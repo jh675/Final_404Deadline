@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.project.option.mapper.RoleMapper">
+
+  <sql id="menuFromWhere">
+    FROM MENU M
+    LEFT JOIN ROLE_MENU RM ON M.ROLE_ID = RM.ROLE_ID
+    LEFT JOIN ROLE R ON RM.ROLE_CD = R.ROLE_CD AND R.PRJ_ID = #{projectId}
+    LEFT JOIN GRP_ROLE GR ON R.ROLE_CD = GR.ROLE_CD
+    LEFT JOIN GRP G ON GR.GRP_ID = G.ID AND G.PRJ_ID = #{projectId}
+    <include refid="menuSearch"/>
+  </sql>
+
+  <!-- 검색: 메뉴(ROLE_ID/ROLE_NAME), 생성일은 ROLE.CREATED_ON (role_menu·grp_role 경로의 권한코드 role_cd) -->
+  <sql id="menuSearch">
+    <where>
+      <if test="permissionKey != null and permissionKey != ''">
+        AND M.ROLE_ID LIKE '%' || #{permissionKey} || '%'
+      </if>
+      <if test="permissionName != null and permissionName != ''">
+        AND M.ROLE_NAME LIKE '%' || #{permissionName} || '%'
+      </if>
+      <if test="createdFrom != null and createdFrom != ''">
+        AND EXISTS (
+          SELECT 1 FROM ROLE_MENU RM_DT
+          INNER JOIN ROLE R_DT ON RM_DT.ROLE_CD = R_DT.ROLE_CD AND R_DT.PRJ_ID = #{projectId}
+          WHERE RM_DT.ROLE_ID = M.ROLE_ID
+            AND TRUNC(R_DT.CREATED_ON) &gt;= TO_DATE(#{createdFrom}, 'YYYY-MM-DD')
+        )
+      </if>
+      <if test="createdTo != null and createdTo != ''">
+        AND EXISTS (
+          SELECT 1 FROM ROLE_MENU RM_DT2
+          INNER JOIN ROLE R_DT2 ON RM_DT2.ROLE_CD = R_DT2.ROLE_CD AND R_DT2.PRJ_ID = #{projectId}
+          WHERE RM_DT2.ROLE_ID = M.ROLE_ID
+            AND TRUNC(R_DT2.CREATED_ON) &lt;= TO_DATE(#{createdTo}, 'YYYY-MM-DD')
+        )
+      </if>
+    </where>
+  </sql>
+
+  <select id="selectRoleListCount" resultType="long">
+    SELECT COUNT(1)
+    FROM (
+      SELECT M.ROLE_ID
+      <include refid="menuFromWhere"/>
+      GROUP BY M.ROLE_ID, M.ROLE_NAME
+    ) X
+  </select>
+
+  <!-- 생성일: 해당 프로젝트에서 메뉴와 연결된 ROLE 들 중 최신 CREATED_ON -->
+  <select id="selectRoleList" resultType="com.example.demo.project.option.service.RoleVO">
+    SELECT * FROM (
+      SELECT p.*, ROWNUM AS rn FROM (
+        SELECT
+          M.ROLE_ID   AS roleId,
+          M.ROLE_NAME AS roleName,
+          MAX(R.CREATED_ON) AS createdOn,
+          COUNT(DISTINCT G.ID) AS grpCnt
+        <include refid="menuFromWhere"/>
+        GROUP BY M.ROLE_ID, M.ROLE_NAME
+        ORDER BY M.ROLE_ID
+      ) p
+      WHERE ROWNUM &lt;= #{offset} + #{limit}
+    ) WHERE rn &gt; #{offset}
+  </select>
+</mapper>
