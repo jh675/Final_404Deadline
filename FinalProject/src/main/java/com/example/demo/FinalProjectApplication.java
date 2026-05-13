@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @MapperScan(basePackages = "com.example.demo.**.mapper")
 @SpringBootApplication
+@MapperScan("com.example.demo.project.option.mapper")
 public class FinalProjectApplication {
 
 	public static void main(String[] args) {
