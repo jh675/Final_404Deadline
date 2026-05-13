@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>이슈 상세</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+	font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
+	background-color: #f7f7f7;
+	padding: 30px;
+	color: #333;
+}
+
+.container {
+	max-width: 960px;
+	margin: 0 auto;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 28px 32px 36px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.back-row {
+	margin-bottom: 16px;
+}
+
+.back-row a {
+	font-size: 13px;
+	color: #5b6cff;
+	text-decoration: none;
+}
+
+.back-row a:hover {
+	text-decoration: underline;
+}
+
+.page-title {
+	font-size: 22px;
+	font-weight: 700;
+	margin-bottom: 22px;
+	line-height: 1.35;
+}
+
+.meta-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px 32px;
+	margin-bottom: 24px;
+}
+
+.meta-item label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	color: #555;
+	margin-bottom: 4px;
+}
+
+.meta-item input,
+.meta-item textarea {
+	width: 100%;
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	background: #fafafa;
+	color: #333;
+}
+
+.meta-item textarea {
+	min-height: 72px;
+	resize: vertical;
+	font-family: inherit;
+}
+
+.meta-item input.short {
+	max-width: 120px;
+}
+
+.section-block {
+	margin-bottom: 22px;
+}
+
+.section-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 10px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #333;
+}
+
+.badge-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 22px;
+	height: 22px;
+	padding: 0 6px;
+	font-size: 12px;
+	font-weight: 600;
+	background: #e8e9ef;
+	color: #444;
+	border-radius: 999px;
+}
+
+.attach-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 20px;
+	align-items: center;
+}
+
+.attach-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: #444;
+}
+
+.attach-item a {
+	color: #5b6cff;
+	text-decoration: none;
+	font-size: 16px;
+	line-height: 1;
+}
+
+.attach-item a:hover {
+	color: #4956d8;
+}
+
+table.data-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+table.data-table thead th {
+	background: #f0f1f5;
+	border: 1px solid #ddd;
+	padding: 10px 12px;
+	text-align: left;
+	font-weight: 600;
+	color: #444;
+}
+
+table.data-table tbody td {
+	border: 1px solid #e5e5e5;
+	padding: 10px 12px;
+	background: #fff;
+}
+
+.tab-row {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+	margin-bottom: 12px;
+}
+
+.tab-btn {
+	padding: 8px 18px;
+	border: 1px solid #ccc;
+	border-radius: 20px;
+	background: #fff;
+	font-size: 13px;
+	font-weight: 600;
+	color: #444;
+	cursor: pointer;
+	transition: background .15s, color .15s, border-color .15s;
+}
+
+.tab-btn:hover {
+	border-color: #bbb;
+}
+
+.tab-btn.is-active {
+	background: #4a4a4a;
+	color: #fff;
+	border-color: #4a4a4a;
+}
+
+.tab-panel-wrap {
+	background: #e8e9ec;
+	border-radius: 6px;
+	padding: 16px;
+	min-height: 220px;
+}
+
+.tab-panel {
+	display: none;
+}
+
+.tab-panel.is-visible {
+	display: block;
+}
+
+/* 댓글 스레드 */
+.comment-thread .comment {
+	background: #f4f4f6;
+	border-radius: 4px;
+	padding: 10px 12px;
+	margin-bottom: 8px;
+	font-size: 13px;
+}
+
+.comment-thread .comment .meta {
+	font-size: 12px;
+	color: #666;
+	margin-bottom: 6px;
+}
+
+.comment-thread .comment .meta strong {
+	color: #333;
+	margin-right: 8px;
+}
+
+.comment-thread .nested {
+	margin-left: 20px;
+	margin-top: 8px;
+	padding-left: 12px;
+	border-left: 2px solid #d0d0d8;
+}
+
+.comment-thread .nested .comment::before {
+	content: "↳ ";
+	color: #888;
+}
+
+.comment-form {
+	display: flex;
+	gap: 10px;
+	margin-top: 14px;
+	align-items: stretch;
+}
+
+.comment-form textarea {
+	flex: 1;
+	min-height: 80px;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	font-family: inherit;
+	resize: vertical;
+}
+
+.comment-form button {
+	align-self: flex-end;
+	padding: 10px 22px;
+	background: #7c5cff;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.comment-form button:hover {
+	background: #6a4ae6;
+}
+
+.inner-table-title {
+	font-size: 13px;
+	font-weight: 600;
+	margin-bottom: 8px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+	<div class="back-row">
+		<a th:href="@{/issue/list}">← 이슈 목록</a>
+	</div>
+
+	<p th:if="${issue == null}" style="padding:24px 0;color:#666;">이슈를 찾을 수 없습니다.</p>
+
+	<th:block th:if="${issue != null}">
+	<h1 class="page-title" th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
+
+	<div class="meta-grid">
+		<div class="meta-item">
+			<label>설명</label>
+			<textarea readonly th:text="${issue.description}">설명</textarea>
+		</div>
+		<div class="meta-item">
+			<label>상위 이슈</label>
+			<input type="text" readonly
+				th:value="${issue.parentIssue != null ? 'ID ' + issue.parentIssue : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>상태</label>
+			<input type="text" readonly th:value="${issue.statusCd ?: '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>담당자</label>
+			<input type="text" readonly th:value="${issue.memName != null ?  issue.memName : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>시작 예정일</label>
+			<input type="text" readonly
+				th:value="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yy-MM-dd HH:mm') : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>종료 예정일</label>
+			<input type="text" readonly
+				th:value="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yy-MM-dd HH:mm') : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>우선순위</label>
+			<input type="text" readonly class="short" th:value="${issue.priorityCd ?: '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>진척률</label>
+			<input type="text" readonly class="short"
+				th:value="${issue.doneRatio != null ? issue.doneRatio + '%' : '—'}" />
+		</div>
+	</div>
+
+	<div class="section-block">
+		<div class="section-head">
+			<span>첨부파일</span>
+			<span class="badge-count">3</span>
+		</div>
+		<div class="attach-list">
+			<span class="attach-item">파일명1.jpg <a href="#" title="다운로드">⬇</a></span>
+			<span class="attach-item">파일명2.jpg <a href="#" title="다운로드">⬇</a></span>
+			<span class="attach-item">파일명3.jpg <a href="#" title="다운로드">⬇</a></span>
+		</div>
+	</div>
+
+	<div class="section-block">
+		<div class="section-head">
+			<span>하위이슈</span>
+			<span class="badge-count">3</span>
+		</div>
+		<table class="data-table">
+			<thead>
+				<tr>
+					<th>이슈명</th>
+					<th>이슈상태</th>
+					<th>담당자</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>이슈1</td>
+					<td>종료</td>
+					<td>홍길동</td>
+				</tr>
+				<tr>
+					<td>이슈2</td>
+					<td>진행</td>
+					<td>김길동</td>
+				</tr>
+				<tr>
+					<td>이슈3</td>
+					<td>신규</td>
+					<td>김길동</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="tab-row" role="tablist">
+		<button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="comments">댓글</button>
+		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="related">연관된 이슈</button>
+		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="history">히스토리</button>
+	</div>
+
+	<div class="tab-panel-wrap" id="tabPanels">
+		<div class="tab-panel is-visible" id="panel-comments" role="tabpanel" data-panel="comments">
+			<div class="comment-thread">
+				<div class="comment">
+					<div class="meta"><strong>작성자</strong><span>26-05-06</span></div>
+					<div>댓글내용</div>
+					<div class="nested">
+						<div class="comment">
+							<div class="meta"><strong>작성자</strong><span>26-05-06</span></div>
+							<div>댓글내용</div>
+							<div class="nested">
+								<div class="comment">
+									<div class="meta"><strong>작성자</strong><span>26-05-06</span></div>
+									<div>댓글내용</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="comment-form">
+				<textarea placeholder="댓글 내용"></textarea>
+				<button type="button">등록</button>
+			</div>
+		</div>
+
+		<div class="tab-panel" id="panel-related" role="tabpanel" data-panel="related" hidden>
+			<div class="inner-table-title">
+				<span>연관된 이슈</span>
+				<span class="badge-count">3</span>
+			</div>
+			<table class="data-table">
+				<thead>
+					<tr>
+						<th>이슈명</th>
+						<th>이슈상태</th>
+						<th>담당자</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>이슈1</td>
+						<td>종료</td>
+						<td>홍길동</td>
+					</tr>
+					<tr>
+						<td>이슈2</td>
+						<td>진행</td>
+						<td>김길동</td>
+					</tr>
+					<tr>
+						<td>이슈3</td>
+						<td>신규</td>
+						<td>김길동</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="tab-panel" id="panel-history" role="tabpanel" data-panel="history" hidden>
+			<div class="inner-table-title">
+				<span>히스토리</span>
+				<span class="badge-count">3</span>
+			</div>
+			<table class="data-table">
+				<thead>
+					<tr>
+						<th>일시</th>
+						<th>담당자</th>
+						<th>내용</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>2003.02.18 14:05:23</td>
+						<td>이름 A</td>
+						<td>SR260211_4482 내용을 변경하였습니다</td>
+					</tr>
+					<tr>
+						<td>2003.02.18 14:05:23</td>
+						<td>이름 B</td>
+						<td>SR260211_4482 내용을 변경하였습니다</td>
+					</tr>
+					<tr>
+						<td>2003.02.18 14:05:23</td>
+						<td>이름 A</td>
+						<td>SR260211_4482 내용을 변경하였습니다</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	</th:block>
+</div>
+
+<script>
+(function () {
+	var tabs = document.querySelectorAll('.tab-btn');
+	var panels = document.querySelectorAll('.tab-panel');
+
+	function activate(name) {
+		tabs.forEach(function (btn) {
+			var on = btn.getAttribute('data-tab') === name;
+			btn.classList.toggle('is-active', on);
+			btn.setAttribute('aria-selected', on ? 'true' : 'false');
+		});
+		panels.forEach(function (panel) {
+			var on = panel.getAttribute('data-panel') === name;
+			panel.classList.toggle('is-visible', on);
+			if (on) {
+				panel.removeAttribute('hidden');
+			} else {
+				panel.setAttribute('hidden', 'hidden');
+			}
+		});
+	}
+
+	tabs.forEach(function (btn) {
+		btn.addEventListener('click', function () {
+			activate(btn.getAttribute('data-tab'));
+		});
+	});
+})();
+</script>
+</body>
+</html>
