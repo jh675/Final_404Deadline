@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>캘린더 조회</title>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
+
+</head>
+<body>
+
+<!-- 캘린더 -->
+<div id='calendar'></div>
+
+<!-- 등록 팝업 -->
+<div id="add-popup" class="popup-overlay">
+    <div class="popbox">
+        <div class="popup-header">
+            <h3>일정 등록</h3>
+            <button class="close-btn" onclick="closeAddPopup()">✕</button>
+        </div>
+        <div class="popup-body">
+            <div class="form-row">
+                <span class="form-label">일정일</span>
+                <div class="date-input-wrap">
+                    <input type="date" id="add-cal-day">
+                    <span class="cal-icon">📅</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <span class="form-label"></span>
+                <div class="checkbox-area">
+                    <label>
+                        <input type="checkbox" id="add-chk-allday" onchange="toggleAddTime(this)">
+                        하루종일
+                    </label>
+                    <label>
+                        <input type="checkbox" id="add-chk-time" onchange="toggleAddAllday(this)">
+                        시간 선택
+                    </label>
+                </div>
+            </div>
+            <div class="form-row time-row" id="add-time-row">
+                <span class="form-label"></span>
+                <div class="time-area">
+                    <div class="time-select-wrap">
+                        <select id="add-start-time">
+                            <option value="">선택</option>
+                            <option value="09:00">오전 09:00</option>
+                            <option value="09:30">오전 09:30</option>
+                            <option value="10:00">오전 10:00</option>
+                            <option value="10:30">오전 10:30</option>
+                            <option value="11:00">오전 11:00</option>
+                            <option value="11:30">오전 11:30</option>
+                            <option value="12:00">오후 12:00</option>
+                            <option value="13:00">오후 01:00</option>
+                            <option value="13:30">오후 01:30</option>
+                            <option value="14:00">오후 02:00</option>
+                            <option value="14:30">오후 02:30</option>
+                            <option value="15:00">오후 03:00</option>
+                            <option value="16:00">오후 04:00</option>
+                            <option value="17:00">오후 05:00</option>
+                            <option value="18:00">오후 06:00</option>
+                        </select>
+                    </div>
+                    <span class="time-between">부터</span>
+                    <div class="time-select-wrap">
+                        <select id="add-end-time">
+                            <option value="">선택</option>
+                            <option value="09:00">오전 09:00</option>
+                            <option value="09:30">오전 09:30</option>
+                            <option value="10:00">오전 10:00</option>
+                            <option value="10:30">오전 10:30</option>
+                            <option value="11:00">오전 11:00</option>
+                            <option value="11:30">오전 11:30</option>
+                            <option value="12:00">오후 12:00</option>
+                            <option value="13:00">오후 01:00</option>
+                            <option value="13:30">오후 01:30</option>
+                            <option value="14:00">오후 02:00</option>
+                            <option value="14:30">오후 02:30</option>
+                            <option value="15:00">오후 03:00</option>
+                            <option value="16:00">오후 04:00</option>
+                            <option value="17:00">오후 05:00</option>
+                            <option value="18:00">오후 06:00</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <span class="form-label">일정 장소</span>
+                <input type="text" class="form-input" id="add-place" placeholder="장소 입력">
+            </div>
+            <div class="form-row">
+                <span class="form-label">일정 내용</span>
+                <input type="text" class="form-input" id="add-cal-text" placeholder="일정 내용 입력">
+            </div>
+            <div class="form-row">
+                <span class="form-label">일정 유형</span>
+                <div class="select-wrap">
+                    <select id="add-type-cd">
+                        <option value="">선택</option>
+                        <option value="01CALTYPE">개인 일정</option>
+                        <option value="02CALTYPE">그룹 일정</option>
+                        <option value="03CALTYPE">회사 일정</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <span class="form-label">공유 여부</span>
+                <div class="select-wrap">
+                    <select id="add-sharing-cd">
+                        <option value="">선택</option>
+                        <option value="01CALSHARE">공유</option>
+                        <option value="02CALSHARE">비공유</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="popup-footer">
+            <button class="btn btn-cancel" onclick="closeAddPopup()">일정 취소</button>
+            <button class="btn btn-save" onclick="saveEvent()">일정 등록</button>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ script를 body 끝으로 이동 -->
+<script th:inline="none">
+
+let calendar;  // ✅ 밖에 선언
+
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'ko',
+        dayHeaderFormat: { weekday: 'short' },
+        dayCellContent: function(e) {
+            return e.dayNumberText.replace('일', '');
+        },
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today: '오늘', month: '월', week: '주', day: '일'
+        },
+        events: function(fetchInfo, successCallback, failureCallback) {
+            fetch('/calender/list')
+                .then(res => res.json())
+                .then(data => {
+                    const events = data.map(e => ({
+                        id:    e.id,
+                        title: e.calText,
+                        start: e.calStart,
+                        end:   e.calEnd
+                    }));
+                    successCallback(events);
+                })
+                .catch(err => failureCallback(err));
+        },
+        dateClick: function(info) {
+            openAddPopup(info.dateStr);
+        },
+        eventClick: function(info) {
+            openUpdatePopup(info.event);
+        }
+    });
+
+    calendar.render();
+});
+
+// ✅ 등록 팝업 열기
+function openAddPopup(date) {
+    document.getElementById('add-cal-day').value    = date;
+    document.getElementById('add-cal-text').value   = '';
+    document.getElementById('add-place').value      = '';
+    document.getElementById('add-type-cd').value    = '';
+    document.getElementById('add-sharing-cd').value = '';
+    document.getElementById('add-chk-allday').checked = false;
+    document.getElementById('add-chk-time').checked   = false;
+    document.getElementById('add-time-row').style.display = 'none';
+    document.getElementById('add-popup').style.display = 'flex';
+}
+
+// ✅ 등록 팝업 닫기
+function closeAddPopup() {
+    document.getElementById('add-popup').style.display = 'none';
+}
+
+// ✅ 하루종일 체크
+function toggleAddTime(checkbox) {
+    const timeRow = document.getElementById('add-time-row');
+    const chkTime = document.getElementById('add-chk-time');
+    if (checkbox.checked) {
+        timeRow.style.display = 'none';
+        chkTime.checked = false;
+    }
+}
+
+// ✅ 시간선택 체크
+function toggleAddAllday(checkbox) {
+    const timeRow   = document.getElementById('add-time-row');
+    const chkAllday = document.getElementById('add-chk-allday');
+    if (checkbox.checked) {
+        chkAllday.checked = false;
+        timeRow.style.display = 'flex';
+    } else {
+        timeRow.style.display = 'none';
+    }
+}
+
+// ✅ 일정 등록 저장
+function saveEvent() {
+    const calDay    = document.getElementById('add-cal-day').value;
+    const isAllday  = document.getElementById('add-chk-allday').checked;
+    const isTime    = document.getElementById('add-chk-time').checked;
+    const calText   = document.getElementById('add-cal-text').value;
+    const place     = document.getElementById('add-place').value;
+    const typeCd    = document.getElementById('add-type-cd').value;
+    const sharingCd = document.getElementById('add-sharing-cd').value;
+
+    if (!calDay)   { alert('일정일을 선택해주세요!'); return; }
+    if (!calText)  { alert('일정 내용을 입력해주세요!'); return; }
+    if (!isAllday && !isTime) { alert('하루종일 또는 시간 선택을 체크해주세요!'); return; }
+
+    let calStart, calEnd;
+    if (isAllday) {
+        calStart = calDay + ' 00:00:00';
+        calEnd   = calDay + ' 23:59:59';
+    } else {
+        const startTime = document.getElementById('add-start-time').value;
+        const endTime   = document.getElementById('add-end-time').value;
+        if (!startTime || !endTime) { alert('시작/종료 시간을 선택해주세요!'); return; }
+        calStart = calDay + ' ' + startTime + ':00';
+        calEnd   = calDay + ' ' + endTime   + ':00';
+    }
+
+    const data = {
+        memId:      1,
+        calText:    calText,
+        place:      place,
+        typeCd:     typeCd,
+        sharingCd:  sharingCd,
+        stateCd:    '01STATE',
+        calStart:   calStart,
+        calEnd:     calEnd
+    };
+
+    fetch('/calender/insert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert('등록되었습니다!');
+        calendar.refetchEvents();
+        closeAddPopup();
+    })
+    .catch(err => {
+        console.error(err);
+        alert('오류가 발생했습니다.');
+    });
+}
+
+// ✅ 수정 팝업 열기 (나중에 수정 팝업 추가 시 사용)
+function openUpdatePopup(event) {
+    fetch('/calender/detail?id=' + event.id)
+        .then(res => res.json())
+        .then(data => {
+            // 수정 팝업 연동 시 여기에 추가
+            console.log(data);
+        });
+}
+
+</script>
+
+</body>
+</html>
