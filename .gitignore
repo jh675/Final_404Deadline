@@ -2,3 +2,4 @@
 servers/
 apache-tomcat-11.0.21/
 target/
+application.properties/
