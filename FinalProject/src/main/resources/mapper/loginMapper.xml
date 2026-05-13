@@ -4,13 +4,18 @@
 
 	<select id="selectOne">
 		select ID
+			  ,BIZ_NO
 	  		  ,LOGIN
 			  ,PASSWORD
 			  ,NAME
-			  ,ADMIN_CD
-			  ,STATUS_CD
-			  ,PRJ_MANAGER_CD
-			  ,MCP_CD
+			  ,TEL
+			  ,EMAIL
+			  ,get_sub_code_name(ADMIN_CD) as "ADMIN_CD"
+			  ,get_sub_code_name(STATUS_CD) "STATUS_CD"
+			  ,CREATED_ON
+			  ,PW_UPDATED_ON
+			  ,get_sub_code_name(PRJ_MANAGER_CD) "PRJ_MANAGER_CD"
+			  ,get_sub_code_name(MCP_CD) "MCP_CD"
 	  	from   users
 	 	where  login = #{loginId}
 	</select>

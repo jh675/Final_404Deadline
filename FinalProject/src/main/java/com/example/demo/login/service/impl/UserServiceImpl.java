@@ -30,8 +30,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
 		String role = switch (vo.getAdminCd()) {
 		// db에 있는 권한을 security에서 쓰이는 형태의 문구로 변환
-			case "01ROLE" -> "ROLE_ADMIN";
-			case "02ROLE" -> "ROLE_CADMIN";
+		// xml 파일에서 함수를 사용해 이름으로 가져오는 걸로 해둬서 이름으로 표현해야됨
+			case "시스템관리자" -> "ROLE_ADMIN";
+			case "기업관리자" -> "ROLE_CADMIN";
 			default -> "ROLE_USER";
 		};
 

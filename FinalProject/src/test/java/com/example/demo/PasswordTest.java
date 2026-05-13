@@ -8,9 +8,9 @@ public class PasswordTest {
 	@Test
 	public void test() {
 		PasswordEncoder encoder = new BCryptPasswordEncoder(10);
-		String pw = encoder.encode("admin");
+		String pw = encoder.encode("user1");
 		System.out.println(pw);
-		boolean result = encoder.matches("admin", "$2a$10$phU9FnLKsmIgaJugM85o1.uzOEUSw0rw1qMMhqQVVEyOs19H5ZEeu");
+		boolean result = encoder.matches("user1", "$2a$10$b.7hRYnrOLRMu2Vx2dnPBOkDZADuEr9.XTGKjwPxiwONZv0vQ.Vv.");
 		System.out.println(result);
 	}
 }
