@@ -1,4 +1,4 @@
-package com.example.demo.project.issue.vo;
+package com.example.demo.project.issue.service;
 
 import java.util.Date;
 

@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.example.demo.project.issue.vo.IssueInputVO;
-import com.example.demo.project.issue.vo.IssueOutputVO;
+import com.example.demo.project.issue.service.IssueInputVO;
+import com.example.demo.project.issue.service.IssueOutputVO;
 
 @Mapper
 public interface IssueMapper {

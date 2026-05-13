@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.project.issue.mapper.IssueMapper;
+import com.example.demo.project.issue.service.IssueInputVO;
+import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
-import com.example.demo.project.issue.vo.IssueInputVO;
-import com.example.demo.project.issue.vo.IssueOutputVO;
 
 @Service
 public class IssueServiceImpl implements IssueService {

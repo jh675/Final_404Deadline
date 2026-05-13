@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.demo.project.issue.service.IssueInputVO;
+import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
-import com.example.demo.project.issue.vo.IssueInputVO;
-import com.example.demo.project.issue.vo.IssueOutputVO;
 
 @Controller
 public class IssueController {
