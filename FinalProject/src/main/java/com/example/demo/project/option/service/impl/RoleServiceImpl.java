@@ -1,36 +1,52 @@
 package com.example.demo.project.option.service.impl;
 
 import java.util.List;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import com.example.demo.project.option.mapper.RoleMapper;
+import com.example.demo.project.option.service.RoleGroupRowVO;
 import com.example.demo.project.option.service.RoleService;
 import com.example.demo.project.option.service.RoleVO;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Primary
 @RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
     private final RoleMapper roleMapper;
 
     @Override
-    public long countRoleList(RoleVO roleVO) {
-        applyPaging(roleVO);
-        return roleMapper.selectRoleListCount(roleVO);
-    }
-
-    @Override
     public List<RoleVO> selectRoleList(RoleVO roleVO) {
-        applyPaging(roleVO);
         return roleMapper.selectRoleList(roleVO);
     }
 
-    private static void applyPaging(RoleVO roleVO) {
-        int page = Math.max(1, roleVO.getPage());
-        int pageSize = Math.max(1, Math.min(100, roleVO.getPageSize()));
-        roleVO.setPage(page);
-        roleVO.setPageSize(pageSize);
-        roleVO.setOffset((page - 1) * pageSize);
-        roleVO.setLimit(pageSize);
+    @Override
+    public RoleVO selectRoleByPrjAndCd(Long prjId, Long roleCd) {
+        if (prjId == null || roleCd == null) {
+            return null;
+        }
+        return roleMapper.selectRoleByPrjAndCd(prjId, roleCd);
+    }
+
+    @Override
+    public List<RoleVO> selectAllMenus() {
+        return roleMapper.selectAllMenus();
+    }
+
+    @Override
+    public List<String> selectMenuRoleIdsByRoleCd(Long roleCd) {
+        if (roleCd == null) {
+            return List.of();
+        }
+        return roleMapper.selectMenuRoleIdsByRoleCd(roleCd);
+    }
+
+    @Override
+    public List<RoleGroupRowVO> selectRoleGroupsList(Long prjId, Long roleCd) {
+        if (prjId == null || roleCd == null) {
+            return List.of();
+        }
+        return roleMapper.selectRoleGroupsList(prjId, roleCd);
     }
 }

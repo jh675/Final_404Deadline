@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import com.example.demo.login.service.UserVO;
 
 @Controller
-public class UserController {
+public class LoginController {
 	
 	@GetMapping("/")
 	public String main(Model model) {
@@ -50,22 +50,12 @@ public class UserController {
 	        return "error/403";
 
 	    } else {
-
 	        // 비로그인 사용자
-	        return "login/home";
+	        return "login/info";
 	    }
+  	
+//	    userVO 꺼내서 쓰는 방법 > 참고자료 폴더의 security_userVO 확인
 	    
-	    
-//	    Authentication auth = SecurityContextHolder
-//                .getContext()
-//                .getAuthentication();
-//
-//		UserVO user = (UserVO) auth.getPrincipal(); // 세션에 있는 유저정보 가져오기
-	    
-//	    model.addAttribute("ex", user); // 정보를 페이지로 보내기
-//	    로그인이 된 상태면 security에 userVO 정보가 올라가기때문에 이런식으로
-//	    userVO를 불러서 사용할 수 있음
-	   	    
 	}
 	
 	@GetMapping("/admin/test1")

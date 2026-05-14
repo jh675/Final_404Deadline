@@ -42,18 +42,10 @@ class WebSecurityConfig {
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder(10);
 	}
-	
+
 	@Bean
 	AuthenticationSuccessHandler successHandler() {
 		return new CustomLoginSuccessHandler();
 	}
-
-//	@Bean
-//	UserDetailsService userDetailsService(PasswordEncoder encoder) {
-//		String password = encoder.encode("password");
-//		UserDetails user = User.withUsername("user").password(password).roles("USER").build();
-//		UserDetails admin= User.withUsername("admin").password(password).roles("ADMIN").build();
-//		return new InMemoryUserDetailsManager(user, admin);
-//	}
 
 }

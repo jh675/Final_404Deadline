@@ -1,4 +1,4 @@
-package com.example.demo.project.calender;
+package com.example.demo.project.calender.service;
 
 import java.util.Date;
 
@@ -16,6 +16,7 @@ public class CalenderVO {
 	private String sharingCd;
 	private String statecd;
 	private String colorTagCd;
+	private String keyword;
 	
 	@DateTimeFormat(pattern = "YYYY-MM-dd")
 	private Date calStart;

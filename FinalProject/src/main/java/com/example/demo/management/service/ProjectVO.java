@@ -23,4 +23,7 @@ public class ProjectVO {
 	private Integer prjLft;
 	private Integer prjRgt;
 	private Integer userId;
+	private String enaNameCd;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private Date closedDate;
 }
