@@ -1,0 +1,35 @@
+방법 1 (권장)
+템플릿에서
+html 태그에 xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 항목 넣기
+
+예시 : <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+sec:authentication="principal.필드"로 꺼내쓰기
+
+예시 : <span><strong sec:authentication="principal.name"></strong>님</span>
+
+
+principal이 userVO라서 principal.name, principal.tel, principal.adminCd 등등 꺼내쓰면 됨
+
+주의! : userVO를 db에서 꺼낼 때 .xml파일에서 진환씨가 만들어준 함수를 사용해서 서브코드 이름으로 되어있음
+'01ACTIVE'가 아니고 '활성' 으로 userVO 필드에 저장되어있음
+즉 principal.adminCd 를 사용하면 '01ROLE' 이 아니라 '시스템관리자' 형식으로 되어있어서 꺼내서 쓸 때 확인필요
+공통코드를 프론트에 표시할 때는 그냥 사용하면 바로 글자로 나와서 편리하지만 db에 넣을때는 다시 코드화 해서 넣어야함
+
+
+방법 2
+
+컨트롤러 파일에서    
+	    // 로그인한 세션에 있는 정보 가져오기
+	    Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+		UserVO user = (UserVO) auth.getPrincipal();
+
+	   // 정보를 페이지로 전달하기    
+	    model.addAttribute("ex", user);  // ex라는 이름으로 userVO를 전달하겠다.
+
+	   // template에서는 이렇게 사용
+	   th:text="${ex.name}"> // ex라는 이름으로 전달했으니 ex.필드명으로 받아서 사용
+

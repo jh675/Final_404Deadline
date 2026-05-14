@@ -7,26 +7,26 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.login.mapper.UserMapper;
-import com.example.demo.login.service.UserService;
+import com.example.demo.login.mapper.LoginMapper;
+import com.example.demo.login.service.LoginService;
 import com.example.demo.login.service.UserVO;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class LoginServiceImpl implements LoginService, UserDetailsService {
 
-	private final UserMapper userMapper;
+	private final LoginMapper loginMapper;
 
 	@Override
 	public UserVO selectOne(String userId) {
-		return userMapper.selectOne(userId);
+		return loginMapper.selectOne(userId);
 	}
 
 	@Override
 	public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-		UserVO vo = userMapper.selectOne(userId);
+		UserVO vo = loginMapper.selectOne(userId);
 
 		String role = switch (vo.getAdminCd()) {
 		// db에 있는 권한을 security에서 쓰이는 형태의 문구로 변환
