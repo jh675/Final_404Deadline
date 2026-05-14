@@ -1,0 +1,442 @@
+<!doctype html>
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/userLayout}"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>역할 상세</title>
+    <link
+      rel="stylesheet"
+      href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://uicdn.toast.com/grid/latest/tui-grid.css"
+    />
+    <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <style>
+      .role-page-head {
+        margin-bottom: 1rem;
+      }
+      .role-page-head__title {
+        margin: 0 0 0.35rem;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #222;
+      }
+      .role-page-head__rule {
+        height: 3px;
+        background: #333;
+        border: 0;
+        margin: 0;
+      }
+      .role-back-link {
+        display: inline-block;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        color: #1976d2;
+        text-decoration: none;
+      }
+      .role-back-link:hover {
+        text-decoration: underline;
+      }
+      .role-section {
+        margin-bottom: 1.75rem;
+      }
+      .role-section__title {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #222;
+        padding-bottom: 0.35rem;
+        border-bottom: 3px solid #333;
+      }
+      .role-section__body {
+        padding-top: 0.75rem;
+      }
+      .role-section__divider {
+        height: 1px;
+        background: #ddd;
+        margin: 1rem 0;
+        border: 0;
+      }
+      .role-info-fields {
+        max-width: 28rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .role-info-fields__row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .role-info-fields__row label {
+        font-size: 0.8125rem;
+        color: #444;
+      }
+      .role-info-fields__row input {
+        padding: 0.4rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.875rem;
+      }
+      .perm-sub {
+        margin-bottom: 1.25rem;
+      }
+      .perm-full-block {
+        margin-bottom: 1rem;
+      }
+      .perm-subblock-title {
+        margin: 0 0 0.4rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #555;
+      }
+      .perm-crud-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem 1.25rem;
+        align-items: center;
+        padding: 0.35rem 0 0.5rem;
+      }
+      .perm-crud-row .perm-grid__cell {
+        min-width: 4.5rem;
+      }
+      .perm-sub__title {
+        margin: 0 0 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #333;
+      }
+      .perm-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+        gap: 0.5rem 1rem;
+        align-items: start;
+      }
+      .perm-grid__cell {
+        display: grid;
+        grid-template-columns: 1.125rem minmax(0, 1fr);
+        column-gap: 0.5rem;
+        align-items: start;
+        font-size: 0.8125rem;
+        color: #444;
+        cursor: default;
+        min-width: 0;
+      }
+      .perm-grid__cell span {
+        line-height: 1.35;
+        word-break: keep-all;
+      }
+      .perm-grid__cell input {
+        width: 1rem;
+        height: 1rem;
+        margin: 0.2em 0 0;
+        justify-self: start;
+      }
+      .perm-empty {
+        margin: 0.25rem 0 0;
+        font-size: 0.8125rem;
+        color: #777;
+      }
+      .role-groups-panel {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fafafa;
+        padding: 0.75rem 0.75rem 0.5rem;
+      }
+      .role-groups-panel__hint {
+        margin: 0 0 0.65rem;
+        font-size: 0.8125rem;
+        color: #555;
+        line-height: 1.45;
+      }
+      .role-groups-panel__grid-host {
+        min-height: 120px;
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .btn-revoke {
+        padding: 0.2rem 0.65rem;
+        font-size: 0.75rem;
+        border-radius: 6px;
+        border: 1px solid #f8bbd0;
+        background: #fce4ec;
+        color: #ad1457;
+        cursor: pointer;
+      }
+      .btn-revoke:hover {
+        background: #f8bbd0;
+      }
+    </style>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <a
+        class="role-back-link"
+        th:href="@{/project/option/role/roleManagement(prjId=${prjId})}"
+        >← 역할 목록으로</a
+      >
+
+      <div class="role-page-head">
+        <h1 class="role-page-head__title">역할 상세</h1>
+        <hr class="role-page-head__rule" />
+      </div>
+
+      <th:block th:if="${roleNotFound}">
+        <p class="perm-empty">
+          요청한 역할(<span th:text="${roleCd}">-</span>)을 이 프로젝트에서 찾을
+          수 없습니다.
+        </p>
+      </th:block>
+
+      <th:block th:if="${currentRole != null}">
+        <section class="role-section">
+          <h2 class="role-section__title">역할 정보</h2>
+          <div class="role-section__body">
+            <div class="role-info-fields">
+              <div class="role-info-fields__row">
+                <label for="detailRoleCd">역할 코드</label>
+                <input
+                  type="text"
+                  id="detailRoleCd"
+                  readonly
+                  th:value="${currentRole.roleCd}"
+                />
+              </div>
+              <div class="role-info-fields__row">
+                <label for="detailRoleName">역할명</label>
+                <input
+                  type="text"
+                  id="detailRoleName"
+                  readonly
+                  th:value="${currentRole.roleName}"
+                />
+              </div>
+              <div class="role-info-fields__row">
+                <label for="detailCreatedOn">권한 생성일</label>
+                <input
+                  type="text"
+                  id="detailCreatedOn"
+                  readonly
+                  th:value="${roleCreatedOnYmd}"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="role-section">
+          <h2 class="role-section__title">메뉴 권한 연결</h2>
+          <div class="role-section__body">
+            <th:block
+              th:if="${menuSections != null and !menuSections.isEmpty()}"
+            >
+              <div class="perm-sub" th:each="sec, secStat : ${menuSections}">
+                <h3 class="perm-sub__title" th:text="${sec.sectionTitle}">
+                  구분
+                </h3>
+                <hr class="role-section__divider" />
+                <th:block
+                  th:if="${sec.fullControlSlots != null and !sec.fullControlSlots.isEmpty()}"
+                >
+                  <div class="perm-full-block">
+                    <div class="perm-grid">
+                      <label
+                        class="perm-grid__cell"
+                        th:each="fs, fsStat : ${sec.fullControlSlots}"
+                        th:for="|cb-full-${secStat.index}-${fsStat.index}|"
+                      >
+                        <input
+                          disabled
+                          type="checkbox"
+                          th:id="|cb-full-${secStat.index}-${fsStat.index}|"
+                          th:checked="${fs.checked}"
+                        />
+                        <span th:text="${fs.label}">전체</span>
+                      </label>
+                    </div>
+                  </div>
+                </th:block>
+                <div
+                  class="perm-full-block"
+                  th:if="${sec.crudSlots != null and !sec.crudSlots.isEmpty()}"
+                >
+                  <div class="perm-crud-row">
+                    <label
+                      class="perm-grid__cell"
+                      th:each="c, cStat : ${sec.crudSlots}"
+                      th:for="|cb-crud-${secStat.index}-${cStat.index}|"
+                    >
+                      <input
+                        disabled
+                        type="checkbox"
+                        th:id="|cb-crud-${secStat.index}-${cStat.index}|"
+                        th:checked="${c.checked}"
+                      />
+                      <span th:text="${c.label}">조회</span>
+                    </label>
+                  </div>
+                </div>
+                <th:block
+                  th:if="${sec.extraSlots != null and !sec.extraSlots.isEmpty()}"
+                >
+                  <div class="perm-full-block">
+                    <h4 class="perm-subblock-title">기타 권한</h4>
+                    <div class="perm-grid">
+                      <label
+                        class="perm-grid__cell"
+                        th:each="ex, exStat : ${sec.extraSlots}"
+                        th:for="|cb-extra-${secStat.index}-${exStat.index}|"
+                      >
+                        <input
+                          disabled
+                          type="checkbox"
+                          th:id="|cb-extra-${secStat.index}-${exStat.index}|"
+                          th:checked="${ex.checked}"
+                        />
+                        <span th:text="${ex.label}">권한</span>
+                      </label>
+                    </div>
+                  </div>
+                </th:block>
+              </div>
+            </th:block>
+            <p
+              class="perm-empty"
+              th:if="${menuSections == null or menuSections.isEmpty()}"
+            >
+              메뉴 권한 데이터가 없습니다.
+            </p>
+          </div>
+        </section>
+
+        <section class="role-section" aria-labelledby="role-groups-heading">
+          <h2 class="role-section__title" id="role-groups-heading">
+            이 역할을 보유한 그룹
+          </h2>
+          <div class="role-section__body">
+            <div class="role-groups-panel">
+              <div
+                id="roleGroupsGrid"
+                class="role-groups-panel__grid-host"
+                th:attr="data-prj-id=${prjId},data-role-cd=${roleCd}"
+                role="region"
+                aria-label="역할 보유 그룹 목록"
+              ></div>
+            </div>
+          </div>
+        </section>
+      </th:block>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          var host = document.getElementById("roleGroupsGrid");
+          if (!host || typeof tui === "undefined" || !tui.Grid) return;
+
+          function formatDate(value) {
+            if (value == null || value === "") return "";
+            var d = new Date(value);
+            if (isNaN(d.getTime())) return String(value);
+            var pad = function (n) {
+              return String(n).padStart(2, "0");
+            };
+            return (
+              d.getFullYear() +
+              "-" +
+              pad(d.getMonth() + 1) +
+              "-" +
+              pad(d.getDate())
+            );
+          }
+
+          var pid = (host.getAttribute("data-prj-id") || "").trim();
+          var rc = (host.getAttribute("data-role-cd") || "").trim();
+          if (!pid || !rc) {
+            host.innerHTML =
+              '<p class="perm-empty" style="padding:1rem">프로젝트 또는 역할 코드가 없어 그룹을 조회할 수 없습니다.</p>';
+            return;
+          }
+
+          var url =
+            "/project/option/role/roleGroups?prjId=" +
+            encodeURIComponent(pid) +
+            "&roleCd=" +
+            encodeURIComponent(rc);
+
+          fetch(url)
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (body) {
+              var rows = body && body.content ? body.content : [];
+              new tui.Grid({
+                el: host,
+                data: rows,
+                rowHeaders: ["rowNum"],
+                scrollX: false,
+                scrollY: false,
+                bodyHeight: "auto",
+                rowHeight: 36,
+                minBodyHeight: 100,
+                columns: [
+                  {
+                    header: "그룹명",
+                    name: "grpName",
+                    align: "center",
+                    sortable: true,
+                  },
+                  {
+                    header: "그룹인원",
+                    name: "grpMemberCnt",
+                    width: 100,
+                    align: "center",
+                    sortable: true,
+                    formatter: function (ctx) {
+                      var v = ctx.value;
+                      return v == null ? "0" : String(v);
+                    },
+                  },
+                  {
+                    header: "그룹 생성일",
+                    name: "createdOn",
+                    width: 120,
+                    align: "center",
+                    sortable: true,
+                    formatter: function (ctx) {
+                      return formatDate(ctx.value);
+                    },
+                  },
+                  {
+                    header: "권한 회수",
+                    name: "revoke",
+                    width: 100,
+                    align: "center",
+                    sortable: false,
+                    formatter: function () {
+                      return '<button type="button" class="btn-revoke">회수</button>';
+                    },
+                  },
+                ],
+                pageOptions: {
+                  useClient: true,
+                  perPage: 10,
+                },
+              });
+            })
+            .catch(function () {
+              host.innerHTML =
+                '<p class="perm-empty" style="padding:1rem">그룹 목록을 불러오지 못했습니다.</p>';
+            });
+        });
+      </script>
+    </div>
+  </body>
+</html>

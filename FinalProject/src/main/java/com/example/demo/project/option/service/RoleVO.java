@@ -1,6 +1,6 @@
 package com.example.demo.project.option.service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,8 +8,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * 권한 관리 화면용 VO.
- * DB: {@code menu}(권한 마스터), {@code role_menu}·{@code role}·{@code grp_role}·{@code grp}(프로젝트별 그룹 수 집계).
+ * 권한 관리 VO.
+ * <ul>
+ *   <li>목록({@code selectRoleList}): 프로젝트 {@code ROLE} — {@link #roleCd}, {@link #roleName},
+ *       {@link #grpCnt}, {@link #createdOn}</li>
+ *   <li>상세 메뉴 체크: {@code MENU} — {@link #roleId}, {@link #roleName}, {@link #roleTp} 등</li>
+ * </ul>
  */
 @Getter
 @Setter
@@ -18,46 +22,41 @@ import lombok.Setter;
 @Builder
 public class RoleVO {
 
-    /** project.prj_id — 목록 집계 시 해당 프로젝트만 */
-    private Long projectId;
+    /** 프로젝트 ID ({@code PRJ_ID}) */
+    private Long prjId;
 
-    /** 검색: menu.role_id 부분 일치 */
+    /** 검색: {@code ROLE.ROLE_CD} 문자열 부분 일치 (목록) */
     private String permissionKey;
 
-    /** 검색: menu.role_name 부분 일치 */
+    /** 검색: {@code ROLE.ROLE_NAME} 부분 일치 (목록) */
     private String permissionName;
 
-    /** 검색: ROLE.created_on 구간 시작(yyyy-MM-dd) */
+    /** 검색: {@code ROLE.CREATED_ON} 구간 시작 (yyyy-MM-dd) */
     private String createdFrom;
 
-    /** 검색: ROLE.created_on 구간 끝(yyyy-MM-dd) */
+    /** 검색: {@code ROLE.CREATED_ON} 구간 끝 (yyyy-MM-dd) */
     private String createdTo;
 
-    /** 페이징: 1부터 */
-    @Builder.Default
-    private int page = 1;
+    /** 그리드·링크용 — 목록에서는 보통 {@code TO_CHAR(ROLE_CD)} */
+    private String id;
 
-    @Builder.Default
-    private int pageSize = 10;
-
-    /** MyBatis 페이징용 */
-    private int offset;
-    private int limit;
-
-    /** menu.role_id (PK, 권한 코드) */
+    /** 목록: {@code ROLE_CD} 문자열 표기 또는 메뉴 행의 {@code MENU.ROLE_ID} */
     private String roleId;
 
-    /** menu.role_name */
+    /** {@code ROLE.ROLE_NAME} 또는 {@code MENU.ROLE_NAME} */
     private String roleName;
 
-    /** menu.role_url, role_tp, role_mth — 상세·등록·수정 시 사용 */
+    /** 프로젝트 역할 코드 ({@code ROLE.ROLE_CD}) — 목록 행 */
+    private Long roleCd;
+
+    /** {@code MENU} — 상세 메뉴 체크 목록 */
     private String roleUrl;
     private String roleTp;
     private String roleMth;
 
-    /** 목록·상세: ROLE.created_on (메뉴에 매핑된 프로젝트 역할들 중 집계·MAX). 연결 없으면 null */
-    private LocalDate createdOn;
+    /** 목록: {@code ROLE.CREATED_ON} */
+    private LocalDateTime createdOn;
 
-    /** 프로젝트 내 해당 권한을 갖는 역할을 보유한 grp 수 */
+    /** 목록: 이 역할을 보유한 {@code GRP} 수 */
     private int grpCnt;
 }

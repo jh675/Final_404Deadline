@@ -1,4 +1,4 @@
-package com.example.demo.project.issue.vo;
+package com.example.demo.project.issue.service;
 
 import java.util.Date;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class IssueOutputVO {
+public class IssueInputVO {
 
 	private Long id;
 	private Long prjId;
@@ -28,9 +28,13 @@ public class IssueOutputVO {
 	private Date closedDate;
 	private Long parentIssue;
 	private Long rootIssue;
-	private	String memName;
+	private Long memId;
 	private Long lft;
 	private Long rgt;
 	private Long doneRatio;
 	private String isAttachCd;
+
+	/** 하위이슈 목록 페이징(무한스크롤) — MyBatis에서만 사용 */
+	private Integer offset;
+	private Integer limit;
 }
