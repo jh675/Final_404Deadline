@@ -1,6 +1,9 @@
 package com.example.demo.project.issue.service;
 
 import java.util.List;
+import java.util.Map;
+
+
 
 public interface IssueService {
     List<IssueOutputVO> selectIssueList(IssueInputVO issueVO);
@@ -12,4 +15,16 @@ public interface IssueService {
     int updateIssue(IssueInputVO issueVO);
 
     int deleteIssue(Long id);
+
+    List<IssueOutputVO> selectChildIssueList(Long id);
+
+    long countChildIssues(Long id);
+    
+    Map<Long, String> getParentIssue(Long id);
+    
+    List<CommentOutputVO> getComment(Long id);
+
+    int insertComment(CommentInputVO vo);
+    
+    List<Map<Long, String>> getIssueIds();
 }

@@ -33,4 +33,8 @@ public class IssueInputVO {
 	private Long rgt;
 	private Long doneRatio;
 	private String isAttachCd;
+
+	/** 하위이슈 목록 페이징(무한스크롤) — MyBatis에서만 사용 */
+	private Integer offset;
+	private Integer limit;
 }

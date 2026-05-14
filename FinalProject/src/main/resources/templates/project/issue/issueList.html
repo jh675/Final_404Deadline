@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/userLayout}">
 <head>
 <meta charset="UTF-8">
 <title>이슈 목록</title>
+<th:block layout:fragment="head-content">
   <!--
     TOAST UI Grid 페이징은 tui-pagination 에 의존합니다.
     CDN 사용 시 반드시 tui-pagination(.js) 을 tui-grid.js 보다 먼저 로드해야
@@ -14,20 +17,19 @@
   <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
 <style>
-* {
+.issue-shell,
+.issue-shell *,
+.issue-shell *::before,
+.issue-shell *::after {
 	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
 }
 
-body {
+.issue-shell {
 	font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
-	background-color: #f7f7f7;
-	padding: 30px;
 	color: #333;
 }
 
-.container {
+.issue-shell .issue-inner {
 	max-width: 1100px;
 	margin: 0 auto;
 	background: #fff;
@@ -200,10 +202,36 @@ td.title {
 	#grid {
 		margin-top: 8px;
 	}
+
+	.issue-register-actions {
+		margin-top: 18px;
+		text-align: right;
+	}
+
+	.issue-register-btn {
+		display: inline-block;
+		padding: 10px 22px;
+		background-color: #5b6cff;
+		color: #fff;
+		border: none;
+		border-radius: 4px;
+		font-size: 14px;
+		font-weight: 600;
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.issue-register-btn:hover {
+		background-color: #4956d8;
+		color: #fff;
+	}
 </style>
+</th:block>
 </head>
 <body>
-	<div class="container">
+<div layout:fragment="content">
+	<div class="issue-shell">
+	<div class="issue-inner">
 		<!-- 1. 검색 영역 (form 으로 감싸서 GET submit) -->
 		<form id="searchForm" th:action="@{/issue/list}" method="get"
 			th:object="${filter}" class="search-area">
@@ -270,6 +298,10 @@ td.title {
 
 
 		<div id="grid"></div>
+		<div class="issue-register-actions">
+			<a th:href="@{/issue/register}" class="issue-register-btn">이슈 등록</a>
+		</div>
+	</div>
 	</div>
 
 	<!-- ====================================================
@@ -282,21 +314,23 @@ td.title {
 	<script th:inline="javascript">
 		/*<![CDATA[*/
 		const issueData = /*[[${issueList}]]*/ [];
+		const LOGIN_MEM_ID = /*[[${(#authentication.principal instanceof T(com.example.demo.login.service.UserVO)) ? #strings.toString(#authentication.principal.id) : ''}]]*/ '';
+
+		
 		/*]]>*/
 	</script>
 
-	<script>
+	<script >
 		document.addEventListener('DOMContentLoaded', function () {
 			const myIssueCheckbox = document.getElementById('myIssue');
 			const memIdSelect = document.getElementById('memId');
 			const searchForm = document.getElementById('searchForm');
 			
 
-			// 로그인 사용자의 memId (예시: 1) — 실제로는 서버에서 내려주는 값을 사용
-			const LOGIN_MEM_ID = '1';
 
 			function applyMyIssueState() {
 				if (myIssueCheckbox.checked) {
+					console.log(LOGIN_MEM_ID);
 					memIdSelect.value = LOGIN_MEM_ID;
 					memIdSelect.disabled = true;
 				} else {
@@ -398,7 +432,7 @@ td.title {
 					},
 					{
 						// 제목 컬럼: 클릭 시 상세 페이지로 이동하도록 <a> 태그를 직접 렌더링
-						header: '제목',
+						header: '이슈명',
 						name: 'subject',
 						sortable: true,
 						formatter: ({ row, value }) => {
@@ -503,5 +537,6 @@ td.title {
 		});
 	</script>
 
+</div>
 </body>
 </html>

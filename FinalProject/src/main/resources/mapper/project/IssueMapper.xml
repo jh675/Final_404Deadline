@@ -104,6 +104,7 @@
 		START_DATE,
 		CLOSED_DATE,
 		PARENT_ISSUE,
+		(SELECT P.SUBJECT FROM ISSUE P WHERE P.ID = ISSUE.PARENT_ISSUE) AS parentIssueSubject,
 		ROOT_ISSUE,
 		GET_USERID_TO_NAME (MEM_ID) as memName,
 		LFT,
@@ -119,7 +120,7 @@
 	<!-- ===================================================== -->
 	<insert id="insertIssue" parameterType="IssueInputVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
-			SELECT SEQ_ISSUE.NEXTVAL FROM DUAL
+			SELECT ISS_SEQ.NEXTVAL FROM DUAL
 		</selectKey>
 		INSERT INTO TB_ISSUE (
 			ID,
@@ -203,4 +204,94 @@
 		WHERE ID = #{id}
 	</delete>
 
+	<!-- ===================================================== -->
+	<!-- 하위이슈: PARENT_ISSUE = 상위 이슈 ID                     -->
+	<!--   offset / limit: Oracle 12c+ OFFSET … FETCH …         -->
+	<!-- ===================================================== -->
+	<select id="selectChildIssueList" parameterType="Long"
+		resultType="IssueOutputVO">
+		SELECT
+		ID,
+		PRJ_ID,
+		SUBJECT,
+		DESCRIPTION,
+		get_sub_code_name(CATEGORY_CD) as CATEGORY_CD,
+		get_sub_code_name(STATUS_CD) as STATUS_CD,
+		get_sub_code_name(PRIORITY_CD)as PRIORITY_CD,
+		CREATED_ON,
+		UPDATED_ON,
+		EST_START_DATE,
+		DUE_DATE,
+		START_DATE,
+		CLOSED_DATE,
+		PARENT_ISSUE,
+		ROOT_ISSUE,
+		GET_USERID_TO_NAME (MEM_ID) as memName,
+		LFT,
+		RGT,
+		DONE_RATIO
+		FROM ISSUE
+		WHERE PARENT_ISSUE = #{id}
+		ORDER BY ID DESC
+	</select>
+
+	<!-- ===================================================== -->
+	<!--  하위이슈 갯수              -->
+	<!-- ===================================================== -->
+	<select id="countChildIssues" resultType="long">
+		SELECT COUNT(*)
+		FROM ISSUE
+		WHERE PARENT_ISSUE = #{id}
+	</select>
+	<!-- ===================================================== -->
+	<!--  아이디랑키 이름 받아오기(단건)      -->
+	<!-- ===================================================== -->
+	<select id="getParentIssue" resultType="map">
+		SELECT id,subject
+		FROM ISSUE
+		WHERE id = #{id}
+	</select>
+	<!-- ===================================================== -->
+	<!--  댓글 조회              -->
+	<!-- ===================================================== -->
+	<select id="getComment" resultType="CommentOutputVO">
+		SELECT
+			c.ID,
+			c.PARENT_ID,
+			c.ISSUE_ID,
+			c.CONTENT,
+			c.WRITE_DATE,
+			GET_USERID_TO_NAME(c.MEM_ID) AS memId,
+			LEVEL AS depth
+		FROM issue_comment c
+		WHERE c.issue_id = #{id}
+		START WITH c.parent_id IS NULL
+		CONNECT BY PRIOR c.id = c.parent_id
+		ORDER SIBLINGS BY c.id
+	</select>
+
+	<!-- 댓글 등록: ID는 트리거/시퀀스/IDENTITY 등 DB 설정에 맞게 조정 -->
+	<insert id="insertComment" parameterType="CommentInputVO">
+
+		INSERT INTO issue_comment (
+			id,
+			PARENT_ID,
+			ISSUE_ID,
+			CONTENT,
+			WRITE_DATE,
+			MEM_ID
+		) VALUES (
+			ISS_SEQ.NEXTVAL,
+			#{parentId},
+			#{issueId},
+			#{content},
+			SYSDATE,
+			#{memId}
+		)
+	</insert>
+	
+	<select id="getIssueIds" resultType="map">
+		SELECT id,subject
+		FROM ISSUE
+	</select>
 </mapper>
