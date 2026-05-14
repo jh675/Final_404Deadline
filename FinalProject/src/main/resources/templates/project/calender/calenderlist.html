@@ -1,280 +1,756 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>캘린더 조회</title>
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캘린더</title>
+    <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            background: #f5f6fa;
+            color: #333;
+        }
+
+        .calendar-wrapper {
+            padding: 16px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin: 16px;
+        }
+
+        /* 상단 툴바 */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .view-btn-group {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .view-btn {
+            padding: 6px 14px;
+            border: none;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            color: #555;
+            transition: background 0.2s;
+        }
+
+        .view-btn:hover { background: #f0f0f0; }
+        .view-btn.active {
+            background: #3d8bff;
+            color: #fff;
+        }
+
+        .nav-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            color: #555;
+            transition: background 0.2s;
+        }
+        .nav-btn:hover { background: #f0f0f0; }
+
+        .current-date {
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        /* 검색 영역 */
+        .search-area {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
+
+        .filter-select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #555;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .search-input {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            width: 180px;
+        }
+
+        .search-btn {
+            padding: 6px 12px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .search-btn:hover { background: #f0f0f0; }
+
+        /* 캘린더 */
+        #calendar {
+            height: 700px;
+        }
+
+        /* 모달 공통 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: #fff;
+            border-radius: 10px;
+            padding: 24px;
+            width: 400px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            position: relative;
+            animation: modalIn 0.2s ease;
+        }
+
+        @keyframes modalIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #222;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #888;
+        }
+        .modal-close:hover { color: #333; }
+
+        .form-row {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-label span { color: red; }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3d8bff;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .time-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .time-row .form-select { flex: 1; }
+        .time-label { font-size: 13px; color: #555; white-space: nowrap; }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: #fff;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #f0f0f0; }
+
+        .btn-primary {
+            background: #3d8bff;
+            color: #fff;
+            border-color: #3d8bff;
+        }
+        .btn-primary:hover { background: #2a75e8; }
+
+        .btn-danger {
+            background: #ff4d4f;
+            color: #fff;
+            border-color: #ff4d4f;
+        }
+        .btn-danger:hover { background: #e03c3e; }
+
+        /* 안내 메시지 모달 */
+        .alert-modal {
+            background: #fff;
+            border-radius: 10px;
+            padding: 24px;
+            width: 300px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            position: relative;
+            animation: modalIn 0.2s ease;
+        }
+
+        .alert-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: #222;
+        }
+
+        .alert-msg {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* 검색 결과 팝업 */
+        .result-modal {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            width: 320px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            position: relative;
+            animation: modalIn 0.2s ease;
+        }
+
+        .result-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: #222;
+        }
+
+        .result-row {
+            display: flex;
+            font-size: 13px;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+
+        .result-key {
+            color: #888;
+            min-width: 70px;
+        }
+
+        .result-val { color: #333; font-weight: 500; }
+    </style>
+    
+   
 </head>
 <body>
 
-<!-- 캘린더 -->
-<div id='calendar'></div>
+<div class="calendar-wrapper">
+    <!-- 툴바 -->
+    <div class="toolbar">
+        <div class="view-btn-group">
+            <button class="view-btn" onclick="changeView('month')">월간</button>
+            <button class="view-btn" onclick="changeView('week')">주간</button>
+            <button class="view-btn active" onclick="changeView('day')">일간</button>
+        </div>
 
-<!-- 등록 팝업 -->
-<div id="add-popup" class="popup-overlay">
-    <div class="popbox">
-        <div class="popup-header">
-            <h3>일정 등록</h3>
-            <button class="close-btn" onclick="closeAddPopup()">✕</button>
+        <button class="nav-btn" onclick="calendar.prev()">이전달</button>
+        <div class="current-date" id="currentDate">(시스템 기준) 년 월</div>
+        <button class="nav-btn" onclick="calendar.next()">다음달</button>
+
+        <!-- 검색 영역 -->
+        <div class="search-area">
+            <select class="filter-select" id="typeCd" onchange="filterEvents()">
+                <option value="">전체</option>
+                <option value="personal">개인일정</option>
+                <option value="group">그룹일정</option>
+                <option value="company">회사일정</option>
+            </select>
+            <input type="text" class="search-input" id="searchInput" placeholder="검색어를 입력해주세요." />
+            <button class="search-btn" onclick="searchEvents()">🔍</button>
         </div>
-        <div class="popup-body">
-            <div class="form-row">
-                <span class="form-label">일정일</span>
-                <div class="date-input-wrap">
-                    <input type="date" id="add-cal-day">
-                    <span class="cal-icon">📅</span>
-                </div>
-            </div>
-            <div class="form-row">
-                <span class="form-label"></span>
-                <div class="checkbox-area">
-                    <label>
-                        <input type="checkbox" id="add-chk-allday" onchange="toggleAddTime(this)">
-                        하루종일
-                    </label>
-                    <label>
-                        <input type="checkbox" id="add-chk-time" onchange="toggleAddAllday(this)">
-                        시간 선택
-                    </label>
-                </div>
-            </div>
-            <div class="form-row time-row" id="add-time-row">
-                <span class="form-label"></span>
-                <div class="time-area">
-                    <div class="time-select-wrap">
-                        <select id="add-start-time">
-                            <option value="">선택</option>
-                            <option value="09:00">오전 09:00</option>
-                            <option value="09:30">오전 09:30</option>
-                            <option value="10:00">오전 10:00</option>
-                            <option value="10:30">오전 10:30</option>
-                            <option value="11:00">오전 11:00</option>
-                            <option value="11:30">오전 11:30</option>
-                            <option value="12:00">오후 12:00</option>
-                            <option value="13:00">오후 01:00</option>
-                            <option value="13:30">오후 01:30</option>
-                            <option value="14:00">오후 02:00</option>
-                            <option value="14:30">오후 02:30</option>
-                            <option value="15:00">오후 03:00</option>
-                            <option value="16:00">오후 04:00</option>
-                            <option value="17:00">오후 05:00</option>
-                            <option value="18:00">오후 06:00</option>
-                        </select>
-                    </div>
-                    <span class="time-between">부터</span>
-                    <div class="time-select-wrap">
-                        <select id="add-end-time">
-                            <option value="">선택</option>
-                            <option value="09:00">오전 09:00</option>
-                            <option value="09:30">오전 09:30</option>
-                            <option value="10:00">오전 10:00</option>
-                            <option value="10:30">오전 10:30</option>
-                            <option value="11:00">오전 11:00</option>
-                            <option value="11:30">오전 11:30</option>
-                            <option value="12:00">오후 12:00</option>
-                            <option value="13:00">오후 01:00</option>
-                            <option value="13:30">오후 01:30</option>
-                            <option value="14:00">오후 02:00</option>
-                            <option value="14:30">오후 02:30</option>
-                            <option value="15:00">오후 03:00</option>
-                            <option value="16:00">오후 04:00</option>
-                            <option value="17:00">오후 05:00</option>
-                            <option value="18:00">오후 06:00</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="form-row">
-                <span class="form-label">일정 장소</span>
-                <input type="text" class="form-input" id="add-place" placeholder="장소 입력">
-            </div>
-            <div class="form-row">
-                <span class="form-label">일정 내용</span>
-                <input type="text" class="form-input" id="add-cal-text" placeholder="일정 내용 입력">
-            </div>
-            <div class="form-row">
-                <span class="form-label">일정 유형</span>
-                <div class="select-wrap">
-                    <select id="add-type-cd">
-                        <option value="">선택</option>
-                        <option value="01CALTYPE">개인 일정</option>
-                        <option value="02CALTYPE">그룹 일정</option>
-                        <option value="03CALTYPE">회사 일정</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <span class="form-label">공유 여부</span>
-                <div class="select-wrap">
-                    <select id="add-sharing-cd">
-                        <option value="">선택</option>
-                        <option value="01CALSHARE">공유</option>
-                        <option value="02CALSHARE">비공유</option>
-                    </select>
-                </div>
+    </div>
+
+    <!-- 캘린더 -->
+    <div id="calendar"></div>
+</div>
+
+<!-- ===== 일정 등록 모달 ===== -->
+<div class="modal-overlay" id="insertModalOverlay">
+    <div class="modal">
+        <div class="modal-title">일정 등록</div>
+        <button class="modal-close" onclick="closeModal('insertModalOverlay')">✕</button>
+
+        <div class="form-row">
+            <label class="form-label">일정장소 <span>*</span></label>
+            <input type="text" class="form-input" id="ins_place" placeholder="텍스트를 입력해 주세요." />
+        </div>
+        <div class="form-row">
+            <label class="form-label">일정 내용</label>
+            <input type="text" class="form-input" id="ins_calText" placeholder="텍스트를 입력해 주세요." />
+        </div>
+        <div class="form-row">
+            <div class="checkbox-row">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="ins_sharingAll" checked /> 전체 공유
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="ins_sharingMe" /> 나만보기
+                </label>
+                <label class="form-label" style="margin:0;">일정 유형</label>
+                <select class="form-select" id="ins_typeCd" style="width:auto;">
+                    <option value="">선택</option>
+                    <option value="personal">개인일정</option>
+                    <option value="group">그룹일정</option>
+                    <option value="company">회사일정</option>
+                </select>
             </div>
         </div>
-        <div class="popup-footer">
-            <button class="btn btn-cancel" onclick="closeAddPopup()">일정 취소</button>
-            <button class="btn btn-save" onclick="saveEvent()">일정 등록</button>
+        <div class="form-row">
+            <div class="time-row">
+                <span class="time-label">시작시간</span>
+                <select class="form-select" id="ins_calStart">
+                    <option value="">선택</option>
+                    <option>오전 09:00</option>
+                    <option>오전 09:15</option>
+                    <option>오전 09:30</option>
+                    <option>오전 10:00</option>
+                    <option>오전 10:30</option>
+                    <option>오전 11:00</option>
+                    <option>오후 12:00</option>
+                    <option>오후 01:00</option>
+                    <option>오후 02:00</option>
+                    <option>오후 03:00</option>
+                    <option>오후 04:00</option>
+                    <option>오후 05:00</option>
+                    <option>오후 06:00</option>
+                </select>
+                <span class="time-label">종료시간</span>
+                <select class="form-select" id="ins_calEnd">
+                    <option value="">선택</option>
+                    <option>오전 09:00</option>
+                    <option>오전 09:15</option>
+                    <option>오전 09:30</option>
+                    <option>오전 10:00</option>
+                    <option>오전 10:30</option>
+                    <option>오전 11:00</option>
+                    <option>오후 12:00</option>
+                    <option>오후 01:00</option>
+                    <option>오후 02:00</option>
+                    <option>오후 03:00</option>
+                    <option>오후 04:00</option>
+                    <option>오후 05:00</option>
+                    <option>오후 06:00</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn" onclick="closeModal('insertModalOverlay')">취소</button>
+            <button class="btn btn-primary" onclick="insertEvent()">확인</button>
         </div>
     </div>
 </div>
 
-<!-- ✅ script를 body 끝으로 이동 -->
-<script th:inline="none">
+<!-- ===== 일정 변경/삭제 모달 ===== -->
+<div class="modal-overlay" id="updateModalOverlay">
+    <div class="modal">
+        <div class="modal-title">일정 변경/삭제</div>
+        <button class="modal-close" onclick="closeModal('updateModalOverlay')">✕</button>
 
-let calendar;  // ✅ 밖에 선언
+        <input type="hidden" id="upd_id" />
 
-document.addEventListener('DOMContentLoaded', function() {
-    const calendarEl = document.getElementById('calendar');
+        <div class="form-row">
+            <label class="form-label">일정장소 <span>*</span></label>
+            <input type="text" class="form-input" id="upd_place" />
+        </div>
+        <div class="form-row">
+            <label class="form-label">일정 내용</label>
+            <input type="text" class="form-input" id="upd_calText" />
+        </div>
+        <div class="form-row">
+            <div class="checkbox-row">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="upd_sharingAll" checked /> 전체 공유
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="upd_sharingMe" /> 나만보기
+                </label>
+                <label class="form-label" style="margin:0;">일정 유형</label>
+                <select class="form-select" id="upd_typeCd" style="width:auto;">
+                    <option value="">선택</option>
+                    <option value="personal">개인일정</option>
+                    <option value="group">그룹일정</option>
+                    <option value="company">회사일정</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="time-row">
+                <span class="time-label">시작시간</span>
+                <select class="form-select" id="upd_calStart">
+                    <option value="">선택</option>
+                    <option>오전 09:00</option>
+                    <option>오전 09:15</option>
+                    <option>오전 09:30</option>
+                    <option>오전 10:00</option>
+                    <option>오전 10:30</option>
+                    <option>오전 11:00</option>
+                    <option>오후 12:00</option>
+                    <option>오후 01:00</option>
+                    <option>오후 02:00</option>
+                    <option>오후 03:00</option>
+                    <option>오후 04:00</option>
+                    <option>오후 05:00</option>
+                    <option>오후 06:00</option>
+                </select>
+                <span class="time-label">종료시간</span>
+                <select class="form-select" id="upd_calEnd">
+                    <option value="">선택</option>
+                    <option>오전 09:00</option>
+                    <option>오전 09:15</option>
+                    <option>오전 09:30</option>
+                    <option>오전 10:00</option>
+                    <option>오전 10:30</option>
+                    <option>오전 11:00</option>
+                    <option>오후 12:00</option>
+                    <option>오후 01:00</option>
+                    <option>오후 02:00</option>
+                    <option>오후 03:00</option>
+                    <option>오후 04:00</option>
+                    <option>오후 05:00</option>
+                    <option>오후 06:00</option>
+                </select>
+            </div>
+        </div>
 
-    calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'ko',
-        dayHeaderFormat: { weekday: 'short' },
-        dayCellContent: function(e) {
-            return e.dayNumberText.replace('일', '');
+        <div class="modal-footer">
+            <button class="btn btn-danger" onclick="confirmDelete()">삭제</button>
+            <button class="btn btn-primary" onclick="updateEvent()">변경</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 검색 결과 모달 ===== -->
+<div class="modal-overlay" id="resultModalOverlay">
+    <div class="result-modal">
+        <div class="result-title">검색 결과</div>
+        <button class="modal-close" onclick="closeModal('resultModalOverlay')">✕</button>
+        <div class="result-row"><span class="result-key">일정일:</span><span class="result-val" id="res_date"></span></div>
+        <div class="result-row"><span class="result-key">일정 시간:</span><span class="result-val" id="res_time"></span></div>
+        <div class="result-row"><span class="result-key">일정장소:</span><span class="result-val" id="res_place"></span></div>
+        <div class="result-row"><span class="result-key">일정내용:</span><span class="result-val" id="res_calText"></span></div>
+        <div class="result-row"><span class="result-key">일정유형:</span><span class="result-val" id="res_typeCd"></span></div>
+        <div class="result-row"><span class="result-key">공유여부:</span><span class="result-val" id="res_sharing"></span></div>
+        <div class="result-row"><span class="result-key">일정상태:</span><span class="result-val" id="res_state"></span></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeModal('resultModalOverlay')">확인</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 안내 메시지 모달 ===== -->
+<div class="modal-overlay" id="alertModalOverlay">
+    <div class="alert-modal">
+        <div class="alert-title">안내 메시지</div>
+        <button class="modal-close" onclick="closeModal('alertModalOverlay')">✕</button>
+        <div class="alert-msg" id="alertMsg"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" id="alertConfirmBtn" onclick="closeModal('alertModalOverlay')">확인</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 삭제 확인 모달 ===== -->
+<div class="modal-overlay" id="deleteConfirmOverlay">
+    <div class="alert-modal">
+        <div class="alert-title">안내 메시지</div>
+        <button class="modal-close" onclick="closeModal('deleteConfirmOverlay')">✕</button>
+        <div class="alert-msg">일정을 삭제 하시겠습니까?</div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="deleteEvent()">확인</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+<script>
+    const Calendar = tui.Calendar;
+
+    const calendar = new Calendar('#calendar', {
+        defaultView: 'day',
+        language: 'ko',
+        usageStatistics: false,
+        
+        week: {
+		  dayNames: ['일', '월', '화', '수', '목', '금', '토'],
         },
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        month: {
+		  dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+		  visibleEventCount: 0,
         },
-        buttonText: {
-            today: '오늘', month: '월', week: '주', day: '일'
-        },
-        events: function(fetchInfo, successCallback, failureCallback) {
-            fetch('/calender/list')
-                .then(res => res.json())
-                .then(data => {
-                    const events = data.map(e => ({
-                        id:    e.id,
-                        title: e.calText,
-                        start: e.calStart,
-                        end:   e.calEnd
-                    }));
-                    successCallback(events);
-                })
-                .catch(err => failureCallback(err));
-        },
-        dateClick: function(info) {
-            openAddPopup(info.dateStr);
-        },
-        eventClick: function(info) {
-            openUpdatePopup(info.event);
+        calendars: [
+            { id: 'personal', name: '개인일정', color: '#fff', backgroundColor: '#ff6b6b', borderColor: '#ff6b6b' },
+            { id: 'group',    name: '그룹일정', color: '#fff', backgroundColor: '#51cf66', borderColor: '#51cf66' },
+            { id: 'company',  name: '회사일정', color: '#fff', backgroundColor: '#339af0', borderColor: '#339af0' },
+        ],
+        template: {
+            time(event) {
+                return `<span>${event.title}</span>`;
+            }
         }
     });
 
-    calendar.render();
-});
-
-// ✅ 등록 팝업 열기
-function openAddPopup(date) {
-    document.getElementById('add-cal-day').value    = date;
-    document.getElementById('add-cal-text').value   = '';
-    document.getElementById('add-place').value      = '';
-    document.getElementById('add-type-cd').value    = '';
-    document.getElementById('add-sharing-cd').value = '';
-    document.getElementById('add-chk-allday').checked = false;
-    document.getElementById('add-chk-time').checked   = false;
-    document.getElementById('add-time-row').style.display = 'none';
-    document.getElementById('add-popup').style.display = 'flex';
-}
-
-// ✅ 등록 팝업 닫기
-function closeAddPopup() {
-    document.getElementById('add-popup').style.display = 'none';
-}
-
-// ✅ 하루종일 체크
-function toggleAddTime(checkbox) {
-    const timeRow = document.getElementById('add-time-row');
-    const chkTime = document.getElementById('add-chk-time');
-    if (checkbox.checked) {
-        timeRow.style.display = 'none';
-        chkTime.checked = false;
+    // 날짜 표시 업데이트
+    function updateDateLabel() {
+        const date = calendar.getDate();
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        document.getElementById('currentDate').textContent = `${year}년 ${month}월`;
     }
-}
+    updateDateLabel();
 
-// ✅ 시간선택 체크
-function toggleAddAllday(checkbox) {
-    const timeRow   = document.getElementById('add-time-row');
-    const chkAllday = document.getElementById('add-chk-allday');
-    if (checkbox.checked) {
-        chkAllday.checked = false;
-        timeRow.style.display = 'flex';
-    } else {
-        timeRow.style.display = 'none';
-    }
-}
-
-// ✅ 일정 등록 저장
-function saveEvent() {
-    const calDay    = document.getElementById('add-cal-day').value;
-    const isAllday  = document.getElementById('add-chk-allday').checked;
-    const isTime    = document.getElementById('add-chk-time').checked;
-    const calText   = document.getElementById('add-cal-text').value;
-    const place     = document.getElementById('add-place').value;
-    const typeCd    = document.getElementById('add-type-cd').value;
-    const sharingCd = document.getElementById('add-sharing-cd').value;
-
-    if (!calDay)   { alert('일정일을 선택해주세요!'); return; }
-    if (!calText)  { alert('일정 내용을 입력해주세요!'); return; }
-    if (!isAllday && !isTime) { alert('하루종일 또는 시간 선택을 체크해주세요!'); return; }
-
-    let calStart, calEnd;
-    if (isAllday) {
-        calStart = calDay + ' 00:00:00';
-        calEnd   = calDay + ' 23:59:59';
-    } else {
-        const startTime = document.getElementById('add-start-time').value;
-        const endTime   = document.getElementById('add-end-time').value;
-        if (!startTime || !endTime) { alert('시작/종료 시간을 선택해주세요!'); return; }
-        calStart = calDay + ' ' + startTime + ':00';
-        calEnd   = calDay + ' ' + endTime   + ':00';
+    // 뷰 전환
+    function changeView(view) {
+        calendar.changeView(view);
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        const map = { month: 0, week: 1, day: 2 };
+        document.querySelectorAll('.view-btn')[map[view]].classList.add('active');
+        updateDateLabel();
     }
 
-    const data = {
-        memId:      1,
-        calText:    calText,
-        place:      place,
-        typeCd:     typeCd,
-        sharingCd:  sharingCd,
-        stateCd:    '01STATE',
-        calStart:   calStart,
-        calEnd:     calEnd
-    };
+    // 이전/다음 클릭 시 날짜 업데이트
+    document.querySelector('.nav-btn').addEventListener('click', () => setTimeout(updateDateLabel, 0));
 
-    fetch('/calender/insert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(() => {
-        alert('등록되었습니다!');
-        calendar.refetchEvents();
-        closeAddPopup();
-    })
-    .catch(err => {
-        console.error(err);
-        alert('오류가 발생했습니다.');
+    // 서버에서 일정 불러오기
+    function loadEvents(typeCd = '') {
+        fetch(`/calender/list?typeCd=${typeCd}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.json())
+            .then(data => {
+                calendar.clear();
+                const events = data.map(item => ({
+                    id: String(item.id),
+                    calendarId: item.typeCd || 'personal',
+                    title: item.place,
+                    start: item.calStart,
+                    end: item.calEnd,
+                    extendedProps: item
+                }));
+                calendar.createEvents(events);
+            })
+            .catch(() => {
+                // 개발 중 샘플 데이터
+                calendar.createEvents([
+                    { id: '1', calendarId: 'company', title: '총무팀 회의 00관련', start: new Date(), end: new Date(Date.now() + 7200000) },
+                    { id: '2', calendarId: 'personal', title: '어버이날 5', start: new Date(Date.now() - 86400000), end: new Date(Date.now() - 82800000) },
+                ]);
+            });
+    }
+    loadEvents();
+
+    // 일정 유형 필터
+    function filterEvents() {
+        const typeCd = document.getElementById('typeCd').value;
+        loadEvents(typeCd);
+    }
+
+    // 검색
+    function searchEvents() {
+        const keyword = document.getElementById('searchInput').value.trim();
+        const typeCd = document.getElementById('typeCd').value;
+        if (!keyword) { showAlert('검색어를 입력해 주세요.'); return; }
+        fetch(`/calender/search?keyword=${keyword}&typeCd=${typeCd}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.json())
+            .then(data => {
+                if (!data || data.length === 0) { 
+					showAlert('검색 결과가 없습니다.'); 
+                    return; 
+                }
+                const item = data[0];
+                document.getElementById('res_date').textContent = item.calStart?.split('T')[0] || '';
+                document.getElementById('res_time').textContent = `${item.calStart} ~ ${item.calEnd}`;
+                document.getElementById('res_place').textContent = item.place || '';
+                document.getElementById('res_calText').textContent = item.calText || '';
+                document.getElementById('res_typeCd').textContent = item.typeCd || '';
+                document.getElementById('res_sharing').textContent = item.sharingCd || '';
+                document.getElementById('res_state').textContent = item.stateCd || '';
+                openModal('resultModalOverlay');
+            });
+    }
+
+    // 빈 날짜 클릭 → 등록 모달
+    calendar.on('selectDateTime', ({ start, end }) => {
+        document.getElementById('ins_place').value = '';
+        document.getElementById('ins_calText').value = '';
+        document.getElementById('ins_typeCd').value = '';
+        openModal('insertModalOverlay');
     });
-}
 
-// ✅ 수정 팝업 열기 (나중에 수정 팝업 추가 시 사용)
-function openUpdatePopup(event) {
-    fetch('/calender/detail?id=' + event.id)
+    // 일정 클릭 → 수정 모달
+    calendar.on('clickEvent', ({ event }) => {
+        const p = event.extendedProps || {};
+        document.getElementById('upd_id').value = event.id;
+        document.getElementById('upd_place').value = event.title || '';
+        document.getElementById('upd_calText').value = p.calText || '';
+        document.getElementById('upd_typeCd').value = p.typeCd || '';
+        openModal('updateModalOverlay');
+    });
+    
+    // 일정 색갈테그 지정 
+    
+    calendar.setTheme({
+  common: {
+    gridSelection: {
+      backgroundColor: 'rgba(81, 230, 92, 0.05)',
+      border: '1px dotted #515ce6',
+    },
+  },
+});
+    // 등록
+    function insertEvent() {
+        const place = document.getElementById('ins_place').value.trim();
+        const calText = document.getElementById('ins_calText').value.trim();
+        const typeCd = document.getElementById('ins_typeCd').value;
+        const calStart = document.getElementById('ins_calStart').value;
+        const calEnd = document.getElementById('ins_calEnd').value;
+
+        if (!place || !typeCd || !calStart || !calEnd) {
+            showAlert('필수값 모두 입력해 주세요');
+            return;
+        }
+
+        fetch('/calender/insert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `place=${place}&calText=${calText}&typeCd=${typeCd}&calStart=${calStart}&calEnd=${calEnd}`
+        })
         .then(res => res.json())
-        .then(data => {
-            // 수정 팝업 연동 시 여기에 추가
-            console.log(data);
+        .then(() => {
+            closeModal('insertModalOverlay');
+            showAlert('등록이 완료 되었습니다');
+            loadEvents();
         });
-}
+    }
 
+    // 수정
+    function updateEvent() {
+        const id = document.getElementById('upd_id').value;
+        const place = document.getElementById('upd_place').value.trim();
+        const calText = document.getElementById('upd_calText').value.trim();
+        const typeCd = document.getElementById('upd_typeCd').value;
+        const calStart = document.getElementById('upd_calStart').value;
+        const calEnd = document.getElementById('upd_calEnd').value;
+
+        fetch('/calender/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `id=${id}&place=${place}&calText=${calText}&typeCd=${typeCd}&calStart=${calStart}&calEnd=${calEnd}`
+        })
+        .then(res => res.json())
+        .then(() => {
+            closeModal('updateModalOverlay');
+            showAlert('변경이 완료 되었습니다');
+            loadEvents();
+        });
+    }
+
+    // 삭제 확인
+    function confirmDelete() {
+        closeModal('updateModalOverlay');
+        openModal('deleteConfirmOverlay');
+    }
+
+    // 삭제 실행
+    function deleteEvent() {
+        const id = document.getElementById('upd_id').value;
+        fetch('/calender/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `id=${id}`
+        })
+        .then(res => res.json())
+        .then(() => {
+            closeModal('deleteConfirmOverlay');
+            showAlert('일정이 삭제 되었습니다');
+            loadEvents();
+        });
+    }
+
+    // 모달 열기/닫기
+    function openModal(id) {
+        document.getElementById(id).classList.add('show');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('show');
+    }
+
+    // 안내 메시지
+    function showAlert(msg) {
+        document.getElementById('alertMsg').textContent = msg;
+        openModal('alertModalOverlay');
+    }
 </script>
-
 </body>
 </html>
