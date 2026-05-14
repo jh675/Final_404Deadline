@@ -1,21 +1,31 @@
 package com.example.demo.project.option.controller;
 
-import java.util.Comparator;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.example.demo.project.option.service.RoleGroupRowVO;
+import com.example.demo.project.option.service.RoleMenuSectionVO;
+import com.example.demo.project.option.service.RoleMenuSectionVO.CrudSlot;
+import com.example.demo.project.option.service.RoleMenuSectionVO.LabelSlot;
 import com.example.demo.project.option.service.RoleService;
 import com.example.demo.project.option.service.RoleVO;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 권한 관리 — {@code project/role/roleManagement.html} (TOAST UI Grid, {@code rows}, {@code prjId}).
+ * 권한 관리 — {@code project/role/roleManagement.html} (TOAST UI Grid, {@code ROLE} 목록).
  */
 @Controller
 @RequestMapping("/project/option/role")
@@ -53,31 +63,32 @@ public class RoleController {
     }
 
     /**
-     * 권한 상세 — {@code project/role/roleManagementInfo.html}
+     * 역할 상세 — {@code project/role/roleManagementInfo.html}
+     * (프로젝트 {@code ROLE} + {@code ROLE_MENU}으로 연결된 {@code MENU} 권한 체크 표시)
      */
     @GetMapping("/roleManagementInfo")
     public String roleManagementInfoPage(
             @RequestParam("prjId") Long prjId,
-            @RequestParam("roleId") String roleId,
+            @RequestParam("roleCd") Long roleCd,
             Model model) {
 
-        RoleVO search = RoleVO.builder()
-                .prjId(prjId)
-                .permissionKey("")
-                .permissionName("")
-                .createdFrom("")
-                .createdTo("")
-                .build();
-
-        List<RoleVO> rows = roleService.selectRoleList(search);
-
-        model.addAttribute("rows", rows);
-        addPermSection(model, "issue", rows, "ROLE_ISSUE_");
-        addPermSection(model, "member", rows, "ROLE_MEMBER_");
-        addPermSection(model, "group", rows, "ROLE_GROUP_");
-        addPermSection(model, "history", rows, "ROLE_HISTORY_");
         model.addAttribute("prjId", prjId);
-        model.addAttribute("roleId", nullToEmpty(roleId));
+        model.addAttribute("roleCd", roleCd);
+
+        RoleVO currentRole = roleService.selectRoleByPrjAndCd(prjId, roleCd);
+        if (currentRole == null) {
+            model.addAttribute("roleNotFound", true);
+            model.addAttribute("menuSections", List.of());
+            return "project/role/roleManagementInfo";
+        }
+
+        model.addAttribute("roleNotFound", false);
+        model.addAttribute("currentRole", currentRole);
+        model.addAttribute("roleCreatedOnYmd", formatRoleDateYmd(currentRole.getCreatedOn()));
+
+        List<RoleVO> allMenus = roleService.selectAllMenus();
+        Set<String> linked = new HashSet<>(roleService.selectMenuRoleIdsByRoleCd(roleCd));
+        model.addAttribute("menuSections", buildMenuSections(allMenus, linked));
         return "project/role/roleManagementInfo";
     }
 
@@ -106,69 +117,134 @@ public class RoleController {
         return body;
     }
 
+    /** 역할 상세 — 이 {@code ROLE_CD}를 보유한 그룹 목록(TOAST Grid 데이터). */
+    @GetMapping("/roleGroups")
+    @ResponseBody
+    public Map<String, Object> roleGroups(
+            @RequestParam("prjId") Long prjId,
+            @RequestParam(value = "roleCd", required = false) Long roleCd) {
+
+        List<RoleGroupRowVO> list =
+                roleCd == null ? List.of() : roleService.selectRoleGroupsList(prjId, roleCd);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", list);
+        body.put("prjId", prjId);
+        return body;
+    }
+
     private static String nullToEmpty(String s) {
         return s == null ? "" : s;
     }
 
-    /** 메뉴 권한 코드 접두사별 목록 (상세 화면 체크박스용), ROLE_ID 오름차순 */
-    private static List<RoleVO> permsByPrefix(List<RoleVO> rows, String prefix) {
-        if (rows == null || prefix == null) {
-            return List.of();
+    private static String formatRoleDateYmd(LocalDateTime dt) {
+        if (dt == null) {
+            return "";
         }
-        return rows.stream()
-                .filter(r -> r.getRoleId() != null && r.getRoleId().startsWith(prefix))
-                .sorted(Comparator.comparing(RoleVO::getRoleId))
-                .toList();
+        return dt.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
-    private static void addPermSection(Model model, String key, List<RoleVO> rows, String prefix) {
-        List<RoleVO> all = permsByPrefix(rows, prefix);
-        model.addAttribute(key + "Perms", all);
-        model.addAttribute(key + "PermAll", findAllMenuPerm(all));
-        model.addAttribute(key + "PermDetails", detailPermsSorted(all));
+    private static List<RoleMenuSectionVO> buildMenuSections(List<RoleVO> allMenus, Set<String> linked) {
+        Set<String> safeLinked = linked == null ? Set.of() : linked;
+
+        Map<String, List<RoleVO>> byTp = allMenus.stream()
+                .collect(Collectors.groupingBy(
+                        m -> (m.getRoleTp() != null && !m.getRoleTp().isBlank())
+                                ? m.getRoleTp()
+                                : "기타",
+                        LinkedHashMap::new,
+                        Collectors.toList()));
+
+        List<RoleMenuSectionVO> sections = new ArrayList<>();
+        for (Map.Entry<String, List<RoleVO>> e : byTp.entrySet()) {
+            List<RoleVO> items = e.getValue();
+            List<RoleVO> fullRows = new ArrayList<>();
+            List<RoleVO> nonFullRows = new ArrayList<>();
+            for (RoleVO m : items) {
+                if (isAllMth(m.getRoleMth())) {
+                    fullRows.add(m);
+                } else {
+                    nonFullRows.add(m);
+                }
+            }
+
+            boolean anyFullLinked =
+                    fullRows.stream().anyMatch(m -> safeLinked.contains(m.getRoleId()));
+
+            List<LabelSlot> fullSlots = fullRows.stream()
+                    .map(m -> new LabelSlot(
+                            m.getRoleName() != null ? m.getRoleName() : "전체 관리",
+                            safeLinked.contains(m.getRoleId())))
+                    .collect(Collectors.toList());
+
+            String[] mths = {"GET", "POST", "PUT", "DELETE"};
+            String[] labels = {"조회", "등록", "수정", "삭제"};
+            List<CrudSlot> crud = new ArrayList<>(4);
+            for (int i = 0; i < mths.length; i++) {
+                RoleVO row = findFirstByMth(nonFullRows, mths[i]);
+                boolean checked = anyFullLinked
+                        || (row != null && safeLinked.contains(row.getRoleId()));
+                crud.add(new CrudSlot(labels[i], checked));
+            }
+
+            List<LabelSlot> extras = nonFullRows.stream()
+                    .filter(m -> !isCrudMth(m.getRoleMth()))
+                    .map(m -> new LabelSlot(
+                            m.getRoleName() != null ? m.getRoleName() : m.getRoleId(),
+                            safeLinked.contains(m.getRoleId())))
+                    .collect(Collectors.toList());
+
+            sections.add(new RoleMenuSectionVO(e.getKey(), fullSlots, crud, extras));
+        }
+        return sections;
     }
 
-    /** 접두사 묶음 안의 {@code *_ALL} 한 건 (전체 관리) */
-    private static RoleVO findAllMenuPerm(List<RoleVO> perms) {
-        if (perms == null) {
-            return null;
+    private static boolean isAllMth(String roleMth) {
+        if (roleMth == null || roleMth.isBlank()) {
+            return false;
         }
-        return perms.stream()
-                .filter(p -> p.getRoleId() != null && p.getRoleId().endsWith("_ALL"))
-                .findFirst()
-                .orElse(null);
+        String u = roleMth.trim().toUpperCase(Locale.ROOT);
+        return "ALL".equals(u) || "전체".equals(roleMth.trim());
     }
 
-    /** 전체 관리 제외 — 조회·등록·수정·삭제 등 세부 권한 (표시 순: 조회 → 등록 → 수정 → 삭제) */
-    private static List<RoleVO> detailPermsSorted(List<RoleVO> perms) {
-        if (perms == null) {
-            return List.of();
+    private static boolean isCrudMth(String roleMth) {
+        if (roleMth == null || roleMth.isBlank()) {
+            return false;
         }
-        return perms.stream()
-                .filter(p -> p.getRoleId() == null || !p.getRoleId().endsWith("_ALL"))
-                .sorted(Comparator.comparingInt(RoleController::crudSortKey).thenComparing(RoleVO::getRoleId))
-                .toList();
+        String u = roleMth.trim().toUpperCase(Locale.ROOT);
+        return "GET".equals(u)
+                || "POST".equals(u)
+                || "PUT".equals(u)
+                || "DELETE".equals(u)
+                || "조회".equals(roleMth.trim())
+                || "등록".equals(roleMth.trim())
+                || "수정".equals(roleMth.trim())
+                || "삭제".equals(roleMth.trim());
     }
 
-    /** {@code ROLE_*_READ} 등을 조회(0)~삭제(3) 순으로 정렬 */
-    private static int crudSortKey(RoleVO p) {
-        String id = p.getRoleId();
-        if (id == null) {
-            return 99;
+    private static RoleVO findFirstByMth(List<RoleVO> rows, String code) {
+        for (RoleVO m : rows) {
+            if (mthMatches(m.getRoleMth(), code)) {
+                return m;
+            }
         }
-        String u = id.toUpperCase();
-        if (u.endsWith("_READ") || u.endsWith("_SELECT") || u.endsWith("_VIEW") || u.endsWith("_LIST")) {
-            return 0;
+        return null;
+    }
+
+    private static boolean mthMatches(String raw, String code) {
+        if (raw == null || raw.isBlank()) {
+            return false;
         }
-        if (u.endsWith("_CREATE") || u.endsWith("_INSERT") || u.endsWith("_ADD") || u.endsWith("_REG")) {
-            return 1;
+        String t = raw.trim();
+        String u = t.toUpperCase(Locale.ROOT);
+        if (u.equals(code)) {
+            return true;
         }
-        if (u.endsWith("_UPDATE") || u.endsWith("_MODIFY") || u.endsWith("_EDIT")) {
-            return 2;
-        }
-        if (u.endsWith("_DELETE") || u.endsWith("_REMOVE")) {
-            return 3;
-        }
-        return 50;
+        return switch (code) {
+            case "GET" -> "조회".equals(t);
+            case "POST" -> "등록".equals(t);
+            case "PUT" -> "수정".equals(t);
+            case "DELETE" -> "삭제".equals(t);
+            default -> false;
+        };
     }
 }

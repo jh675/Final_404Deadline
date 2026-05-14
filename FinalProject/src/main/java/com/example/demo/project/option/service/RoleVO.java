@@ -8,8 +8,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * 권한 관리 화면({@code roleManagement.html}) 그리드 행 VO.
- * 컬럼: {@code id}, {@code roleId}, {@code roleName}, {@code grpCnt}, {@code createdOn}
+ * 권한 관리 VO.
+ * <ul>
+ *   <li>목록({@code selectRoleList}): 프로젝트 {@code ROLE} — {@link #roleCd}, {@link #roleName},
+ *       {@link #grpCnt}, {@link #createdOn}</li>
+ *   <li>상세 메뉴 체크: {@code MENU} — {@link #roleId}, {@link #roleName}, {@link #roleTp} 등</li>
+ * </ul>
  */
 @Getter
 @Setter
@@ -18,13 +22,13 @@ import lombok.Setter;
 @Builder
 public class RoleVO {
 
-    /** 프로젝트 ID ({@code PRJ_ID}) — 목록 집계·검색 조건 */
+    /** 프로젝트 ID ({@code PRJ_ID}) */
     private Long prjId;
 
-    /** 검색: {@code MENU.ROLE_ID} 부분 일치 */
+    /** 검색: {@code ROLE.ROLE_CD} 문자열 부분 일치 (목록) */
     private String permissionKey;
 
-    /** 검색: {@code MENU.ROLE_NAME} 부분 일치 */
+    /** 검색: {@code ROLE.ROLE_NAME} 부분 일치 (목록) */
     private String permissionName;
 
     /** 검색: {@code ROLE.CREATED_ON} 구간 시작 (yyyy-MM-dd) */
@@ -33,26 +37,26 @@ public class RoleVO {
     /** 검색: {@code ROLE.CREATED_ON} 구간 끝 (yyyy-MM-dd) */
     private String createdTo;
 
-    /**
-     * 그리드 권한명 링크용 식별자 — {@code roleManagement.html} 에서 {@code row.id} 로 사용.
-     * 메뉴 권한 코드와 동일하게 {@link #roleId} 와 매핑.
-     */
+    /** 그리드·링크용 — 목록에서는 보통 {@code TO_CHAR(ROLE_CD)} */
     private String id;
 
-    /** {@code MENU.ROLE_ID} (권한 코드) */
+    /** 목록: {@code ROLE_CD} 문자열 표기 또는 메뉴 행의 {@code MENU.ROLE_ID} */
     private String roleId;
 
-    /** {@code MENU.ROLE_NAME} */
+    /** {@code ROLE.ROLE_NAME} 또는 {@code MENU.ROLE_NAME} */
     private String roleName;
 
-    /** {@code MENU} 기타 — 상세 화면 등에서 사용 */
+    /** 프로젝트 역할 코드 ({@code ROLE.ROLE_CD}) — 목록 행 */
+    private Long roleCd;
+
+    /** {@code MENU} — 상세 메뉴 체크 목록 */
     private String roleUrl;
     private String roleTp;
     private String roleMth;
 
-    /** 해당 프로젝트에서 메뉴와 연결된 {@code ROLE} 들 중 최신 {@code CREATED_ON} */
+    /** 목록: {@code ROLE.CREATED_ON} */
     private LocalDateTime createdOn;
 
-    /** 해당 권한을 갖는 역할을 보유한 {@code GRP} 수 */
+    /** 목록: 이 역할을 보유한 {@code GRP} 수 */
     private int grpCnt;
 }
