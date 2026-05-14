@@ -1,4 +1,4 @@
-package com.example.demo.project.issue.vo;
+package com.example.demo.project.issue.service;
 
 import java.util.Date;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class IssueInputVO {
+public class IssueOutputVO {
 
 	private Long id;
 	private Long prjId;
@@ -28,7 +28,7 @@ public class IssueInputVO {
 	private Date closedDate;
 	private Long parentIssue;
 	private Long rootIssue;
-	private Long memId;
+	private	String memName;
 	private Long lft;
 	private Long rgt;
 	private Long doneRatio;
