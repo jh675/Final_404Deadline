@@ -1,6 +1,6 @@
 package com.example.demo.project.option.controller;
 
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import com.example.demo.project.option.service.RoleVO;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 권한 관리 목록 — DB {@code menu} 마스터 + 프로젝트별 {@code grp} 집계.
+ * 권한 관리 — {@code project/role/roleManagement.html} (TOAST UI Grid, {@code rows}, {@code prjId}).
  */
 @Controller
 @RequestMapping("/project/option/role")
@@ -26,85 +26,149 @@ public class RoleController {
 
     @GetMapping("/roleManagement")
     public String roleManagementPage(
-            @RequestParam("projectId") Long projectId,
+            @RequestParam("prjId") Long prjId,
             @RequestParam(required = false) String permissionKey,
             @RequestParam(required = false) String permissionName,
             @RequestParam(required = false) String createdFrom,
             @RequestParam(required = false) String createdTo,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int pageSize,
             Model model) {
 
         RoleVO search = RoleVO.builder()
-                .projectId(projectId)
+                .prjId(prjId)
                 .permissionKey(nullToEmpty(permissionKey))
                 .permissionName(nullToEmpty(permissionName))
                 .createdFrom(nullToEmpty(createdFrom))
                 .createdTo(nullToEmpty(createdTo))
-                .page(page)
-                .pageSize(pageSize)
                 .build();
 
-        long totalElements = roleService.countRoleList(search);
-        List<RoleVO> rows =
-                totalElements == 0 ? Collections.emptyList() : roleService.selectRoleList(search);
-        int totalPages = totalPages(totalElements, search.getPageSize());
+        List<RoleVO> rows = roleService.selectRoleList(search);
 
         model.addAttribute("rows", rows);
-        model.addAttribute("totalElements", totalElements);
-        model.addAttribute("page", search.getPage());
-        model.addAttribute("pageSize", search.getPageSize());
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("projectId", projectId);
-        model.addAttribute("permissionKey", nullToEmpty(permissionKey));
-        model.addAttribute("permissionName", nullToEmpty(permissionName));
-        model.addAttribute("createdFrom", nullToEmpty(createdFrom));
-        model.addAttribute("createdTo", nullToEmpty(createdTo));
-        return "project/role/RoleManagement";
+        model.addAttribute("prjId", prjId);
+        model.addAttribute("permissionKey", search.getPermissionKey());
+        model.addAttribute("permissionName", search.getPermissionName());
+        model.addAttribute("createdFrom", search.getCreatedFrom());
+        model.addAttribute("createdTo", search.getCreatedTo());
+        return "project/role/roleManagement";
+    }
+
+    /**
+     * 권한 상세 — {@code project/role/roleManagementInfo.html}
+     */
+    @GetMapping("/roleManagementInfo")
+    public String roleManagementInfoPage(
+            @RequestParam("prjId") Long prjId,
+            @RequestParam("roleId") String roleId,
+            Model model) {
+
+        RoleVO search = RoleVO.builder()
+                .prjId(prjId)
+                .permissionKey("")
+                .permissionName("")
+                .createdFrom("")
+                .createdTo("")
+                .build();
+
+        List<RoleVO> rows = roleService.selectRoleList(search);
+
+        model.addAttribute("rows", rows);
+        addPermSection(model, "issue", rows, "ROLE_ISSUE_");
+        addPermSection(model, "member", rows, "ROLE_MEMBER_");
+        addPermSection(model, "group", rows, "ROLE_GROUP_");
+        addPermSection(model, "history", rows, "ROLE_HISTORY_");
+        model.addAttribute("prjId", prjId);
+        model.addAttribute("roleId", nullToEmpty(roleId));
+        return "project/role/roleManagementInfo";
     }
 
     @GetMapping("/roleManagementList")
     @ResponseBody
     public Map<String, Object> roleManagementList(
-            @RequestParam("projectId") Long projectId,
+            @RequestParam("prjId") Long prjId,
             @RequestParam(required = false) String permissionKey,
             @RequestParam(required = false) String permissionName,
             @RequestParam(required = false) String createdFrom,
-            @RequestParam(required = false) String createdTo,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int pageSize) {
+            @RequestParam(required = false) String createdTo) {
 
         RoleVO search = RoleVO.builder()
-                .projectId(projectId)
+                .prjId(prjId)
                 .permissionKey(nullToEmpty(permissionKey))
                 .permissionName(nullToEmpty(permissionName))
                 .createdFrom(nullToEmpty(createdFrom))
                 .createdTo(nullToEmpty(createdTo))
-                .page(page)
-                .pageSize(pageSize)
                 .build();
 
-        long totalElements = roleService.countRoleList(search);
-        List<RoleVO> rows =
-                totalElements == 0 ? Collections.emptyList() : roleService.selectRoleList(search);
+        List<RoleVO> rows = roleService.selectRoleList(search);
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("content", rows);
-        body.put("totalElements", totalElements);
-        body.put("page", search.getPage());
-        body.put("pageSize", search.getPageSize());
-        body.put("totalPages", totalPages(totalElements, search.getPageSize()));
+        body.put("prjId", prjId);
         return body;
-    }
-
-    private static int totalPages(long totalElements, int pageSize) {
-        if (pageSize <= 0) {
-            return 0;
-        }
-        return (int) Math.ceil((double) totalElements / pageSize);
     }
 
     private static String nullToEmpty(String s) {
         return s == null ? "" : s;
+    }
+
+    /** 메뉴 권한 코드 접두사별 목록 (상세 화면 체크박스용), ROLE_ID 오름차순 */
+    private static List<RoleVO> permsByPrefix(List<RoleVO> rows, String prefix) {
+        if (rows == null || prefix == null) {
+            return List.of();
+        }
+        return rows.stream()
+                .filter(r -> r.getRoleId() != null && r.getRoleId().startsWith(prefix))
+                .sorted(Comparator.comparing(RoleVO::getRoleId))
+                .toList();
+    }
+
+    private static void addPermSection(Model model, String key, List<RoleVO> rows, String prefix) {
+        List<RoleVO> all = permsByPrefix(rows, prefix);
+        model.addAttribute(key + "Perms", all);
+        model.addAttribute(key + "PermAll", findAllMenuPerm(all));
+        model.addAttribute(key + "PermDetails", detailPermsSorted(all));
+    }
+
+    /** 접두사 묶음 안의 {@code *_ALL} 한 건 (전체 관리) */
+    private static RoleVO findAllMenuPerm(List<RoleVO> perms) {
+        if (perms == null) {
+            return null;
+        }
+        return perms.stream()
+                .filter(p -> p.getRoleId() != null && p.getRoleId().endsWith("_ALL"))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /** 전체 관리 제외 — 조회·등록·수정·삭제 등 세부 권한 (표시 순: 조회 → 등록 → 수정 → 삭제) */
+    private static List<RoleVO> detailPermsSorted(List<RoleVO> perms) {
+        if (perms == null) {
+            return List.of();
+        }
+        return perms.stream()
+                .filter(p -> p.getRoleId() == null || !p.getRoleId().endsWith("_ALL"))
+                .sorted(Comparator.comparingInt(RoleController::crudSortKey).thenComparing(RoleVO::getRoleId))
+                .toList();
+    }
+
+    /** {@code ROLE_*_READ} 등을 조회(0)~삭제(3) 순으로 정렬 */
+    private static int crudSortKey(RoleVO p) {
+        String id = p.getRoleId();
+        if (id == null) {
+            return 99;
+        }
+        String u = id.toUpperCase();
+        if (u.endsWith("_READ") || u.endsWith("_SELECT") || u.endsWith("_VIEW") || u.endsWith("_LIST")) {
+            return 0;
+        }
+        if (u.endsWith("_CREATE") || u.endsWith("_INSERT") || u.endsWith("_ADD") || u.endsWith("_REG")) {
+            return 1;
+        }
+        if (u.endsWith("_UPDATE") || u.endsWith("_MODIFY") || u.endsWith("_EDIT")) {
+            return 2;
+        }
+        if (u.endsWith("_DELETE") || u.endsWith("_REMOVE")) {
+            return 3;
+        }
+        return 50;
     }
 }

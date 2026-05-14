@@ -1,5 +1,10 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/userLayout}"
+>
   <head>
     <meta charset="UTF-8" />
     <title>권한 관리</title>
@@ -14,175 +19,398 @@
     <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
     <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
+    <style>
+      .role-search {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 1rem;
+        padding: 1rem 1.25rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fafafa;
+      }
+      .role-search__bar {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 0.75rem 1.25rem;
+        flex: 1;
+        min-width: 0;
+        overflow-x: auto;
+      }
+      .role-search__inline {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: nowrap;
+        flex-shrink: 0;
+      }
+      .role-search__inline label {
+        font-size: 0.8125rem;
+        color: #444;
+        white-space: nowrap;
+      }
+      .role-search__inline input[type="text"],
+      .role-search__inline input[type="date"] {
+        min-width: 10rem;
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .role-search__inline--date-range input[type="date"] {
+        min-width: 9.5rem;
+      }
+      .role-search__tilde {
+        color: #444;
+        font-size: 0.875rem;
+        user-select: none;
+      }
+      .role-search__actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .role-search__actions button {
+        padding: 0.4rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        border: 1px solid #1976d2;
+        background: #1976d2;
+        color: #fff;
+        font-size: 0.875rem;
+      }
+      .role-search__actions button[type="button"] {
+        background: #fff;
+        color: #333;
+        border-color: #ccc;
+      }
+
+      .role-grid-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 2px 0.25rem;
+        box-sizing: border-box;
+      }
+      .role-grid-toolbar__btn {
+        padding: 0.35rem 0.95rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        line-height: 1.25;
+      }
+      .role-grid-toolbar__btn--register {
+        border: 1px solid #1565c0;
+        background: #1976d2;
+        color: #fff;
+      }
+      .role-grid-toolbar__btn--register:hover {
+        background: #1565c0;
+      }
+      .role-grid-toolbar__btn--delete {
+        border: 1px solid #c62828;
+        background: #fff;
+        color: #c62828;
+      }
+      .role-grid-toolbar__btn--delete:hover {
+        background: #ffebee;
+      }
+    </style>
+
     <script th:inline="javascript">
       /*<![CDATA[*/
+      const prjId = /*[[${prjId}]]*/ "";
       const roleData = /*[[${rows}]]*/ [];
       /*]]>*/
     </script>
   </head>
   <body>
-    <div id="grid"></div>
+    <div layout:fragment="content">
+      <form
+        class="role-search"
+        id="roleSearchForm"
+        th:action="@{/project/option/role/roleManagement}"
+        method="get"
+      >
+        <input type="hidden" name="prjId" th:value="${prjId}" />
+        <div class="role-search__bar">
+          <div class="role-search__inline">
+            <label for="permissionKey">권한아이디</label>
+            <input
+              type="text"
+              id="permissionKey"
+              name="permissionKey"
+              th:value="${permissionKey}"
+              placeholder="권한아이디"
+              autocomplete="off"
+            />
+          </div>
+          <div class="role-search__inline">
+            <label for="permissionName">권한명</label>
+            <input
+              type="text"
+              id="permissionName"
+              name="permissionName"
+              th:value="${permissionName}"
+              placeholder="권한명"
+              autocomplete="off"
+            />
+          </div>
+          <div class="role-search__inline role-search__inline--date-range">
+            <label for="createdFrom">생성일</label>
+            <input
+              type="date"
+              id="createdFrom"
+              name="createdFrom"
+              th:value="${createdFrom}"
+            />
+            <span class="role-search__tilde">~</span>
+            <input
+              type="date"
+              id="createdTo"
+              name="createdTo"
+              th:value="${createdTo}"
+              aria-label="생성일 종료"
+            />
+          </div>
+          <div class="role-search__actions">
+            <button type="submit">검색</button>
+            <button type="button" id="roleSearchReset">초기화</button>
+          </div>
+        </div>
+      </form>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // ============================================================
-        // TOAST UI Grid 초기화
-        // 공식 문서: https://github.com/nhn/tui.grid
-        // ============================================================
+      <div id="grid"></div>
 
-        /**
-         * 날짜 포맷 함수
-         * - 서버 Date 가 JSON 직렬화될 때 timestamp(Long) 또는 ISO 문자열로 내려옴
-         * - 두 경우 모두 new Date(value) 로 받을 수 있음
-         * - 결과 형태: "2026-05-13 14:00"
-         */
-        function formatDate(value) {
-          if (!value) return ""; // null / undefined / 빈 값 처리
-          const d = new Date(value);
-          if (isNaN(d.getTime())) return value; // 변환 실패 시 원본 반환
-          const pad = (n) => String(n).padStart(2, "0"); // 1 → "01" 형태로 0 채움
-          return (
-            d.getFullYear() +
-            "-" +
-            pad(d.getMonth() + 1) +
-            "-" +
-            pad(d.getDate()) +
-            " " +
-            pad(d.getHours()) +
-            ":" +
-            pad(d.getMinutes())
-          );
-        }
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          (function roleSearchDates() {
+            const form = document.getElementById("roleSearchForm");
+            const start = document.getElementById("createdFrom");
+            const end = document.getElementById("createdTo");
+            if (!form || !start || !end) return;
 
-        const grid = new tui.Grid({
-          // ── 기본 설정 ──────────────────────────────────────────
-          el: document.getElementById("grid"), // 그리드를 그릴 DOM 요소 (필수)
-          data: roleData, // 그리드에 표시할 데이터 배열 (위에서 주입한 roleData)
+            const pad = (n) => String(n).padStart(2, "0");
+            const todayStr = () => {
+              const d = new Date();
+              return (
+                d.getFullYear() +
+                "-" +
+                pad(d.getMonth() + 1) +
+                "-" +
+                pad(d.getDate())
+              );
+            };
 
-          // ── 레이아웃 / 스크롤 옵션 ────────────────────────────
-          scrollX: false, // 가로 스크롤바 숨김
-          scrollY: false, // 세로 스크롤바 숨김 (rowHeight × 행수 만큼 자동 확장)
-          bodyHeight: "auto", // 본문 높이를 데이터 양에 맞춰 자동 조절
-          rowHeight: 36, // 한 행의 높이(px)
-          minBodyHeight: 100, // 데이터 0건일 때 최소 높이(px)
+            const compare = (a, b) => {
+              if (!a || !b) return 0;
+              return a < b ? -1 : a > b ? 1 : 0;
+            };
 
-          // ── 컬럼 정의 (가장 핵심) ─────────────────────────────
-          // 배열 순서대로 왼쪽부터 표시됨
-          // header  : 헤더에 표시되는 한글 라벨
-          // name    : data 객체의 어떤 key 와 매핑할지 (예: row.subject)
-          // width   : 컬럼 너비(px) — 생략 시 자동 분배
-          // align   : 셀 텍스트 정렬 ('left' | 'center' | 'right')
-          // sortable: true 면 헤더 클릭으로 정렬 가능 (기본 false)
-          // comparator: 정렬 시 사용할 비교 함수 (생략 시 문자/숫자 기본 규칙 = 사전순 등)
-          // formatter: 셀 표시값을 가공하는 함수.
-          //            ({ row, value, column }) 인자에서
-          //              - value  : 해당 셀의 원본 값
-          //              - row    : 해당 행 전체 객체 (다른 컬럼 값 접근 가능)
-          //            return 문자열(또는 HTML)이 셀에 그대로 렌더링됨
-          columns: [
-            {
-              header: "No",
-              name: "",
-              align: "center",
-              width: 50,
-              sortable: true,
-            },
-            {
-              header: "권한 코드",
-              name: "roleId",
-              width: 100,
-              align: "center",
-              sortable: true,
-            },
-            {
-              // 권한명 컬럼: 클릭 시 상세 페이지로 이동하도록 <a> 태그를 직접 렌더링
-              header: "권한명",
-              name: "roleName",
-              width: 100,
-              align: "center",
-              sortable: true,
-              formatter: ({ row, value }) => {
-                const id = row.id; // 같은 행의 id 값 참조
-                const text = value == null ? "" : value;
-                return (
-                  '<a href="/project/option/role/roleManagement?roleId=' +
-                  id +
-                  '">' +
-                  text +
-                  "</a>"
-                );
-              },
-            },
-            {
-              header: "권한 보유 그룹 수",
-              name: "grpCnt",
-              width: 100,
-              align: "center",
-              sortable: true,
-            },
-            {
-              header: "생성일",
-              name: "createdOn",
-              width: 100,
-              align: "center",
-              sortable: true,
-              formatter: ({ value }) => formatDate(value),
-            },
-          ],
+            function minYmd(a, b) {
+              if (!a) return b;
+              if (!b) return a;
+              return compare(a, b) <= 0 ? a : b;
+            }
 
-          // ═══════════════════════════════════════════════════════════
-          // 페이지네이션 (그리드 하단의 페이지 번호 영역 = tui-pagination)
-          // - 스크립트: head 에서 tui-pagination.js 를 tui-grid.js 보다 먼저 로드해야
-          //   하단 네비게이션 바가 생성됨.
-          // - 동작: useClient 가 true 이면 서버에서 내려준 issueData 전체를 메모리에 두고,
-          //   그리드는 한 페이지(perPage 행)만 그림. 페이지 클릭 시 서버 재요청 없이
-          //   클라이언트에서만 행을 바꿔 보여 줌.
-          // - 서버 페이징: useClient 를 끄고 data 대신 dataSource + readData API 를 쓰는
-          //   방식(예: tutorial-example10-data-source)은 이 화면에서는 사용하지 않음.
-          // ═══════════════════════════════════════════════════════════
-          pageOptions: {
-            useClient: true,
-            perPage: 2,
+            function applyLimits() {
+              const today = todayStr();
+              const sv = start.value;
+              const ev = end.value;
 
-            // ---- 아래는 pageOptions 에서 지원하지만 여기서는 쓰지 않는 옵션 예시 ----
-            // page: 1,
-            //   초기 활성 페이지 번호(1부터). 생략 시 1.
-            // visiblePages: 10,
-            //   페이지 번호 버튼을 한 번에 최대 몇 개까지 보일지 (Grid v4.14.0 이상).
-            // position: 'bottom',
-            //   페이징 바 위치. 'bottom'(기본값) | 'top'(그리드 상단).
-          },
-        });
+              end.max = today;
+              if (sv) {
+                end.min = sv;
+              } else {
+                end.removeAttribute("min");
+              }
 
-        // 참고 (위 pageOptions 와는 별개): 서버 페이징(DataSource)이면 readData 응답의
-        // pagination.totalCount 등과 연동하고, resetData 시 pageState 로 페이지를 맞추는
-        // 패턴이 있다. 이 목록은 클라이언트 페이징(useClient: true)만 사용한다.
+              start.max = ev ? minYmd(today, ev) : today;
+            }
 
-        // ---- 페이징 관련 Grid API / 이벤트 (현재 코드에서는 호출하지 않음, 필요 시 사용) ----
-        // const pagination = grid.getPagination(); // 내부 tui-pagination 인스턴스, 없으면 null
-        // pagination?.getCurrentPage();
-        // pagination?.movePageTo(2);
-        // grid.setPerPage(20); // 페이지당 행 수만 변경
-        // grid.setTotalCount(100); // 서버 페이징 등 전체 건수 동기화 시 (클라이언트 페이징만 쓸 때는 보통 불필요)
-        // grid.on('beforePageMove', (ev) => { /* 페이지 이동 직전 */ });
-        // grid.on('afterPageMove', (ev) => { /* 페이지 이동 직후 */ });
+            function clampStart() {
+              const today = todayStr();
+              let sv = start.value;
+              let ev = end.value;
+              if (sv && compare(sv, today) > 0) {
+                sv = today;
+                start.value = sv;
+              }
+              if (sv && ev && compare(sv, ev) > 0) {
+                end.value = sv;
+              }
+              applyLimits();
+            }
 
-        /**
-         * 행 클릭 이벤트
-         * - grid.on('click', callback) : 그리드 내부에서 클릭이 발생했을 때 호출
-         * - ev 객체에는 rowKey(행 인덱스), columnName(컬럼 이름) 등이 들어있음
-         * - 제목(subject) 컬럼은 자체 <a> 링크가 있으니 중복 이동 방지
-         * - 그 외 셀을 클릭하면 해당 행의 상세 페이지로 이동
-         */
-        grid.on("click", (ev) => {
-          if (ev.columnName === "subject" || ev.rowKey == null) return;
-          const row = grid.getRow(ev.rowKey); // rowKey 로 해당 행 데이터 객체 조회
-          if (row && row.roleId) {
-            location.href =
-              "/project/option/role/roleManagement?roleId=" + row.roleId;
+            function clampEnd() {
+              const today = todayStr();
+              let sv = start.value;
+              let ev = end.value;
+              if (ev && compare(ev, today) > 0) {
+                end.value = today;
+                ev = today;
+              }
+              if (sv && ev && compare(ev, sv) < 0) {
+                start.value = ev;
+              }
+              applyLimits();
+            }
+
+            clampStart();
+            clampEnd();
+            applyLimits();
+
+            start.addEventListener("change", clampStart);
+            start.addEventListener("input", clampStart);
+            end.addEventListener("change", clampEnd);
+            end.addEventListener("input", clampEnd);
+
+            form.addEventListener("submit", function (e) {
+              clampStart();
+              clampEnd();
+              const today = todayStr();
+              const sv = start.value;
+              const ev = end.value;
+              if (sv && compare(sv, today) > 0) {
+                e.preventDefault();
+                alert("시작일은 오늘 이후로 지정할 수 없습니다.");
+                return;
+              }
+              if (ev && compare(ev, today) > 0) {
+                e.preventDefault();
+                alert("종료일은 오늘 이후로 지정할 수 없습니다.");
+                return;
+              }
+              if (sv && ev && compare(sv, ev) > 0) {
+                e.preventDefault();
+                alert("시작일은 종료일보다 늦을 수 없습니다.");
+                return;
+              }
+            });
+
+            const resetBtn = document.getElementById("roleSearchReset");
+            if (resetBtn) {
+              resetBtn.addEventListener("click", function () {
+                const pid = form.querySelector('input[name="prjId"]').value;
+                const url = new URL(form.action, window.location.href);
+                url.search = new URLSearchParams({ prjId: pid }).toString();
+                window.location.href = url.toString();
+              });
+            }
+          })();
+
+          function formatDate(value) {
+            if (!value) return "";
+            const d = new Date(value);
+            if (isNaN(d.getTime())) return value;
+            const pad = (n) => String(n).padStart(2, "0");
+            return (
+              d.getFullYear() +
+              "-" +
+              pad(d.getMonth() + 1) +
+              "-" +
+              pad(d.getDate())
+            );
           }
+
+          const grid = new tui.Grid({
+            el: document.getElementById("grid"),
+            data: roleData,
+            rowHeaders: ["rowNum"],
+            scrollX: false,
+            scrollY: false,
+            bodyHeight: "auto",
+            rowHeight: 36,
+            minBodyHeight: 100,
+            columns: [
+              {
+                header: "권한 아이디",
+                name: "roleId",
+                width: 250,
+                align: "center",
+                sortable: true,
+              },
+              {
+                header: "권한명",
+                name: "roleName",
+                width: 200,
+                align: "center",
+                sortable: true,
+                formatter: ({ row, value }) => {
+                  const id = row.id;
+                  const text = value == null ? "" : value;
+                  const q =
+                    "prjId=" +
+                    encodeURIComponent(prjId) +
+                    "&roleId=" +
+                    encodeURIComponent(id == null ? "" : String(id));
+                  return (
+                    '<a href="/project/option/role/roleManagementInfo?' +
+                    q +
+                    '">' +
+                    text +
+                    "</a>"
+                  );
+                },
+              },
+              {
+                header: "권한 보유 그룹 수",
+                name: "grpCnt",
+                width: 200,
+                align: "center",
+                sortable: true,
+              },
+              {
+                header: "생성일",
+                name: "createdOn",
+                width: 100,
+                align: "center",
+                sortable: true,
+                formatter: ({ value }) => formatDate(value),
+              },
+            ],
+            pageOptions: {
+              useClient: true,
+              perPage: 15,
+            },
+          });
+
+          setTimeout(function () {
+            (function roleGridToolbar() {
+              const host = document.getElementById("grid");
+              if (!host || host.querySelector(".role-grid-toolbar")) return;
+              const bar = document.createElement("div");
+              bar.className = "role-grid-toolbar";
+              bar.setAttribute("role", "toolbar");
+              bar.innerHTML =
+                '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--register" id="roleBtnRegister">등록</button>' +
+                '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--delete" id="roleBtnDelete">삭제</button>';
+              const pag = host.querySelector(".tui-pagination");
+              if (pag && pag.parentNode) {
+                pag.parentNode.insertBefore(bar, pag);
+              } else {
+                host.appendChild(bar);
+              }
+            })();
+          }, 0);
+
+          grid.on("click", (ev) => {
+            if (ev.columnName === "roleName" || ev.rowKey == null) return;
+            const row = grid.getRow(ev.rowKey);
+            if (row && row.id != null && row.id !== "") {
+              location.href =
+                "/project/option/role/roleManagementInfo?prjId=" +
+                encodeURIComponent(prjId) +
+                "&roleId=" +
+                encodeURIComponent(String(row.id));
+            }
+          });
         });
-      });
-    </script>
+      </script>
+    </div>
   </body>
 </html>

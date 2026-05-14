@@ -1,0 +1,481 @@
+<!doctype html>
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/userLayout}"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>권한 상세</title>
+    <style>
+      .role-page-head {
+        margin-bottom: 1rem;
+      }
+      .role-page-head__title {
+        margin: 0 0 0.35rem;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #222;
+      }
+      .role-page-head__rule {
+        height: 3px;
+        background: #333;
+        border: 0;
+        margin: 0;
+      }
+      .role-back-link {
+        display: inline-block;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        color: #1976d2;
+        text-decoration: none;
+      }
+      .role-back-link:hover {
+        text-decoration: underline;
+      }
+      .role-section {
+        margin-bottom: 1.75rem;
+      }
+      .role-section__title {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #222;
+        padding-bottom: 0.35rem;
+        border-bottom: 3px solid #333;
+      }
+      .role-section__body {
+        padding-top: 0.75rem;
+      }
+      .role-section__divider {
+        height: 1px;
+        background: #ddd;
+        margin: 1rem 0;
+        border: 0;
+      }
+      .role-info-fields {
+        max-width: 28rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .role-info-fields__row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .role-info-fields__row label {
+        font-size: 0.8125rem;
+        color: #444;
+      }
+      .role-info-fields__row input {
+        padding: 0.4rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.875rem;
+      }
+      .perm-sub {
+        margin-bottom: 1rem;
+      }
+      .perm-sub__title {
+        margin: 0 0 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #333;
+      }
+      .perm-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+        gap: 0.5rem 1rem;
+        align-items: start;
+      }
+      .perm-grid__cell {
+        display: grid;
+        grid-template-columns: 1.125rem minmax(0, 1fr);
+        column-gap: 0.5rem;
+        align-items: start;
+        font-size: 0.8125rem;
+        color: #444;
+        cursor: pointer;
+        min-width: 0;
+      }
+      .perm-grid__cell span {
+        line-height: 1.35;
+        word-break: keep-all;
+      }
+      .perm-grid__cell input {
+        width: 1rem;
+        height: 1rem;
+        margin: 0.2em 0 0;
+        justify-self: start;
+      }
+      .perm-master-row {
+        margin-bottom: 0.65rem;
+        padding-bottom: 0.65rem;
+        border-bottom: 1px dashed #ddd;
+      }
+      .perm-master-label {
+        font-weight: 600;
+        color: #333;
+      }
+      .perm-empty {
+        margin: 0.25rem 0 0;
+        font-size: 0.8125rem;
+        color: #777;
+      }
+      .role-groups-table-wrap {
+        overflow-x: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+      }
+      .role-groups-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8125rem;
+      }
+      .role-groups-table thead th {
+        background: #f0f0f0;
+        padding: 0.55rem 0.4rem;
+        text-align: center;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 1px solid #ddd;
+      }
+      .role-groups-table tbody td {
+        padding: 0.5rem 0.35rem;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+        color: #444;
+      }
+      .role-groups-table tbody tr:last-child td {
+        border-bottom: none;
+      }
+      .btn-revoke {
+        padding: 0.2rem 0.65rem;
+        font-size: 0.75rem;
+        border-radius: 6px;
+        border: 1px solid #f8bbd0;
+        background: #fce4ec;
+        color: #ad1457;
+        cursor: pointer;
+      }
+      .btn-revoke:hover {
+        background: #f8bbd0;
+      }
+    </style>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <a
+        class="role-back-link"
+        th:href="@{/project/option/role/roleManagement(prjId=${prjId})}"
+        >← 권한 목록으로</a
+      >
+
+      <div class="role-page-head">
+        <h1 class="role-page-head__title">권한 상세</h1>
+        <hr class="role-page-head__rule" />
+      </div>
+
+      <th:block th:each="r : ${rows}">
+        <th:block
+          th:if="${(r.id != null and r.id == roleId) or (r.roleId != null and r.roleId == roleId)}"
+        >
+          <section class="role-section">
+            <h2 class="role-section__title">권한 정보</h2>
+            <div class="role-section__body">
+              <div class="role-info-fields">
+                <div class="role-info-fields__row">
+                  <label for="detailRoleCode">권한 코드</label>
+                  <input
+                    type="text"
+                    id="detailRoleCode"
+                    readonly
+                    th:value="${r.roleId}"
+                  />
+                </div>
+                <div class="role-info-fields__row">
+                  <label for="detailRoleName">권한명</label>
+                  <input
+                    type="text"
+                    id="detailRoleName"
+                    readonly
+                    th:value="${r.roleName}"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="role-section">
+            <h2 class="role-section__title">권한 설정</h2>
+            <div class="role-section__body">
+              <div class="perm-sub">
+                <h3 class="perm-sub__title">이슈 권한</h3>
+                <hr class="role-section__divider" />
+                <th:block
+                  th:if="${issuePerms != null and !issuePerms.isEmpty()}"
+                >
+                  <div class="perm-master-row" th:if="${issuePermAll != null}">
+                    <label
+                      class="perm-grid__cell perm-master-label"
+                      for="cb-issue-master"
+                    >
+                      <input
+                        type="checkbox"
+                        id="cb-issue-master"
+                        class="perm-master"
+                        data-section="issue"
+                        th:value="${issuePermAll.roleId}"
+                        th:checked="${r.roleId == issuePermAll.roleId}"
+                      />
+                      <span th:text="${issuePermAll.roleName}">전체 관리</span>
+                    </label>
+                  </div>
+                  <div
+                    class="perm-grid"
+                    th:if="${issuePermDetails != null and !issuePermDetails.isEmpty()}"
+                  >
+                    <label
+                      th:each="p, iter : ${issuePermDetails}"
+                      class="perm-grid__cell"
+                      th:for="|cb-issue-${iter.index}|"
+                    >
+                      <input
+                        type="checkbox"
+                        class="perm-slave"
+                        data-section="issue"
+                        th:id="|cb-issue-${iter.index}|"
+                        name="issuePerm"
+                        th:value="${p.roleId}"
+                        th:checked="${(r.roleId == p.roleId) or (r.roleId == 'ROLE_ISSUE_ALL' and #strings.startsWith(p.roleId, 'ROLE_ISSUE_'))}"
+                      />
+                      <span th:text="${p.roleName}">권한명</span>
+                    </label>
+                  </div>
+                </th:block>
+                <p
+                  class="perm-empty"
+                  th:if="${issuePerms == null or issuePerms.isEmpty()}"
+                >
+                  해당 구역에 등록된 권한이 없습니다.
+                </p>
+              </div>
+              <div class="perm-sub">
+                <h3 class="perm-sub__title">구성원 관리 권한</h3>
+                <hr class="role-section__divider" />
+                <th:block
+                  th:if="${memberPerms != null and !memberPerms.isEmpty()}"
+                >
+                  <div class="perm-master-row" th:if="${memberPermAll != null}">
+                    <label
+                      class="perm-grid__cell perm-master-label"
+                      for="cb-member-master"
+                    >
+                      <input
+                        type="checkbox"
+                        id="cb-member-master"
+                        class="perm-master"
+                        data-section="member"
+                        th:value="${memberPermAll.roleId}"
+                        th:checked="${r.roleId == memberPermAll.roleId}"
+                      />
+                      <span th:text="${memberPermAll.roleName}">전체 관리</span>
+                    </label>
+                  </div>
+                  <div
+                    class="perm-grid"
+                    th:if="${memberPermDetails != null and !memberPermDetails.isEmpty()}"
+                  >
+                    <label
+                      th:each="p, iter : ${memberPermDetails}"
+                      class="perm-grid__cell"
+                      th:for="|cb-member-${iter.index}|"
+                    >
+                      <input
+                        type="checkbox"
+                        class="perm-slave"
+                        data-section="member"
+                        th:id="|cb-member-${iter.index}|"
+                        name="memberPerm"
+                        th:value="${p.roleId}"
+                        th:checked="${(r.roleId == p.roleId) or (r.roleId == 'ROLE_MEMBER_ALL' and #strings.startsWith(p.roleId, 'ROLE_MEMBER_'))}"
+                      />
+                      <span th:text="${p.roleName}">권한명</span>
+                    </label>
+                  </div>
+                </th:block>
+                <p
+                  class="perm-empty"
+                  th:if="${memberPerms == null or memberPerms.isEmpty()}"
+                >
+                  해당 구역에 등록된 권한이 없습니다.
+                </p>
+              </div>
+              <div class="perm-sub">
+                <h3 class="perm-sub__title">그룹 관리 권한</h3>
+                <hr class="role-section__divider" />
+                <th:block
+                  th:if="${groupPerms != null and !groupPerms.isEmpty()}"
+                >
+                  <div class="perm-master-row" th:if="${groupPermAll != null}">
+                    <label
+                      class="perm-grid__cell perm-master-label"
+                      for="cb-group-master"
+                    >
+                      <input
+                        type="checkbox"
+                        id="cb-group-master"
+                        class="perm-master"
+                        data-section="group"
+                        th:value="${groupPermAll.roleId}"
+                        th:checked="${r.roleId == groupPermAll.roleId}"
+                      />
+                      <span th:text="${groupPermAll.roleName}">전체 관리</span>
+                    </label>
+                  </div>
+                  <div
+                    class="perm-grid"
+                    th:if="${groupPermDetails != null and !groupPermDetails.isEmpty()}"
+                  >
+                    <label
+                      th:each="p, iter : ${groupPermDetails}"
+                      class="perm-grid__cell"
+                      th:for="|cb-group-${iter.index}|"
+                    >
+                      <input
+                        type="checkbox"
+                        class="perm-slave"
+                        data-section="group"
+                        th:id="|cb-group-${iter.index}|"
+                        name="groupPerm"
+                        th:value="${p.roleId}"
+                        th:checked="${(r.roleId == p.roleId) or (r.roleId == 'ROLE_GROUP_ALL' and #strings.startsWith(p.roleId, 'ROLE_GROUP_'))}"
+                      />
+                      <span th:text="${p.roleName}">권한명</span>
+                    </label>
+                  </div>
+                </th:block>
+                <p
+                  class="perm-empty"
+                  th:if="${groupPerms == null or groupPerms.isEmpty()}"
+                >
+                  해당 구역에 등록된 권한이 없습니다.
+                </p>
+              </div>
+              <div class="perm-sub">
+                <h3 class="perm-sub__title">히스토리 권한</h3>
+                <hr class="role-section__divider" />
+                <th:block
+                  th:if="${historyPerms != null and !historyPerms.isEmpty()}"
+                >
+                  <div
+                    class="perm-master-row"
+                    th:if="${historyPermAll != null}"
+                  >
+                    <label
+                      class="perm-grid__cell perm-master-label"
+                      for="cb-history-master"
+                    >
+                      <input
+                        type="checkbox"
+                        id="cb-history-master"
+                        class="perm-master"
+                        data-section="history"
+                        th:value="${historyPermAll.roleId}"
+                        th:checked="${r.roleId == historyPermAll.roleId}"
+                      />
+                      <span th:text="${historyPermAll.roleName}"
+                        >전체 관리</span
+                      >
+                    </label>
+                  </div>
+                  <div
+                    class="perm-grid"
+                    th:if="${historyPermDetails != null and !historyPermDetails.isEmpty()}"
+                  >
+                    <label
+                      th:each="p, iter : ${historyPermDetails}"
+                      class="perm-grid__cell"
+                      th:for="|cb-history-${iter.index}|"
+                    >
+                      <input
+                        type="checkbox"
+                        class="perm-slave"
+                        data-section="history"
+                        th:id="|cb-history-${iter.index}|"
+                        name="historyPerm"
+                        th:value="${p.roleId}"
+                        th:checked="${(r.roleId == p.roleId) or (r.roleId == 'ROLE_HISTORY_ALL' and #strings.startsWith(p.roleId, 'ROLE_HISTORY_'))}"
+                      />
+                      <span th:text="${p.roleName}">권한명</span>
+                    </label>
+                  </div>
+                </th:block>
+                <p
+                  class="perm-empty"
+                  th:if="${historyPerms == null or historyPerms.isEmpty()}"
+                >
+                  해당 구역에 등록된 권한이 없습니다.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section class="role-section">
+            <div id="grid"></div>
+          </section>
+        </th:block>
+      </th:block>
+
+      <script>
+        (function () {
+          function slaves(section) {
+            return document.querySelectorAll(
+              '.perm-slave[data-section="' + section + '"]',
+            );
+          }
+          function bindSection(master) {
+            var section = master.getAttribute("data-section");
+            if (!section) return;
+            function syncMasterFromSlaves() {
+              var list = Array.prototype.slice.call(slaves(section));
+              if (!list.length) {
+                master.indeterminate = false;
+                return;
+              }
+              var allOn = list.every(function (c) {
+                return c.checked;
+              });
+              var anyOn = list.some(function (c) {
+                return c.checked;
+              });
+              master.checked = allOn;
+              master.indeterminate = anyOn && !allOn;
+            }
+            master.addEventListener("change", function () {
+              slaves(section).forEach(function (c) {
+                c.checked = master.checked;
+              });
+              master.indeterminate = false;
+            });
+            slaves(section).forEach(function (c) {
+              c.addEventListener("change", syncMasterFromSlaves);
+            });
+            syncMasterFromSlaves();
+          }
+          document.querySelectorAll(".perm-master").forEach(bindSection);
+        })();
+      </script>
+      <script>
+        // 권한을 보유한 그룹을 조회
+        document.addEventListener("DOMContentLoaded", function () {
+          (function roleGroupsGrid() {
+            const host = document.getElementById("grid");
+          });
+        });
+      </script>
+    </div>
+  </body>
+</html>

@@ -7,7 +7,5 @@ import com.example.demo.project.option.service.RoleVO;
 @Mapper
 public interface RoleMapper {
 
-    long selectRoleListCount(RoleVO roleVO);
-
     List<RoleVO> selectRoleList(RoleVO roleVO);
 }
