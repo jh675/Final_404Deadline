@@ -46,6 +46,9 @@ dependencies {
     
      // 레이아웃 의존성 추가
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+    
+    // 이메일 인증을 위한 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {

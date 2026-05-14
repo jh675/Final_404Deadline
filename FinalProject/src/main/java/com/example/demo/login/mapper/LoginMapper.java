@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import com.example.demo.login.service.UserVO;
 
 @Mapper
-public interface UserMapper {
+public interface LoginMapper {
 	UserVO selectOne(String loginId);
 	
 }

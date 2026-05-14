@@ -1,27 +1,54 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="https://www.thymeleaf.org">
+
+<html xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/errorpgLayout}">
+
 <head>
 <meta charset="UTF-8">
+
 <title>로그인</title>
+
 </head>
+
 <body>
-	<div th:if="${param.error}">Invalid username and password.</div>
-	<div th:if="${param.logout}">You have been logged out.</div>
-	<form th:action="@{/login}" method="post">
-		<div>
-			<label> User Name : <input type="text" name="username" />
-			</label>
+	<div layout:fragment="content">
+		<div class="row justify-content-center">
+			<div class="col-md-5">
+				<div class="card shadow-sm">
+					<div class="card-body">
+						<h3 class="mb-4 text-center">로그인</h3>
+						<!-- 로그인 실패 -->
+						<div th:if="${param.error}" class="alert alert-danger">계정
+							정보가 일치하지 않습니다.</div>
+						<!-- 로그아웃 -->
+						<div th:if="${param.logout}" class="alert alert-success">
+							로그아웃 하셨습니다.</div>
+						<form th:action="@{/login}" method="post">
+							<div class="mb-3">
+								<label class="form-label"> 아이디 </label> <input type="text"
+									name="username" class="form-control">
+							</div>
+							<div class="mb-3">
+								<label class="form-label"> 비밀번호 </label> <input type="password"
+									name="password" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-primary w-100">로그인
+							</button>
+						</form>
+						<div class="mt-3 d-flex justify-content-between">
+							<a th:href="@{/}"> 홈으로 돌아가기 </a>
+							<!-- 모달 호출 -->
+							<a href="#" data-bs-toggle="modal" data-bs-target="#resetPwModal">
+								비밀번호 재설정 </a>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
-		<div>
-			<label> Password: <input type="password" name="password" />
-			</label>
-		</div>
-		<div>
-			<input type="submit" value="Sign In" />
-		</div>
-	</form>
-	
-	<div><a th:href="@{/}">홈으로 돌아가기</a></div>
+		<!-- 모달 fragment -->
+		<div th:replace="~{login/resetPw :: resetPwModal}"></div>
+	</div>
+
 </body>
 </html>

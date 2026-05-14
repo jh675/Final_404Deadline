@@ -1,5 +1,5 @@
 package com.example.demo.login.service;
 
-public interface UserService {
+public interface LoginService {
 	UserVO selectOne(String UserId);
 }
