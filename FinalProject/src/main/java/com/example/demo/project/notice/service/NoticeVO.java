@@ -1,4 +1,4 @@
-package com.example.demo.project.notice.service.impl;
+package com.example.demo.project.notice.service;
 
 import java.util.Date;
 
@@ -11,4 +11,5 @@ public class NoticeVO {
 	private String description;
 	private Integer memId;
 	private Date createdOn;
+	private String isFixed;
 }

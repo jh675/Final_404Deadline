@@ -1,10 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>공지사항 관리</title>
 </head>
 <body>
+    <div>
+        <form th:action="@{/notice/list}" method="get">
+            <input type="text" name="keyword" placeholder="검색어를 입력해 주세요!">
+            <button type="submit">검색</button>
+            
+            <button type="button" style="float: right;" th:onclick="|location.href='@{/notice/register}'|">공지사항 등록</button>
+        </form>
+    </div>
 
+    <table border="1" style="width: 100%; margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>작성일</th>
+                <th>관리</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="notice : ${list}">
+                <td>
+                    <span th:if="${notice.isFixed}"><strong>고정</strong></span>
+                    <span th:text="${notice.id}"></span>
+                </td>
+                	
+                <td th:text="${notice.title}"></td>
+                
+                <td th:text="${notice.memId}"></td>
+                
+                <td th:text="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"></td>
+                
+                <td>
+                
+                    <button type="button" th:onclick="|location.href='@{/notice/modify(id=${notice.id})}'|">수정</button>
+                    
+             
+                    <button type="button" th:onclick="|if(confirm('정말로 삭제하시겠습니까?')) location.href='@{/notice/delete(id=${notice.id})}'|">삭제</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="#">처음</a>
+        <a href="#">&lt;이전</a>
+        <span> [1] </span>
+        <a href="#">다음&gt;</a>
+        <a href="#">마지막</a>
+    </div>
 </body>
 </html>

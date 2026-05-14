@@ -8,7 +8,7 @@
  select *
  FROM notice
  where prj_id = #{prjId}
- ORDER BY id DESC
+ ORDER BY is_fixed DESC, id ASC
 
 </select>
 
@@ -18,15 +18,16 @@ insert into notice(
 		prj_id, 
 		mem_id, 
 		title, 
-		description
+		description,
+		is_fixed
 		)
 values(
 		news_seq.nextval, 
 		#{prjId}, 
 		#{memId}, 
 		#{title}, 
-		#{description}
-
+		#{description},
+		#{isFixed}
 )
 </insert>
 
@@ -44,7 +45,8 @@ set
     prj_id = #{prjId}, 
     mem_id = #{memId}, 
     title = #{title}, 
-    description = #{description}
+    description = #{description},
+    is_fixed = #{isFixed} 
 where id = #{id}
 </update>
 
