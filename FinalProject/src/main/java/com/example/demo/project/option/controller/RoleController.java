@@ -1,21 +1,31 @@
 package com.example.demo.project.option.controller;
 
-import java.util.Collections;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.example.demo.project.option.service.RoleGroupRowVO;
+import com.example.demo.project.option.service.RoleMenuSectionVO;
+import com.example.demo.project.option.service.RoleMenuSectionVO.CrudSlot;
+import com.example.demo.project.option.service.RoleMenuSectionVO.LabelSlot;
 import com.example.demo.project.option.service.RoleService;
 import com.example.demo.project.option.service.RoleVO;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 권한 관리 목록 — DB {@code menu} 마스터 + 프로젝트별 {@code grp} 집계.
+ * 권한 관리 — {@code project/role/roleManagement.html} (TOAST UI Grid, {@code ROLE} 목록).
  */
 @Controller
 @RequestMapping("/project/option/role")
@@ -26,85 +36,215 @@ public class RoleController {
 
     @GetMapping("/roleManagement")
     public String roleManagementPage(
-            @RequestParam("projectId") Long projectId,
+            @RequestParam("prjId") Long prjId,
             @RequestParam(required = false) String permissionKey,
             @RequestParam(required = false) String permissionName,
             @RequestParam(required = false) String createdFrom,
             @RequestParam(required = false) String createdTo,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int pageSize,
             Model model) {
 
         RoleVO search = RoleVO.builder()
-                .projectId(projectId)
+                .prjId(prjId)
                 .permissionKey(nullToEmpty(permissionKey))
                 .permissionName(nullToEmpty(permissionName))
                 .createdFrom(nullToEmpty(createdFrom))
                 .createdTo(nullToEmpty(createdTo))
-                .page(page)
-                .pageSize(pageSize)
                 .build();
 
-        long totalElements = roleService.countRoleList(search);
-        List<RoleVO> rows =
-                totalElements == 0 ? Collections.emptyList() : roleService.selectRoleList(search);
-        int totalPages = totalPages(totalElements, search.getPageSize());
+        List<RoleVO> rows = roleService.selectRoleList(search);
 
         model.addAttribute("rows", rows);
-        model.addAttribute("totalElements", totalElements);
-        model.addAttribute("page", search.getPage());
-        model.addAttribute("pageSize", search.getPageSize());
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("projectId", projectId);
-        model.addAttribute("permissionKey", nullToEmpty(permissionKey));
-        model.addAttribute("permissionName", nullToEmpty(permissionName));
-        model.addAttribute("createdFrom", nullToEmpty(createdFrom));
-        model.addAttribute("createdTo", nullToEmpty(createdTo));
-        return "project/role/RoleManagement";
+        model.addAttribute("prjId", prjId);
+        model.addAttribute("permissionKey", search.getPermissionKey());
+        model.addAttribute("permissionName", search.getPermissionName());
+        model.addAttribute("createdFrom", search.getCreatedFrom());
+        model.addAttribute("createdTo", search.getCreatedTo());
+        return "project/role/roleManagement";
+    }
+
+    /**
+     * 역할 상세 — {@code project/role/roleManagementInfo.html}
+     * (프로젝트 {@code ROLE} + {@code ROLE_MENU}으로 연결된 {@code MENU} 권한 체크 표시)
+     */
+    @GetMapping("/roleManagementInfo")
+    public String roleManagementInfoPage(
+            @RequestParam("prjId") Long prjId,
+            @RequestParam("roleCd") Long roleCd,
+            Model model) {
+
+        model.addAttribute("prjId", prjId);
+        model.addAttribute("roleCd", roleCd);
+
+        RoleVO currentRole = roleService.selectRoleByPrjAndCd(prjId, roleCd);
+        if (currentRole == null) {
+            model.addAttribute("roleNotFound", true);
+            model.addAttribute("menuSections", List.of());
+            return "project/role/roleManagementInfo";
+        }
+
+        model.addAttribute("roleNotFound", false);
+        model.addAttribute("currentRole", currentRole);
+        model.addAttribute("roleCreatedOnYmd", formatRoleDateYmd(currentRole.getCreatedOn()));
+
+        List<RoleVO> allMenus = roleService.selectAllMenus();
+        Set<String> linked = new HashSet<>(roleService.selectMenuRoleIdsByRoleCd(roleCd));
+        model.addAttribute("menuSections", buildMenuSections(allMenus, linked));
+        return "project/role/roleManagementInfo";
     }
 
     @GetMapping("/roleManagementList")
     @ResponseBody
     public Map<String, Object> roleManagementList(
-            @RequestParam("projectId") Long projectId,
+            @RequestParam("prjId") Long prjId,
             @RequestParam(required = false) String permissionKey,
             @RequestParam(required = false) String permissionName,
             @RequestParam(required = false) String createdFrom,
-            @RequestParam(required = false) String createdTo,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int pageSize) {
+            @RequestParam(required = false) String createdTo) {
 
         RoleVO search = RoleVO.builder()
-                .projectId(projectId)
+                .prjId(prjId)
                 .permissionKey(nullToEmpty(permissionKey))
                 .permissionName(nullToEmpty(permissionName))
                 .createdFrom(nullToEmpty(createdFrom))
                 .createdTo(nullToEmpty(createdTo))
-                .page(page)
-                .pageSize(pageSize)
                 .build();
 
-        long totalElements = roleService.countRoleList(search);
-        List<RoleVO> rows =
-                totalElements == 0 ? Collections.emptyList() : roleService.selectRoleList(search);
+        List<RoleVO> rows = roleService.selectRoleList(search);
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("content", rows);
-        body.put("totalElements", totalElements);
-        body.put("page", search.getPage());
-        body.put("pageSize", search.getPageSize());
-        body.put("totalPages", totalPages(totalElements, search.getPageSize()));
+        body.put("prjId", prjId);
         return body;
     }
 
-    private static int totalPages(long totalElements, int pageSize) {
-        if (pageSize <= 0) {
-            return 0;
-        }
-        return (int) Math.ceil((double) totalElements / pageSize);
+    /** 역할 상세 — 이 {@code ROLE_CD}를 보유한 그룹 목록(TOAST Grid 데이터). */
+    @GetMapping("/roleGroups")
+    @ResponseBody
+    public Map<String, Object> roleGroups(
+            @RequestParam("prjId") Long prjId,
+            @RequestParam(value = "roleCd", required = false) Long roleCd) {
+
+        List<RoleGroupRowVO> list =
+                roleCd == null ? List.of() : roleService.selectRoleGroupsList(prjId, roleCd);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", list);
+        body.put("prjId", prjId);
+        return body;
     }
 
     private static String nullToEmpty(String s) {
         return s == null ? "" : s;
+    }
+
+    private static String formatRoleDateYmd(LocalDateTime dt) {
+        if (dt == null) {
+            return "";
+        }
+        return dt.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+    }
+
+    private static List<RoleMenuSectionVO> buildMenuSections(List<RoleVO> allMenus, Set<String> linked) {
+        Set<String> safeLinked = linked == null ? Set.of() : linked;
+
+        Map<String, List<RoleVO>> byTp = allMenus.stream()
+                .collect(Collectors.groupingBy(
+                        m -> (m.getRoleTp() != null && !m.getRoleTp().isBlank())
+                                ? m.getRoleTp()
+                                : "기타",
+                        LinkedHashMap::new,
+                        Collectors.toList()));
+
+        List<RoleMenuSectionVO> sections = new ArrayList<>();
+        for (Map.Entry<String, List<RoleVO>> e : byTp.entrySet()) {
+            List<RoleVO> items = e.getValue();
+            List<RoleVO> fullRows = new ArrayList<>();
+            List<RoleVO> nonFullRows = new ArrayList<>();
+            for (RoleVO m : items) {
+                if (isAllMth(m.getRoleMth())) {
+                    fullRows.add(m);
+                } else {
+                    nonFullRows.add(m);
+                }
+            }
+
+            boolean anyFullLinked =
+                    fullRows.stream().anyMatch(m -> safeLinked.contains(m.getRoleId()));
+
+            List<LabelSlot> fullSlots = fullRows.stream()
+                    .map(m -> new LabelSlot(
+                            m.getRoleName() != null ? m.getRoleName() : "전체 관리",
+                            safeLinked.contains(m.getRoleId())))
+                    .collect(Collectors.toList());
+
+            String[] mths = {"GET", "POST", "PUT", "DELETE"};
+            String[] labels = {"조회", "등록", "수정", "삭제"};
+            List<CrudSlot> crud = new ArrayList<>(4);
+            for (int i = 0; i < mths.length; i++) {
+                RoleVO row = findFirstByMth(nonFullRows, mths[i]);
+                boolean checked = anyFullLinked
+                        || (row != null && safeLinked.contains(row.getRoleId()));
+                crud.add(new CrudSlot(labels[i], checked));
+            }
+
+            List<LabelSlot> extras = nonFullRows.stream()
+                    .filter(m -> !isCrudMth(m.getRoleMth()))
+                    .map(m -> new LabelSlot(
+                            m.getRoleName() != null ? m.getRoleName() : m.getRoleId(),
+                            safeLinked.contains(m.getRoleId())))
+                    .collect(Collectors.toList());
+
+            sections.add(new RoleMenuSectionVO(e.getKey(), fullSlots, crud, extras));
+        }
+        return sections;
+    }
+
+    private static boolean isAllMth(String roleMth) {
+        if (roleMth == null || roleMth.isBlank()) {
+            return false;
+        }
+        String u = roleMth.trim().toUpperCase(Locale.ROOT);
+        return "ALL".equals(u) || "전체".equals(roleMth.trim());
+    }
+
+    private static boolean isCrudMth(String roleMth) {
+        if (roleMth == null || roleMth.isBlank()) {
+            return false;
+        }
+        String u = roleMth.trim().toUpperCase(Locale.ROOT);
+        return "GET".equals(u)
+                || "POST".equals(u)
+                || "PUT".equals(u)
+                || "DELETE".equals(u)
+                || "조회".equals(roleMth.trim())
+                || "등록".equals(roleMth.trim())
+                || "수정".equals(roleMth.trim())
+                || "삭제".equals(roleMth.trim());
+    }
+
+    private static RoleVO findFirstByMth(List<RoleVO> rows, String code) {
+        for (RoleVO m : rows) {
+            if (mthMatches(m.getRoleMth(), code)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    private static boolean mthMatches(String raw, String code) {
+        if (raw == null || raw.isBlank()) {
+            return false;
+        }
+        String t = raw.trim();
+        String u = t.toUpperCase(Locale.ROOT);
+        if (u.equals(code)) {
+            return true;
+        }
+        return switch (code) {
+            case "GET" -> "조회".equals(t);
+            case "POST" -> "등록".equals(t);
+            case "PUT" -> "수정".equals(t);
+            case "DELETE" -> "삭제".equals(t);
+            default -> false;
+        };
     }
 }

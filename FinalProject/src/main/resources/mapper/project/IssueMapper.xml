@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.project.issue.mapper.IssueMapper">
+
+	<!-- ===================================================== -->
+	<!-- 공통 컬럼 정의                                           -->
+	<!-- ===================================================== -->
+	<sql id="issueColumns">
+		ID,
+		PRJ_ID,
+		SUBJECT,
+		DESCRIPTION,
+		CATEGORY_CD,
+		STATUS_CD,
+		PRIORITY_CD,
+		CREATED_ON,
+		UPDATED_ON,
+		EST_START_DATE,
+		DUE_DATE,
+		START_DATE,
+		CLOSED_DATE,
+		PARENT_ISSUE,
+		ROOT_ISSUE,
+		MEM_ID,
+		LFT,
+		RGT,
+		DONE_RATIO,
+		IS_ATTACH_CD
+	</sql>
+
+	<!-- ===================================================== -->
+	<!-- 검색 조건 (프론트 issueList.html 검색 영역 기준)            -->
+	<!--   - 우선순위(priorityCd) / 상태(statusCd) / 담당자(memId) -->
+	<!--   - 제목(subject) LIKE 검색                              -->
+	<!--   - 내가 맡은 이슈 (loginMemId 와 MEM_ID 일치)             -->
+	<!-- ===================================================== -->
+	<sql id="issueSearchWhere">
+		<where>
+			<if test="prjId != null">
+				AND PRJ_ID = #{prjId}
+			</if>
+			<if test="priorityCd != null and priorityCd != ''">
+				AND PRIORITY_CD = #{priorityCd}
+			</if>
+			<if test="statusCd != null and statusCd != ''">
+				AND STATUS_CD = #{statusCd}
+			</if>
+			<if test="memId != null">
+				AND MEM_ID = #{memId}
+			</if>
+			<if test="subject != null and subject != ''">
+				AND SUBJECT LIKE '%' || #{subject} || '%'
+			</if>
+		</where>
+	</sql>
+
+	<!-- ===================================================== -->
+	<!-- 이슈 목록 조회                                           -->
+	<!-- ===================================================== -->
+	<select id="selectIssueList" parameterType="IssueInputVO"
+		resultType="IssueOutputVO">
+		SELECT
+		ID,
+		PRJ_ID,
+		SUBJECT,
+		DESCRIPTION,
+		get_sub_code_name(CATEGORY_CD) as CATEGORY_CD,
+		get_sub_code_name(STATUS_CD) as STATUS_CD,
+		get_sub_code_name(PRIORITY_CD)as PRIORITY_CD,
+		CREATED_ON,
+		UPDATED_ON,
+		EST_START_DATE,
+		DUE_DATE,
+		START_DATE,
+		CLOSED_DATE,
+		PARENT_ISSUE,
+		ROOT_ISSUE,
+		GET_USERID_TO_NAME (MEM_ID) as memName,
+		LFT,
+		RGT,
+		DONE_RATIO
+		FROM ISSUE
+		<include refid="issueSearchWhere" />
+		ORDER BY PRIORITY_CD DESC
+	</select>
+
+	<!-- ===================================================== -->
+	<!-- 이슈 단건 조회                                           -->
+	<!-- ===================================================== -->
+	<select id="selectIssue" parameterType="long" resultType="IssueOutputVO">
+		SELECT
+		ID,
+		PRJ_ID,
+		SUBJECT,
+		DESCRIPTION,
+		get_sub_code_name(CATEGORY_CD) as CATEGORY_CD,
+		get_sub_code_name(STATUS_CD) as STATUS_CD,
+		get_sub_code_name(PRIORITY_CD)as PRIORITY_CD,
+		CREATED_ON,
+		UPDATED_ON,
+		EST_START_DATE,
+		DUE_DATE,
+		START_DATE,
+		CLOSED_DATE,
+		PARENT_ISSUE,
+		(SELECT P.SUBJECT FROM ISSUE P WHERE P.ID = ISSUE.PARENT_ISSUE) AS parentIssueSubject,
+		ROOT_ISSUE,
+		GET_USERID_TO_NAME (MEM_ID) as memName,
+		LFT,
+		RGT,
+		DONE_RATIO
+		FROM ISSUE
+		WHERE ID = #{id}
+	</select>
+
+	<!-- ===================================================== -->
+	<!-- 이슈 등록                                                -->
+	<!--   - ID는 시퀀스(SEQ_ISSUE) 사용 가정                       -->
+	<!-- ===================================================== -->
+	<insert id="insertIssue" parameterType="IssueInputVO">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT ISS_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO TB_ISSUE (
+			ID,
+			PRJ_ID,
+			SUBJECT,
+			DESCRIPTION,
+			CATEGORY_CD,
+			STATUS_CD,
+			PRIORITY_CD,
+			CREATED_ON,
+			UPDATED_ON,
+			EST_START_DATE,
+			DUE_DATE,
+			START_DATE,
+			CLOSED_DATE,
+			PARENT_ISSUE,
+			ROOT_ISSUE,
+			MEM_ID,
+			LFT,
+			RGT,
+			DONE_RATIO,
+			IS_ATTACH_CD
+		) VALUES (
+			#{id},
+			#{prjId},
+			#{subject},
+			#{description},
+			#{categoryCd},
+			#{statusCd},
+			#{priorityCd},
+			SYSDATE,
+			#{updatedOn},
+			#{estStartDate},
+			#{dueDate},
+			#{startDate},
+			#{closedDate},
+			#{parentIssue},
+			#{rootIssue},
+			#{memId},
+			#{lft},
+			#{rgt},
+			#{doneRatio},
+			#{isAttachCd}
+		)
+	</insert>
+
+	<!-- ===================================================== -->
+	<!-- 이슈 수정                                                -->
+	<!--   - 동적 SQL로 전달된 컬럼만 갱신                          -->
+	<!-- ===================================================== -->
+	<update id="updateIssue" parameterType="IssueInputVO">
+		UPDATE TB_ISSUE
+		<set>
+			<if test="prjId != null">PRJ_ID = #{prjId},</if>
+			<if test="subject != null">SUBJECT = #{subject},</if>
+			<if test="description != null">DESCRIPTION = #{description},</if>
+			<if test="categoryCd != null">CATEGORY_CD = #{categoryCd},</if>
+			<if test="statusCd != null">STATUS_CD = #{statusCd},</if>
+			<if test="priorityCd != null">PRIORITY_CD = #{priorityCd},</if>
+			<if test="estStartDate != null">EST_START_DATE = #{estStartDate},</if>
+			<if test="dueDate != null">DUE_DATE = #{dueDate},</if>
+			<if test="startDate != null">START_DATE = #{startDate},</if>
+			<if test="closedDate != null">CLOSED_DATE = #{closedDate},</if>
+			<if test="parentIssue != null">PARENT_ISSUE = #{parentIssue},</if>
+			<if test="rootIssue != null">ROOT_ISSUE = #{rootIssue},</if>
+			<if test="memId != null">MEM_ID = #{memId},</if>
+			<if test="lft != null">LFT = #{lft},</if>
+			<if test="rgt != null">RGT = #{rgt},</if>
+			<if test="doneRatio != null">DONE_RATIO = #{doneRatio},</if>
+			<if test="isAttachCd != null">IS_ATTACH_CD = #{isAttachCd},</if>
+			UPDATED_ON = SYSDATE
+		</set>
+		WHERE ID = #{id}
+	</update>
+
+	<!-- ===================================================== -->
+	<!-- 이슈 삭제                                                -->
+	<!-- ===================================================== -->
+	<delete id="deleteIssue" parameterType="long">
+		DELETE FROM TB_ISSUE
+		WHERE ID = #{id}
+	</delete>
+
+	<!-- ===================================================== -->
+	<!-- 하위이슈: PARENT_ISSUE = 상위 이슈 ID                     -->
+	<!--   offset / limit: Oracle 12c+ OFFSET … FETCH …         -->
+	<!-- ===================================================== -->
+	<select id="selectChildIssueList" parameterType="Long"
+		resultType="IssueOutputVO">
+		SELECT
+		ID,
+		PRJ_ID,
+		SUBJECT,
+		DESCRIPTION,
+		get_sub_code_name(CATEGORY_CD) as CATEGORY_CD,
+		get_sub_code_name(STATUS_CD) as STATUS_CD,
+		get_sub_code_name(PRIORITY_CD)as PRIORITY_CD,
+		CREATED_ON,
+		UPDATED_ON,
+		EST_START_DATE,
+		DUE_DATE,
+		START_DATE,
+		CLOSED_DATE,
+		PARENT_ISSUE,
+		ROOT_ISSUE,
+		GET_USERID_TO_NAME (MEM_ID) as memName,
+		LFT,
+		RGT,
+		DONE_RATIO
+		FROM ISSUE
+		WHERE PARENT_ISSUE = #{id}
+		ORDER BY ID DESC
+	</select>
+
+	<!-- ===================================================== -->
+	<!--  하위이슈 갯수              -->
+	<!-- ===================================================== -->
+	<select id="countChildIssues" resultType="long">
+		SELECT COUNT(*)
+		FROM ISSUE
+		WHERE PARENT_ISSUE = #{id}
+	</select>
+	<!-- ===================================================== -->
+	<!--  아이디랑키 이름 받아오기(단건)      -->
+	<!-- ===================================================== -->
+	<select id="getParentIssue" resultType="map">
+		SELECT id,subject
+		FROM ISSUE
+		WHERE id = #{id}
+	</select>
+	<!-- ===================================================== -->
+	<!--  댓글 조회              -->
+	<!-- ===================================================== -->
+	<select id="getComment" resultType="CommentOutputVO">
+		SELECT
+			c.ID,
+			c.PARENT_ID,
+			c.ISSUE_ID,
+			c.CONTENT,
+			c.WRITE_DATE,
+			GET_USERID_TO_NAME(c.MEM_ID) AS memId,
+			LEVEL AS depth
+		FROM issue_comment c
+		WHERE c.issue_id = #{id}
+		START WITH c.parent_id IS NULL
+		CONNECT BY PRIOR c.id = c.parent_id
+		ORDER SIBLINGS BY c.id
+	</select>
+
+	<!-- 댓글 등록: ID는 트리거/시퀀스/IDENTITY 등 DB 설정에 맞게 조정 -->
+	<insert id="insertComment" parameterType="CommentInputVO">
+
+		INSERT INTO issue_comment (
+			id,
+			PARENT_ID,
+			ISSUE_ID,
+			CONTENT,
+			WRITE_DATE,
+			MEM_ID
+		) VALUES (
+			ISS_SEQ.NEXTVAL,
+			#{parentId},
+			#{issueId},
+			#{content},
+			SYSDATE,
+			#{memId}
+		)
+	</insert>
+	
+	<select id="getIssueIds" resultType="map">
+		SELECT id,subject
+		FROM ISSUE
+	</select>
+</mapper>
