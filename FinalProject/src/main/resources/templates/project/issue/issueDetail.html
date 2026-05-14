@@ -1,19 +1,29 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/userLayout}">
 <head>
 <meta charset="UTF-8">
 <title>이슈 상세</title>
+<th:block layout:fragment="head-content">
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+.issue-shell,
+.issue-shell *,
+.issue-shell *::before,
+.issue-shell *::after {
+	box-sizing: border-box;
+}
 
-body {
+.issue-shell {
 	font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
-	background-color: #f7f7f7;
-	padding: 30px;
 	color: #333;
 }
 
-.container {
+.issue-shell .issue-inner {
 	max-width: 960px;
 	margin: 0 auto;
 	background: #fff;
@@ -78,6 +88,33 @@ body {
 
 .meta-item input.short {
 	max-width: 120px;
+}
+
+.meta-item .parent-issue-link {
+	display: block;
+	width: 100%;
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	background: #fafafa;
+	color: #5b6cff;
+	text-decoration: none;
+}
+
+.meta-item .parent-issue-link:hover {
+	color: #4956d8;
+	text-decoration: underline;
+}
+
+.meta-item .meta-empty {
+	display: block;
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	background: #fafafa;
+	color: #333;
 }
 
 .section-block {
@@ -219,6 +256,12 @@ table.data-table tbody td {
 	margin-right: 8px;
 }
 
+.comment-thread .comment .meta .comment-num {
+	font-weight: 700;
+	color: #5b6cff;
+	margin-right: 10px;
+}
+
 .comment-thread .nested {
 	margin-left: 20px;
 	margin-top: 8px;
@@ -229,6 +272,16 @@ table.data-table tbody td {
 .comment-thread .nested .comment::before {
 	content: "↳ ";
 	color: #888;
+}
+
+.comment-thread .comment.is-reply {
+	border-left: 2px solid #d0d0d8;
+	padding-left: 12px;
+}
+
+.comment-thread-scroll {
+	overflow-y: visible;
+	scrollbar-gutter: stable;
 }
 
 .comment-form {
@@ -266,6 +319,66 @@ table.data-table tbody td {
 	background: #6a4ae6;
 }
 
+.comment-actions {
+	margin-top: 8px;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.comment-actions .btn-reply {
+	padding: 4px 10px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #5b6cff;
+	background: #fff;
+	border: 1px solid #c8c9d8;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.comment-actions .btn-reply:hover {
+	border-color: #5b6cff;
+	color: #4956d8;
+}
+
+.comment-form-wrap {
+	margin-top: 14px;
+}
+
+.comment-form-wrap .comment-form {
+	margin-top: 0;
+}
+
+.reply-hint-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 12px;
+	color: #555;
+	margin-bottom: 8px;
+	padding: 8px 10px;
+	background: #eef0ff;
+	border: 1px solid #d8dcff;
+	border-radius: 4px;
+}
+
+.reply-hint-row button {
+	padding: 4px 12px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #444;
+	background: #fff;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.reply-hint-row button:hover {
+	border-color: #999;
+}
+
 .inner-table-title {
 	font-size: 13px;
 	font-weight: 600;
@@ -274,10 +387,18 @@ table.data-table tbody td {
 	align-items: center;
 	gap: 8px;
 }
+
+#childIssueList {
+	width: 100%;
+	/* 그리드 본문 3행(40px×3) + 헤더는 그리드가 별도 처리 */
+}
 </style>
+</th:block>
 </head>
 <body>
-<div class="container">
+<div layout:fragment="content">
+<div class="issue-shell">
+<div class="issue-inner">
 	<div class="back-row">
 		<a th:href="@{/issue/list}">← 이슈 목록</a>
 	</div>
@@ -294,8 +415,11 @@ table.data-table tbody td {
 		</div>
 		<div class="meta-item">
 			<label>상위 이슈</label>
-			<input type="text" readonly
-				th:value="${issue.parentIssue != null ? 'ID ' + issue.parentIssue : '—'}" />
+			<th:block th:if="${ParentIssue != null and !#maps.isEmpty(ParentIssue)}">
+				<a class="parent-issue-link" th:href="@{/issue/detail(id=${ParentIssue['ID']})}"
+					th:text="${ParentIssue['SUBJECT'] != null and !#strings.isEmpty(ParentIssue['SUBJECT'])} ? ${ParentIssue['SUBJECT']} : '제목 없음'">상위 이슈</a>
+			</th:block>
+			<span class="meta-empty" th:unless="${ParentIssue != null and !#maps.isEmpty(ParentIssue)}">—</span>
 		</div>
 		<div class="meta-item">
 			<label>상태</label>
@@ -341,65 +465,56 @@ table.data-table tbody td {
 	<div class="section-block">
 		<div class="section-head">
 			<span>하위이슈</span>
-			<span class="badge-count">3</span>
+			<span class="badge-count" id="childIssueBadge" th:text="${childIssueTotal != null ? childIssueTotal : 0}">0</span>
 		</div>
-		<table class="data-table">
-			<thead>
-				<tr>
-					<th>이슈명</th>
-					<th>이슈상태</th>
-					<th>담당자</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>이슈1</td>
-					<td>종료</td>
-					<td>홍길동</td>
-				</tr>
-				<tr>
-					<td>이슈2</td>
-					<td>진행</td>
-					<td>김길동</td>
-				</tr>
-				<tr>
-					<td>이슈3</td>
-					<td>신규</td>
-					<td>김길동</td>
-				</tr>
-			</tbody>
-		</table>
+		<div id="childIssueList"></div>
 	</div>
 
 	<div class="tab-row" role="tablist">
-		<button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="comments">댓글</button>
+		<button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="comments">
+			댓글 <span class="badge-count" th:text="${commentTotal != null ? commentTotal : 0}">0</span>
+		</button>
 		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="related">연관된 이슈</button>
 		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="history">히스토리</button>
 	</div>
 
 	<div class="tab-panel-wrap" id="tabPanels">
 		<div class="tab-panel is-visible" id="panel-comments" role="tabpanel" data-panel="comments">
-			<div class="comment-thread">
-				<div class="comment">
-					<div class="meta"><strong>작성자</strong><span>26-05-06</span></div>
-					<div>댓글내용</div>
-					<div class="nested">
-						<div class="comment">
-							<div class="meta"><strong>작성자</strong><span>26-05-06</span></div>
-							<div>댓글내용</div>
-							<div class="nested">
-								<div class="comment">
-									<div class="meta"><strong>작성자</strong><span>26-05-06</span></div>
-									<div>댓글내용</div>
-								</div>
-							</div>
+			<div class="comment-thread" th:if="${comments == null or comments.isEmpty()}">
+				<p style="font-size:13px;color:#666;padding:8px 0;">등록된 댓글이 없습니다.</p>
+			</div>
+			<div class="comment-thread" th:if="${comments != null and !comments.isEmpty()}">
+				<div class="comment-thread-scroll" id="commentThreadScroll">
+					<div class="comment" th:each="c, cStat : ${comments}"
+						th:classappend="${c.depth != null and c.depth > 1} ? ' is-reply'"
+						th:style="|margin-left: ${(c.depth != null and c.depth > 1) ? (c.depth - 1) * 16 : 0}px|">
+						<div class="meta">
+							<span class="comment-num" th:text="|${cStat.count}번 댓글|">1번 댓글</span>
+							<strong th:text="${c.memId != null and !#strings.isEmpty(c.memId)} ? ${c.memId} : '—'">작성자</strong>
+							<span th:text="${c.writeDate != null ? #dates.format(c.writeDate, 'yy-MM-dd HH:mm') : '—'}">날짜</span>
+						</div>
+						<div th:text="${c.content != null ? c.content : ''}">댓글내용</div>
+						<div class="comment-actions" th:if="${c.id != null}">
+							<button type="button" class="btn-reply"
+								th:data-comment-id="${c.id}"
+								th:data-comment-num="${cStat.count}">댓글달기</button>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="comment-form">
-				<textarea placeholder="댓글 내용"></textarea>
-				<button type="button">등록</button>
+			<div class="comment-form-wrap">
+				<div class="reply-hint-row" id="replyHintRow" hidden>
+					<span id="replyHintText"></span>
+					<button type="button" id="cancelReplyBtn">답글 취소</button>
+				</div>
+				<form class="comment-form" id="issueCommentForm" th:action="@{/issue/comment}" method="post">
+					<input type="hidden" name="issueId" th:value="${issue.id}" />
+					<input type="hidden" th:value="${#authentication.principal.id}" />
+					
+					<input type="hidden" name="parentId" id="commentParentId" value="" />
+					<textarea name="content" placeholder="댓글 내용" required></textarea>
+					<button type="submit">등록</button>
+				</form>
 			</div>
 		</div>
 
@@ -471,6 +586,7 @@ table.data-table tbody td {
 	</div>
 	</th:block>
 </div>
+</div>
 
 <script>
 (function () {
@@ -500,6 +616,131 @@ table.data-table tbody td {
 		});
 	});
 })();
+
+(function () {
+	var panel = document.getElementById('panel-comments');
+	if (!panel) return;
+	var form = document.getElementById('issueCommentForm');
+	var parentInput = document.getElementById('commentParentId');
+	var hintRow = document.getElementById('replyHintRow');
+	var hintText = document.getElementById('replyHintText');
+	var cancelBtn = document.getElementById('cancelReplyBtn');
+	if (!form || !parentInput) return;
+
+	function clearReplyTarget() {
+		parentInput.value = '';
+		hintText.textContent = '';
+		if (hintRow) hintRow.hidden = true;
+	}
+
+	panel.addEventListener('click', function (e) {
+		var btn = e.target.closest('.btn-reply');
+		if (!btn) return;
+		var cid = btn.getAttribute('data-comment-id');
+		if (!cid) return;
+		parentInput.value = cid;
+		var num = btn.getAttribute('data-comment-num');
+		if (hintText) {
+			if (num != null && String(num).length) {
+				hintText.textContent = num + '번 댓글에 댓글 작성중';
+			} else {
+				hintText.textContent = '선택한 댓글에 댓글 작성중';
+			}
+		}
+		if (hintRow) hintRow.hidden = false;
+		var ta = form.querySelector('textarea[name="content"]');
+		if (ta) ta.focus();
+	});
+
+	if (cancelBtn) {
+		cancelBtn.addEventListener('click', clearReplyTarget);
+	}
+})();
+
+(function () {
+	function layoutCommentThreadScroll() {
+		var wrap = document.getElementById('commentThreadScroll');
+		if (!wrap) return;
+		var items = wrap.querySelectorAll(':scope > .comment');
+		if (items.length <= 3) {
+			wrap.style.maxHeight = '';
+			wrap.style.overflowY = '';
+			return;
+		}
+		var r0 = items[0].getBoundingClientRect();
+		var r2 = items[2].getBoundingClientRect();
+		var h = r2.bottom - r0.top;
+		wrap.style.maxHeight = Math.ceil(h) + 'px';
+		wrap.style.overflowY = 'auto';
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', layoutCommentThreadScroll);
+	} else {
+		layoutCommentThreadScroll();
+	}
+	window.addEventListener('resize', layoutCommentThreadScroll);
+})();
 </script>
+<th:block th:if="${issue != null}">
+<script th:inline="javascript">
+/*<![CDATA[*/
+(function () {
+	var allChildIssues = /*[[${childIssueList}]]*/ [];
+	if (!Array.isArray(allChildIssues)) {
+		allChildIssues = [];
+	}
+	if (typeof tui === 'undefined' || !tui.Grid) {
+		return;
+	}
+	var host = document.getElementById('childIssueList');
+	if (!host) {
+		return;
+	}
+
+	var rowH = 40;
+	var visibleRows = 3;
+
+	new tui.Grid({
+		el: host,
+		data: allChildIssues,
+		scrollX: false,
+		scrollY: true,
+		bodyHeight: rowH * visibleRows,
+		rowHeight: rowH,
+		rowKey: 'id',
+		columns: [
+			{
+				header: '이슈명',
+				name: 'subject',
+				sortable: false,
+				formatter: function (props) {
+					var row = props.row;
+					var value = props.value;
+					var id = row == null ? '' : row.id;
+					var text = value == null ? '' : String(value);
+					return '<a href="/issue/detail?id=' + id + '">' + text + '</a>';
+				}
+			},
+			{
+				header: '이슈상태',
+				name: 'statusCd',
+				width: 120,
+				align: 'center',
+				sortable: false
+			},
+			{
+				header: '담당자',
+				name: 'memName',
+				width: 120,
+				align: 'center',
+				sortable: false
+			}
+		]
+	});
+})();
+/*]]>*/
+</script>
+</th:block>
+</div>
 </body>
 </html>
