@@ -1,6 +1,7 @@
 package com.example.demo.project.option.service.impl;
 
 import java.util.List;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import com.example.demo.project.option.mapper.RoleMapper;
 import com.example.demo.project.option.service.RoleGroupRowVO;
@@ -9,6 +10,7 @@ import com.example.demo.project.option.service.RoleVO;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Primary
 @RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
