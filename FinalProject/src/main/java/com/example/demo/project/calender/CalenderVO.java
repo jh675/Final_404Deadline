@@ -16,6 +16,7 @@ public class CalenderVO {
 	private String sharingCd;
 	private String statecd;
 	private String colorTagCd;
+	private String keyword;
 	
 	@DateTimeFormat(pattern = "YYYY-MM-dd")
 	private Date calStart;

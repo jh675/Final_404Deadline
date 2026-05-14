@@ -1,8 +1,13 @@
 package com.example.demo.project.calender.service;
 
-import org.apache.ibatis.annotations.Mapper;
+import java.util.List;
 
-@Mapper
+import com.example.demo.project.calender.CalenderVO;
+
 public interface CalenderService {
- 
+	List<CalenderVO> selectAll(CalenderVO vo);
+	 CalenderVO selectOne(int id);
+	 int insert(CalenderVO vo);
+	 int updete(CalenderVO vo);
+	 int delete(int id);
 }
