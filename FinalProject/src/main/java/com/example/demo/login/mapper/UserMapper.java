@@ -7,5 +7,5 @@ import com.example.demo.login.service.UserVO;
 @Mapper
 public interface UserMapper {
 	UserVO selectOne(String loginId);
-	
+
 }
