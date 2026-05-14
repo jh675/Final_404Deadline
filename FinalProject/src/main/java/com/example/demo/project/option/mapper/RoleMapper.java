@@ -2,12 +2,22 @@ package com.example.demo.project.option.mapper;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import com.example.demo.project.option.service.RoleGroupRowVO;
 import com.example.demo.project.option.service.RoleVO;
 
 @Mapper
 public interface RoleMapper {
 
-    long selectRoleListCount(RoleVO roleVO);
-
     List<RoleVO> selectRoleList(RoleVO roleVO);
+
+    RoleVO selectRoleByPrjAndCd(@Param("prjId") Long prjId, @Param("roleCd") Long roleCd);
+
+    List<RoleVO> selectAllMenus();
+
+    List<String> selectMenuRoleIdsByRoleCd(@Param("roleCd") Long roleCd);
+
+    List<RoleGroupRowVO> selectRoleGroupsList(
+            @Param("prjId") Long prjId,
+            @Param("roleCd") Long roleCd);
 }
