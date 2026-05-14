@@ -1,4 +1,4 @@
-package com.example.demo.project.calender;
+package com.example.demo.project.calender.service;
 
 import java.util.Date;
 
