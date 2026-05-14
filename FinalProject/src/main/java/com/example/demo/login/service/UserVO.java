@@ -43,6 +43,9 @@ public class UserVO implements UserDetails{
 	
 	private List<String> role;
 	
+	private String verifyNum;
+	private String result;
+	
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return role.stream()
