@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.demo.project.notice.service.NoticeService;
-import com.example.demo.project.notice.service.impl.NoticeVO;
+import com.example.demo.project.notice.service.NoticeVO;
 
 @Controller
 public class NoticeController {

@@ -50,9 +50,8 @@ public class UserController {
 	        return "error/403";
 
 	    } else {
-
 	        // 비로그인 사용자
-	        return "login/home";
+	        return "login/info";
 	    }
 	    
 	    

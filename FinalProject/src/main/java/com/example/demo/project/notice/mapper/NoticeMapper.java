@@ -2,7 +2,8 @@ package com.example.demo.project.notice.mapper;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
-import com.example.demo.project.notice.service.impl.NoticeVO;
+
+import com.example.demo.project.notice.service.NoticeVO;
 
 @Mapper
 public interface NoticeMapper {

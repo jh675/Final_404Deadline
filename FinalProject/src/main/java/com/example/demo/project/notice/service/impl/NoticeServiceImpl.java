@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.project.notice.mapper.NoticeMapper;
 import com.example.demo.project.notice.service.NoticeService;
+import com.example.demo.project.notice.service.NoticeVO;
 
 @Service
 public class NoticeServiceImpl implements NoticeService {

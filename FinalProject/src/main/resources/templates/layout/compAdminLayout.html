@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="UTF-8">
 <title>layout</title>
@@ -31,18 +32,32 @@
 						<li class="nav-item"><a class="nav-link disabled"
 							aria-disabled="true">Disabled</a></li> */-->
 					</ul>
+					<div class="d-flex align-items-center gap-2"
+						sec:authorize="isAuthenticated()">
+
+						<span> <strong sec:authentication="principal.name"></strong>
+							님
+						</span>
+
+						<form th:action="@{/logout}" method="post">
+							<input type="hidden" th:name="${_csrf.parameterName}"
+								th:value="${_csrf.token}">
+
+							<button type="submit" class="btn btn-outline-danger btn-sm">
+								로그아웃</button>
+						</form>
+					</div>
 				</div>
 			</div>
 		</nav>
 
 		<div class="card">
 			<div class="card-body">
-				<div layout:fragment="content">
-					This is some text within a card body.
-				</div>
+				<div layout:fragment="content">This is some text within a card
+					body.</div>
 			</div>
 		</div>
-		
+
 		<div th:insert="~{layout/footer::yedam}"></div>
 	</div>
 </body>
