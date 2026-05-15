@@ -24,23 +24,23 @@ public class EmailVerifyServiceImpl implements EmailVerifyService {
 	@Override
 	public UserVO verifyUser(UserVO user) {
 
-		long totalStart = System.currentTimeMillis();
+//		long totalStart = System.currentTimeMillis();
 		
 //		프로시저 실행 시간
-		long procStart = System.currentTimeMillis();
+//		long procStart = System.currentTimeMillis();
 		verifyMapper.sendVerifyCode(user);
-		long procEnd = System.currentTimeMillis();
-		System.out.println("프로시저 실행 시간 : " + (procEnd - procStart) + "ms");
+//		long procEnd = System.currentTimeMillis();
+//		System.out.println("프로시저 실행 시간 : " + (procEnd - procStart) + "ms");
 		
 //		메일 발송 시간
 		if ("success".equals(user.getResult())) {
-			long mailStart = System.currentTimeMillis();
+//			long mailStart = System.currentTimeMillis();
 			emailSend.sendVerifyMail(user.getEmail(), user.getVerifyNum());
-			long mailEnd = System.currentTimeMillis();
-			System.out.println("메일 발송 시간 : " + (mailEnd - mailStart) + "ms");
+//			long mailEnd = System.currentTimeMillis();
+//			System.out.println("메일 발송 시간 : " + (mailEnd - mailStart) + "ms");
 		}
-		long totalEnd = System.currentTimeMillis();
-		System.out.println("전체 처리 시간 : " + (totalEnd - totalStart) + "ms");
+//		long totalEnd = System.currentTimeMillis();
+//		System.out.println("전체 처리 시간 : " + (totalEnd - totalStart) + "ms");
 		return user;
 	}
 

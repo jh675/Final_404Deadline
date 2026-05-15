@@ -9,7 +9,6 @@ const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 async function csrfFetch(url, options = {}) {
     options.headers = {
         ...options.headers,
-        'Content-Type': 'application/json',
         [csrfHeader]: csrfToken
     };
 
