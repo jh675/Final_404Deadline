@@ -31,10 +31,6 @@ public class EmailVerifyRestController {
 
 		EmailVerifyVO result = verifyService.verifyCode(vo);
 
-		if (result != null) {
-			return "success";
-		}
-
-		return "fail";
+		return result.getResult();
 	}
 }

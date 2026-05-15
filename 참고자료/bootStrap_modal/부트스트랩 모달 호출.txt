@@ -15,7 +15,7 @@ data-bs-target="#resetPwModal" 의 "#resetPwModal" 이거는 커스텀하면 됨
 <div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
 
 를 적으면 됨. 레이아웃의 푸터 붙여넣는거랑 같은 개념인데 th:replace라서 항상 붙어나오는게 아니라 호출해야 생기는 방식
-login/modals/resetPw :: resetPwModal 에서 login/modal/resetPw는 모달 창 html 경로를 적어주고 resetPwModal 는 위에 적은 #resetPwModal 이거랑 연결되는 방식
+login/modals/resetPw :: resetPwModal 에서 login/modal/resetPw는 모달 창 html 경로를 적어주고 resetPwModal 는 모달창 html에서  resetPwModal를 찾아서 연결하는 방식
 
 login/modals/resetPw.html 에서 모달창 화면을 따로 만들면 되는데 
 
