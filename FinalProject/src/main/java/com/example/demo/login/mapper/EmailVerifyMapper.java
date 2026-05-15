@@ -11,5 +11,5 @@ public interface EmailVerifyMapper {
 	void sendVerifyCode(UserVO user);
 	
 	// 인증 코드 일치 확인
-	EmailVerifyVO verifyCode(EmailVerifyVO vo);
+	void verifyCode(EmailVerifyVO vo);
 }
