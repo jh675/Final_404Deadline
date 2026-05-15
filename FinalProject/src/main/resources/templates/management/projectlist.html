@@ -9,70 +9,94 @@
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
       crossorigin="anonymous"
     />
+    <style>
+   	/* 테이블 바디의 번호를 초기화 */
+	.numbered-table tbody {
+	    counter-reset: myIndex 0;
+	}
+	
+	/* 2. 생성된 모든 tr에서 숫자를 1씩 증가 */
+	.numbered-table tbody tr {
+	    counter-increment: myIndex;
+	}
+	
+	/* 3. td 안의 가상 요소에 숫자를 표시 */
+	.row-index::before {
+	    content: counter(myIndex);
+	}
+	
+	.table td.text-center {
+	    vertical-align: middle; /* 높이 중앙 맞춤 */
+	}
+	
+	.btn-group {
+	    display: inline-flex;
+	    justify-content: center;
+	}
+    </style>
   </head>
   <body>
     <h2>프로젝트</h2>
-    <a href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
-    <table border="1">
+    <a th:if="${#authentication.principal.adminCd == '시스템관리자' or #authentication.principal.adminCd == '기업관리자'}"
+       href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
+    <select>
+	    <option value="apple">진행중인 프로젝트</option>
+	    <option value="banana">종료된 프로젝트</option>
+	</select>
+    <div style="width: 100%; overflow-x: auto; padding-right: 200px;">
+    <table border="1" class="table numbered-table" style="width: calc(100% - 200px);">
       <thead>
         <tr>
           <th>No</th>
           <th>프로젝트명</th>
           <th>식별자</th>
+          <th th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminCd == '시스템관리자'}">회사명</th>
           <th>설명</th>
           <th>생성일</th>
           <th>종료일</th>
-          <th>설정</th>
+          <th class="text-center" th:if="${#authentication.principal.adminCd == '시스템관리자' or #authentication.principal.adminCd == '기업관리자'}">설정</th>
         </tr>
       </thead>
       <tbody>
-        <tr th:each="pro, iterStat : ${projectinfo.list}">
-          <td th:text="${iterStat.count}"></td>
+        <tr th:each="pro : ${projectinfo.list}"
+            th:if="${#authentication.principal.adminCd == '시스템관리자' or pro.bizNo == #authentication.principal.bizNo}">
+          <td class="row-index"></td>
           <td th:text="${pro.prjName}"></td>
           <td th:text="${pro.prjIdentifier}"></td>
+          <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminCd == '시스템관리자'}">
+			    <th:block th:each="c : ${companyList}">
+			        <span th:if="${pro.bizNo == c.bizNo}" th:text="${c.companyName}"></span>
+			    </th:block>
+			</td>
+              
+          
           <td th:text="${pro.prjDesc}"></td>
           <td
             th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"
           ></td>
           <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
-          <td class="text-end">
-            <div class="btn-group dropend">
+          <td class="text-center" th:if="${#authentication.principal.adminCd == '시스템관리자' or #authentication.principal.adminCd == '기업관리자'}">
+           <div class="btn-group dropend">
               <button
-                type="button"
-                class="btn btn-sm btn-outline-secondary"
-                data-bs-toggle="dropdown"
-                data-bs-auto-close="true"
-                aria-expanded="false"
-                aria-haspopup="true"
-              >
-                ...
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="#"
-                    th:attr="data-project-id=${pro.id}"
-                    >설정</a
-                  >
-                </li>
+				  type="button"
+				  class="btn btn-sm btn-outline-secondary"
+				  data-bs-toggle="dropdown"
+				  data-bs-boundary="viewport" 
+				  aria-expanded="false"
+				>
+				  ...
+				</button>
+              <ul class="dropdown-menu shadow-sm">
+                <li><a class="dropdown-item" href="#">설정</a></li>
                 <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <button
-                    type="button"
-                    class="dropdown-item text-danger"
-                    th:attr="data-project-id=${pro.id}"
-                  >
-                    삭제
-                  </button>
-                </li>
+                <li><button type="button" class="dropdown-item text-danger">삭제</button></li>
               </ul>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
-
+	</div>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
       crossorigin="anonymous"

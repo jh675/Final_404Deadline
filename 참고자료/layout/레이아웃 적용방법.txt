@@ -1,0 +1,26 @@
+레이아웃 적용방법
+1.
+자신이 만든 페이지(template)에서
+html 태그를
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/compAdminLayout}">
+로 바꾸고
+
+layout:decorate="~{layout/compAdminLayout}" 에서
+compAdminLayout 는 레이아웃 경로이니까 맞는 레이아웃으로 수정
+
+~{layout/sysAdminLayout} : 시스템 관리자 레이아웃
+~{layout/compAdminLayout} : 기업 관리자 레이아웃
+~{layout/userLayout} : 유저 레이아웃
+~{layout/errorpgLayout} : 에러페이지 레이아웃
+
+2.
+<body> 태그 바로 아래에
+<div layout:fragment="content"> 를 추가하기
+
+
+3.
+</body>태그 바로 위에
+</div> 추가하기

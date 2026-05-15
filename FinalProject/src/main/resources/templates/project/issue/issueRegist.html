@@ -9,27 +9,8 @@
 <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
 <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
 <style>
-.issue-shell,
-.issue-shell *,
-.issue-shell *::before,
-.issue-shell *::after {
-	box-sizing: border-box;
-}
 
-.issue-shell {
-	font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
-	color: #333;
-}
 
-.issue-shell .issue-inner {
-	max-width: 720px;
-	margin: 0 auto;
-	background: #fff;
-	border: 1px solid #ddd;
-	border-radius: 8px;
-	padding: 28px 32px 36px;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
 
 .back-row {
 	margin-bottom: 16px;
@@ -351,12 +332,13 @@
 		<a href="javascript:history.back()">← 이전</a>
 	</div>
 
-	<h1 class="page-title">이슈 등록/수정</h1>
+	<h1 class="page-title" th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'">이슈 등록</h1>
 
 	<form id="issueRegistForm" th:action="@{/sign-up}">
 		<input type="hidden" id="issueId" name="id"
 			th:value="${issue != null and issue.id != null ? issue.id : ''}" />
-
+		<input type="hidden" id="memId" name="memId"
+			th:value="${#authentication.principal.id}" />
 		<div class="form-grid">
 			<label for="subject">제목<span class="req">*</span></label>
 			<div class="field-wrap" id="wrap-subject">
@@ -442,7 +424,7 @@
 			<div class="field-wrap">
 				<select id="priorityCd" name="priorityCd">
 					<option value="01ISSUEPRI"
-						th:selected="${issue != null and issue.priorityCd == '01ISSUEPRI'}">긴급</option>
+						th:selected="${issue != null and issue.priorityCd == '01ISSUEPRI'}">최상</option>
 					<option value="02ISSUEPRI"
 						th:selected="${issue != null and issue.priorityCd == '02ISSUEPRI'}">상</option>
 					<option value="03ISSUEPRI"
@@ -478,7 +460,8 @@
 		</div>
 
 		<div class="form-actions">
-			<button type="submit" class="btn-primary" id="btnSubmit">등록/수정</button>
+			<button type="submit" class="btn-primary" id="btnSubmit"
+				th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'" required>이슈 등록</button>
 			<button type="button" class="btn-secondary" id="btnCancel">취소</button>
 		</div>
 	</form>
@@ -628,7 +611,7 @@
 		var due = document.getElementById('dueDate').value;
 		if (est) payload.estStartDate = est;
 		if (due) payload.dueDate = due;
-
+		
 		var formData = new FormData();
 		formData.append('issue', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
 		attachRows.querySelectorAll('input[type="file"]').forEach(function (inp) {
@@ -643,8 +626,8 @@
 		if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
 			headers[headerMeta.content] = tokenMeta.content;
 		}
-
-		fetch(/*[[@{/issue/insert}]]*/ '/issue/insert', {
+		var saveUrl = /*[[${issue != null and issue.id != null} ? @{/issue/update} : @{/issue/insert}]]*/ '/issue/insert';
+		fetch(saveUrl, {
 			method: 'POST',
 			headers: headers,
 			body: formData
