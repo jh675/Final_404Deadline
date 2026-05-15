@@ -14,12 +14,14 @@ public class CalenderVO {
 	private String place;
 	private String typeCd;
 	private String sharingCd;
-	private String statecd;
+	private String stateCd;
 	private String colorTagCd;
 	private String keyword;
 	
-	@DateTimeFormat(pattern = "YYYY-MM-dd")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
 	private Date calStart;
+	
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
 	private Date calEnd;
 	private Date createdOn;
 	private Date updatedOn;

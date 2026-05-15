@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="calenderAddModal">
+
+
+		
+			<!-- ===== 일정 변경/삭제 모달 ===== -->
+<div class="modal-overlay" id="updateModalOverlay">
+    <div class="modal">
+        <div class="modal-title">일정 변경/삭제</div>
+        <button class="modal-close" onclick="closeModal('updateModalOverlay')">✕</button>
+
+        <input type="hidden" id="upd_id" />
+
+        <div class="form-row">
+            <label class="form-label">일정장소 <span>*</span></label>
+            <input type="text" class="form-input" id="upd_place" />
+        </div>
+        <div class="form-row">
+            <label class="form-label">일정 내용</label>
+            <input type="text" class="form-input" id="upd_calText" />
+        </div>
+        <div class="form-row">
+            <div class="checkbox-row">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="upd_sharingAll" checked /> 전체 공유
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="upd_sharingMe" /> 나만보기
+                </label>
+                <label class="form-label" style="margin:0;">일정 유형</label>
+                <select class="form-select" id="upd_typeCd" style="width:auto;">
+                    <option value="">선택</option>
+                    <option value="personal">개인일정</option>
+                    <option value="group">그룹일정</option>
+                    <option value="company">회사일정</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="time-row">
+                <span class="time-label">시작시간</span>
+                <select class="form-select" id="upd_calStart">
+                    <option value="">선택</option>
+                    <option>오전 09:00</option>
+                    <option>오전 09:15</option>
+                    <option>오전 09:30</option>
+                    <option>오전 10:00</option>
+                    <option>오전 10:30</option>
+                    <option>오전 11:00</option>
+                    <option>오후 12:00</option>
+                    <option>오후 01:00</option>
+                    <option>오후 02:00</option>
+                    <option>오후 03:00</option>
+                    <option>오후 04:00</option>
+                    <option>오후 05:00</option>
+                    <option>오후 06:00</option>
+                </select>
+                <span class="time-label">종료시간</span>
+                <select class="form-select" id="upd_calEnd">
+                    <option value="">선택</option>
+                    <option>오전 09:00</option>
+                    <option>오전 09:15</option>
+                    <option>오전 09:30</option>
+                    <option>오전 10:00</option>
+                    <option>오전 10:30</option>
+                    <option>오전 11:00</option>
+                    <option>오후 12:00</option>
+                    <option>오후 01:00</option>
+                    <option>오후 02:00</option>
+                    <option>오후 03:00</option>
+                    <option>오후 04:00</option>
+                    <option>오후 05:00</option>
+                    <option>오후 06:00</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-danger" onclick="confirmDelete()">삭제</button>
+            <button class="btn btn-primary" onclick="updateEvent()">변경</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 안내 매새지 모달창 부분 ===== -->
+<div class="modal-overlay" id="alertModalOverlay" style="display: none;">
+	<div class="alert-modal">
+		<div class="alert-title">안내 메시지</div>
+		<button class="modal-close"
+			onclick="closeModal('alertModalOverlay')">✕</button>
+		<div class="alert-msg" id="alertMsg"></div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" id="alertConfirmBtn"
+				onclick="closeModal('alertModalOverlay')">확인</button>
+		</div>
+	</div>
+</div>
+
+<!-- ===== 일정 삭제 확인모달창 부분 ===== -->
+<div class="modal-overlay" id="deleteConfirmOverlay" style="display: none;">
+	<div class="alert-modal">
+		<div class="alert-title">안내 메시지</div>
+		<button class="modal-close"
+			onclick="closeModal('deleteConfirmOverlay')">✕</button>
+		<div class="alert-msg">일정을 삭제 하시겠습니까?</div>
+		<div class="modal-footer">
+			<button class="btn btn-primary" onclick="deleteEvent()">확인</button>
+		</div>
+	</div>
+</div>
+	
+</div>
+</html>
