@@ -20,9 +20,9 @@ class WebSecurityConfig {
 		http
 			.authorizeHttpRequests((requests) -> requests
 				.requestMatchers("/**", "/login/**").permitAll()
-				.requestMatchers("/admin/**").hasAnyRole("ADMIN") // 시스템관리자 롤 01ROLE
-				.requestMatchers("/cadmin/**").hasAnyRole("CADMIN") // 기업관리자 롤 02ROLE
-				.requestMatchers("/user/**").hasAnyRole("USER") // 일반 이용자 롤 03ROLE
+				.requestMatchers("/admin/**").hasAnyRole("ADMIN") // 시스템관리자 01ROLE
+				.requestMatchers("/cadmin/**").hasAnyRole("CADMIN") // 기업관리자 02ROLE
+				.requestMatchers("/user/**").hasAnyRole("USER") // 일반 이용자 03ROLE
 				.anyRequest().authenticated()
 			)
 			.formLogin((form) -> form
