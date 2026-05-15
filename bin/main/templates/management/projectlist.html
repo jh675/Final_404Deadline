@@ -1,0 +1,81 @@
+<!doctype html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insert title here</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <h2>프로젝트</h2>
+    <a href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>프로젝트명</th>
+          <th>식별자</th>
+          <th>설명</th>
+          <th>생성일</th>
+          <th>종료일</th>
+          <th>설정</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="pro, iterStat : ${projectinfo.list}">
+          <td th:text="${iterStat.count}"></td>
+          <td th:text="${pro.prjName}"></td>
+          <td th:text="${pro.prjIdentifier}"></td>
+          <td th:text="${pro.prjDesc}"></td>
+          <td
+            th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"
+          ></td>
+          <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
+          <td class="text-end">
+            <div class="btn-group dropend">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="true"
+                aria-expanded="false"
+                aria-haspopup="true"
+              >
+                ...
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="#"
+                    th:attr="data-project-id=${pro.id}"
+                    >설정</a
+                  >
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <button
+                    type="button"
+                    class="dropdown-item text-danger"
+                    th:attr="data-project-id=${pro.id}"
+                  >
+                    삭제
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

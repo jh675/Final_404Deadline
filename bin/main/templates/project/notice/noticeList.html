@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/compAdminLayout}">
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항 관리</title>
+    <style>
+        /* 테마 및 페이징 디자인 */
+        .bg-light-green { background-color: #f1f8e9 !important; }
+        .bg-mint-highlight { background-color: #e8f5e9 !important; border-left: 4px solid #66bb6a !important; }
+        .text-success-dark { color: #2e7d32 !important; }
+        .btn-green { background-color: #66bb6a; color: white; border: none; border-radius: 50px; }
+        .btn-green:hover { background-color: #43a047; color: white; }
+        .pagination { gap: 10px; border: none; }
+        .pagination .page-link { border: 1px solid #dee2e6; color: #555; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-decoration: none; }
+        .pagination .page-item:first-child .page-link, .pagination .page-item:last-child .page-link { border-radius: 50px !important; padding: 8px 22px; }
+        .pagination .page-item:not(:first-child):not(:last-child) .page-link { border-radius: 8px !important; min-width: 42px; height: 40px; display: flex; align-items: center; justify-content: center; }
+        .pagination .page-item.active .page-link { background-color: #66bb6a !important; border-color: #66bb6a !important; color: white !important; }
+        .pagination .page-item.disabled .page-link { background-color: #f8f9fa; color: #ccc; pointer-events: none; }
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="container-fluid py-4">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-success-dark mb-0">🌿 공지사항 관리</h3>
+        <button type="button" class="btn btn-green shadow-sm px-4" th:onclick="|location.href='@{/notice/register}'|">공지사항 등록</button>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form th:action="@{/notice/list}" method="get" class="row g-2">
+                <div class="col-auto">
+                    <div class="input-group">
+                        <input type="text" name="keyword" class="form-control border-success-subtle" th:value="${param.keyword}" placeholder="검색어를 입력하세요">
+                        <button class="btn btn-outline-success px-3" type="submit">검색</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="noticeTable">
+                <thead class="bg-light-green text-success-dark">
+                    <tr>
+                        <th class="text-center" style="width: 80px;">번호</th>
+                        <th>제목</th>
+                        <th class="text-center" style="width: 150px;">작성자</th>
+                        <th class="text-center" style="width: 150px;">작성일</th>
+                        <th class="text-center" style="width: 180px;">관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="notice, noticeStat : ${list}" 
+                        th:classappend="${notice.isFixed == '01ACTIVE'} ? 'bg-mint-highlight' : ''"
+                        class="notice-row">
+                        <td class="text-center">
+                            <span th:text="${noticeStat.count}" th:classappend="${notice.isFixed == '01ACTIVE'} ? 'fw-bold text-success' : 'text-muted'"></span>
+                            <span th:if="${notice.isFixed == '01ACTIVE'}" class="ms-1">📌</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/notice/modify(id=${notice.id})}" class="text-decoration-none text-dark" th:classappend="${notice.isFixed == '01ACTIVE'} ? 'fw-bold' : ''" th:text="${notice.title}"></a>
+                        </td>
+                        <td class="text-muted small text-center" th:text="${notice.memId}"></td>
+                        <td class="text-muted small text-center" th:text="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"></td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-success px-2" th:onclick="|location.href='@{/notice/modify(id=${notice.id})}'|">수정</button>
+                                <button type="button" class="btn btn-outline-danger px-2" th:onclick="|if(confirm('정말로 삭제하시겠습니까?')) location.href='@{/notice/delete(id=${notice.id})}'|">삭제</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer bg-white border-0 py-4">
+            <nav>
+                <ul class="pagination justify-content-center mb-0" id="pagination">
+                    </ul>
+            </nav>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            const rowsPerPage = 10;
+            const rows = document.querySelectorAll(".notice-row");
+            const rowsCount = rows.length;
+            const pageCount = Math.ceil(rowsCount / rowsPerPage);
+            const paginationUl = document.getElementById("pagination");
+            
+            function displayPage(page) {
+                const start = (page - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                
+                rows.forEach((row, index) => {
+                    row.style.display = (index >= start && index < end) ? "" : "none";
+                });
+                
+                renderPagination(page);
+            }
+
+            function renderPagination(currentPage) {
+                paginationUl.innerHTML = "";
+
+                // 이전 버튼
+                const prevLi = document.createElement("li");
+                prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                prevLi.innerHTML = `<a class="page-link shadow-sm" href="#">이전</a>`;
+                prevLi.onclick = () => { if(currentPage > 1) displayPage(currentPage - 1); };
+                paginationUl.appendChild(prevLi);
+
+                // 페이지 숫자 버튼
+                for (let i = 1; i <= pageCount; i++) {
+                    const li = document.createElement("li");
+                    li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                    li.innerHTML = `<a class="page-link shadow-sm" href="#">${i}</a>`;
+                    li.onclick = () => displayPage(i);
+                    paginationUl.appendChild(li);
+                }
+
+                // 다음 버튼
+                const nextLi = document.createElement("li");
+                nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
+                nextLi.innerHTML = `<a class="page-link shadow-sm" href="#">다음</a>`;
+                nextLi.onclick = () => { if(currentPage < pageCount) displayPage(currentPage + 1); };
+                paginationUl.appendChild(nextLi);
+            }
+
+            if (rowsCount > 0) {
+                displayPage(1);
+            } else {
+                paginationUl.closest('.card-footer').style.display = 'none';
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

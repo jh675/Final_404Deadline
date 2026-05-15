@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.company.mapper.CompanyMapper">
+
+<select id="selectAll">
+	select *
+	from company
+</select>
+
+<select id="selectOne">
+	select *
+	from company
+	where biz_no = #{bizNo}
+</select>
+
+<insert id="insert">
+  insert into company (
+		biz_no,
+	 	company_name,
+		tel,
+	    address,
+		is_active_cd
+	 	
+  )	
+  
+  values (
+  	#{bizNo},
+  	#{companyName},
+  	#{tel},
+  	#{address},
+  	#{isActiveCd}
+  	
+ )
+</insert>
+
+<update id="update">
+  update company
+  	set company_name = #{companyName},
+  		tel = #{tel},
+  		address = #{address},
+  	    is_active_cd = #{isActiveCd}
+  	 where biz_no = #{bizNo}   
+</update>
+
+<delete id="delete">
+	delete from company
+	where biz_no = #{bizNo}
+
+</delete>
+
+
+
+
+
+
+
+
+
+
+</mapper>
