@@ -7,27 +7,23 @@
 >
   <head>
     <meta charset="UTF-8" />
-    <meta
-      th:if="${_csrf != null}"
-      name="_csrf"
-      th:content="${_csrf.token}"
-    />
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
     <meta
       th:if="${_csrf != null}"
       name="_csrf_header"
       th:content="${_csrf.headerName}"
     />
-    <title>프로젝트 역할 관리</title>
+    <title>프로젝트 멤버 관리</title>
     <link
       rel="stylesheet"
       href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css"
     />
     <link
       rel="stylesheet"
-      href="https://uicdn.toast.com/grid/latest/tui-grid.css"
+      href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css"
     />
     <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
-    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.js"></script>
 
     <style>
       .menu-role-page {
@@ -47,18 +43,6 @@
         background: #333;
         border: 0;
         margin: 0 0 0.75rem;
-      }
-      .menu-role-page__lead {
-        margin: 0;
-        font-size: 0.8125rem;
-        line-height: 1.55;
-        color: #555;
-      }
-      .menu-role-page__lead code {
-        font-size: 0.8em;
-        padding: 0.05em 0.35em;
-        background: #f0f0f0;
-        border-radius: 3px;
       }
       .menu-role-page__section-title {
         margin: 0 0 0.5rem;
@@ -211,8 +195,7 @@
     <script th:inline="javascript">
       /*<![CDATA[*/
       const prjId = /*[[${prjId}]]*/ "";
-      /** 서버 `selectRoleList`: 기준 테이블은 ROLE(R), 그룹 수는 GRP_ROLE·GRP 조인 */
-      const projectRoleRows = /*[[${rows}]]*/ [];
+      const projectMemberRows = /*[[${rows}]]*/ [];
       /*]]>*/
     </script>
   </head>
@@ -220,62 +203,60 @@
     <div layout:fragment="content">
       <main class="menu-role-page">
         <header class="menu-role-page__head">
-          <h1 class="menu-role-page__title">프로젝트 역할 관리</h1>
+          <h1 class="menu-role-page__title">프로젝트 멤버 관리</h1>
           <hr class="menu-role-page__rule" />
         </header>
 
         <section
           class="menu-role-page__search"
-          aria-labelledby="menu-role-search-heading"
+          aria-labelledby="member-search-heading"
         >
-          <h2 id="menu-role-search-heading" class="visually-hidden">
-            역할 검색
-          </h2>
+          <h2 id="member-search-heading" class="visually-hidden">멤버 검색</h2>
           <form
             class="role-search"
-            id="roleSearchForm"
-            th:action="@{/project/option/role/roleManagement}"
+            id="memberSearchForm"
+            th:action="@{/project/member/memberManagement}"
             method="get"
           >
             <input type="hidden" name="prjId" th:value="${prjId}" />
             <div class="role-search__bar">
               <div class="role-search__inline">
-                <label for="permissionKey">역할 코드</label>
+                <label for="memberName">이름</label>
                 <input
                   type="text"
-                  id="permissionKey"
-                  name="permissionKey"
-                  th:value="${permissionKey}"
-                  placeholder="역할 코드"
+                  id="memberName"
+                  name="memberName"
+                  th:value="${memberName}"
+                  placeholder="이름"
                   autocomplete="off"
                 />
               </div>
               <div class="role-search__inline">
-                <label for="permissionName">역할명</label>
+                <label for="grpName">소속</label>
                 <input
                   type="text"
-                  id="permissionName"
-                  name="permissionName"
-                  th:value="${permissionName}"
-                  placeholder="역할명"
+                  id="grpName"
+                  name="grpName"
+                  th:value="${grpName}"
+                  placeholder="소속 그룹명"
                   autocomplete="off"
                 />
               </div>
               <div class="role-search__inline role-search__inline--date-range">
-                <label for="createdFrom">역할 생성일</label>
+                <label for="prjStartFrom">프로젝트 투입일</label>
                 <input
                   type="date"
-                  id="createdFrom"
-                  name="createdFrom"
-                  th:value="${createdFrom}"
+                  id="prjStartFrom"
+                  name="prjStartFrom"
+                  th:value="${prjStartFrom}"
                 />
                 <span class="role-search__tilde">~</span>
                 <input
                   type="date"
-                  id="createdTo"
-                  name="createdTo"
-                  th:value="${createdTo}"
-                  aria-label="권한 생성일 종료"
+                  id="prjStartTo"
+                  name="prjStartTo"
+                  th:value="${prjStartTo}"
+                  aria-label="프로젝트 투입일 종료"
                 />
               </div>
               <div class="role-search__actions">
@@ -285,19 +266,17 @@
           </form>
         </section>
 
-        <section
-          class="menu-role-page__list"
-          aria-labelledby="menu-role-list-heading"
-        >
-          <h2 class="menu-role-page__section-title" id="menu-role-list-heading">
-            프로젝트 역할 목록
+        <section class="menu-role-page__list"
+          aria-labelledby="member-list-heading">
+          <h2 class="menu-role-page__section-title" id="member-list-heading">
+            프로젝트 멤버 목록
           </h2>
           <div class="menu-role-page__grid-wrap">
             <div
-              id="menuRoleGrid"
+              id="memberGrid"
               class="menu-role-page__grid-host"
               role="region"
-              aria-label="프로젝트 역할 그리드"
+              aria-label="프로젝트 멤버 그리드"
             ></div>
           </div>
         </section>
@@ -308,15 +287,8 @@
       ></div>
 
       <script>
-        /**
-         * 역할 확인/알림 모달 (#roleQuestionModal). 메시지·제목은 호출부에서 전달.
-         */
         window.RoleQuestionModal = (function () {
-          var modalEl,
-            titleEl,
-            msgEl,
-            btnCancel,
-            btnConfirm;
+          var modalEl, titleEl, msgEl, btnCancel, btnConfirm;
 
           function cacheElements() {
             if (!modalEl) {
@@ -325,7 +297,9 @@
               titleEl = document.getElementById("roleQuestionModalTitle");
               msgEl = document.getElementById("roleQuestionModalMessage");
               btnCancel = document.getElementById("roleQuestionModalCancelBtn");
-              btnConfirm = document.getElementById("roleQuestionModalConfirmBtn");
+              btnConfirm = document.getElementById(
+                "roleQuestionModalConfirmBtn",
+              );
             }
             return true;
           }
@@ -362,11 +336,8 @@
                 resolve(value);
               }
               function onModalHidden() {
-                if (mode === "confirm") {
-                  settle(false);
-                } else {
-                  settle(undefined);
-                }
+                if (mode === "confirm") settle(false);
+                else settle(undefined);
               }
               titleEl.textContent =
                 opts.title != null && opts.title !== ""
@@ -406,10 +377,10 @@
         })();
 
         document.addEventListener("DOMContentLoaded", function () {
-          (function roleSearchDates() {
-            const form = document.getElementById("roleSearchForm");
-            const start = document.getElementById("createdFrom");
-            const end = document.getElementById("createdTo");
+          (function memberSearchDates() {
+            const form = document.getElementById("memberSearchForm");
+            const start = document.getElementById("prjStartFrom");
+            const end = document.getElementById("prjStartTo");
             if (!form || !start || !end) return;
 
             const pad = (n) => String(n).padStart(2, "0");
@@ -497,7 +468,7 @@
                 e.preventDefault();
                 await window.RoleQuestionModal.alert(
                   "시작일은 오늘 이후로 지정할 수 없습니다.",
-                  "알림"
+                  "알림",
                 );
                 return;
               }
@@ -505,7 +476,7 @@
                 e.preventDefault();
                 await window.RoleQuestionModal.alert(
                   "종료일은 오늘 이후로 지정할 수 없습니다.",
-                  "알림"
+                  "알림",
                 );
                 return;
               }
@@ -513,7 +484,7 @@
                 e.preventDefault();
                 await window.RoleQuestionModal.alert(
                   "시작일은 종료일보다 늦을 수 없습니다.",
-                  "알림"
+                  "알림",
                 );
                 return;
               }
@@ -521,9 +492,15 @@
           })();
 
           function formatDate(value) {
-            if (!value) return "";
+            if (value == null || value === "") return "";
+            if (
+              typeof value === "string" &&
+              /^\d{4}-\d{2}-\d{2}$/.test(value)
+            ) {
+              return value;
+            }
             const d = new Date(value);
-            if (isNaN(d.getTime())) return value;
+            if (isNaN(d.getTime())) return String(value);
             const pad = (n) => String(n).padStart(2, "0");
             return (
               d.getFullYear() +
@@ -534,23 +511,12 @@
             );
           }
 
-          function collectRoleCdForApi(r) {
-            if (!r) return null;
-            var v =
-              r.roleCd != null && r.roleCd !== ""
-                ? r.roleCd
-                : r.id != null && r.id !== ""
-                  ? r.id
-                  : null;
-            if (v == null || v === "") return null;
-            var n = Number(v);
-            return isNaN(n) ? null : n;
-          }
-
           function buildCsrfHeaders() {
             var headers = { "Content-Type": "application/json" };
             var tokenMeta = document.querySelector('meta[name="_csrf"]');
-            var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+            var headerMeta = document.querySelector(
+              'meta[name="_csrf_header"]',
+            );
             if (
               tokenMeta &&
               headerMeta &&
@@ -562,8 +528,25 @@
             return headers;
           }
 
-          let gridData = Array.isArray(projectRoleRows)
-            ? projectRoleRows.map(function (r) {
+          function rowMemberKey(r) {
+            if (!r) return null;
+            var u = r.userId != null ? String(r.userId) : "";
+            var g = r.grpId != null ? String(r.grpId) : "";
+            if (!u || !g) return null;
+            return u + "_" + g;
+          }
+
+          function memberKeyPayload(r) {
+            if (!r) return null;
+            var uid =
+              r.userId != null && r.userId !== "" ? Number(r.userId) : NaN;
+            var gid = r.grpId != null && r.grpId !== "" ? Number(r.grpId) : NaN;
+            if (isNaN(uid) || isNaN(gid)) return null;
+            return { userId: uid, grpId: gid };
+          }
+
+          let gridData = Array.isArray(projectMemberRows)
+            ? projectMemberRows.map(function (r) {
                 return typeof r === "object" && r !== null
                   ? Object.assign({}, r)
                   : r;
@@ -571,22 +554,21 @@
             : [];
           let deleteMode = false;
           let grid = null;
-          /** 그리드 destroy 시 같이 지워지지 않도록 보관하는 툴바 루트 */
           let toolbarMountElement = null;
 
           function getToolbarMount() {
             if (!toolbarMountElement) {
               toolbarMountElement = document.createElement("div");
-              toolbarMountElement.id = "roleGridToolbarMount";
+              toolbarMountElement.id = "memberGridToolbarMount";
               toolbarMountElement.className = "role-grid-toolbar";
               toolbarMountElement.setAttribute("role", "toolbar");
-              toolbarMountElement.setAttribute("aria-label", "역할 목록 도구");
+              toolbarMountElement.setAttribute("aria-label", "멤버 목록 도구");
             }
             return toolbarMountElement;
           }
 
           function detachToolbarFromGrid() {
-            const host = document.getElementById("menuRoleGrid");
+            const host = document.getElementById("memberGrid");
             const mount = getToolbarMount();
             if (host && mount.parentNode === host) {
               host.removeChild(mount);
@@ -594,7 +576,7 @@
           }
 
           function placeToolbarBetweenTableAndPagination() {
-            const host = document.getElementById("menuRoleGrid");
+            const host = document.getElementById("memberGrid");
             const mount = getToolbarMount();
             if (!host || !mount) return false;
             const pag = host.querySelector(".tui-pagination");
@@ -614,20 +596,13 @@
                 setTimeout(attempt, 30);
                 return;
               }
-              var host = document.getElementById("menuRoleGrid");
+              var host = document.getElementById("memberGrid");
               var mount = getToolbarMount();
               if (host && mount && !host.contains(mount)) {
                 host.appendChild(mount);
               }
             }
             setTimeout(attempt, 0);
-          }
-
-          function rowBizId(r) {
-            if (!r) return null;
-            if (r.roleCd != null && r.roleCd !== "") return String(r.roleCd);
-            if (r.id != null && r.id !== "") return String(r.id);
-            return null;
           }
 
           function getCheckedRowsForRemove() {
@@ -653,19 +628,19 @@
             const mount = getToolbarMount();
             if (!mount) return;
             let html =
-              '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--register" id="roleBtnRegister">등록</button>';
+              '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--register" id="memberBtnRegister">등록</button>';
             if (!deleteMode) {
               html +=
-                '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--delete" id="roleBtnDelete">삭제</button>';
+                '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--delete" id="memberBtnDelete">삭제</button>';
             } else {
               const rows = grid ? getCheckedRowsForRemove() : [];
               const n = rows.length;
               if (n === 0) {
                 html +=
-                  '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--cancel-delete" id="roleBtnDeleteCancel">삭제 취소</button>';
+                  '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--cancel-delete" id="memberBtnDeleteCancel">삭제 취소</button>';
               } else {
                 html +=
-                  '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--remove" id="roleBtnRemove">제거</button>';
+                  '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--remove" id="memberBtnRemove">제거</button>';
               }
             }
             mount.innerHTML = html;
@@ -678,20 +653,20 @@
             mount.addEventListener("click", function (e) {
               const btn = e.target.closest("button");
               if (!btn || !btn.id) return;
-              if (btn.id === "roleBtnRegister") {
+              if (btn.id === "memberBtnRegister") {
                 return;
               }
-              if (btn.id === "roleBtnDelete") {
+              if (btn.id === "memberBtnDelete") {
                 deleteMode = true;
                 recreateGrid();
                 return;
               }
-              if (btn.id === "roleBtnDeleteCancel") {
+              if (btn.id === "memberBtnDeleteCancel") {
                 deleteMode = false;
                 recreateGrid();
                 return;
               }
-              if (btn.id === "roleBtnRemove") {
+              if (btn.id === "memberBtnRemove") {
                 void onRemoveClicked();
               }
             });
@@ -703,30 +678,29 @@
               return;
             }
             const names = rows.map(function (r) {
-              return r.roleName != null && r.roleName !== ""
-                ? String(r.roleName)
-                : "(역할명 없음)";
+              return r.userName != null && r.userName !== ""
+                ? String(r.userName)
+                : "(이름 없음)";
             });
             const msg =
-              "선택한 역할을 삭제하시겠습니까?\n\n" + names.join("\n");
+              "선택한 멤버를 프로젝트에서 제거하시겠습니까?\n\n" +
+              names.join("\n");
             var confirmed = await window.RoleQuestionModal.confirm(
               msg,
-              "역할 삭제"
+              "멤버 제거",
             );
             if (!confirmed) {
               return;
             }
-            const roleCds = rows
+            const members = rows
               .map(function (r) {
-                return collectRoleCdForApi(r);
+                return memberKeyPayload(r);
               })
-              .filter(function (n) {
-                return n != null;
-              });
-            if (!roleCds.length) {
+              .filter(Boolean);
+            if (!members.length) {
               await window.RoleQuestionModal.alert(
-                "역할 코드를 확인할 수 없습니다.",
-                "알림"
+                "사용자·그룹 정보를 확인할 수 없습니다.",
+                "알림",
               );
               return;
             }
@@ -734,20 +708,17 @@
             if (isNaN(pid)) {
               await window.RoleQuestionModal.alert(
                 "프로젝트 ID가 올바르지 않습니다.",
-                "알림"
+                "알림",
               );
               return;
             }
             try {
-              var res = await fetch(
-                "/project/option/role/deleteRoles",
-                {
-                  method: "POST",
-                  headers: buildCsrfHeaders(),
-                  credentials: "same-origin",
-                  body: JSON.stringify({ prjId: pid, roleCds: roleCds }),
-                }
-              );
+              var res = await fetch("/project/member/deleteMembers", {
+                method: "POST",
+                headers: buildCsrfHeaders(),
+                credentials: "same-origin",
+                body: JSON.stringify({ prjId: pid, members: members }),
+              });
               var data = {};
               try {
                 data = await res.json();
@@ -764,7 +735,7 @@
             } catch (e) {
               await window.RoleQuestionModal.alert(
                 "제거 중 오류가 발생하였습니다.",
-                "오류"
+                "오류",
               );
               return;
             }
@@ -775,17 +746,17 @@
             const okMsg =
               names.length === 1
                 ? labelPart + "이(가) 정상적으로 제거되었습니다."
-                : labelPart + " 역할이 정상적으로 제거되었습니다.";
+                : labelPart + " 멤버가 정상적으로 제거되었습니다.";
             await window.RoleQuestionModal.alert(okMsg, "알림");
 
             const removeSet = {};
             rows.forEach(function (r) {
-              const id = rowBizId(r);
-              if (id) removeSet[id] = true;
+              const k = rowMemberKey(r);
+              if (k) removeSet[k] = true;
             });
             gridData = gridData.filter(function (r) {
-              const id = rowBizId(r);
-              return !id || !removeSet[id];
+              const k = rowMemberKey(r);
+              return !k || !removeSet[k];
             });
             deleteMode = false;
             recreateGrid();
@@ -797,7 +768,7 @@
               grid.destroy();
               grid = null;
             }
-            const el = document.getElementById("menuRoleGrid");
+            const el = document.getElementById("memberGrid");
             if (!el) return;
 
             bindToolbarMountOnce();
@@ -817,51 +788,37 @@
               minBodyHeight: 100,
               columns: [
                 {
-                  header: "ROLE_CD",
-                  name: "roleCd",
-                  width: 110,
+                  header: "이름",
+                  name: "userName",
+                  width: 120,
                   align: "center",
                   sortable: true,
-                  formatter: ({ value }) =>
-                    value == null || value === "" ? "" : String(value),
                 },
                 {
-                  header: "역할명",
-                  name: "roleName",
+                  header: "연락처",
+                  name: "tel",
+                  width: 130,
+                  align: "center",
+                  sortable: false,
+                },
+                {
+                  header: "이메일",
+                  name: "email",
                   width: 220,
                   align: "center",
-                  sortable: true,
-                  formatter: ({ row, value }) => {
-                    const rc =
-                      row.roleCd != null && row.roleCd !== ""
-                        ? row.roleCd
-                        : row.id;
-                    const text = value == null ? "" : value;
-                    const q =
-                      "prjId=" +
-                      encodeURIComponent(prjId) +
-                      "&roleCd=" +
-                      encodeURIComponent(rc == null ? "" : String(rc));
-                    return (
-                      '<a href="/project/option/role/roleManagementInfo?' +
-                      q +
-                      '">' +
-                      text +
-                      "</a>"
-                    );
-                  },
+                  sortable: false,
                 },
                 {
-                  header: "보유 그룹 수",
-                  name: "grpCnt",
-                  width: 120,
+                  header: "소속 그룹명",
+                  name: "grpName",
+                  width: 180,
                   align: "center",
-                  sortable: true,
+                  sortable: false,
                 },
                 {
-                  header: "권한 생성일",
-                  name: "createdOn",
-                  width: 120,
+                  header: "프로젝트 투입일",
+                  name: "prjStartDate",
+                  width: 130,
                   align: "center",
                   sortable: true,
                   formatter: ({ value }) => formatDate(value),
@@ -869,7 +826,7 @@
               ],
               pageOptions: {
                 useClient: true,
-                perPage: 15,
+                perPage: 10,
               },
             });
 
@@ -884,25 +841,6 @@
             });
             grid.on("uncheckAll", function () {
               renderToolbar();
-            });
-
-            grid.on("click", function (ev) {
-              if (deleteMode) {
-                return;
-              }
-              if (ev.columnName === "roleName" || ev.rowKey == null) return;
-              const row = grid.getRow(ev.rowKey);
-              const rc =
-                row && row.roleCd != null && row.roleCd !== ""
-                  ? row.roleCd
-                  : row && row.id;
-              if (rc != null && rc !== "") {
-                location.href =
-                  "/project/option/role/roleManagementInfo?prjId=" +
-                  encodeURIComponent(prjId) +
-                  "&roleCd=" +
-                  encodeURIComponent(String(rc));
-              }
             });
 
             renderToolbar();
