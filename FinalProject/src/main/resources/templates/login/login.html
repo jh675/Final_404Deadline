@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/errorpgLayout}">
+<head>
+<title>Spring Security Example</title>
+</head>
+<body>
+	<div layout:fragment="content">
+		<div th:if="${param.error}">회원정보가 일치하지 않습니다.</div>
+		<div th:if="${param.logout}">로그아웃 했습니다.</div>
+		<form th:action="@{/login}" method="post">
+			<div>
+				<label> User Name : <input type="text" name="username" />
+				</label>
+			</div>
+			<div>
+				<label id="test"> Password: <input type="password" name="password" />
+				</label>
+			</div>
+			<div>
+				<input type="submit" value="Sign In" />
+			</div>
+		</form>
+
+		<div>
+			<a th:href="@{/}">홈으로 돌아가기</a> <a href="#" data-bs-toggle="modal"
+				data-bs-target="#resetPwModal">비밀번호 재설정 </a>
+		</div>
+
+		<div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
+	</div>
+	
+<!-- CSS 연결 -->
+	<th:block layout:fragment="css">
+		<link rel="stylesheet" th:href="@{/css/login/login.css}">
+	</th:block>
+<!-- JS 연결 -->
+	<th:block layout:fragment="script">
+		<script th:src="@{/js/login/resetPw.js}"></script>
+	</th:block>
+</body>
+</html>

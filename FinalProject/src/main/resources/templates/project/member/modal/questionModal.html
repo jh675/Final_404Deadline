@@ -1,0 +1,55 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <!--
+      멤버 관리 등에서 재사용하는 확인/알림 모달.
+      메시지·제목은 스크립트에서 설정합니다 (예: memberQuestionModal.confirm / .alert).
+    -->
+    <div th:fragment="memberQuestionModal">
+      <div
+        class="modal fade"
+        id="memberQuestionModal"
+        tabindex="-1"
+        aria-labelledby="memberQuestionModalTitle"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="memberQuestionModalTitle">알림</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="닫기"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <p
+                class="mb-0 text-break"
+                id="memberQuestionModalMessage"
+                style="white-space: pre-wrap"
+              ></p>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="memberQuestionModalCancelBtn"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="memberQuestionModalConfirmBtn"
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

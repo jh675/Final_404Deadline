@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.login.mapper.LoginMapper">
+
+	<select id="selectOne">
+		select ID
+			  ,BIZ_NO
+	  		  ,LOGIN
+			  ,PASSWORD
+			  ,NAME
+			  ,TEL
+			  ,EMAIL
+			  ,get_sub_code_name(ADMIN_CD) as "ADMIN_CD"
+			  ,get_sub_code_name(STATUS_CD) "STATUS_CD"
+			  ,CREATED_ON
+			  ,PW_UPDATED_ON
+			  ,get_sub_code_name(PRJ_MANAGER_CD) "PRJ_MANAGER_CD"
+			  ,get_sub_code_name(MCP_CD) "MCP_CD"
+	  	from   users
+	 	where  login = #{loginId}
+	</select>
+
+	<update id="updatePassword">
+
+		UPDATE users
+		SET password = #{password}
+		WHERE biz_no = #{bizNo}
+		AND login = #{login}
+	
+	</update>
+</mapper>

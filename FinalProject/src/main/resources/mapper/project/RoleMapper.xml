@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 프로젝트 권한: ROLE·MENU·ROLE_MENU·GRP_ROLE -->
+<mapper namespace="com.example.demo.project.option.mapper.RoleMapper">
+
+  <!-- 목록 검색 WHERE (prjId 필수, 권한코드·이름·생성일 선택) -->
+  <sql id="roleListWhere">
+    <where>
+      R.PRJ_ID = #{prjId}
+      <if test="permissionKey != null and permissionKey != ''">
+        AND TO_CHAR(R.ROLE_CD) LIKE '%' || #{permissionKey} || '%'
+      </if>
+      <if test="permissionName != null and permissionName != ''">
+        AND R.ROLE_NAME LIKE '%' || #{permissionName} || '%'
+      </if>
+      <if test="createdFrom != null and createdFrom != ''">
+        AND TRUNC(R.CREATED_ON) &gt;= TO_DATE(#{createdFrom}, 'YYYY-MM-DD')
+      </if>
+      <if test="createdTo != null and createdTo != ''">
+        AND TRUNC(R.CREATED_ON) &lt;= TO_DATE(#{createdTo}, 'YYYY-MM-DD')
+      </if>
+    </where>
+  </sql>
+
+  <!-- 프로젝트 ROLE 목록 (기준: ROLE R) -->
+  <select id="selectRoleList" resultType="com.example.demo.project.option.service.RoleVO">
+    SELECT
+      R.ROLE_CD AS roleCd,
+      TO_CHAR(R.ROLE_CD) AS id,
+      TO_CHAR(R.ROLE_CD) AS roleId,
+      R.ROLE_NAME AS roleName,
+      R.CREATED_ON AS createdOn,
+      COUNT(DISTINCT G.ID) AS grpCnt
+    FROM ROLE R
+    LEFT JOIN GRP_ROLE GR ON GR.ROLE_CD = R.ROLE_CD
+    LEFT JOIN GRP G ON G.ID = GR.GRP_ID AND G.PRJ_ID = R.PRJ_ID
+    <include refid="roleListWhere"/>
+    GROUP BY R.ROLE_CD, R.ROLE_NAME, R.CREATED_ON
+    ORDER BY R.ROLE_CD
+  </select>
+
+  <!-- 역할 상세 — 단일 ROLE -->
+  <select id="selectRoleByPrjAndCd" resultType="com.example.demo.project.option.service.RoleVO">
+    SELECT
+      R.ROLE_CD AS roleCd,
+      TO_CHAR(R.ROLE_CD) AS id,
+      TO_CHAR(R.ROLE_CD) AS roleId,
+      R.ROLE_NAME AS roleName,
+      R.CREATED_ON AS createdOn,
+      0 AS grpCnt
+    FROM ROLE R
+    WHERE R.PRJ_ID = #{prjId}
+      AND R.ROLE_CD = #{roleCd}
+  </select>
+
+  <!-- MENU 전체 — 역할 상세에서 ROLE_MENU 연결 여부 체크용 -->
+  <select id="selectAllMenus" resultType="com.example.demo.project.option.service.RoleVO">
+    SELECT
+      M.ROLE_ID AS id,
+      M.ROLE_ID AS roleId,
+      M.ROLE_NAME AS roleName,
+      M.ROLE_URL AS roleUrl,
+      M.ROLE_TP AS roleTp,
+      M.ROLE_MTH AS roleMth
+    FROM MENU M
+    ORDER BY M.ROLE_TP, M.ROLE_ID
+  </select>
+
+  <!-- 역할 상세 — 체크된 메뉴 ID 목록 -->
+  <select id="selectMenuRoleIdsByRoleCd" resultType="java.lang.String">
+    SELECT RM.ROLE_ID
+    FROM ROLE_MENU RM
+    WHERE RM.ROLE_CD = #{roleCd}
+  </select>
+
+  <!-- 해당 ROLE_CD를 GRP_ROLE로 보유한 그룹 -->
+  <select id="selectRoleGroupsList" resultType="com.example.demo.project.option.service.RoleGroupRowVO">
+    SELECT
+      G.ID AS id,
+      G.NAME AS grpName,
+      COUNT(DISTINCT M.USER_ID) AS grpMemberCnt,
+      G.CREATED_ON AS createdOn
+    FROM GRP G
+    LEFT JOIN MEMBER M ON M.GRP_ID = G.ID
+    WHERE G.PRJ_ID = #{prjId}
+      AND EXISTS (
+        SELECT 1
+        FROM GRP_ROLE GR
+        WHERE GR.GRP_ID = G.ID
+          AND GR.ROLE_CD = #{roleCd}
+      )
+    GROUP BY G.ID, G.NAME, G.CREATED_ON
+    ORDER BY G.ID
+  </select>
+
+  <!-- 역할 삭제 — DB 프로시저 (ROLE_MENU·GRP_ROLE·ROLE 등 DB 내부에서 정리) -->
+  <update id="callProcRoleDelete" statementType="CALLABLE">
+    {
+      CALL PROC_ROLE_DELETE(
+        #{roleCd, mode=IN, jdbcType=NUMERIC},
+        #{prjId, mode=IN, jdbcType=NUMERIC}
+      )
+    }
+  </update>
+</mapper>

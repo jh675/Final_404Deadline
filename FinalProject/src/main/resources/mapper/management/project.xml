@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.example.demo.management.mapper.ProjectMapper">
+ 
+ <select id="listProject" resultType="ProjectVO">
+ 	SELECT p.*, c.company_name as companyName
+	FROM project p
+	LEFT JOIN company c ON p.biz_no = c.biz_no
+ </select>
+ 
+<select id="searchUsersByBizNo" resultType="com.example.demo.login.service.UserVO">
+    SELECT 
+        id          AS "id", 
+        name   AS "name"  <!-- VO 필드명이 name이면 반드시 "name"으로 별칭 -->
+    FROM users 
+    WHERE biz_no = #{bizNo}
+      AND name LIKE '%' || #{term} || '%'
+</select>
+ 
+ 
+<insert id="projectInsert" parameterType="ProjectVO">
+    <selectKey keyProperty="id" resultType="int" order="BEFORE">
+        select pj_seq.nextval from dual
+    </selectKey>
+    
+    DECLARE
+        v_lft INTEGER;
+        v_rgt INTEGER;
+    BEGIN
+        <choose>
+            <!-- 1. 자식 프로젝트로 추가될 경우 -->
+            <when test="prjParId != null and prjParId != ''">
+                SELECT prj_rgt INTO v_lft FROM project WHERE id = #{prjParId};
+                UPDATE project SET prj_lft = prj_lft + 2 WHERE prj_lft >= v_lft;
+                UPDATE project SET prj_rgt = prj_rgt + 2 WHERE prj_rgt >= v_lft;
+                v_rgt := v_lft + 1;
+            </when>
+            
+            <!-- 2. 최상위 프로젝트로 추가될 경우 -->
+            <otherwise>
+                SELECT NVL(MAX(prj_rgt), 0) + 1 INTO v_lft FROM project;
+                v_rgt := v_lft + 1;
+            </otherwise>
+        </choose>
+
+        INSERT INTO project (
+            id, biz_no, prj_par_id, prj_root_id, prj_name, 
+            prj_desc, prj_identifier, prj_status_cd, prj_lft, prj_rgt, user_id
+        ) VALUES (
+            #{id}, #{bizNo}, #{prjParId}, 
+            <choose>
+                <when test="prjParId != null and prjParId != ''">#{prjRootId}</when>
+                <otherwise>#{id}</otherwise> 
+            </choose>, 
+            #{prjName}, #{prjDesc}, #{prjIdentifier}, '01PROSTAT', 
+            v_lft, v_rgt, #{userId}
+        );
+        
+       
+        
+    END;
+</insert>
+
+<!-- 별도로 분리한 모듈 삽입 쿼리 -->
+<insert id="moduleInsert" parameterType="com.example.demo.management.service.ModulesVO">
+    INSERT INTO enabled_modules (ena_id, prj_id, ena_name_cd)
+    VALUES (en_mod_seq.nextval, #{prjId}, #{enaNameCd})
+</insert>
+ 
+ 
+ 
+ 
+ </mapper>

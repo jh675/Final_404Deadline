@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/userLayout}">
+<head>
+<meta charset="UTF-8">
+<title th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'">이슈 등록</title>
+<th:block layout:fragment="head-content">
+<meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+<meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+<style>
+
+
+
+.back-row {
+	margin-bottom: 16px;
+}
+
+.back-row a {
+	font-size: 13px;
+	color: #5b6cff;
+	text-decoration: none;
+}
+
+.back-row a:hover {
+	text-decoration: underline;
+}
+
+.page-title {
+	font-size: 22px;
+	font-weight: 700;
+	margin-bottom: 24px;
+	line-height: 1.35;
+}
+
+.req {
+	color: #d32f2f;
+	font-weight: 700;
+	margin-left: 2px;
+}
+
+.form-grid {
+	display: grid;
+	grid-template-columns: 140px 1fr;
+	gap: 14px 20px;
+	align-items: center;
+	margin-bottom: 18px;
+}
+
+.form-grid label {
+	font-size: 13px;
+	font-weight: 600;
+	color: #444;
+	justify-self: start;
+}
+
+.form-grid .field-wrap {
+	width: 100%;
+}
+
+.form-grid input[type="text"],
+.form-grid input[type="datetime-local"],
+.form-grid select,
+.form-grid textarea {
+	width: 100%;
+	max-width: 100%;
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	background: #fff;
+	color: #333;
+}
+
+.form-grid textarea {
+	min-height: 140px;
+	resize: vertical;
+	font-family: inherit;
+	line-height: 1.45;
+}
+
+.form-hint {
+	font-size: 12px;
+	color: #777;
+	margin-top: 6px;
+}
+
+.attach-section {
+	grid-column: 1 / -1;
+	border: 1px solid #e0e0e0;
+	border-radius: 6px;
+	padding: 14px 16px;
+	background: #fafafa;
+}
+
+.attach-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.attach-head span {
+	font-size: 13px;
+	font-weight: 600;
+	color: #444;
+}
+
+.attach-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.attach-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.attach-row input[type="file"] {
+	flex: 1;
+	min-width: 200px;
+	font-size: 13px;
+}
+
+.btn-ghost {
+	padding: 6px 12px;
+	font-size: 12px;
+	border: 1px solid #ccc;
+	background: #fff;
+	border-radius: 4px;
+	cursor: pointer;
+	color: #444;
+}
+
+.btn-ghost:hover {
+	background: #f3f3f3;
+}
+
+.btn-primary {
+	padding: 10px 24px;
+	font-size: 14px;
+	font-weight: 600;
+	border: none;
+	border-radius: 4px;
+	background: #5b6cff;
+	color: #fff;
+	cursor: pointer;
+}
+
+.btn-primary:hover {
+	background: #4956d8;
+}
+
+.btn-secondary {
+	padding: 10px 24px;
+	font-size: 14px;
+	font-weight: 600;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background: #fff;
+	color: #444;
+	cursor: pointer;
+}
+
+.btn-secondary:hover {
+	background: #f5f5f5;
+}
+
+.form-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 28px;
+	padding-top: 20px;
+	border-top: 1px solid #eee;
+}
+
+.err-msg {
+	font-size: 12px;
+	color: #c62828;
+	margin-top: 4px;
+	display: none;
+}
+
+.err-msg.is-visible {
+	display: block;
+}
+
+.form-grid .field-wrap.is-invalid input,
+.form-grid .field-wrap.is-invalid select,
+.form-grid .field-wrap.is-invalid textarea {
+	border-color: #c62828;
+}
+
+/* 썸 지름과 동일 — 트랙 끝과 눈금 정렬에 사용 */
+.progress-wrap {
+	--thumb-size: 18px;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-rows: auto auto;
+	align-items: center;
+	column-gap: 14px;
+	row-gap: 6px;
+	width: 100%;
+}
+
+.progress-wrap input[type="range"] {
+	grid-column: 1;
+	grid-row: 1;
+	width: 100%;
+	min-width: 0;
+	height: 6px;
+	border-radius: 3px;
+	accent-color: #5b6cff;
+	-webkit-appearance: none;
+	appearance: none;
+	background: transparent;
+}
+
+.progress-wrap input[type="range"]::-webkit-slider-runnable-track {
+	height: 6px;
+	border-radius: 3px;
+	background: linear-gradient(to right, #5b6cff 0%, #5b6cff var(--pct, 0%), #e4e6ef var(--pct, 0%), #e4e6ef 100%);
+}
+
+.progress-wrap input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: var(--thumb-size);
+	height: var(--thumb-size);
+	margin-top: -6px;
+	border-radius: 50%;
+	background: #fff;
+	border: 2px solid #5b6cff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+}
+
+.progress-wrap input[type="range"]::-moz-range-track {
+	height: 6px;
+	border-radius: 3px;
+	background: #e4e6ef;
+}
+
+.progress-wrap input[type="range"]::-moz-range-progress {
+	height: 6px;
+	border-radius: 3px;
+	background: #5b6cff;
+}
+
+.progress-wrap input[type="range"]::-moz-range-thumb {
+	width: var(--thumb-size);
+	height: var(--thumb-size);
+	border-radius: 50%;
+	background: #fff;
+	border: 2px solid #5b6cff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+}
+
+.progress-wrap .progress-value-pill {
+	grid-column: 2;
+	grid-row: 1;
+}
+
+.progress-value-pill {
+	flex-shrink: 0;
+	min-width: 52px;
+	padding: 6px 12px;
+	text-align: center;
+	font-size: 14px;
+	font-weight: 700;
+	color: #fff;
+	background: #5b6cff;
+	border-radius: 6px;
+}
+
+/* 눈금: 슬라이더(1열) 너비에만 맞추고, 썸 중심이 움직이는 구간에 맞춰 배치 */
+.progress-ticks {
+	grid-column: 1;
+	grid-row: 2;
+	position: relative;
+	height: 1.15em;
+	font-size: 11px;
+	color: #999;
+	user-select: none;
+}
+
+.progress-ticks span {
+	position: absolute;
+	top: 0;
+	transform: translateX(-50%);
+	white-space: nowrap;
+}
+
+.progress-ticks span:nth-child(1) {
+	left: calc(var(--thumb-size) / 2);
+}
+
+.progress-ticks span:nth-child(2) {
+	left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.2);
+}
+
+.progress-ticks span:nth-child(3) {
+	left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.4);
+}
+
+.progress-ticks span:nth-child(4) {
+	left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.6);
+}
+
+.progress-ticks span:nth-child(5) {
+	left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.8);
+}
+
+.progress-ticks span:nth-child(6) {
+	left: calc(100% - var(--thumb-size) / 2);
+}
+</style>
+</th:block>
+</head>
+<body>
+<div layout:fragment="content">
+<div class="issue-shell">
+<div class="issue-inner">
+	<div class="back-row">
+		<a href="javascript:history.back()">← 이전</a>
+	</div>
+
+	<h1 class="page-title" th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'">이슈 등록</h1>
+
+	<form id="issueRegistForm" th:action="@{/sign-up}">
+		<input type="hidden" id="issueId" name="id"
+			th:value="${issue != null and issue.id != null ? issue.id : ''}" />
+		<input type="hidden" id="memId" name="memId"
+			th:value="${#authentication.principal.id}" />
+		<div class="form-grid">
+			<label for="subject">제목<span class="req">*</span></label>
+			<div class="field-wrap" id="wrap-subject">
+				<input type="text" id="subject" name="subject" maxlength="500"
+					placeholder="제목 입력"
+					th:value="${issue != null and issue.subject != null ? issue.subject : ''}" required />
+				<p class="err-msg" id="err-subject">제목을 입력해 주세요.</p>
+			</div>
+
+			<label for="memId">담당자</label>
+			<div class="field-wrap" id="wrap-memId">
+				<select id="memId" name="memId">
+					<option value="">미정</option>
+					<option value="1">홍길동</option>
+					<option value="2">김길동</option>
+					<option value="3">김민수</option>
+					<option value="4">배민수</option>
+				</select>
+				<p class="err-msg" id="err-memId">담당자를 선택해 주세요.</p>
+			</div>
+
+			<label for="estStartDate">시작예정일</label>
+			<div class="field-wrap">
+				<input type="datetime-local" id="estStartDate" name="estStartDate" step="60"
+					th:value="${issue != null and issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd''T''HH:mm') : ''}" />
+				
+			</div>
+
+			<label for="dueDate">종료예정일</label>
+			<div class="field-wrap">
+				<input type="datetime-local" id="dueDate" name="dueDate" step="60"
+					th:value="${issue != null and issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd''T''HH:mm') : ''}" />
+			</div>
+
+			<label for="milestoneId">마일스톤</label>
+			<div class="field-wrap">
+				<select id="milestoneId" name="milestoneId">
+					<option value="">없음</option>
+					<option value="1">마일스톤1</option>
+					<option value="2">마일스톤2</option>
+					<option value="3">마일스톤3</option>
+				</select>
+			</div>
+
+			<label>첨부파일</label>
+			<div class="field-wrap attach-section">
+				<div class="attach-head">
+					<span>첨부 목록 (최대 5개, 합계 50MB 이하)</span>
+					<button type="button" class="btn-ghost" id="btnAddFile">파일추가</button>
+				</div>
+				<div class="attach-rows" id="attachRows"></div>
+				<p class="err-msg" id="err-attach">첨부 용량은 합계 50MB를 넘을 수 없습니다.</p>
+			</div>
+
+			<label for="parentIssue">상위 이슈</label>
+			<div class="field-wrap">
+				<select id="parentIssue" name="parentIssue">
+					
+					<option value=""
+						th:selected="${issue == null or issue.parentIssue == null}">없음</option>
+					<option th:each="item :${issueIds}" 
+						th:value="${item.ID}"
+						th:text="${item.SUBJECT}"
+						th:selected="${ids != null and issue.parentIssue == ids.id }">없음</option>
+				</select>
+			</div>
+
+			<label for="categoryCd">유형</label>
+			<div class="field-wrap">
+				<select id="categoryCd" name="categoryCd">
+					<option value="01ISSUECATE"
+						th:selected="${issue != null and issue.categoryCd == '01ISSUECATE'}">버그</option>
+					<option value="02ISSUECATE"
+						th:selected="${issue == null or issue.categoryCd == null or issue.categoryCd == '' or issue.categoryCd == '02ISSUECATE'}">기능</option>
+					<option value="03ISSUECATE"
+						th:selected="${issue != null and issue.categoryCd == '03ISSUECATE'}">작업</option>
+					<option value="04ISSUECATE"
+						th:selected="${issue != null and issue.categoryCd == '04ISSUECATE'}">개선</option>
+				</select>
+			</div>
+
+			<label for="priorityCd">우선순위</label>
+			<div class="field-wrap">
+				<select id="priorityCd" name="priorityCd">
+					<option value="01ISSUEPRI"
+						th:selected="${issue != null and issue.priorityCd == '01ISSUEPRI'}">최상</option>
+					<option value="02ISSUEPRI"
+						th:selected="${issue != null and issue.priorityCd == '02ISSUEPRI'}">상</option>
+					<option value="03ISSUEPRI"
+						th:selected="${issue == null or issue.priorityCd == null or issue.priorityCd == '' or issue.priorityCd == '03ISSUEPRI'}">중</option>
+					<option value="04ISSUEPRI"
+						th:selected="${issue != null and issue.priorityCd == '04ISSUEPRI'}">하</option>
+				</select>
+			</div>
+
+			<label for="doneRatio">진척율</label>
+			<div class="field-wrap">
+				<div class="progress-wrap">
+					<input type="range" id="doneRatio" name="doneRatio" min="0" max="100" step="10"
+						th:value="${issue != null and issue.doneRatio != null ? T(java.lang.Math).round(issue.doneRatio.doubleValue() / 10.0) * 10 : 0}" />
+					<span class="progress-value-pill" id="doneRatioDisplay">0%</span>
+					<div class="progress-ticks" aria-hidden="true">
+						<span>0</span>
+						<span>20</span>
+						<span>40</span>
+						<span>60</span>
+						<span>80</span>
+						<span>100</span>
+					</div>
+				</div>
+				<p class="form-hint">10% 단위로만 조절됩니다.</p>
+			</div>
+
+			<label for="description">설명</label>
+			<div class="field-wrap">
+				<textarea id="description" name="description" placeholder="설명 입력"
+					th:text="${issue != null and issue.description != null ? issue.description : ''}"></textarea>
+			</div>
+		</div>
+
+		<div class="form-actions">
+			<button type="submit" class="btn-primary" id="btnSubmit"
+				th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'" required>이슈 등록</button>
+			<button type="button" class="btn-secondary" id="btnCancel">취소</button>
+		</div>
+	</form>
+</div>
+</div>
+
+<script th:inline="javascript">
+(function () {
+	var MAX_FILES = 5;
+	var MAX_TOTAL_BYTES = 50 * 1024 * 1024;
+	var form = document.getElementById('issueRegistForm');
+	var attachRows = document.getElementById('attachRows');
+	var btnAddFile = document.getElementById('btnAddFile');
+	var btnCancel = document.getElementById('btnCancel');
+	var errAttach = document.getElementById('err-attach');
+
+	function syncDoneRatioDisplay() {
+		var r = document.getElementById('doneRatio');
+		var d = document.getElementById('doneRatioDisplay');
+		if (!r || !d) return;
+		var v = Number(r.value);
+		if (isNaN(v)) v = 0;
+		v = Math.max(0, Math.min(100, Math.round(v / 10) * 10));
+		if (String(r.value) !== String(v)) r.value = String(v);
+		d.textContent = v + '%';
+		r.style.setProperty('--pct', v + '%');
+	}
+
+	function applyIssueSelects() {
+		/* 수정 시 서버에서 넘긴 값이 있으면 반영 (유형·상위이슈 등) */
+		var issue = /*[[${issue}]]*/ null;
+		if (!issue) return;
+		if (issue.categoryCd) {
+			var c = document.getElementById('categoryCd');
+			if (c) c.value = issue.categoryCd;
+		}
+		if (issue.priorityCd) {
+			var p = document.getElementById('priorityCd');
+			if (p) p.value = issue.priorityCd;
+		}
+		if (issue.parentIssue != null && issue.parentIssue !== '') {
+			var par = document.getElementById('parentIssue');
+			if (par) par.value = String(issue.parentIssue);
+		}
+		if (issue.memId != null && issue.memId !== '') {
+			var m = document.getElementById('memId');
+			if (m) m.value = String(issue.memId);
+		}
+		if (issue.doneRatio != null && issue.doneRatio !== '') {
+			var r = document.getElementById('doneRatio');
+			if (r) {
+				var v = Math.round(Number(issue.doneRatio) / 10) * 10;
+				v = Math.max(0, Math.min(100, v));
+				r.value = String(v);
+			}
+		}
+	}
+	applyIssueSelects();
+	syncDoneRatioDisplay();
+
+	var doneRatioEl = document.getElementById('doneRatio');
+	if (doneRatioEl) {
+		doneRatioEl.addEventListener('input', syncDoneRatioDisplay);
+		doneRatioEl.addEventListener('change', syncDoneRatioDisplay);
+	}
+
+	function fileRow() {
+		var row = document.createElement('div');
+		row.className = 'attach-row';
+		var input = document.createElement('input');
+		input.type = 'file';
+		input.name = 'attachments';
+		var del = document.createElement('button');
+		del.type = 'button';
+		del.className = 'btn-ghost';
+		del.textContent = '첨부삭제';
+		del.addEventListener('click', function () {
+			row.remove();
+			updateAddButtonState();
+		});
+		row.appendChild(input);
+		row.appendChild(del);
+		return row;
+	}
+
+	function updateAddButtonState() {
+		var n = attachRows.querySelectorAll('.attach-row').length;
+		btnAddFile.disabled = n >= MAX_FILES;
+	}
+
+	function addFileRow() {
+		if (attachRows.querySelectorAll('.attach-row').length >= MAX_FILES) return;
+		attachRows.appendChild(fileRow());
+		updateAddButtonState();
+	}
+
+	btnAddFile.addEventListener('click', addFileRow);
+	addFileRow();
+
+	function totalSelectedBytes() {
+		var sum = 0;
+		attachRows.querySelectorAll('input[type="file"]').forEach(function (inp) {
+			if (inp.files && inp.files[0]) sum += inp.files[0].size;
+		});
+		return sum;
+	}
+
+	function setFieldError(idWrap, idErr, show) {
+		var w = document.getElementById(idWrap);
+		var e = document.getElementById(idErr);
+		if (w) w.classList.toggle('is-invalid', show);
+		if (e) e.classList.toggle('is-visible', show);
+	}
+
+	function validate() {
+		var ok = true;
+		var subject = document.getElementById('subject').value.trim();
+		setFieldError('wrap-subject', 'err-subject', !subject);
+		if (!subject) ok = false;
+		errAttach.classList.remove('is-visible');
+		if (totalSelectedBytes() > MAX_TOTAL_BYTES) {
+			errAttach.classList.add('is-visible');
+			ok = false;
+		}
+		return ok;
+	}
+
+	btnCancel.addEventListener('click', function () {
+		history.back();
+	});
+
+	form.addEventListener('submit', function (ev) {
+		ev.preventDefault();
+		if (!validate()) return;
+
+		var payload = {
+			id: document.getElementById('issueId').value || null,
+			subject: document.getElementById('subject').value.trim(),
+			memId: document.getElementById('memId').value ? Number(document.getElementById('memId').value) : null,
+			categoryCd: document.getElementById('categoryCd').value,
+			priorityCd: document.getElementById('priorityCd').value,
+			doneRatio: document.getElementById('doneRatio').value ? Number(document.getElementById('doneRatio').value) : 0,
+			description: document.getElementById('description').value || '',
+			parentIssue: document.getElementById('parentIssue').value ? Number(document.getElementById('parentIssue').value) : null
+		};
+		var est = document.getElementById('estStartDate').value;
+		var due = document.getElementById('dueDate').value;
+		if (est) payload.estStartDate = est;
+		if (due) payload.dueDate = due;
+		
+		var formData = new FormData();
+		formData.append('issue', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+		attachRows.querySelectorAll('input[type="file"]').forEach(function (inp) {
+			if (inp.files && inp.files[0]) {
+				formData.append('attachments', inp.files[0]);
+			}
+		});
+
+		var headers = {};
+		var tokenMeta = document.querySelector('meta[name="_csrf"]');
+		var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+		if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
+			headers[headerMeta.content] = tokenMeta.content;
+		}
+		var saveUrl = /*[[${issue != null and issue.id != null} ? @{/issue/update} : @{/issue/insert}]]*/ '/issue/insert';
+		fetch(saveUrl, {
+			method: 'POST',
+			headers: headers,
+			body: formData
+		}).then(function (res) {
+			if (res.redirected) {
+				window.location.href = res.url;
+				return;
+			}
+			if (res.ok) {
+				window.location.href = /*[[@{/issue/list}]]*/ '/issue/list';
+				return;
+			}
+			alert('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+		}).catch(function () {
+			alert('네트워크 오류가 발생했습니다.');
+		});
+	});
+})();
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.example.demo.project.calender.mapper.CalenderMapper">
+ 
+ <select id="selectAll" resultType="calenderVO">
+  select * from calender
+  
+  <!-- 일정 검색조건 (일정유형 기준) -->
+  <where>
+   and mem_id = #{memId}
+    <if test="typeCd != null and typeCd !=''">
+     and type_cd = #{typeCd}
+    </if>
+     <if test="keyword != null and keyword !=''">
+       and place like '%' || #{place} || '%'
+     </if>
+  </where>
+  
+ </select>
+   <select id="selectOne" resultType="calenderVO">
+     select * from calender
+     where id = #{id}
+   </select>
+   
+   <insert id="insert">
+     insert into calender ( 
+     						id,
+                            MEM_ID, 
+                            PLACE, 
+                            CAL_TEXT, 
+                            TYPE_CD, 
+                            SHARING_CD, 
+                            STATE_CD, 
+                            CAL_START, 
+                            CAL_END)
+     values (
+     		CAL_SEQ.nextval,
+     		#{memId},
+            #{place},
+            #{calText},
+            #{typeCd},
+            #{sharingCd},
+            '01STATE',
+            #{calStart},
+            #{calEnd})
+   </insert>
+   
+   <update id="update">
+	update calender
+	set  PLACE = #{place},
+        CAL_TEXT = #{calText},
+        SHARING_CD = #{sharingCd},
+        TYPE_CD = #{typeCd},
+        CAL_START = #{calStart},
+        CAL_END = #{calEnd}
+	where id = ${id}
+   </update>
+   
+   <delete id="delete">
+    DELETE FROM calender 
+    WHERE id = #{id}
+   </delete>
+   
+ </mapper>

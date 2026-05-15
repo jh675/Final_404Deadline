@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/userLayout}">
+<head>
+<meta charset="UTF-8">
+<title>이슈 상세</title>
+<th:block layout:fragment="head-content">
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<style>
+
+
+.issue-shell {
+	font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
+	color: #333;
+}
+
+.issue-shell .issue-inner {
+	max-width: 960px;
+	margin: 0 auto;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 28px 32px 36px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.back-row {
+	margin-bottom: 16px;
+}
+
+.back-row a {
+	font-size: 13px;
+	color: #5b6cff;
+	text-decoration: none;
+}
+
+.back-row a:hover {
+	text-decoration: underline;
+}
+
+.page-title-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+	margin-bottom: 22px;
+}
+
+.page-title-row .page-title {
+	margin-bottom: 0;
+	flex: 1;
+	min-width: 0;
+}
+
+.page-title {
+	font-size: 22px;
+	font-weight: 700;
+	margin-bottom: 22px;
+	line-height: 1.35;
+}
+
+.issue-register-btn {
+	flex-shrink: 0;
+	display: inline-block;
+	padding: 10px 22px;
+	background-color: #5b6cff;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.issue-register-btn:hover {
+	background-color: #4956d8;
+	color: #fff;
+	text-decoration: none;
+}
+
+.meta-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px 32px;
+	margin-bottom: 24px;
+}
+
+.meta-item label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	color: #555;
+	margin-bottom: 4px;
+}
+
+.meta-item input,
+.meta-item textarea {
+	width: 100%;
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	background: #fafafa;
+	color: #333;
+}
+
+.meta-item textarea {
+	min-height: 72px;
+	resize: vertical;
+	font-family: inherit;
+}
+
+.meta-item input.short {
+	max-width: 120px;
+}
+
+.meta-item .parent-issue-link {
+	display: block;
+	width: 100%;
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	background: #fafafa;
+	color: #5b6cff;
+	text-decoration: none;
+}
+
+.meta-item .parent-issue-link:hover {
+	color: #4956d8;
+	text-decoration: underline;
+}
+
+.meta-item .meta-empty {
+	display: block;
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	background: #fafafa;
+	color: #333;
+}
+
+.section-block {
+	margin-bottom: 22px;
+}
+
+.section-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 10px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #333;
+}
+
+.badge-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 22px;
+	height: 22px;
+	padding: 0 6px;
+	font-size: 12px;
+	font-weight: 600;
+	background: #e8e9ef;
+	color: #444;
+	border-radius: 999px;
+}
+
+.attach-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 20px;
+	align-items: center;
+}
+
+.attach-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: #444;
+}
+
+.attach-item a {
+	color: #5b6cff;
+	text-decoration: none;
+	font-size: 16px;
+	line-height: 1;
+}
+
+.attach-item a:hover {
+	color: #4956d8;
+}
+
+/* 첨부: 한 줄 3칸 그리드 (스크롤은 .attach-list-scroll-wrap + 스크립트로 처리) */
+.attach-list-scroll-wrap {
+	overflow-x: hidden;
+	min-height: 0;
+	scrollbar-gutter: stable;
+}
+
+.attach-list.attach-list--grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px 14px;
+	align-items: start;
+}
+
+.attach-list.attach-list--grid .attach-item {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+table.data-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+table.data-table thead th {
+	background: #f0f1f5;
+	border: 1px solid #ddd;
+	padding: 10px 12px;
+	text-align: left;
+	font-weight: 600;
+	color: #444;
+}
+
+table.data-table tbody td {
+	border: 1px solid #e5e5e5;
+	padding: 10px 12px;
+	background: #fff;
+}
+
+.tab-row {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+	margin-bottom: 12px;
+}
+
+.tab-btn {
+	padding: 8px 18px;
+	border: 1px solid #ccc;
+	border-radius: 20px;
+	background: #fff;
+	font-size: 13px;
+	font-weight: 600;
+	color: #444;
+	cursor: pointer;
+	transition: background .15s, color .15s, border-color .15s;
+}
+
+.tab-btn:hover {
+	border-color: #bbb;
+}
+
+.tab-btn.is-active {
+	background: #4a4a4a;
+	color: #fff;
+	border-color: #4a4a4a;
+}
+
+.tab-panel-wrap {
+	background: #e8e9ec;
+	border-radius: 6px;
+	padding: 16px;
+	min-height: 220px;
+}
+
+.tab-panel {
+	display: none;
+}
+
+.tab-panel.is-visible {
+	display: block;
+}
+
+/* 댓글 스레드 */
+.comment-thread .comment {
+	background: #f4f4f6;
+	border-radius: 4px;
+	padding: 10px 12px;
+	margin-bottom: 8px;
+	font-size: 13px;
+}
+
+.comment-thread .comment .meta {
+	font-size: 12px;
+	color: #666;
+	margin-bottom: 6px;
+}
+
+.comment-thread .comment .meta strong {
+	color: #333;
+	margin-right: 8px;
+}
+
+.comment-thread .comment .meta .comment-num {
+	font-weight: 700;
+	color: #5b6cff;
+	margin-right: 10px;
+}
+
+.comment-thread .nested {
+	margin-left: 20px;
+	margin-top: 8px;
+	padding-left: 12px;
+	border-left: 2px solid #d0d0d8;
+}
+
+.comment-thread .nested .comment::before {
+	content: "↳ ";
+	color: #888;
+}
+
+.comment-thread .comment.is-reply {
+	border-left: 2px solid #d0d0d8;
+	padding-left: 12px;
+}
+
+.comment-thread-scroll {
+	overflow-y: visible;
+	scrollbar-gutter: stable;
+}
+
+.comment-form {
+	display: flex;
+	gap: 10px;
+	margin-top: 14px;
+	align-items: stretch;
+}
+
+.comment-form textarea {
+	flex: 1;
+	min-height: 80px;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	font-family: inherit;
+	resize: vertical;
+}
+
+.comment-form button {
+	align-self: flex-end;
+	padding: 10px 22px;
+	background: #7c5cff;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.comment-form button:hover {
+	background: #6a4ae6;
+}
+
+.comment-actions {
+	margin-top: 8px;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.comment-actions .btn-reply {
+	padding: 4px 10px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #5b6cff;
+	background: #fff;
+	border: 1px solid #c8c9d8;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.comment-actions .btn-reply:hover {
+	border-color: #5b6cff;
+	color: #4956d8;
+}
+
+.comment-form-wrap {
+	margin-top: 14px;
+}
+
+.comment-form-wrap .comment-form {
+	margin-top: 0;
+}
+
+.reply-hint-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 12px;
+	color: #555;
+	margin-bottom: 8px;
+	padding: 8px 10px;
+	background: #eef0ff;
+	border: 1px solid #d8dcff;
+	border-radius: 4px;
+}
+
+.reply-hint-row button {
+	padding: 4px 12px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #444;
+	background: #fff;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.reply-hint-row button:hover {
+	border-color: #999;
+}
+
+.inner-table-title {
+	font-size: 13px;
+	font-weight: 600;
+	margin-bottom: 8px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+#childIssueList {
+	width: 100%;
+	/* 그리드 본문 3행(40px×3) + 헤더는 그리드가 별도 처리 */
+}
+</style>
+</th:block>
+</head>
+<body>
+<div layout:fragment="content">
+<div class="issue-shell">
+<div class="issue-inner">
+	<div class="back-row">
+		<a th:href="@{/issue/list}">← 이슈 목록</a>
+	</div>
+
+	<p th:if="${issue == null}" style="padding:24px 0;color:#666;">이슈를 찾을 수 없습니다.</p>
+
+	<th:block th:if="${issue != null}">
+	<div class="page-title-row">
+		<h1 class="page-title" th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
+		<a class="issue-register-btn" th:href="@{/issue/register(id=${issue.id})}">이슈 수정</a>
+	</div>
+
+	<div class="meta-grid">
+		<div class="meta-item">
+			<label>설명</label>
+			<textarea readonly th:text="${issue.description}">설명</textarea>
+		</div>
+		<div class="meta-item">
+			<label>상위 이슈</label>
+			<th:block th:if="${ParentIssue != null and !#maps.isEmpty(ParentIssue)}">
+				<a class="parent-issue-link" th:href="@{/issue/detail(id=${ParentIssue['ID']})}"
+					th:text="${ParentIssue['SUBJECT'] != null and !#strings.isEmpty(ParentIssue['SUBJECT'])} ? ${ParentIssue['SUBJECT']} : '제목 없음'">상위 이슈</a>
+			</th:block>
+			<span class="meta-empty" th:unless="${ParentIssue != null and !#maps.isEmpty(ParentIssue)}">—</span>
+		</div>
+		<div class="meta-item">
+			<label>상태</label>
+			<input type="text" readonly th:value="${issue.statusCd ?: '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>담당자</label>
+			<input type="text" readonly th:value="${issue.memName != null ?  issue.memName : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>시작 예정일</label>
+			<input type="text" readonly
+				th:value="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yy-MM-dd HH:mm') : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>종료 예정일</label>
+			<input type="text" readonly
+				th:value="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yy-MM-dd HH:mm') : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>우선순위</label>
+			<input type="text" readonly class="short" th:value="${issue.priorityCd ?: '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>진척률</label>
+			<input type="text" readonly class="short"
+				th:value="${issue.doneRatio != null ? issue.doneRatio + '%' : '—'}" />
+		</div>
+	</div>
+
+	<div class="section-block">
+		<div class="section-head">
+			<span>첨부파일</span>
+			<span class="badge-count" th:text="${attachments != null ? #lists.size(attachments) : 0}">0</span>
+		</div>
+		<div class="attach-list" th:if="${attachments == null or attachments.isEmpty()}">
+			<p style="font-size:13px;color:#666;padding:8px 0;">첨부된 파일이 없습니다.</p>
+		</div>
+		<div id="attachListScroll" class="attach-list-scroll-wrap" th:if="${attachments != null and !attachments.isEmpty()}">
+			<div class="attach-list attach-list--grid">
+				<span class="attach-item" th:each="a : ${attachments}">
+					<span th:text="${a.fileName != null ? a.fileName : a.diskFileName}">파일명</span>
+					<a th:href="@{/download/{id}(id=${a.id})}" title="다운로드">⬇</a>
+				</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="section-block">
+		<div class="section-head">
+			<span>하위이슈</span>
+			<span class="badge-count" id="childIssueBadge" th:text="${childIssueTotal != null ? childIssueTotal : 0}">0</span>
+		</div>
+		<div id="childIssueList"></div>
+	</div>
+
+	<div class="tab-row" role="tablist">
+		<button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="comments">
+			댓글 <span class="badge-count" th:text="${commentTotal != null ? commentTotal : 0}">0</span>
+		</button>
+		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="related">연관된 이슈</button>
+		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="history">히스토리</button>
+	</div>
+
+	<div class="tab-panel-wrap" id="tabPanels">
+		<div class="tab-panel is-visible" id="panel-comments" role="tabpanel" data-panel="comments">
+			<div class="comment-thread" th:if="${comments == null or comments.isEmpty()}">
+				<p style="font-size:13px;color:#666;padding:8px 0;">등록된 댓글이 없습니다.</p>
+			</div>
+			<div class="comment-thread" th:if="${comments != null and !comments.isEmpty()}">
+				<div class="comment-thread-scroll" id="commentThreadScroll">
+					<div class="comment" th:each="c, cStat : ${comments}"
+						th:classappend="${c.depth != null and c.depth > 1} ? ' is-reply'"
+						th:style="|margin-left: ${(c.depth != null and c.depth > 1) ? (c.depth - 1) * 16 : 0}px|">
+						<div class="meta">
+							<span class="comment-num" th:text="|${cStat.count}번 댓글|">1번 댓글</span>
+							<strong th:text="${c.memId != null and !#strings.isEmpty(c.memId)} ? ${c.memId} : '—'">작성자</strong>
+							<span th:text="${c.writeDate != null ? #dates.format(c.writeDate, 'yy-MM-dd HH:mm') : '—'}">날짜</span>
+						</div>
+						<div th:text="${c.content != null ? c.content : ''}">댓글내용</div>
+						<div class="comment-actions" th:if="${c.id != null}">
+							<button type="button" class="btn-reply"
+								th:data-comment-id="${c.id}"
+								th:data-comment-num="${cStat.count}">댓글달기</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="comment-form-wrap">
+				<div class="reply-hint-row" id="replyHintRow" hidden>
+					<span id="replyHintText"></span>
+					<button type="button" id="cancelReplyBtn">답글 취소</button>
+				</div>
+				<form class="comment-form" id="issueCommentForm" th:action="@{/issue/comment}" method="post">
+					<input type="hidden" name="issueId" th:value="${issue.id}" />
+					<input type="hidden" th:value="${#authentication.principal.id}" />
+					
+					<input type="hidden" name="parentId" id="commentParentId" value="" />
+					<textarea name="content" placeholder="댓글 내용" required></textarea>
+					<button type="submit">등록</button>
+				</form>
+			</div>
+		</div>
+
+		<div class="tab-panel" id="panel-related" role="tabpanel" data-panel="related" hidden>
+			<div class="inner-table-title">
+				<span>연관된 이슈</span>
+				<span class="badge-count">3</span>
+			</div>
+			<table class="data-table">
+				<thead>
+					<tr>
+						<th>이슈명</th>
+						<th>이슈상태</th>
+						<th>담당자</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>이슈1</td>
+						<td>종료</td>
+						<td>홍길동</td>
+					</tr>
+					<tr>
+						<td>이슈2</td>
+						<td>진행</td>
+						<td>김길동</td>
+					</tr>
+					<tr>
+						<td>이슈3</td>
+						<td>신규</td>
+						<td>김길동</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="tab-panel" id="panel-history" role="tabpanel" data-panel="history" hidden>
+			<div class="inner-table-title">
+				<span>히스토리</span>
+				<span class="badge-count">3</span>
+			</div>
+			<table class="data-table">
+				<thead>
+					<tr>
+						<th>일시</th>
+						<th>담당자</th>
+						<th>내용</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>2003.02.18 14:05:23</td>
+						<td>이름 A</td>
+						<td>SR260211_4482 내용을 변경하였습니다</td>
+					</tr>
+					<tr>
+						<td>2003.02.18 14:05:23</td>
+						<td>이름 B</td>
+						<td>SR260211_4482 내용을 변경하였습니다</td>
+					</tr>
+					<tr>
+						<td>2003.02.18 14:05:23</td>
+						<td>이름 A</td>
+						<td>SR260211_4482 내용을 변경하였습니다</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	</th:block>
+</div>
+</div>
+
+<script th:inline="javascript">
+(function () {
+	var tabs = document.querySelectorAll('.tab-btn');
+	var panels = document.querySelectorAll('.tab-panel');
+
+	function activate(name) {
+		tabs.forEach(function (btn) {
+			var on = btn.getAttribute('data-tab') === name;
+			btn.classList.toggle('is-active', on);
+			btn.setAttribute('aria-selected', on ? 'true' : 'false');
+		});
+		panels.forEach(function (panel) {
+			var on = panel.getAttribute('data-panel') === name;
+			panel.classList.toggle('is-visible', on);
+			if (on) {
+				panel.removeAttribute('hidden');
+			} else {
+				panel.setAttribute('hidden', 'hidden');
+			}
+		});
+	}
+
+	tabs.forEach(function (btn) {
+		btn.addEventListener('click', function () {
+			activate(btn.getAttribute('data-tab'));
+		});
+	});
+})();
+
+(function () {
+	var panel = document.getElementById('panel-comments');
+	if (!panel) return;
+	
+	var form = document.getElementById('issueCommentForm');
+	var parentInput = document.getElementById('commentParentId');
+	var hintRow = document.getElementById('replyHintRow');
+	var hintText = document.getElementById('replyHintText');
+	var cancelBtn = document.getElementById('cancelReplyBtn');
+	if (!form || !parentInput) return;
+
+	function clearReplyTarget() {
+		parentInput.value = '';
+		hintText.textContent = '';
+		if (hintRow) hintRow.hidden = true;
+	}
+
+	panel.addEventListener('click', function (e) {
+		var btn = e.target.closest('.btn-reply');
+		if (!btn) return;
+		var cid = btn.getAttribute('data-comment-id');
+		if (!cid) return;
+		parentInput.value = cid;
+		var num = btn.getAttribute('data-comment-num');
+		if (hintText) {
+			if (num != null && String(num).length) {
+				hintText.textContent = num + '번 댓글에 댓글 작성중';
+			} else {
+				hintText.textContent = '선택한 댓글에 댓글 작성중';
+			}
+		}
+		if (hintRow) hintRow.hidden = false;
+		var ta = form.querySelector('textarea[name="content"]');
+		if (ta) ta.focus();
+	});
+
+	if (cancelBtn) {
+		cancelBtn.addEventListener('click', clearReplyTarget);
+	}
+})();
+
+(function () {
+	function layoutCommentThreadScroll() {
+		var wrap = document.getElementById('commentThreadScroll');
+		if (!wrap) return;
+		var items = wrap.querySelectorAll(':scope > .comment');
+		if (items.length <= 3) {
+			wrap.style.maxHeight = '';
+			wrap.style.overflowY = '';
+			return;
+		}
+		var r0 = items[0].getBoundingClientRect();
+		var r2 = items[2].getBoundingClientRect();
+		var h = r2.bottom - r0.top;
+		wrap.style.maxHeight = Math.ceil(h) + 'px';
+		wrap.style.overflowY = 'auto';
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', layoutCommentThreadScroll);
+	} else {
+		layoutCommentThreadScroll();
+	}
+	window.addEventListener('resize', layoutCommentThreadScroll);
+})();
+
+(function () {
+	function layoutAttachListScroll() {
+		var wrap = document.getElementById('attachListScroll');
+		if (!wrap) return;
+		var items = wrap.querySelectorAll('.attach-item');
+		if (items.length <= 3) {
+			wrap.style.maxHeight = '';
+			wrap.style.overflowY = '';
+			return;
+		}
+		var r0 = items[0].getBoundingClientRect();
+		var r1 = items[1].getBoundingClientRect();
+		var r2 = items[2].getBoundingClientRect();
+		var bottom = Math.max(r0.bottom, r1.bottom, r2.bottom);
+		var h = bottom - r0.top;
+		wrap.style.maxHeight = Math.ceil(h) + 'px';
+		wrap.style.overflowY = 'auto';
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', layoutAttachListScroll);
+	} else {
+		layoutAttachListScroll();
+	}
+	window.addEventListener('resize', layoutAttachListScroll);
+})();
+</script>
+<th:block th:if="${issue != null}">
+<script th:inline="javascript">
+/*<![CDATA[*/
+(function () {
+	var allChildIssues = /*[[${childIssueList}]]*/ [];
+	if (!Array.isArray(allChildIssues)) {
+		allChildIssues = [];
+	}
+	if (typeof tui === 'undefined' || !tui.Grid) {
+		return;
+	}
+	var host = document.getElementById('childIssueList');
+	if (!host) {
+		return;
+	}
+
+	var rowH = 40;
+	var visibleRows = 3;
+
+	new tui.Grid({
+		el: host,
+		data: allChildIssues,
+		scrollX: false,
+		scrollY: true,
+		bodyHeight: rowH * visibleRows,
+		rowHeight: rowH,
+		rowKey: 'id',
+		columns: [
+			{
+				header: '이슈명',
+				name: 'subject',
+				sortable: false,
+				formatter: function (props) {
+					var row = props.row;
+					var value = props.value;
+					var id = row == null ? '' : row.id;
+					var text = value == null ? '' : String(value);
+					return '<a href="/issue/detail?id=' + id + '">' + text + '</a>';
+				}
+			},
+			{
+				header: '이슈상태',
+				name: 'statusCd',
+				width: 120,
+				align: 'center',
+				sortable: false
+			},
+			{
+				header: '담당자',
+				name: 'memName',
+				width: 120,
+				align: 'center',
+				sortable: false
+			}
+		]
+	});
+})();
+/*]]>*/
+</script>
+</th:block>
+</div>
+</body>
+</html>
