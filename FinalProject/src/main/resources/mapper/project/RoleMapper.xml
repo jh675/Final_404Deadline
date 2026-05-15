@@ -2,8 +2,10 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 프로젝트 권한: ROLE·MENU·ROLE_MENU·GRP_ROLE -->
 <mapper namespace="com.example.demo.project.option.mapper.RoleMapper">
 
+  <!-- 목록 검색 WHERE (prjId 필수, 권한코드·이름·생성일 선택) -->
   <sql id="roleListWhere">
     <where>
       R.PRJ_ID = #{prjId}
@@ -39,6 +41,7 @@
     ORDER BY R.ROLE_CD
   </select>
 
+  <!-- 역할 상세 — 단일 ROLE -->
   <select id="selectRoleByPrjAndCd" resultType="com.example.demo.project.option.service.RoleVO">
     SELECT
       R.ROLE_CD AS roleCd,
@@ -65,6 +68,7 @@
     ORDER BY M.ROLE_TP, M.ROLE_ID
   </select>
 
+  <!-- 역할 상세 — 체크된 메뉴 ID 목록 -->
   <select id="selectMenuRoleIdsByRoleCd" resultType="java.lang.String">
     SELECT RM.ROLE_ID
     FROM ROLE_MENU RM
@@ -91,7 +95,7 @@
     ORDER BY G.ID
   </select>
 
-  <!-- PROC_ROLE_DELETE(p_role_cd, p_prj_id) — 작성 의도와 동일 순서 -->
+  <!-- 역할 삭제 — DB 프로시저 (ROLE_MENU·GRP_ROLE·ROLE 등 DB 내부에서 정리) -->
   <update id="callProcRoleDelete" statementType="CALLABLE">
     {
       CALL PROC_ROLE_DELETE(

@@ -10,6 +10,7 @@ import com.example.demo.project.option.service.RoleService;
 import com.example.demo.project.option.service.RoleVO;
 import lombok.RequiredArgsConstructor;
 
+/** 권한 조회·삭제 — 삭제 시 DB PROC_ROLE_DELETE 호출 */
 @Service
 @Primary
 @RequiredArgsConstructor
@@ -51,6 +52,7 @@ public class RoleServiceImpl implements RoleService {
         return roleMapper.selectRoleGroupsList(prjId, roleCd);
     }
 
+    /** 프로젝트 소속 확인 후 역할마다 PROC_ROLE_DELETE 호출 */
     @Override
     public void deleteRolesForProject(Long prjId, List<Long> roleCds) {
         if (prjId == null || roleCds == null || roleCds.isEmpty()) {

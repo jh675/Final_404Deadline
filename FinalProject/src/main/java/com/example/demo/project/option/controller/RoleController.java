@@ -38,6 +38,7 @@ public class RoleController {
 
     private final RoleService roleService;
 
+    /** 권한(역할) 목록 화면 — 검색 조건 반영 후 Thymeleaf에 rows 전달 */
     @GetMapping("/roleManagement")
     public String roleManagementPage(
             @RequestParam("prjId") Long prjId,
@@ -96,6 +97,7 @@ public class RoleController {
         return "project/role/roleManagementInfo";
     }
 
+    /** 권한 목록 JSON (AJAX 검색용, 현재 HTML에서는 미사용) */
     @GetMapping("/roleManagementList")
     @ResponseBody
     public Map<String, Object> roleManagementList(
@@ -166,10 +168,12 @@ public class RoleController {
         return body;
     }
 
+    /** MyBatis 동적 SQL에서 null 대신 빈 문자열로 통일 */
     private static String nullToEmpty(String s) {
         return s == null ? "" : s;
     }
 
+    /** ROLE.CREATED_ON → yyyy-MM-dd (상세 화면 표시용) */
     private static String formatRoleDateYmd(LocalDateTime dt) {
         if (dt == null) {
             return "";
@@ -177,6 +181,7 @@ public class RoleController {
         return dt.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
+    /** MENU 전체 + ROLE_MENU 연결 여부 → 상세 화면 체크박스 섹션 DTO로 변환 */
     private static List<RoleMenuSectionVO> buildMenuSections(List<RoleVO> allMenus, Set<String> linked) {
         Set<String> safeLinked = linked == null ? Set.of() : linked;
 
