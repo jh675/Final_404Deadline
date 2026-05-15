@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/compAdminLayout}">
+<head>
+<meta charset="UTF-8">
+<title>공지사항 관리</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h2 th:text="${notice.id != null} ? '공지사항 수정' : '공지사항 등록'">공지사항 등록</h2>
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0" th:text="${notice.id != null} ? '공지사항 수정' : '공지사항 등록'">공지사항</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="${notice.id != null} ? @{/notice/modify} : @{/notice/insert}" 
+                  method="post" 
+                  enctype="multipart/form-data">
+                
+                <!-- Hidden Fields -->
+                <input type="hidden" name="id" th:value="${notice.id}">
+                <input type="hidden" name="prjId" th:value="${4}">
+                <input type="hidden" name="memId" th:value="${1}">
+
+                <!-- 상단 고정 체크박스 -->
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="isFixed" id="isFixed" 
+                           value="01ACTIVE" th:checked="${notice.isFixed == '01ACTIVE'}">
+                    <label class="form-check-label fw-bold" for="isFixed">이 게시글을 상단에 고정합니다.</label>
+                </div>
+
+                <!-- 제목 입력 -->
+                <div class="mb-3 row">
+                    <label for="title" class="col-sm-2 col-form-label fw-bold">제목</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="title" id="title" 
+                               th:value="${notice.title}" placeholder="제목을 입력하세요" required>
+                    </div>
+                </div>
+
+                <!-- 내용 입력 -->
+                <div class="mb-3 row">
+                    <label for="description" class="col-sm-2 col-form-label fw-bold">내용</label>
+                    <div class="col-sm-10">
+                        <textarea class="form-control" name="description" id="description" 
+                                  rows="10" th:text="${notice.description}" placeholder="내용을 작성해주세요"></textarea>
+                    </div>
+                </div>
+
+                <!-- 첨부파일 -->
+                <div class="mb-4 row">
+                    <label for="file" class="col-sm-2 col-form-label fw-bold">첨부파일</label>
+                    <div class="col-sm-10">
+                        <input class="form-control" type="file" id="file" name="file">
+                        <div class="form-text text-muted">최대 용량: 10MB (문서, 이미지 파일 권장)</div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- 버튼 영역 -->
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="submit" class="btn btn-primary shadow-sm" 
+                            th:text="${notice.id != null} ? '수정완료' : '등록완료'">등록</button>
+                    
+                    <button type="button" class="btn btn-danger shadow-sm" th:if="${notice.id != null}" 
+                            th:onclick="|if(confirm('정말 삭제하시겠습니까?')) location.href='@{/notice/delete(id=${notice.id})}'|">
+                        삭제
+                    </button>
+                    
+                    <button type="button" class="btn btn-outline-secondary shadow-sm" 
+                            th:onclick="|location.href='@{/notice/list}'|">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+    </div> 
+</body>
+</html>
