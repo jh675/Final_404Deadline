@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>기업정보</title>
+</head>
+<body>
+	<h2>기업리스트</h2>
+
+	<table border="1">
+		<tr>
+			<td>사업자번호</td>
+			<td>기업명</td>
+			<td>전화번호</td>
+			<td>주소</td>
+			<td>활성여부</td>
+			<td>생성일</td>
+		</tr>
+
+		<tr th:each="company : ${pageInfo.list}">
+			<td th:text="${company.bizNo}"></td>
+			<td th:text="${company.companyName}"></td>
+			<td th:text="${company.tel}"></td>
+			<td th:text="${company.address}"></td>
+			<td th:text="${company.isActiveCd}"></td>
+			<td th:text="${company.createdOn}"></td>
+		</tr>
+
+
+
+
+	</table>
+
+</body>
+</html>

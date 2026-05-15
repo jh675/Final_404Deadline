@@ -25,6 +25,7 @@
    
    <insert id="insert">
      insert into calender ( 
+     						id,
                             MEM_ID, 
                             PLACE, 
                             CAL_TEXT, 
@@ -34,12 +35,13 @@
                             CAL_START, 
                             CAL_END)
      values (
-     		  #{memId},
+     		CAL_SEQ.nextval,
+     		#{memId},
             #{place},
             #{calText},
             #{typeCd},
             #{sharingCd},
-            #{stateCd},
+            '01STATE',
             #{calStart},
             #{calEnd})
    </insert>
