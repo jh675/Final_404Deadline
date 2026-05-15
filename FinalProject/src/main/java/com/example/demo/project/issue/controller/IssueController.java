@@ -22,6 +22,8 @@ import com.example.demo.project.issue.service.CommentOutputVO;
 import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
+import com.example.demo.util.attach.service.AttachService;
+import com.example.demo.util.attach.service.AttachVO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,10 +34,12 @@ public class IssueController {
 	@Autowired
 	private IssueService service;
 
+	@Autowired
+	private AttachService attachService;
+
 	@GetMapping("/issue/list")
 	public String issueList(Model model, @ModelAttribute("filter") IssueInputVO issueVO) {
 		List<IssueOutputVO> issueList = service.selectIssueList(issueVO);
-		System.out.println(issueList);
 		model.addAttribute("issueList", issueList);
 		return "project/issue/issueList";
 	}
@@ -44,7 +48,11 @@ public class IssueController {
 	public String issueDetail(Model model, @RequestParam("id") Long id) {
 		IssueOutputVO issue = service.selectIssue(id);
 		model.addAttribute("issue", issue);
+
+		List<AttachVO> attachments = Collections.emptyList();
 		if (issue != null && issue.getId() != null) {
+			List<AttachVO> loaded = attachService.selectAttachList("04MODULE", id);
+			attachments = loaded != null ? loaded : Collections.emptyList();
 			model.addAttribute("ParentIssue",
 					issue.getParentIssue() == null ? null : service.getParentIssue(issue.getParentIssue()));
 			model.addAttribute("childIssueTotal", service.countChildIssues(id));
@@ -61,6 +69,7 @@ public class IssueController {
 				model.addAttribute("commentTotal", 0);
 			}
 		}
+		model.addAttribute("attachments", attachments);
 		return "project/issue/issueDetail";
 	}
 
@@ -69,7 +78,6 @@ public class IssueController {
 		if (vo.getIssueId() == null) {
 			return "redirect:/issue/list";
 		}
-		System.out.println(vo);
 		if (vo.getContent() != null) {
 			vo.setContent(vo.getContent().trim());
 		}
@@ -84,42 +92,84 @@ public class IssueController {
 		return "redirect:/issue/detail?id=" + vo.getIssueId();
 	}
 
+	
 	@GetMapping("/issue/register")
-	public String issueRegister(Model model) {
-		model.addAttribute("issue", IssueInputVO.builder().build());
-		model.addAttribute("issueIds", service.getIssueIds());
+	public String issueRegister(Model model, @RequestParam(required = false) Long id) {
+		IssueInputVO issue;
+		//id값이 있는경우(수정버튼 클릭해서 온경우)
+		if (id != null) {
+			//해당 아이디로 검색해서 값은 가져온다
+			issue = service.selectIssueForForm(id);
+			//만약 값이 없다면 잘못된 경로(임의로 id값을 집어넣은경우)이므로
+			if (issue == null || issue.getId() == null) {
+				//리스트쪽으로 돌려보낸다
+				return "redirect:/issue/list";
+			}
+		} else {
+			//id값이 없는경우 빈vo를 만든다
+			issue = IssueInputVO.builder().build();
+		}
+		//모델에 담아서 보낸다
+		model.addAttribute("issue", issue);
 		return "project/issue/issueRegist";
 	}
 
 	@PostMapping(value = "/issue/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public String issueInsert(Model model, @RequestPart("issue") IssueInputVO issueVO,
+	public String issueInsert(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
-//		List<AttachmentVO> attachmentList = new ArrayList<>();
-//		for (MultipartFile file : attachments) {
-//			try {
-//				String original = file.getOriginalFilename();
-//				String baseName = (original != null && !original.isBlank())
-//						? new File(original).getName()
-//						: "file";
-//				String diskFileName = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
-//						.format(LocalDateTime.now()) + "_" + baseName;
-//				AttachmentVO attachmentVO = new AttachmentVO();
-//				attachmentVO.setFileName(original != null ? original : baseName);
-//				attachmentVO.setFileSize(file.getSize());
-//				attachmentVO.setContentType(file.getContentType());
-//				attachmentVO.setDiskDirectory("attachments");
-//				attachmentVO.setDiskFileName(diskFileName);
-//				attachmentVO.setTableName("issue");
-//				issueVO.setIsAttachCd("01ISATTACH");
-//				file.transferTo(new File("d:/upload/" + diskFileName));
-//				attachmentList.add(attachmentVO);
-//			} catch (Exception e) {
-//				log.error("Failed to store file {}: {}", file.getOriginalFilename(), e.getMessage());
-//				return "redirect:/issue/register";
-//			}
-//		}
-//		service.insertIssue(issueVO);
+
+		boolean hasFiles = hasAttachmentFiles(attachments);
+		if (hasFiles) {
+			issueVO.setIsAttachCd("01ISATTACH");
+		}
+		Long issueId = service.insertIssue(issueVO);
+		if (hasFiles && issueId != null) {
+			saveIssueAttachments(issueId, attachments);
+		}
 		return "redirect:/issue/list";
+	}
+
+	@PostMapping(value = "/issue/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public String issueUpdate(@RequestPart("issue") IssueInputVO issueVO,
+			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
+
+		if (issueVO.getId() == null) {
+			return "redirect:/issue/list";
+		}
+		boolean hasFiles = hasAttachmentFiles(attachments);
+		if (hasFiles) {
+			issueVO.setIsAttachCd("01ISATTACH");
+			saveIssueAttachments(issueVO.getId(), attachments);
+		}
+		service.updateIssue(issueVO);
+		return "redirect:/issue/detail?id=" + issueVO.getId();
+	}
+
+
+
+	private boolean hasAttachmentFiles(MultipartFile[] attachments) {
+		if (attachments == null) {
+			return false;
+		}
+		for (MultipartFile f : attachments) {
+			if (f != null && !f.isEmpty()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void saveIssueAttachments(Long issueId, MultipartFile[] attachments) {
+		List<AttachVO> saved = attachService.saveAttach(attachments, "04MODULE");
+		if (saved.isEmpty()) {
+			return;
+		}
+		for (AttachVO a : saved) {
+			a.setContainerId(issueId);
+			a.setContainerType("ISSUE");
+			a.setTableName("04MODULE");
+		}
+		attachService.insertAttach(saved);
 	}
 
 }

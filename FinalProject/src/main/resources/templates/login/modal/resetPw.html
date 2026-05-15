@@ -3,210 +3,105 @@
 <html xmlns:th="https://www.thymeleaf.org">
 
 <body>
+	<div th:fragment="resetPwModal">
+		<div class="modal fade" id="resetPwModal" tabindex="-1"
+			aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">비밀번호 재설정</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal">
+						</button>
+					</div>
+					<div class="modal-body">
 
-<div th:fragment="resetPwModal">
+						<!-- 기업번호 -->
+						<div class="mb-3">
+							<label class="form-label">기업번호</label> <input type="text"
+								id="bizNo" class="form-control"> <small id="bizNoError"
+								class="text-danger d-none"></small>
+						</div>
 
-    <div class="modal fade"
-         id="resetPwModal"
-         tabindex="-1"
-         aria-hidden="true">
+						<!-- 아이디 -->
+						<div class="mb-3">
+							<label class="form-label">아이디</label> <input type="text"
+								id="login" class="form-control"> <small id="loginError"
+								class="text-danger d-none"></small>
+						</div>
 
-        <div class="modal-dialog modal-dialog-centered">
+						<!-- 이메일 -->
+						<div class="mb-3">
+							<label class="form-label">이메일</label>
+							<div class="d-flex gap-2">
+								<input type="email" id="email" class="form-control">
+								<button type="button" id="sendCodeBtn" class="btn btn-primary">
+									인증요청</button>
+							</div>
 
-            <div class="modal-content">
+							<small id="emailError" class="text-danger d-none"></small>
 
-                <!-- 헤더 -->
-                <div class="modal-header">
+						</div>
 
-                    <h5 class="modal-title">
-                        비밀번호 재설정
-                    </h5>
+						<!-- 공통 메시지 -->
+						<div id="messageArea" class="alert d-none mb-3" role="alert">
+						</div>
 
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal">
-                    </button>
+						<!-- 인증번호 -->
+						<div id="verifyArea" class="mb-3 d-none">
 
-                </div>
+							<label class="form-label">인증번호</label>
 
-                <!-- body -->
-                <div class="modal-body">
+							<div class="d-flex gap-2">
 
-                    <!-- 기업번호 -->
-                    <div class="mb-3">
+								<input type="text" id="verifyNum" class="form-control">
 
-                        <label class="form-label">
-                            기업번호
-                        </label>
+								<button type="button" id="verifyBtn" class="btn btn-success">
+									인증</button>
 
-                        <input type="text"
-                               id="bizNo"
-                               class="form-control">
+							</div>
 
-                        <small id="bizNoError"
-                               class="text-danger d-none">
+							<small id="verifyError" class="text-danger d-none"></small>
 
-                            기업번호를 입력하세요.
+						</div>
 
-                        </small>
+						<!-- 비밀번호 -->
+						<div id="passwordArea" class="d-none">
 
-                    </div>
+							<div class="mb-3">
 
-                    <!-- 아이디 -->
-                    <div class="mb-3">
+								<label class="form-label">새 비밀번호</label> <input type="password"
+									id="newPassword" autocomplete="new-password"
+									class="form-control">
 
-                        <label class="form-label">
-                            아이디
-                        </label>
+							</div>
 
-                        <input type="text"
-                               id="loginId"
-                               class="form-control">
+							<div class="mb-3">
 
-                        <small id="loginError"
-                               class="text-danger d-none">
+								<label class="form-label">비밀번호 확인</label> <input type="password"
+									id="newPasswordCheck" autocomplete="new-password"
+									class="form-control"> <small id="passwordError"
+									class="text-danger d-none"></small>
 
-                            아이디를 입력하세요.
+							</div>
 
-                        </small>
+						</div>
 
-                    </div>
+						<small id="resultMsg" class="text-success d-none"></small>
+					</div>
 
-                    <!-- 이메일 -->
-                    <div class="mb-3">
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">닫기</button>
 
-                        <label class="form-label">
-                            이메일
-                        </label>
+						<button type="button" id="confirmBtn"
+							class="btn btn-primary d-none">확인</button>
 
-                        <div class="d-flex gap-2">
+					</div>
 
-                            <input type="email"
-                                   id="email"
-                                   class="form-control">
-
-                            <button type="button"
-                                    id="sendCodeBtn"
-                                    class="btn btn-primary">
-
-                                인증요청
-
-                            </button>
-
-                        </div>
-
-                        <small id="emailError"
-                               class="text-danger d-none">
-
-                            이메일 정보가 올바르지 않습니다.
-
-                        </small>
-
-                    </div>
-
-                    <!-- 인증번호 -->
-                    <div id="verifyArea"
-                         class="mb-3 d-none">
-
-                        <label class="form-label">
-                            인증번호
-                        </label>
-
-                        <div class="d-flex gap-2">
-
-                            <input type="text"
-                                   id="verifyNum"
-                                   class="form-control">
-
-                            <button type="button"
-                                    id="verifyBtn"
-                                    class="btn btn-success">
-
-                                인증
-
-                            </button>
-
-                        </div>
-
-                        <small id="verifyError"
-                               class="text-danger d-none">
-
-                            재인증이 필요합니다.
-
-                        </small>
-
-                    </div>
-
-                    <!-- 비밀번호 변경 -->
-                    <div id="passwordArea"
-                         class="d-none">
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                새 비밀번호
-                            </label>
-
-                            <input type="password"
-                                   id="newPassword"
-                                   autocomplete="new-password"
-                                   class="form-control">
-
-                        </div>
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                비밀번호 확인
-                            </label>
-
-                            <input type="password"
-                                   id="newPasswordCheck"
-                                   autocomplete="new-password"
-                                   class="form-control">
-
-                            <small id="passwordError"
-                                   class="text-danger d-none">
-
-                                비밀번호가 일치하지 않습니다.
-
-                            </small>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- footer -->
-                <div class="modal-footer">
-
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-
-                        닫기
-
-                    </button>
-
-                    <button type="button"
-                            id="confirmBtn"
-                            class="btn btn-primary d-none">
-
-                        확인
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
 
 </html>

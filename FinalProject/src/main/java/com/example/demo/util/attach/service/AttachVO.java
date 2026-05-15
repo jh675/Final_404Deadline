@@ -1,4 +1,4 @@
-package com.example.demo.project.issue.service;
+package com.example.demo.util.attach.service;
 
 import java.util.Date;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AttachmentVO {
+public class AttachVO {
 
 	private Long id;//ID
 	private String tableName;//테이블명
