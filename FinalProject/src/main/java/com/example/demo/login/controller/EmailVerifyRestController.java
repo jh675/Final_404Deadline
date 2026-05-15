@@ -33,4 +33,10 @@ public class EmailVerifyRestController {
 
 		return result.getResult();
 	}
+	
+	@PostMapping("/resetPw")
+	public String resetPassword(@RequestBody UserVO user) {
+
+	    return verifyService.resetPassword(user);
+	}
 }
