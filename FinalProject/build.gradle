@@ -38,7 +38,6 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	// Spring Security
-<<<<<<< HEAD
     implementation 'org.springframework.boot:spring-boot-starter-security'
     // 타임리프 시큐리티 라이브러리 (템플릿에서 시큐리티 기능 사용 시)
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
@@ -50,21 +49,6 @@ dependencies {
     
     // 이메일 인증을 위한 의존성 추가
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-=======
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	// 타임리프 시큐리티 라이브러리 (템플릿에서 시큐리티 기능 사용 시)
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-	// 레이아웃 의존성 추가
-	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
-}
-
-tasks.withType(JavaCompile).configureEach {
-	options.encoding = 'UTF-8'
-	options.compilerArgs.add('-parameters')
->>>>>>> refs/heads/dev
 }
 
 tasks.named('test') {
