@@ -18,17 +18,16 @@ public class CompanyController {
 
 	@GetMapping("/company/list")
 	public String companylist(Model model, @ModelAttribute("company") CompanyVO company,
-			@RequestParam(name = "pageNum", required = false, defaultValue = "1") int pageNum) {
+			@RequestParam(name = "pageNum", required = false, defaultValue = "1") Integer pageNum) {
 
 		model.addAttribute("pageInfo", companyService.selectAll(company, pageNum));
 		return "company/list";
-		
-		
 	}
-	
-	@GetMapping("/company/register")
+
+	@GetMapping("/company/edit")
 	public void register(@ModelAttribute("company") CompanyVO Company, Model model) {
-	
+
 	}
+	
 
 }
