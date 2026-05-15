@@ -10,7 +10,10 @@ public interface IssueService {
 
     IssueOutputVO selectIssue(Long id);
 
-    int insertIssue(IssueInputVO issueVO);
+    IssueInputVO selectIssueForForm(Long id);
+
+    /** 등록된 이슈 PK를 반환합니다. */
+    Long insertIssue(IssueInputVO issueVO);
 
     int updateIssue(IssueInputVO issueVO);
 
