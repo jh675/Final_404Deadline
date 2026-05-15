@@ -13,7 +13,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 		"com.example.demo.project.main.mapper",
 		"com.example.demo.project.notice.mapper",
 		"com.example.demo.project.option.mapper",
-		"com.example.demo.project.calender.mapper"
+		"com.example.demo.project.calender.mapper",
+		"com.example.demo.util.attach.mapper"
 })
 public class FinalProjectApplication {
 
