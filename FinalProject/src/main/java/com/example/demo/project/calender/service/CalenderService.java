@@ -1,10 +1,6 @@
 package com.example.demo.project.calender.service;
 
-<<<<<<< HEAD
-public interface CalenderService {
 
-}
-=======
 import java.util.List;
 
 import com.example.demo.project.calender.CalenderVO;
@@ -16,4 +12,4 @@ public interface CalenderService {
 	 int updete(CalenderVO vo);
 	 int delete(int id);
 }
->>>>>>> 5b2578b0144c8d3eb5a483aba11be9bcfdeb31b8
+
