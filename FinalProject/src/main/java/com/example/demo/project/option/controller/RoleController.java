@@ -10,9 +10,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -115,6 +119,36 @@ public class RoleController {
         body.put("content", rows);
         body.put("prjId", prjId);
         return body;
+    }
+
+    /**
+     * 역할 목록에서 선택 후 「제거」 — DB {@code PROC_ROLE_DELETE} 호출.
+     */
+    @PostMapping("/deleteRoles")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> deleteRoles(
+            @RequestBody(required = false) RoleDeleteRequest body) {
+        Map<String, Object> ok = new LinkedHashMap<>();
+        ok.put("ok", true);
+        try {
+            if (body == null) {
+                return badRequest("요청 본문이 비어 있습니다.");
+            }
+            roleService.deleteRolesForProject(body.prjId(), body.roleCds());
+            return ResponseEntity.ok(ok);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("ok", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            Map<String, Object> err = new LinkedHashMap<>();
+            err.put("ok", false);
+            err.put("message", "역할 제거 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
+        }
+    }
+
+    private static ResponseEntity<Map<String, Object>> badRequest(String message) {
+        return ResponseEntity.badRequest().body(Map.of("ok", false, "message", message));
     }
 
     /** 역할 상세 — 이 {@code ROLE_CD}를 보유한 그룹 목록(TOAST Grid 데이터). */
@@ -247,4 +281,7 @@ public class RoleController {
             default -> false;
         };
     }
+
+    /** {@link #deleteRoles} JSON 본문 */
+    public static record RoleDeleteRequest(Long prjId, List<Long> roleCds) {}
 }

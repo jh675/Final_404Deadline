@@ -20,4 +20,7 @@ public interface RoleMapper {
     List<RoleGroupRowVO> selectRoleGroupsList(
             @Param("prjId") Long prjId,
             @Param("roleCd") Long roleCd);
+
+    /** DB {@code PROC_ROLE_DELETE} — GRP_ROLE, ROLE_MENU, ROLE 정리 후 COMMIT */
+    void callProcRoleDelete(@Param("roleCd") Long roleCd, @Param("prjId") Long prjId);
 }
