@@ -9,7 +9,6 @@ import com.example.demo.company.service.CompanyVO;
 @Mapper
 
 public interface CompanyMapper {
-	int selectAll_COUNT(CompanyVO company);
 	List<CompanyVO> selectAll(CompanyVO company);
 	CompanyVO selectOne(String bizNo);
 	int delete(String bizNo);
