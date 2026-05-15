@@ -1,9 +1,11 @@
 package com.example.demo.project.calender.mapper;
 
+
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
-import com.example.demo.project.calender.CalenderVO;
+
+import com.example.demo.project.calender.service.CalenderVO;
 
 @Mapper
 public interface CalenderMapper {
@@ -14,3 +16,4 @@ public interface CalenderMapper {
  int delete(int id);
  
 }
+

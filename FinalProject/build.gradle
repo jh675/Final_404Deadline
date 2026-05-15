@@ -36,7 +36,7 @@ dependencies {
 	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testAnnotationProcessor 'org.projectlombok:lombok'
-	
+
 	// Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     // 타임리프 시큐리티 라이브러리 (템플릿에서 시큐리티 기능 사용 시)
@@ -46,8 +46,15 @@ dependencies {
     
      // 레이아웃 의존성 추가
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+    
+    // 이메일 인증을 위한 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-parameters'
 }

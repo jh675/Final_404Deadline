@@ -1,8 +1,7 @@
 package com.example.demo.project.calender.service;
 
-import java.util.List;
 
-import com.example.demo.project.calender.CalenderVO;
+import java.util.List;
 
 public interface CalenderService {
 	List<CalenderVO> selectAll(CalenderVO vo);
@@ -11,3 +10,4 @@ public interface CalenderService {
 	 int updete(CalenderVO vo);
 	 int delete(int id);
 }
+

@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="UTF-8">
-<title layout:title-pattern="$CONTENT_TITLE | 유저">유저</title>
+<title>layout</title>
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
 	rel="stylesheet"
 	integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
 	crossorigin="anonymous">
-<th:block layout:fragment="head-content"></th:block>
 </head>
 <body>
 	<div class="container">
@@ -26,7 +25,6 @@
 					<ul class="navbar-nav">
 						<li class="nav-item"><a class="nav-link active"
 							aria-current="page" th:href="@{/}">메뉴1</a></li>
-						<li class="nav-item"><a class="nav-link" th:href="@{/issue/list}">이슈 목록</a></li>
 						<li class="nav-item"><a class="nav-link" th:href="@{/admin}">메뉴2</a>
 						</li>
 						<!--/* <li class="nav-item"><a class="nav-link" href="#">Pricing</a>
@@ -34,23 +32,39 @@
 						<li class="nav-item"><a class="nav-link disabled"
 							aria-disabled="true">Disabled</a></li> */-->
 					</ul>
+					<div class="d-flex align-items-center gap-2"
+						sec:authorize="isAuthenticated()">
+
+						<span> <strong sec:authentication="principal.name"></strong>
+							님
+						</span>
+
+						<form th:action="@{/logout}" method="post">
+							<input type="hidden" th:name="${_csrf.parameterName}"
+								th:value="${_csrf.token}">
+
+							<button type="submit" class="btn btn-outline-danger btn-sm">
+								로그아웃</button>
+						</form>
+					</div>
 				</div>
 			</div>
 		</nav>
 
 		<div class="card">
 			<div class="card-body">
-				<div layout:fragment="content">
-					This is some text within a card body.
-				</div>
+				<div layout:fragment="content"></div>
 			</div>
 		</div>
-		
+
 		<div th:insert="~{layout/footer::yedam}"></div>
 	</div>
+
 	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-		crossorigin="anonymous"></script>
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
+		
+	</script>
+	
+	
 </body>
 </html>

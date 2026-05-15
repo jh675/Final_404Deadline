@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.login.mapper.EmailVerifyMapper">
+
+	
+	<update id="sendVerifyCode" 
+			statementType="CALLABLE">
+		{
+            CALL PROC_EMAIL_VERIFY_INSERT(
+
+                #{bizNo, mode=IN, jdbcType=VARCHAR},
+                #{login, mode=IN, jdbcType=VARCHAR},
+                #{email, mode=IN, jdbcType=VARCHAR},
+
+                #{result, mode=OUT, jdbcType=VARCHAR},
+                #{verifyNum, mode=OUT, jdbcType=VARCHAR}
+
+            )
+        }	
+	</update>
+
+	<select id="verifyCode">
+	
+		SELECT 	 id
+				,user_id
+				,email
+				,verify_num
+				,created_on
+				,closed_on
+				,verify_status_cd
+		FROM	 email_verify
+		WHERE	 email = #{email}
+		AND		 verify_num = #{verifyNum}
+		AND		 verify_status_cd = '01CERTSTAT'
+		ORDER BY created_on DESC
+		FETCH FIRST 1 ROW ONLY
+		
+	</select>
+</mapper>

@@ -10,7 +10,9 @@
 <body>
 <div layout:fragment="content">
 <h1>유저 로그인 이후 메인페이지입니다.</h1>
-<h3>아래는 userVO를 로그인 세션에서 가져와지는지 테스트</h3>
+<h3>페이지 만들어지면 추가 예정</h3>
+
+<!-- <h3>아래는 userVO를 로그인 세션에서 가져와지는지 테스트</h3>
 <table>
 	<tr>
 		<td>식별자</td>
@@ -31,7 +33,7 @@
     	<td th:text="${user.id}"></td>
     	<td th:text="${user.bizNo}"></td>
     	<td th:text="${user.login}"></td>
-    	<!-- <td th:text="${user.password}"></td> -->
+    	<td th:text="${user.password}"></td>
     	<td>비밀번호</td>
     	<td th:text="${user.name}"></td>
     	<td th:text="${user.tel}"></td>
@@ -44,11 +46,7 @@
     	<td th:text="${user.prjManagerCd}"></td>
   	</tr>
 </table>
-
-	<form action="/logout" method="post">
-		<input name="_csrf" th:value="${_csrf.token}" type="hidden"> 
-		<input type="submit" value="Sign Out" />
-	</form>
+ -->
 </div>
 </body>
 </html>
