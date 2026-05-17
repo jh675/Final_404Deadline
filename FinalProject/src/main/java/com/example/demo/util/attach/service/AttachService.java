@@ -12,6 +12,9 @@ public interface AttachService {
     int deleteAttach(Long id);
 
     List<AttachVO> saveAttach(MultipartFile[] attachments,String tableName);
+
+    void saveAndInsertAttachments(Long containerId, MultipartFile[] attachments, String tableName,
+            String containerType);
     
     AttachVO selectAttach(Long id);
     

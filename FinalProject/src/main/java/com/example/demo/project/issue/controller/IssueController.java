@@ -94,7 +94,7 @@ public class IssueController {
 
 	
 	@GetMapping("/issue/register")
-	public String issueRegister(Model model, @RequestParam(required = false) Long id) {
+	public String issueRegister(Model model, @RequestParam(value = "id", required = false) Long id) {
 		IssueInputVO issue;
 		//id값이 있는경우(수정버튼 클릭해서 온경우)
 		if (id != null) {
@@ -124,7 +124,7 @@ public class IssueController {
 		}
 		Long issueId = service.insertIssue(issueVO);
 		if (hasFiles && issueId != null) {
-			saveIssueAttachments(issueId, attachments);
+			attachService.saveAndInsertAttachments(issueId, attachments, "04MODULE", "ISSUE");
 		}
 		return "redirect:/issue/list";
 	}
@@ -139,7 +139,7 @@ public class IssueController {
 		boolean hasFiles = hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
-			saveIssueAttachments(issueVO.getId(), attachments);
+			attachService.saveAndInsertAttachments(issueVO.getId(), attachments, "04MODULE", "ISSUE");
 		}
 		service.updateIssue(issueVO);
 		return "redirect:/issue/detail?id=" + issueVO.getId();
@@ -157,19 +157,6 @@ public class IssueController {
 			}
 		}
 		return false;
-	}
-
-	private void saveIssueAttachments(Long issueId, MultipartFile[] attachments) {
-		List<AttachVO> saved = attachService.saveAttach(attachments, "04MODULE");
-		if (saved.isEmpty()) {
-			return;
-		}
-		for (AttachVO a : saved) {
-			a.setContainerId(issueId);
-			a.setContainerType("ISSUE");
-			a.setTableName("04MODULE");
-		}
-		attachService.insertAttach(saved);
 	}
 
 }

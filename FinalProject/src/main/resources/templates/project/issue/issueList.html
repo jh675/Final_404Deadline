@@ -17,8 +17,6 @@
   <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
 <style>
-
-
 /* 검색 영역 */
 .search-area {
 	display: flex;
@@ -94,33 +92,33 @@
 	flex-shrink: 0;
 }
 
-	/* TOAST UI Grid 컨테이너 */
-	#grid {
-		margin-top: 8px;
-	}
+/* TOAST UI Grid 컨테이너 */
+#grid {
+	margin-top: 8px;
+}
 
-	.issue-register-actions {
-		margin-top: 18px;
-		text-align: right;
-	}
+.issue-register-actions {
+	margin-top: 18px;
+	text-align: right;
+}
 
-	.issue-register-btn {
-		display: inline-block;
-		padding: 10px 22px;
-		background-color: #5b6cff;
-		color: #fff;
-		border: none;
-		border-radius: 4px;
-		font-size: 14px;
-		font-weight: 600;
-		text-decoration: none;
-		cursor: pointer;
-	}
+.issue-register-btn {
+	display: inline-block;
+	padding: 10px 22px;
+	background-color: #5b6cff;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: pointer;
+}
 
-	.issue-register-btn:hover {
-		background-color: #4956d8;
-		color: #fff;
-	}
+.issue-register-btn:hover {
+	background-color: #4956d8;
+	color: #fff;
+}
 </style>
 </th:block>
 </head>
@@ -132,8 +130,8 @@
 		<form id="searchForm" th:action="@{/issue/list}" method="get"
 			th:object="${filter}" class="search-area">
 			<div class="search-item">
-				<label for="categoryCd">유형</label> <select id="categoryCd"
-					th:field="*{categoryCd}">
+				<label for="categoryCd">유형</label>
+				<select id="categoryCd" th:field="*{categoryCd}">
 					<option value="">미선택</option>
 					<option value="01ISSUECATE">버그</option>
 					<option value="02ISSUECATE">기능</option>
@@ -142,8 +140,8 @@
 				</select>
 			</div>
 			<div class="search-item">
-				<label for="priorityCd">우선순위</label> <select id="priorityCd"
-					th:field="*{priorityCd}">
+				<label for="priorityCd">우선순위</label>
+				<select id="priorityCd" th:field="*{priorityCd}">
 					<option value="">미선택</option>
 					<option value="01ISSUEPRI">최상</option>
 					<option value="02ISSUEPRI">상</option>
@@ -153,8 +151,8 @@
 			</div>
 
 			<div class="search-item">
-				<label for="statusCd">상태</label> <select id="statusCd"
-					th:field="*{statusCd}">
+				<label for="statusCd">상태</label>
+				<select id="statusCd" th:field="*{statusCd}">
 					<option value="">미선택</option>
 					<option value="01ISSUESTAT">신규</option>
 					<option value="02ISSUESTAT">진행중</option>
@@ -164,8 +162,8 @@
 			</div>
 
 			<div class="search-item">
-				<label for="memId">담당자</label> <select id="memId"
-					th:field="*{memId}">
+				<label for="memId">담당자</label>
+				<select id="memId" th:field="*{memId}">
 					<option value="">미선택</option>
 					<option value="1">홍길동</option>
 					<option value="2">김길동</option>
@@ -176,12 +174,13 @@
 
 			<div class="right-area">
 				<div class="search-item">
-					<label for="subject">제목</label> <input type="text" id="subject"
-						th:field="*{subject}" placeholder="텍스트를 입력해 주세요.">
+					<label for="subject">제목</label>
+					<input type="text" id="subject" th:field="*{subject}"
+						placeholder="텍스트를 입력해 주세요." />
 				</div>
 
-				<label class="checkbox-item"> <input type="checkbox"
-					id="myIssue" name="myIssue" value="Y" > 내가 맡은 이슈
+				<label class="checkbox-item">
+					<input type="checkbox" id="myIssue" name="myIssue" value="Y" /> 내가 맡은 이슈
 				</label>
 
 				<button type="submit" class="search-btn">검색</button>
@@ -209,15 +208,14 @@
 		/*]]>*/
 	</script>
 
-	<script >
+	<script>
 		document.addEventListener('DOMContentLoaded', function () {
 			const myIssueCheckbox = document.getElementById('myIssue');
 			const memIdSelect = document.getElementById('memId');
 			const searchForm = document.getElementById('searchForm');
-			
+
 			function applyMyIssueState() {
 				if (myIssueCheckbox.checked) {
-					console.log(LOGIN_MEM_ID);
 					memIdSelect.value = LOGIN_MEM_ID;
 					memIdSelect.disabled = true;
 				} else {
@@ -267,8 +265,7 @@
 					최상: 1,
 					상: 2,
 					중: 3,
-					하: 4,
-
+					하: 4
 				};
 				// order에 직접 정의된 키인지(hasOwnProperty)만 순위를 부여한다.
 				// → 예: 키가 "toString" 등 Object.prototype 이름과 겹치면 잘못된 순위가 되는 것을 방지.

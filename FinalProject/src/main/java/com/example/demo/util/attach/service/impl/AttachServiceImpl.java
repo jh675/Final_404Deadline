@@ -127,6 +127,21 @@ public class AttachServiceImpl implements AttachService {
 	}
 
 	@Override
+	public void saveAndInsertAttachments(Long containerId, MultipartFile[] attachments, String tableName,
+			String containerType) {
+		List<AttachVO> saved = saveAttach(attachments, tableName);
+		if (saved.isEmpty()) {
+			return;
+		}
+		for (AttachVO a : saved) {
+			a.setContainerId(containerId);
+			a.setContainerType(containerType);
+			a.setTableName(tableName);
+		}
+		insertAttach(saved);
+	}
+
+	@Override
 	public AttachVO selectAttach(Long id) {
 		// TODO Auto-generated method stub
 		return mapper.selectAttach(id);

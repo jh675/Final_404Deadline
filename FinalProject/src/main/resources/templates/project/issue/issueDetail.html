@@ -11,8 +11,6 @@
 <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <style>
-
-
 .issue-shell {
 	font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
 	color: #333;
@@ -437,9 +435,9 @@ table.data-table tbody td {
 	gap: 8px;
 }
 
+/* 그리드 본문 3행(40px×3) + 헤더는 그리드가 별도 처리 */
 #childIssueList {
 	width: 100%;
-	/* 그리드 본문 3행(40px×3) + 헤더는 그리드가 별도 처리 */
 }
 </style>
 </th:block>
@@ -479,7 +477,7 @@ table.data-table tbody td {
 		</div>
 		<div class="meta-item">
 			<label>담당자</label>
-			<input type="text" readonly th:value="${issue.memName != null ?  issue.memName : '—'}" />
+			<input type="text" readonly th:value="${issue.memName != null ? issue.memName : '—'}" />
 		</div>
 		<div class="meta-item">
 			<label>시작 예정일</label>
@@ -567,8 +565,6 @@ table.data-table tbody td {
 				</div>
 				<form class="comment-form" id="issueCommentForm" th:action="@{/issue/comment}" method="post">
 					<input type="hidden" name="issueId" th:value="${issue.id}" />
-					<input type="hidden" th:value="${#authentication.principal.id}" />
-					
 					<input type="hidden" name="parentId" id="commentParentId" value="" />
 					<textarea name="content" placeholder="댓글 내용" required></textarea>
 					<button type="submit">등록</button>
@@ -678,7 +674,7 @@ table.data-table tbody td {
 (function () {
 	var panel = document.getElementById('panel-comments');
 	if (!panel) return;
-	
+
 	var form = document.getElementById('issueCommentForm');
 	var parentInput = document.getElementById('commentParentId');
 	var hintRow = document.getElementById('replyHintRow');

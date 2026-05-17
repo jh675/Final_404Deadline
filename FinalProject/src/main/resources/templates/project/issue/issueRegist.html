@@ -9,9 +9,6 @@
 <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
 <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
 <style>
-
-
-
 .back-row {
 	margin-bottom: 16px;
 }
@@ -364,7 +361,6 @@
 			<div class="field-wrap">
 				<input type="datetime-local" id="estStartDate" name="estStartDate" step="60"
 					th:value="${issue != null and issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd''T''HH:mm') : ''}" />
-				
 			</div>
 
 			<label for="dueDate">종료예정일</label>
@@ -396,13 +392,12 @@
 			<label for="parentIssue">상위 이슈</label>
 			<div class="field-wrap">
 				<select id="parentIssue" name="parentIssue">
-					
 					<option value=""
 						th:selected="${issue == null or issue.parentIssue == null}">없음</option>
-					<option th:each="item :${issueIds}" 
+					<option th:each="item : ${issueIds}"
 						th:value="${item.ID}"
 						th:text="${item.SUBJECT}"
-						th:selected="${ids != null and issue.parentIssue == ids.id }">없음</option>
+						th:selected="${ids != null and issue.parentIssue == ids.id}">없음</option>
 				</select>
 			</div>
 
@@ -611,7 +606,7 @@
 		var due = document.getElementById('dueDate').value;
 		if (est) payload.estStartDate = est;
 		if (due) payload.dueDate = due;
-		
+
 		var formData = new FormData();
 		formData.append('issue', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
 		attachRows.querySelectorAll('input[type="file"]').forEach(function (inp) {
