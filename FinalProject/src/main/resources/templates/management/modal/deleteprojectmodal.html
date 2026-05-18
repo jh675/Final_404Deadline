@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+	<div th:fragment="deleteproject">
+		<div class="modal fade" id="deleteproject" tabindex="-1"
+			aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<h3>해당 프로젝트를 삭제하겠습니까?</h3>
+					<form  method="post" layout:fragment="content">
+						<input type="hidden" id="projectHide" name="id" value="" />
+						<div th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminCd == '시스템관리자'}">
+							<button type="submit" formaction="/management/delete">완전삭제</button>
+						</div>
+						<div>
+							<button type="submit" formaction="/management/hide">삭제</button>
+							<button type="button" class="btn btn-secondary"
+									data-bs-dismiss="modal">취소</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -94,5 +94,19 @@ public class ProjectController {
 	    
 	    return "redirect:/management/project";
 	}
+	
+	@PostMapping("/management/hide")
+	public String projectHide(ProjectVO vo) {
+		projectservice.projectHide(vo);
+		System.out.println("숨김완료");
+		System.out.println(vo.getId());
+		return "redirect:/management/project";
+	}
+	
+	@PostMapping("/management/delete")
+	public String projectDelete(int id) {
+		projectservice.projectDelete(id);
+		return "redirect:/management/project";
+	}
 
 }
