@@ -2,9 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="https://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout/errorpgLayout}">
+	layout:decorate="~{layout/defaultLayout}">
 <head>
 <title>Spring Security Example</title>
+<link rel="stylesheet" th:href="@{/css/login/login.css}">
+<script th:src="@{/js/login/resetPw.js}"></script>
 </head>
 <body>
 	<div layout:fragment="content">
@@ -16,7 +18,8 @@
 				</label>
 			</div>
 			<div>
-				<label id="test"> Password: <input type="password" name="password" />
+				<label id="test"> Password: <input type="password"
+					name="password" />
 				</label>
 			</div>
 			<div>
@@ -31,14 +34,5 @@
 
 		<div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
 	</div>
-	
-<!-- CSS 연결 -->
-	<th:block layout:fragment="css">
-		<link rel="stylesheet" th:href="@{/css/login/login.css}">
-	</th:block>
-<!-- JS 연결 -->
-	<th:block layout:fragment="script">
-		<script th:src="@{/js/login/resetPw.js}"></script>
-	</th:block>
 </body>
 </html>
