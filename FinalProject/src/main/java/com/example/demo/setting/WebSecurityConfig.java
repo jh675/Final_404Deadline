@@ -31,7 +31,7 @@ class WebSecurityConfig {
 				.successHandler(successHandler())
 			)
 			.logout(LogoutConfigurer::permitAll)
-			.csrf(a -> a.disable())
+			// .csrf(a -> a.disable())
 			;
 		// @formatter:on
 

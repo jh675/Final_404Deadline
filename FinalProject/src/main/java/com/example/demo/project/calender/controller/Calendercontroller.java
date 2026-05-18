@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.login.service.UserVO;
@@ -31,6 +32,16 @@ public class Calendercontroller {
 	  return "project/calender/calender";
 	}
 	
+	// 일정목록 가져오기 
+	@GetMapping("/calender/listJson" )
+	@ResponseBody
+	public List<CalenderVO> calenderListJson(@RequestParam(name = "typeCd", defaultValue = "") String typeCd) {
+		CalenderVO vo = new CalenderVO();
+		vo.setTypeCd(typeCd);
+		vo.setMemId(2);
+		return calenderService.getList(vo);
+	}
+	
 	// 일정 등록
 	@PostMapping("calender/insert")
 	@ResponseBody
@@ -45,16 +56,15 @@ public class Calendercontroller {
 		return calenderService.insert(vo);
 	}
 	// 일정 수정
-	@PutMapping("calender/update")
+	@PutMapping("/calender/update")
 	@ResponseBody
 	 public int update(CalenderVO vo) {
-		calenderService.updete(vo);
 		return calenderService.updete(vo);
 	}
 	// 일정 삭제 
-	@DeleteMapping("calender/delete")
+	@DeleteMapping("/calender/delete")
 	@ResponseBody
-	 public int delete(int id) {
+	 public int delete(@RequestParam(name="id") int id) {
 		return calenderService.delete(id);
 	}
 
