@@ -200,46 +200,24 @@
           <hr class="menu-role-page__rule" />
         </header>
 
-        <section
-          class="menu-role-page__search"
-          aria-labelledby="group-search-heading"
-        >
+        <section class="menu-role-page__search"
+          aria-labelledby="group-search-heading" >
           <h2 id="group-search-heading" class="visually-hidden">그룹 검색</h2>
-          <form
-            class="role-search"
-            id="groupSearchForm"
-            th:action="@{/project/group/groupManagement}"
-            method="get"
-          >
+          <form class="role-search" id="groupSearchForm"
+            th:action="@{/project/group/groupManagement}" method="get" >
             <input type="hidden" name="prjId" th:value="${prjId}" />
             <div class="role-search__bar">
               <div class="role-search__inline">
                 <label for="grpName">그룹명</label>
-                <input
-                  type="text"
-                  id="grpName"
-                  name="grpName"
-                  th:value="${grpName}"
-                  placeholder="그룹명"
-                  autocomplete="off"
-                />
+                <input type="text" id="grpName" name="grpName" th:value="${grpName}"
+                  placeholder="그룹명" autocomplete="off" />
               </div>
               <div class="role-search__inline role-search__inline--date-range">
                 <label for="createdFrom">그룹 생성일</label>
-                <input
-                  type="date"
-                  id="createdFrom"
-                  name="createdFrom"
-                  th:value="${createdFrom}"
-                />
+                <input type="date" id="createdFrom" name="createdFrom" th:value="${createdFrom}" />
                 <span class="role-search__tilde">~</span>
-                <input
-                  type="date"
-                  id="createdTo"
-                  name="createdTo"
-                  th:value="${createdTo}"
-                  aria-label="그룹 생성일 종료"
-                />
+                <input type="date" id="createdTo" name="createdTo" th:value="${createdTo}"
+                  aria-label="그룹 생성일 종료" />
               </div>
               <div class="role-search__actions">
                 <button type="submit">검색</button>
@@ -248,27 +226,20 @@
           </form>
         </section>
 
-        <section
-          class="menu-role-page__list"
-          aria-labelledby="group-list-heading"
-        >
+        <section class="menu-role-page__list" aria-labelledby="group-list-heading" >
           <h2 class="menu-role-page__section-title" id="group-list-heading">
             프로젝트 그룹 목록
           </h2>
           <div class="menu-role-page__grid-wrap">
-            <div
-              id="groupGrid"
-              class="menu-role-page__grid-host"
-              role="region"
-              aria-label="프로젝트 그룹 그리드"
-            ></div>
+            <div id="groupGrid" class="menu-role-page__grid-host"
+              role="region" aria-label="프로젝트 그룹 그리드">
+            </div>
           </div>
         </section>
       </main>
 
-      <div
-        th:replace="~{project/role/modal/questionModal :: roleQuestionModal}"
-      ></div>
+      <div th:replace="~{project/role/modal/questionModal :: roleQuestionModal}">
+      </div>
 
       <script>
         window.RoleQuestionModal = (function () {
@@ -632,6 +603,17 @@
               const btn = e.target.closest("button");
               if (!btn || !btn.id) return;
               if (btn.id === "groupBtnRegister") {
+                var pid = Number(prjId);
+                if (isNaN(pid)) {
+                  void window.RoleQuestionModal.alert(
+                    "프로젝트 ID가 올바르지 않습니다.",
+                    "알림",
+                  );
+                  return;
+                }
+                location.href =
+                  "/project/group/groupManagementInfo?prjId=" +
+                  encodeURIComponent(prjId);
                 return;
               }
               if (btn.id === "groupBtnDelete") {
@@ -770,6 +752,26 @@
                   width: 220,
                   align: "center",
                   sortable: true,
+                  formatter: ({ row, value }) => {
+                    const gid =
+                      row.id != null && row.id !== ""
+                        ? row.id
+                        : null;
+                    const text = value == null ? "" : value;
+                    if (gid == null) return text;
+                    const q =
+                      "prjId=" +
+                      encodeURIComponent(prjId) +
+                      "&grpId=" +
+                      encodeURIComponent(String(gid));
+                    return (
+                      '<a href="/project/group/groupManagementInfo?' +
+                      q +
+                      '">' +
+                      text +
+                      "</a>"
+                    );
+                  },
                 },
                 {
                   header: "멤버 수",
@@ -806,6 +808,21 @@
             });
             grid.on("uncheckAll", function () {
               renderToolbar();
+            });
+
+            grid.on("click", function (ev) {
+              if (deleteMode) return;
+              if (ev.columnName !== "grpName" || ev.rowKey == null) return;
+              const row = grid.getRow(ev.rowKey);
+              const gid =
+                row && row.id != null && row.id !== "" ? row.id : null;
+              if (gid != null) {
+                location.href =
+                  "/project/group/groupManagementInfo?prjId=" +
+                  encodeURIComponent(prjId) +
+                  "&grpId=" +
+                  encodeURIComponent(String(gid));
+              }
             });
 
             renderToolbar();
