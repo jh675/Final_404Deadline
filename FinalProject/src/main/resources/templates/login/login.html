@@ -1,130 +1,44 @@
 <!DOCTYPE html>
-
-<html xmlns:th="https://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/errorpgLayout}">
-
-<!-- head fragment -->
-<th:block layout:fragment="head">
-
-    <title>로그인</title>
-
-    <!-- csrf -->
-    <meta name="_csrf"
-          th:content="${_csrf.token}">
-
-    <meta name="_csrf_header"
-          th:content="${_csrf.headerName}">
-
-</th:block>
-
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/errorpgLayout}">
+<head>
+<title>Spring Security Example</title>
+</head>
 <body>
+	<div layout:fragment="content">
+		<div th:if="${param.error}">회원정보가 일치하지 않습니다.</div>
+		<div th:if="${param.logout}">로그아웃 했습니다.</div>
+		<form th:action="@{/login}" method="post">
+			<div>
+				<label> User Name : <input type="text" name="username" />
+				</label>
+			</div>
+			<div>
+				<label id="test"> Password: <input type="password" name="password" />
+				</label>
+			</div>
+			<div>
+				<input type="submit" value="Sign In" />
+			</div>
+		</form>
 
-<div layout:fragment="content">
+		<div>
+			<a th:href="@{/}">홈으로 돌아가기</a> <a href="#" data-bs-toggle="modal"
+				data-bs-target="#resetPwModal">비밀번호 재설정 </a>
+		</div>
 
-    <div class="row justify-content-center">
-
-        <div class="col-md-5">
-
-            <div class="card shadow-sm">
-
-                <div class="card-body">
-
-                    <h3 class="mb-4 text-center">
-                        로그인
-                    </h3>
-
-                    <!-- 로그인 실패 -->
-                    <div th:if="${param.error}"
-                         class="alert alert-danger">
-
-                        계정 정보가 일치하지 않습니다.
-
-                    </div>
-
-                    <!-- 로그아웃 -->
-                    <div th:if="${param.logout}"
-                         class="alert alert-success">
-
-                        로그아웃 하셨습니다.
-
-                    </div>
-
-                    <!-- 로그인 폼 -->
-                    <form th:action="@{/login}"
-                          method="post">
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                아이디
-                            </label>
-
-                            <input type="text"
-                                   name="username"
-                                   class="form-control">
-
-                        </div>
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                비밀번호
-                            </label>
-
-                            <input type="password"
-                                   name="password"
-                                   class="form-control">
-
-                        </div>
-
-                        <button type="submit"
-                                class="btn btn-primary w-100">
-
-                            로그인
-
-                        </button>
-
-                    </form>
-
-                    <!-- 하단 -->
-                    <div class="mt-3 d-flex justify-content-between">
-
-                        <a th:href="@{/}">
-                            홈으로 돌아가기
-                        </a>
-
-                        <button type="button"
-                                class="btn btn-link p-0"
-                                data-bs-toggle="modal"
-                                data-bs-target="#resetPwModal">
-
-                            비밀번호 재설정
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- 모달 -->
-    <div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
-
-</div>
-
+		<div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
+	</div>
+	
+<!-- CSS 연결 -->
+	<th:block layout:fragment="css">
+		<link rel="stylesheet" th:href="@{/css/login/login.css}">
+	</th:block>
+<!-- JS 연결 -->
+	<th:block layout:fragment="script">
+		<script th:src="@{/js/login/resetPw.js}"></script>
+	</th:block>
 </body>
-
-<!-- script fragment -->
-<th:block layout:fragment="script">
-
-    <script th:src="@{/js/resetPw.js}"></script>
-
-</th:block>
-
 </html>

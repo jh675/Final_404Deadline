@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 프로젝트 그룹: GRP + MEMBER 집계 -->
+<mapper namespace="com.example.demo.project.group.mapper.GroupMapper">
+
+  <!-- 목록 검색 WHERE (prjId 필수, 그룹명·생성일 선택) -->
+  <sql id="groupListWhere">
+    <where>
+      G.PRJ_ID = #{prjId}
+      <if test="grpName != null and grpName != ''">
+        AND G.NAME LIKE '%' || #{grpName} || '%'
+      </if>
+      <if test="createdFrom != null and createdFrom != ''">
+        AND TRUNC(G.CREATED_ON) &gt;= TO_DATE(#{createdFrom}, 'YYYY-MM-DD')
+      </if>
+      <if test="createdTo != null and createdTo != ''">
+        AND TRUNC(G.CREATED_ON) &lt;= TO_DATE(#{createdTo}, 'YYYY-MM-DD')
+      </if>
+    </where>
+  </sql>
+
+  <!-- 그룹 목록 — 멤버 0명 그룹도 LEFT JOIN으로 포함 -->
+  <select id="selectProjectGroupList" resultType="com.example.demo.project.group.service.ProjectGroupRowVO">
+    SELECT
+      G.ID AS id,
+      G.NAME AS grpName,
+      COUNT(M.USER_ID) AS cntMem,
+      G.CREATED_ON AS createdOn
+    FROM GRP G
+    LEFT JOIN MEMBER M ON M.GRP_ID = G.ID
+    <include refid="groupListWhere"/>
+    GROUP BY G.ID, G.NAME, G.CREATED_ON
+    ORDER BY G.ID
+  </select>
+
+  <!-- 그룹 삭제 1/3: 소속 MEMBER -->
+  <delete id="deleteGroupMembers">
+    DELETE FROM MEMBER M
+    WHERE EXISTS (
+      SELECT 1 FROM GRP G WHERE G.ID = M.GRP_ID AND G.PRJ_ID = #{prjId}
+    )
+    AND M.GRP_ID IN
+    <foreach collection="grpIds" item="gid" open="(" separator="," close=")">
+      #{gid}
+    </foreach>
+  </delete>
+
+  <!-- 그룹 삭제 2/3: GRP_ROLE -->
+  <delete id="deleteGroupRoles">
+    DELETE FROM GRP_ROLE GR
+    WHERE EXISTS (
+      SELECT 1 FROM GRP G WHERE G.ID = GR.GRP_ID AND G.PRJ_ID = #{prjId}
+    )
+    AND GR.GRP_ID IN
+    <foreach collection="grpIds" item="gid" open="(" separator="," close=")">
+      #{gid}
+    </foreach>
+  </delete>
+
+  <!-- 그룹 삭제 3/3: GRP -->
+  <delete id="deleteGroupRows">
+    DELETE FROM GRP G
+    WHERE G.PRJ_ID = #{prjId}
+      AND G.ID IN
+    <foreach collection="grpIds" item="gid" open="(" separator="," close=")">
+      #{gid}
+    </foreach>
+  </delete>
+</mapper>

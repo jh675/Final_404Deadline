@@ -115,6 +115,35 @@
 	</select>
 
 	<!-- ===================================================== -->
+	<!-- 이슈 등록/수정 폼용 조회 (코드값·MEM_ID 원본)              -->
+	<!-- ===================================================== -->
+	<select id="selectIssueForForm" parameterType="long" resultType="IssueInputVO">
+		SELECT
+			ID AS id,
+			PRJ_ID AS prjId,
+			SUBJECT AS subject,
+			DESCRIPTION AS description,
+			CATEGORY_CD AS categoryCd,
+			STATUS_CD AS statusCd,
+			PRIORITY_CD AS priorityCd,
+			CREATED_ON AS createdOn,
+			UPDATED_ON AS updatedOn,
+			EST_START_DATE AS estStartDate,
+			DUE_DATE AS dueDate,
+			START_DATE AS startDate,
+			CLOSED_DATE AS closedDate,
+			PARENT_ISSUE AS parentIssue,
+			ROOT_ISSUE AS rootIssue,
+			MEM_ID AS memId,
+			LFT AS lft,
+			RGT AS rgt,
+			DONE_RATIO AS doneRatio,
+			IS_ATTACH_CD AS isAttachCd
+		FROM ISSUE
+		WHERE ID = #{id}
+	</select>
+
+	<!-- ===================================================== -->
 	<!-- 이슈 등록                                                -->
 	<!--   - ID는 시퀀스(SEQ_ISSUE) 사용 가정                       -->
 	<!-- ===================================================== -->
@@ -122,13 +151,12 @@
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
 			SELECT ISS_SEQ.NEXTVAL FROM DUAL
 		</selectKey>
-		INSERT INTO TB_ISSUE (
+		INSERT INTO ISSUE (
 			ID,
 			PRJ_ID,
 			SUBJECT,
 			DESCRIPTION,
 			CATEGORY_CD,
-			STATUS_CD,
 			PRIORITY_CD,
 			CREATED_ON,
 			UPDATED_ON,
@@ -141,15 +169,17 @@
 			MEM_ID,
 			LFT,
 			RGT,
-			DONE_RATIO,
+			DONE_RATIO
+			<if test="isAttachCd != null">
+			,
 			IS_ATTACH_CD
+			</if>
 		) VALUES (
 			#{id},
-			#{prjId},
+			3,
 			#{subject},
 			#{description},
 			#{categoryCd},
-			#{statusCd},
 			#{priorityCd},
 			SYSDATE,
 			#{updatedOn},
@@ -162,8 +192,11 @@
 			#{memId},
 			#{lft},
 			#{rgt},
-			#{doneRatio},
-			#{isAttachCd}
+			#{doneRatio}
+			<if test="isAttachCd != null">
+			,#{isAttachCd}
+			</if>
+			
 		)
 	</insert>
 
@@ -172,9 +205,8 @@
 	<!--   - 동적 SQL로 전달된 컬럼만 갱신                          -->
 	<!-- ===================================================== -->
 	<update id="updateIssue" parameterType="IssueInputVO">
-		UPDATE TB_ISSUE
+		UPDATE ISSUE
 		<set>
-			<if test="prjId != null">PRJ_ID = #{prjId},</if>
 			<if test="subject != null">SUBJECT = #{subject},</if>
 			<if test="description != null">DESCRIPTION = #{description},</if>
 			<if test="categoryCd != null">CATEGORY_CD = #{categoryCd},</if>
@@ -184,7 +216,6 @@
 			<if test="dueDate != null">DUE_DATE = #{dueDate},</if>
 			<if test="startDate != null">START_DATE = #{startDate},</if>
 			<if test="closedDate != null">CLOSED_DATE = #{closedDate},</if>
-			<if test="parentIssue != null">PARENT_ISSUE = #{parentIssue},</if>
 			<if test="rootIssue != null">ROOT_ISSUE = #{rootIssue},</if>
 			<if test="memId != null">MEM_ID = #{memId},</if>
 			<if test="lft != null">LFT = #{lft},</if>

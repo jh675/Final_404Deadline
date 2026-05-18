@@ -20,4 +20,12 @@
 	 	where  login = #{loginId}
 	</select>
 
+	<update id="updatePassword">
+
+		UPDATE users
+		SET password = #{password}
+		WHERE biz_no = #{bizNo}
+		AND login = #{login}
+	
+	</update>
 </mapper>

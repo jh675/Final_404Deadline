@@ -1,61 +1,95 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.example.demo.company.mapper.CompanyMapper">
 
-<select id="selectAll">
-	select *
-	from company
-</select>
+    <!-- ===================== LIST ===================== -->
+    <select id="selectAll"
+            parameterType="com.example.demo.company.service.CompanyVO"
+            resultType="com.example.demo.company.service.CompanyVO">
 
-<select id="selectOne">
-	select *
-	from company
-	where biz_no = #{bizNo}
-</select>
+        select *
+        from company
 
-<insert id="insert">
-  insert into company (
-		biz_no,
-	 	company_name,
-		tel,
-	    address,
-		is_active_cd
-	 	
-  )	
-  
-  values (
-  	#{bizNo},
-  	#{companyName},
-  	#{tel},
-  	#{address},
-  	#{isActiveCd}
-  	
- )
-</insert>
+        <where>
 
-<update id="update">
-  update company
-  	set company_name = #{companyName},
-  		tel = #{tel},
-  		address = #{address},
-  	    is_active_cd = #{isActiveCd}
-  	 where biz_no = #{bizNo}   
-</update>
+            <if test="keyword != null and keyword != ''">
 
-<delete id="delete">
-	delete from company
-	where biz_no = #{bizNo}
+                <choose>
 
-</delete>
+                    <when test="searchType == 'bizNo'">
+                        biz_no like '%' || #{keyword} || '%'
+                    </when>
 
+                    <when test="searchType == 'companyName'">
+                        company_name like '%' || #{keyword} || '%'
+                    </when>
 
+                    <when test="searchType == 'tel'">
+                        tel like '%' || #{keyword} || '%'
+                    </when>
 
+                    <when test="searchType == 'address'">
+                        address like '%' || #{keyword} || '%'
+                    </when>
 
+                </choose>
 
+            </if>
 
+        </where>
 
+    </select>
 
+    <!-- ===================== ONE ===================== -->
+    <select id="selectOne"
+            resultType="com.example.demo.company.service.CompanyVO">
 
+        select *
+        from company
+        where biz_no = #{bizNo}
+
+    </select>
+
+    <!-- ===================== INSERT ===================== -->
+    <insert id="insert">
+
+        insert into company (
+            biz_no,
+            company_name,
+            tel,
+            address,
+            is_active_cd
+        )
+        values (
+            #{bizNo},
+            #{companyName},
+            #{tel},
+            #{address},
+            #{isActiveCd}
+        )
+
+    </insert>
+
+    <!-- ===================== UPDATE ===================== -->
+    <update id="update">
+
+        update company
+        set company_name = #{companyName},
+            tel = #{tel},
+            address = #{address},
+            is_active_cd = #{isActiveCd}
+        where biz_no = #{bizNo}
+
+    </update>
+
+    <!-- ===================== DELETE ===================== -->
+    <delete id="delete">
+
+        delete from company
+        where biz_no = #{bizNo}
+
+    </delete>
 
 </mapper>

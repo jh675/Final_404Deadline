@@ -11,12 +11,7 @@
 <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <style>
-.issue-shell,
-.issue-shell *,
-.issue-shell *::before,
-.issue-shell *::after {
-	box-sizing: border-box;
-}
+
 
 .issue-shell {
 	font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
@@ -47,11 +42,46 @@
 	text-decoration: underline;
 }
 
+.page-title-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+	margin-bottom: 22px;
+}
+
+.page-title-row .page-title {
+	margin-bottom: 0;
+	flex: 1;
+	min-width: 0;
+}
+
 .page-title {
 	font-size: 22px;
 	font-weight: 700;
 	margin-bottom: 22px;
 	line-height: 1.35;
+}
+
+.issue-register-btn {
+	flex-shrink: 0;
+	display: inline-block;
+	padding: 10px 22px;
+	background-color: #5b6cff;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.issue-register-btn:hover {
+	background-color: #4956d8;
+	color: #fff;
+	text-decoration: none;
 }
 
 .meta-grid {
@@ -169,6 +199,25 @@
 
 .attach-item a:hover {
 	color: #4956d8;
+}
+
+/* 첨부: 한 줄 3칸 그리드 (스크롤은 .attach-list-scroll-wrap + 스크립트로 처리) */
+.attach-list-scroll-wrap {
+	overflow-x: hidden;
+	min-height: 0;
+	scrollbar-gutter: stable;
+}
+
+.attach-list.attach-list--grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px 14px;
+	align-items: start;
+}
+
+.attach-list.attach-list--grid .attach-item {
+	min-width: 0;
+	overflow-wrap: anywhere;
 }
 
 table.data-table {
@@ -406,7 +455,10 @@ table.data-table tbody td {
 	<p th:if="${issue == null}" style="padding:24px 0;color:#666;">이슈를 찾을 수 없습니다.</p>
 
 	<th:block th:if="${issue != null}">
-	<h1 class="page-title" th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
+	<div class="page-title-row">
+		<h1 class="page-title" th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
+		<a class="issue-register-btn" th:href="@{/issue/register(id=${issue.id})}">이슈 수정</a>
+	</div>
 
 	<div class="meta-grid">
 		<div class="meta-item">
@@ -453,12 +505,18 @@ table.data-table tbody td {
 	<div class="section-block">
 		<div class="section-head">
 			<span>첨부파일</span>
-			<span class="badge-count">3</span>
+			<span class="badge-count" th:text="${attachments != null ? #lists.size(attachments) : 0}">0</span>
 		</div>
-		<div class="attach-list">
-			<span class="attach-item">파일명1.jpg <a href="#" title="다운로드">⬇</a></span>
-			<span class="attach-item">파일명2.jpg <a href="#" title="다운로드">⬇</a></span>
-			<span class="attach-item">파일명3.jpg <a href="#" title="다운로드">⬇</a></span>
+		<div class="attach-list" th:if="${attachments == null or attachments.isEmpty()}">
+			<p style="font-size:13px;color:#666;padding:8px 0;">첨부된 파일이 없습니다.</p>
+		</div>
+		<div id="attachListScroll" class="attach-list-scroll-wrap" th:if="${attachments != null and !attachments.isEmpty()}">
+			<div class="attach-list attach-list--grid">
+				<span class="attach-item" th:each="a : ${attachments}">
+					<span th:text="${a.fileName != null ? a.fileName : a.diskFileName}">파일명</span>
+					<a th:href="@{/download/{id}(id=${a.id})}" title="다운로드">⬇</a>
+				</span>
+			</div>
 		</div>
 	</div>
 
@@ -588,7 +646,7 @@ table.data-table tbody td {
 </div>
 </div>
 
-<script>
+<script th:inline="javascript">
 (function () {
 	var tabs = document.querySelectorAll('.tab-btn');
 	var panels = document.querySelectorAll('.tab-panel');
@@ -620,6 +678,7 @@ table.data-table tbody td {
 (function () {
 	var panel = document.getElementById('panel-comments');
 	if (!panel) return;
+	
 	var form = document.getElementById('issueCommentForm');
 	var parentInput = document.getElementById('commentParentId');
 	var hintRow = document.getElementById('replyHintRow');
@@ -679,6 +738,32 @@ table.data-table tbody td {
 		layoutCommentThreadScroll();
 	}
 	window.addEventListener('resize', layoutCommentThreadScroll);
+})();
+
+(function () {
+	function layoutAttachListScroll() {
+		var wrap = document.getElementById('attachListScroll');
+		if (!wrap) return;
+		var items = wrap.querySelectorAll('.attach-item');
+		if (items.length <= 3) {
+			wrap.style.maxHeight = '';
+			wrap.style.overflowY = '';
+			return;
+		}
+		var r0 = items[0].getBoundingClientRect();
+		var r1 = items[1].getBoundingClientRect();
+		var r2 = items[2].getBoundingClientRect();
+		var bottom = Math.max(r0.bottom, r1.bottom, r2.bottom);
+		var h = bottom - r0.top;
+		wrap.style.maxHeight = Math.ceil(h) + 'px';
+		wrap.style.overflowY = 'auto';
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', layoutAttachListScroll);
+	} else {
+		layoutAttachListScroll();
+	}
+	window.addEventListener('resize', layoutAttachListScroll);
 })();
 </script>
 <th:block th:if="${issue != null}">

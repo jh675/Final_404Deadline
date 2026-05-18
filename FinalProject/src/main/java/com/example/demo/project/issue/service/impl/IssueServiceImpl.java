@@ -34,9 +34,18 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
-	public int insertIssue(IssueInputVO issueVO) {
-		// TODO Auto-generated method stub
-		return mapper.insertIssue(issueVO);
+	public IssueInputVO selectIssueForForm(Long id) {
+		if (id == null) {
+			return IssueInputVO.builder().build();
+		}
+		IssueInputVO vo = mapper.selectIssueForForm(id);
+		return vo != null ? vo : IssueInputVO.builder().build();
+	}
+
+	@Override
+	public Long insertIssue(IssueInputVO issueVO) {
+		mapper.insertIssue(issueVO);
+		return issueVO.getId();
 	}
 
 	@Override

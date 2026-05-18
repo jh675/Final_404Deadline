@@ -2,6 +2,7 @@ package com.example.demo.login.service.impl;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.login.service.EmailSendService;
@@ -14,9 +15,9 @@ public class EmailSendImpl implements EmailSendService {
 
 	private final JavaMailSender mailSender;
 
+	@Async
 	@Override
 	public void sendVerifyMail(String to, String verifyNum) {
-
 		SimpleMailMessage message = new SimpleMailMessage();
 
 		// 받는 사람
@@ -35,5 +36,4 @@ public class EmailSendImpl implements EmailSendService {
 			e.printStackTrace();
 		}
 	}
-
 }

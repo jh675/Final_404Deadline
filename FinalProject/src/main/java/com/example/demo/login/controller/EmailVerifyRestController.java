@@ -31,10 +31,12 @@ public class EmailVerifyRestController {
 
 		EmailVerifyVO result = verifyService.verifyCode(vo);
 
-		if (result != null) {
-			return "success";
-		}
+		return result.getResult();
+	}
+	
+	@PostMapping("/resetPw")
+	public String resetPassword(@RequestBody UserVO user) {
 
-		return "fail";
+	    return verifyService.resetPassword(user);
 	}
 }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 프로젝트 구성원: USERS + MEMBER + GRP -->
+<mapper namespace="com.example.demo.project.member.mapper.MemberMapper">
+
+  <!-- 목록 검색 WHERE (prjId 필수, 나머지 선택) -->
+  <sql id="memberListWhere">
+    <where>
+      G.PRJ_ID = #{prjId}
+      <if test="memberName != null and memberName != ''">
+        AND U.NAME LIKE '%' || #{memberName} || '%'
+      </if>
+      <if test="grpName != null and grpName != ''">
+        AND G.NAME LIKE '%' || #{grpName} || '%'
+      </if>
+      <if test="prjStartFrom != null and prjStartFrom != ''">
+        AND TRUNC(M.PRJ_START_DATE) &gt;= TO_DATE(#{prjStartFrom}, 'YYYY-MM-DD')
+      </if>
+      <if test="prjStartTo != null and prjStartTo != ''">
+        AND TRUNC(M.PRJ_START_DATE) &lt;= TO_DATE(#{prjStartTo}, 'YYYY-MM-DD')
+      </if>
+    </where>
+  </sql>
+
+  <!-- 구성원 목록 — Grid·Thymeleaf rows -->
+  <select id="selectProjectMemberList" resultType="com.example.demo.project.member.service.ProjectMemberRowVO">
+    SELECT
+      M.USER_ID AS userId,
+      M.GRP_ID AS grpId,
+      U.NAME AS userName,
+      U.TEL AS tel,
+      U.EMAIL AS email,
+      G.NAME AS grpName,
+      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+    FROM USERS U
+    JOIN MEMBER M ON U.ID = M.USER_ID
+    JOIN GRP G ON M.GRP_ID = G.ID
+    <include refid="memberListWhere"/>
+    ORDER BY M.USER_ID
+  </select>
+
+  <!-- 프로젝트에서 구성원 제거 — (USER_ID, GRP_ID) 복합키, prjId로 오삭제 방지 -->
+  <delete id="deleteMemberRows">
+    DELETE FROM MEMBER M
+    WHERE EXISTS (
+      SELECT 1 FROM GRP G WHERE G.ID = M.GRP_ID AND G.PRJ_ID = #{prjId}
+    )
+    AND (
+      <foreach collection="rows" item="r" separator=" OR ">
+        (M.USER_ID = #{r.userId} AND M.GRP_ID = #{r.grpId})
+      </foreach>
+    )
+  </delete>
+</mapper>

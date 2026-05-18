@@ -17,6 +17,8 @@ public class CompanyVO {
 	private String tel;
 	private String address;
 	private String isActiveCd;
-	private Date createdOn; 
+	private Date createdOn;
+	private String searchType;
+	private String keyword;
 
 }

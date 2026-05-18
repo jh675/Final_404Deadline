@@ -17,6 +17,8 @@ public interface IssueMapper {
     List<IssueOutputVO> selectIssueList(IssueInputVO issueVO);
     //단건조회
     IssueOutputVO selectIssue(Long id);
+    /** 상세 표시용이 아닌 등록/수정 폼용(코드·MEM_ID 원본) */
+    IssueInputVO selectIssueForForm(Long id);
     //입력
     int insertIssue(IssueInputVO issueVO);
     //수정

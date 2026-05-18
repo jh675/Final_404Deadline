@@ -7,6 +7,16 @@
 >
   <head>
     <meta charset="UTF-8" />
+    <meta
+      th:if="${_csrf != null}"
+      name="_csrf"
+      th:content="${_csrf.token}"
+    />
+    <meta
+      th:if="${_csrf != null}"
+      name="_csrf_header"
+      th:content="${_csrf.headerName}"
+    />
     <title>프로젝트 역할 관리</title>
     <link
       rel="stylesheet"
@@ -293,7 +303,108 @@
         </section>
       </main>
 
+      <div
+        th:replace="~{project/role/modal/questionModal :: roleQuestionModal}"
+      ></div>
+
       <script>
+        /**
+         * 역할 확인/알림 모달 (#roleQuestionModal). 메시지·제목은 호출부에서 전달.
+         */
+        window.RoleQuestionModal = (function () {
+          var modalEl,
+            titleEl,
+            msgEl,
+            btnCancel,
+            btnConfirm;
+
+          function cacheElements() {
+            if (!modalEl) {
+              modalEl = document.getElementById("roleQuestionModal");
+              if (!modalEl) return false;
+              titleEl = document.getElementById("roleQuestionModalTitle");
+              msgEl = document.getElementById("roleQuestionModalMessage");
+              btnCancel = document.getElementById("roleQuestionModalCancelBtn");
+              btnConfirm = document.getElementById("roleQuestionModalConfirmBtn");
+            }
+            return true;
+          }
+
+          function getInstance() {
+            if (
+              !cacheElements() ||
+              typeof bootstrap === "undefined" ||
+              !bootstrap.Modal
+            ) {
+              return null;
+            }
+            return bootstrap.Modal.getOrCreateInstance(modalEl);
+          }
+
+          function open(opts) {
+            var mode = opts.mode || "alert";
+            return new Promise(function (resolve) {
+              var inst = getInstance();
+              if (!inst || !titleEl || !msgEl) {
+                if (mode === "confirm") {
+                  resolve(window.confirm(String(opts.message || "")));
+                } else {
+                  window.alert(String(opts.message || ""));
+                  resolve(undefined);
+                }
+                return;
+              }
+              var settled = false;
+              function settle(value) {
+                if (settled) return;
+                settled = true;
+                modalEl.removeEventListener("hidden.bs.modal", onModalHidden);
+                resolve(value);
+              }
+              function onModalHidden() {
+                if (mode === "confirm") {
+                  settle(false);
+                } else {
+                  settle(undefined);
+                }
+              }
+              titleEl.textContent =
+                opts.title != null && opts.title !== ""
+                  ? opts.title
+                  : mode === "confirm"
+                    ? "확인"
+                    : "알림";
+              msgEl.textContent =
+                opts.message != null ? String(opts.message) : "";
+              if (mode === "alert") {
+                btnCancel.classList.add("d-none");
+              } else {
+                btnCancel.classList.remove("d-none");
+              }
+              modalEl.addEventListener("hidden.bs.modal", onModalHidden);
+              btnCancel.onclick = function () {
+                if (mode === "confirm") settle(false);
+                inst.hide();
+              };
+              btnConfirm.onclick = function () {
+                if (mode === "confirm") settle(true);
+                else settle(undefined);
+                inst.hide();
+              };
+              inst.show();
+            });
+          }
+
+          return {
+            alert: function (message, title) {
+              return open({ message: message, title: title, mode: "alert" });
+            },
+            confirm: function (message, title) {
+              return open({ message: message, title: title, mode: "confirm" });
+            },
+          };
+        })();
+
         document.addEventListener("DOMContentLoaded", function () {
           (function roleSearchDates() {
             const form = document.getElementById("roleSearchForm");
@@ -376,7 +487,7 @@
             end.addEventListener("change", clampEnd);
             end.addEventListener("input", clampEnd);
 
-            form.addEventListener("submit", function (e) {
+            form.addEventListener("submit", async function (e) {
               clampStart();
               clampEnd();
               const today = todayStr();
@@ -384,17 +495,26 @@
               const ev = end.value;
               if (sv && compare(sv, today) > 0) {
                 e.preventDefault();
-                alert("시작일은 오늘 이후로 지정할 수 없습니다.");
+                await window.RoleQuestionModal.alert(
+                  "시작일은 오늘 이후로 지정할 수 없습니다.",
+                  "알림"
+                );
                 return;
               }
               if (ev && compare(ev, today) > 0) {
                 e.preventDefault();
-                alert("종료일은 오늘 이후로 지정할 수 없습니다.");
+                await window.RoleQuestionModal.alert(
+                  "종료일은 오늘 이후로 지정할 수 없습니다.",
+                  "알림"
+                );
                 return;
               }
               if (sv && ev && compare(sv, ev) > 0) {
                 e.preventDefault();
-                alert("시작일은 종료일보다 늦을 수 없습니다.");
+                await window.RoleQuestionModal.alert(
+                  "시작일은 종료일보다 늦을 수 없습니다.",
+                  "알림"
+                );
                 return;
               }
             });
@@ -414,10 +534,33 @@
             );
           }
 
-          /**
-           * API 연동 전 프론트 전용. false 로 바꾸면 제거 실패(7-2) 알림만 재현할 수 있습니다.
-           */
-          const REMOVAL_SIMULATE_SUCCESS = true;
+          function collectRoleCdForApi(r) {
+            if (!r) return null;
+            var v =
+              r.roleCd != null && r.roleCd !== ""
+                ? r.roleCd
+                : r.id != null && r.id !== ""
+                  ? r.id
+                  : null;
+            if (v == null || v === "") return null;
+            var n = Number(v);
+            return isNaN(n) ? null : n;
+          }
+
+          function buildCsrfHeaders() {
+            var headers = { "Content-Type": "application/json" };
+            var tokenMeta = document.querySelector('meta[name="_csrf"]');
+            var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+            if (
+              tokenMeta &&
+              headerMeta &&
+              tokenMeta.content &&
+              headerMeta.content
+            ) {
+              headers[headerMeta.content] = tokenMeta.content;
+            }
+            return headers;
+          }
 
           let gridData = Array.isArray(projectRoleRows)
             ? projectRoleRows.map(function (r) {
@@ -549,12 +692,12 @@
                 return;
               }
               if (btn.id === "roleBtnRemove") {
-                onRemoveClicked();
+                void onRemoveClicked();
               }
             });
           }
 
-          function onRemoveClicked() {
+          async function onRemoveClicked() {
             const rows = getCheckedRowsForRemove();
             if (!rows.length) {
               return;
@@ -566,23 +709,74 @@
             });
             const msg =
               "선택한 역할을 삭제하시겠습니까?\n\n" + names.join("\n");
-            if (!window.confirm(msg)) {
+            var confirmed = await window.RoleQuestionModal.confirm(
+              msg,
+              "역할 삭제"
+            );
+            if (!confirmed) {
               return;
             }
-            const removalSucceeded = REMOVAL_SIMULATE_SUCCESS;
+            const roleCds = rows
+              .map(function (r) {
+                return collectRoleCdForApi(r);
+              })
+              .filter(function (n) {
+                return n != null;
+              });
+            if (!roleCds.length) {
+              await window.RoleQuestionModal.alert(
+                "역할 코드를 확인할 수 없습니다.",
+                "알림"
+              );
+              return;
+            }
+            var pid = Number(prjId);
+            if (isNaN(pid)) {
+              await window.RoleQuestionModal.alert(
+                "프로젝트 ID가 올바르지 않습니다.",
+                "알림"
+              );
+              return;
+            }
+            try {
+              var res = await fetch(
+                "/project/option/role/deleteRoles",
+                {
+                  method: "POST",
+                  headers: buildCsrfHeaders(),
+                  credentials: "same-origin",
+                  body: JSON.stringify({ prjId: pid, roleCds: roleCds }),
+                }
+              );
+              var data = {};
+              try {
+                data = await res.json();
+              } catch (ignore) {}
+              if (!res.ok || !data || data.ok !== true) {
+                var errText =
+                  (data && data.message) ||
+                  (res.status === 403
+                    ? "권한이 없거나 보안 토큰이 만료되었습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요."
+                    : "제거 중 오류가 발생하였습니다.");
+                await window.RoleQuestionModal.alert(errText, "오류");
+                return;
+              }
+            } catch (e) {
+              await window.RoleQuestionModal.alert(
+                "제거 중 오류가 발생하였습니다.",
+                "오류"
+              );
+              return;
+            }
             const labelPart =
               names.length === 1
                 ? "「" + names[0] + "」"
                 : "「" + names.join("」, 「") + "」";
-            if (!removalSucceeded) {
-              window.alert(labelPart + " 제거 중 오류가 발생하였습니다.");
-              return;
-            }
             const okMsg =
               names.length === 1
                 ? labelPart + "이(가) 정상적으로 제거되었습니다."
                 : labelPart + " 역할이 정상적으로 제거되었습니다.";
-            window.alert(okMsg);
+            await window.RoleQuestionModal.alert(okMsg, "알림");
 
             const removeSet = {};
             rows.forEach(function (r) {

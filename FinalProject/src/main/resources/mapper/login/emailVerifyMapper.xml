@@ -5,6 +5,7 @@
 	
 	<update id="sendVerifyCode" 
 			statementType="CALLABLE">
+		<!-- 프로시저 실행 -->
 		{
             CALL PROC_EMAIL_VERIFY_INSERT(
 
@@ -19,21 +20,18 @@
         }	
 	</update>
 
-	<select id="verifyCode">
+	<update id="verifyCode"
+	        statementType="CALLABLE">
+		<!-- 프로시저 실행 -->
+	    {
+	        CALL PROC_EMAIL_VERIFY_CHECK(
 	
-		SELECT 	 id
-				,user_id
-				,email
-				,verify_num
-				,created_on
-				,closed_on
-				,verify_status_cd
-		FROM	 email_verify
-		WHERE	 email = #{email}
-		AND		 verify_num = #{verifyNum}
-		AND		 verify_status_cd = '01CERTSTAT'
-		ORDER BY created_on DESC
-		FETCH FIRST 1 ROW ONLY
-		
-	</select>
+	            #{email, mode=IN, jdbcType=VARCHAR},
+	            #{verifyNum, mode=IN, jdbcType=VARCHAR},
+	
+	            #{result, mode=OUT, jdbcType=VARCHAR}
+	
+	        )
+	    }
+	</update>
 </mapper>

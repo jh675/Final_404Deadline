@@ -17,15 +17,9 @@ public class CompanyServiceImpl implements CompanyService {
 	private final CompanyMapper companyMapper;
 	
 	@Override
-	public int selectAll_COUNT(CompanyVO company) {
-		
-		return companyMapper.selectAll_COUNT(company);
-	}
-
-	@Override
 	public PageInfo<CompanyVO> selectAll(CompanyVO company, int pageNum) {
 		
-		PageInfo<CompanyVO> page = PageHelper.startPage(pageNum, 15)
+		PageInfo<CompanyVO> page = PageHelper.startPage(pageNum, 5)
 				.doSelectPageInfo(()->companyMapper.selectAll(company));
 				
 		return page;

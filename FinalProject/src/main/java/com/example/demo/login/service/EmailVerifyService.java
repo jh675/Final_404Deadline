@@ -6,4 +6,6 @@ public interface EmailVerifyService {
 	
 	// 인증코드 일치 확인
 	EmailVerifyVO verifyCode(EmailVerifyVO vo);
+	
+	String resetPassword(UserVO user);
 }

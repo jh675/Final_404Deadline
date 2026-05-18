@@ -1,0 +1,28 @@
+레이아웃에 
+<th:block layout:fragment="script"></th:block>
+<th:block layout:fragment="css"></th:block>
+를 추가했음
+
+
+레이아웃이 최상위 html이고 그 안에 본문 html, 모달 html이 들어가는 구조라서 th:block으로 영역을 잡아야 자바스크립트랑 css가 정상적으로 연결이 됨
+
+
+각자 template에서 
+
+
+자바스크립트 연결
+<th:block layout:fragment="script">
+<script th:src="@{/js/login/resetPw.js}"></script>
+</th:block>
+
+CSS 연결 (보통 부트스트랩으로 class로 스타일 다 만들텐데 따로 쓰는 스타일이 있다면 연결)
+<th:block layout:fragment="css">
+	<link rel="stylesheet" th:href="@{/css/login/login.css}">
+</th:block>
+
+이런 형태로 th:block을 선언한 뒤에 안쪽에 script랑 css를 연결하면 되는 구조
+
+Javascript는 static/js에 모으고, css는 /static/css에 모으면 되고 각자 그 폴더 안에 폴더를 또 만들어서 파일을 넣는 구조.
+그리고 css와 js를 넣을 template은 모달창.html에는 넣지말고 content에 들어가는 .html에 넣기
+
+예시파일 : template/login/login.html  (05.15 git merge 이후 확인바람)

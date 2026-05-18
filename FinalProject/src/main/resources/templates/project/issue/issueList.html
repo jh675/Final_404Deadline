@@ -17,27 +17,7 @@
   <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
 <style>
-.issue-shell,
-.issue-shell *,
-.issue-shell *::before,
-.issue-shell *::after {
-	box-sizing: border-box;
-}
 
-.issue-shell {
-	font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
-	color: #333;
-}
-
-.issue-shell .issue-inner {
-	max-width: 1100px;
-	margin: 0 auto;
-	background: #fff;
-	border: 1px solid #ddd;
-	border-radius: 8px;
-	padding: 30px;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
 
 /* 검색 영역 */
 .search-area {
@@ -113,90 +93,6 @@
 	gap: 10px;
 	flex-shrink: 0;
 }
-
-/* 테이블 영역 */
-table {
-	width: 100%;
-	border-collapse: collapse;
-	font-size: 14px;
-}
-
-thead th {
-	background-color: #f0f1f5;
-	border: 1px solid #d8d8d8;
-	padding: 10px 8px;
-	text-align: center;
-	font-weight: 600;
-	color: #444;
-}
-
-thead th .sort {
-	font-size: 11px;
-	color: #888;
-	margin-left: 3px;
-}
-
-tbody td {
-	border: 1px solid #e0e0e0;
-	padding: 10px 8px;
-	text-align: center;
-	color: #555;
-}
-
-tbody tr:hover {
-	background-color: #fafbff;
-	cursor: pointer;
-}
-
-td.title {
-	text-align: left;
-	padding-left: 14px;
-}
-
-/* 페이징 영역 */
-.pagination {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 6px;
-	margin-top: 24px;
-}
-
-.pagination a {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-width: 32px;
-	height: 32px;
-	padding: 0 8px;
-	border: 1px solid #ccc;
-	background-color: #fff;
-	color: #555;
-	text-decoration: none;
-	border-radius: 4px;
-	font-size: 13px;
-}
-
-.pagination a.active {
-	background-color: #555;
-	color: #fff;
-	border-color: #555;
-	font-weight: 600;
-}
-
-	.pagination a:hover:not(.active) {
-		background-color: #f0f0f0;
-	}
-
-	/* 섹션 타이틀 (비교용) */
-	.section-title {
-		margin: 28px 0 12px;
-		font-size: 15px;
-		font-weight: 700;
-		color: #5b6cff;
-		border-left: 4px solid #5b6cff;
-		padding-left: 10px;
-	}
 
 	/* TOAST UI Grid 컨테이너 */
 	#grid {
@@ -291,12 +187,7 @@ td.title {
 				<button type="submit" class="search-btn">검색</button>
 			</div>
 		</form>
-
-
-
-
-
-
+		
 		<div id="grid"></div>
 		<div class="issue-register-actions">
 			<a th:href="@{/issue/register}" class="issue-register-btn">이슈 등록</a>
@@ -315,8 +206,6 @@ td.title {
 		/*<![CDATA[*/
 		const issueData = /*[[${issueList}]]*/ [];
 		const LOGIN_MEM_ID = /*[[${(#authentication.principal instanceof T(com.example.demo.login.service.UserVO)) ? #strings.toString(#authentication.principal.id) : ''}]]*/ '';
-
-		
 		/*]]>*/
 	</script>
 
@@ -326,8 +215,6 @@ td.title {
 			const memIdSelect = document.getElementById('memId');
 			const searchForm = document.getElementById('searchForm');
 			
-
-
 			function applyMyIssueState() {
 				if (myIssueCheckbox.checked) {
 					console.log(LOGIN_MEM_ID);
@@ -495,7 +382,7 @@ td.title {
 				// ═══════════════════════════════════════════════════════════
 				pageOptions: {
 					useClient: true,
-					perPage: 2
+					perPage: 10
 
 					// ---- 아래는 pageOptions 에서 지원하지만 여기서는 쓰지 않는 옵션 예시 ----
 					// page: 1,
@@ -536,7 +423,6 @@ td.title {
 			});
 		});
 	</script>
-
 </div>
 </body>
 </html>

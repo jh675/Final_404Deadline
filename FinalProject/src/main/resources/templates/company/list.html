@@ -1,35 +1,136 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://ultraq.net.nz"
+      layout:decorate="~{layout/compAdminLayout}">
+
 <head>
-<meta charset="UTF-8">
-<title>기업정보</title>
+    <meta charset="UTF-8">
+    <title>기업리스트</title>
+
+    <!-- ================= TUI CSS (정상 CDN) ================= -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+    
+    <style>
+#grid {
+    height: 500px;
+}
+</style>
 </head>
+
 <body>
-	<h2>기업리스트</h2>
 
-	<table border="1">
-		<tr>
-			<td>사업자번호</td>
-			<td>기업명</td>
-			<td>전화번호</td>
-			<td>주소</td>
-			<td>활성여부</td>
-			<td>생성일</td>
-		</tr>
+<div layout:fragment="content">
 
-		<tr th:each="company : ${pageInfo.list}">
-			<td th:text="${company.bizNo}"></td>
-			<td th:text="${company.companyName}"></td>
-			<td th:text="${company.tel}"></td>
-			<td th:text="${company.address}"></td>
-			<td th:text="${company.isActiveCd}"></td>
-			<td th:text="${company.createdOn}"></td>
-		</tr>
+    <h2>기업리스트</h2>
 
+    <!-- ================= 검색 영역 ================= -->
+    <div class="d-flex mb-3">
 
+        <select id="searchType" class="form-select me-2" style="width:150px;">
+            <option value="">선택</option>
+            <option value="bizNo">사업자번호</option>
+            <option value="companyName">기업명</option>
+            <option value="tel">전화번호</option>
+            <option value="address">주소</option>
+        </select>
 
+        <input id="keyword" class="form-control me-2" type="search" placeholder="검색">
 
-	</table>
+        <button class="btn btn-success" type="button" onclick="loadData(1)">
+            검색
+        </button>
+
+    </div>
+
+    <!-- ================= GRID ================= -->
+    <div id="grid"></div>
+
+    <!-- ================= PAGINATION ================= -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <div style="width:120px;"></div>
+
+        <div id="pagination"></div>
+
+        <button class="btn btn-info" onclick="goRegister()">등록</button>
+
+    </div>
+
+</div>
+
+<!-- ================= TUI JS (핵심) ================= -->
+<script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.js"></script>
+<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+
+<script>
+
+let grid;
+let pagination;
+
+setTimeout(function () {
+
+    grid = new tui.Grid({
+        el: document.getElementById('grid'),
+        data: [],
+        scrollX: false,
+        scrollY: true,
+        bodyHeight: 450,
+        columns: [
+            { header: '사업자번호', name: 'bizNo' },
+            { header: '기업명', name: 'companyName' },
+            { header: '전화번호', name: 'tel' },
+            { header: '주소', name: 'address' },
+            { header: '활성여부', name: 'isActiveCd' },
+            { header: '생성일', name: 'createdOn' }
+        ]
+    });
+
+    loadData(1);
+
+}, 0);
+
+function loadData(page) {
+
+    const searchType = document.getElementById('searchType').value;
+    const keyword = document.getElementById('keyword').value || '';
+
+    fetch(`/api/company/list?pageNum=${page}`
+        + `&searchType=${searchType}`
+        + `&keyword=${encodeURIComponent(keyword)}`)
+    .then(res => res.json())
+    .then(data => {
+
+        console.log("DATA:", data);
+
+        grid.resetData(data.list || []);
+        grid.refreshLayout();
+
+        if (pagination) {
+            pagination.destroy();
+            document.getElementById('pagination').innerHTML = '';
+        }
+
+        pagination = new tui.Pagination('pagination', {
+            totalItems: data.total || 0,
+            itemsPerPage: 5,
+            visiblePages: 5,
+            page: page
+        });
+
+        pagination.on('afterMove', function (e) {
+            loadData(e.page);
+        });
+
+    })
+    .catch(err => console.error("ERROR:", err));
+}
+
+function goRegister() {
+    location.href = '/company/register';
+}
+
+</script>
 
 </body>
 </html>
