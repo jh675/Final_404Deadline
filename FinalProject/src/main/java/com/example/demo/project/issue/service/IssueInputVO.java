@@ -30,6 +30,8 @@ public class IssueInputVO {
 	private Long parentIssue;
 	private Long rootIssue;
 	private Long memId;
+	/** 목록 검색: 내가 맡은 이슈 (체크 시 "Y") */
+	private String myIssue;
 	private Long lft;
 	private Long rgt;
 	private Long doneRatio;

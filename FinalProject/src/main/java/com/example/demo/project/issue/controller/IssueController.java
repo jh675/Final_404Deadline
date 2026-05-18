@@ -1,10 +1,13 @@
 package com.example.demo.project.issue.controller;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.login.service.UserVO;
@@ -111,6 +115,7 @@ public class IssueController {
 		}
 		//모델에 담아서 보낸다
 		model.addAttribute("issue", issue);
+		model.addAttribute("issueIds", service.getIssueIds());
 		return "project/issue/issueRegist";
 	}
 
@@ -132,7 +137,7 @@ public class IssueController {
 	@PostMapping(value = "/issue/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String issueUpdate(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
-
+		System.out.println(issueVO);
 		if (issueVO.getId() == null) {
 			return "redirect:/issue/list";
 		}
@@ -145,7 +150,31 @@ public class IssueController {
 		return "redirect:/issue/detail?id=" + issueVO.getId();
 	}
 
+	@PostMapping("/issue/register-start-date")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> registerStartDate(@RequestParam("id") Long id) {
+		int updated = service.updateIssueStartDate(id);
+		if (updated <= 0) {
+			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
+		}
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("ok", true);
+		body.put("id", id);
+		return ResponseEntity.ok(body);
+	}
 
+	@PostMapping("/issue/register-closed-date")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> registerClosedDate(@RequestParam("id") Long id) {
+		int updated = service.updateIssueClosedDate(id);
+		if (updated <= 0) {
+			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
+		}
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("ok", true);
+		body.put("id", id);
+		return ResponseEntity.ok(body);
+	}
 
 	private boolean hasAttachmentFiles(MultipartFile[] attachments) {
 		if (attachments == null) {

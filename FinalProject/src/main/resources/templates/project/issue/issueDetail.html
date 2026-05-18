@@ -6,6 +6,8 @@
 <meta charset="UTF-8">
 <title>이슈 상세</title>
 <th:block layout:fragment="head-content">
+<meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+<meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
 <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
 <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
@@ -197,6 +199,34 @@
 
 .attach-item a:hover {
 	color: #4956d8;
+}
+
+.attach-item-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.attach-delete-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: #999;
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.attach-delete-btn:hover {
+	background: #fee;
+	color: #c33;
 }
 
 /* 첨부: 한 줄 3칸 그리드 (스크롤은 .attach-list-scroll-wrap + 스크립트로 처리) */
@@ -500,7 +530,7 @@ table.data-table tbody td {
 		</div>
 	</div>
 
-	<div class="section-block">
+	<div class="section-block" id="attachSection">
 		<div class="section-head">
 			<span>첨부파일</span>
 			<span class="badge-count" th:text="${attachments != null ? #lists.size(attachments) : 0}">0</span>
@@ -511,8 +541,12 @@ table.data-table tbody td {
 		<div id="attachListScroll" class="attach-list-scroll-wrap" th:if="${attachments != null and !attachments.isEmpty()}">
 			<div class="attach-list attach-list--grid">
 				<span class="attach-item" th:each="a : ${attachments}">
-					<span th:text="${a.fileName != null ? a.fileName : a.diskFileName}">파일명</span>
-					<a th:href="@{/download/{id}(id=${a.id})}" title="다운로드">⬇</a>
+					<span class="attach-item-name" th:text="${a.fileName != null ? a.fileName : a.diskFileName}">파일명</span>
+					<span class="attach-item-actions">
+						<a th:href="@{/download/{id}(id=${a.id})}" title="다운로드">⬇</a>
+						<button type="button" class="attach-delete-btn" title="삭제" aria-label="첨부 삭제"
+							th:attr="data-attach-id=${a.id}">&times;</button>
+					</span>
 				</span>
 			</div>
 		</div>
@@ -760,6 +794,45 @@ table.data-table tbody td {
 		layoutAttachListScroll();
 	}
 	window.addEventListener('resize', layoutAttachListScroll);
+})();
+
+(function () {
+	function initAttachDelete() {
+		var section = document.getElementById('attachSection');
+		if (!section) return;
+
+		var tokenMeta = document.querySelector('meta[name="_csrf"]');
+		var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+
+		section.addEventListener('click', function (e) {
+			var btn = e.target.closest('.attach-delete-btn');
+			if (!btn) return;
+
+			var id = btn.getAttribute('data-attach-id');
+			if (!id) return;
+			if (!confirm('이 첨부파일을 삭제하시겠습니까?')) return;
+
+			var headers = {};
+			if (tokenMeta && headerMeta) {
+				headers[headerMeta.content] = tokenMeta.content;
+			}
+
+			fetch('/delete/' + encodeURIComponent(id), { method: 'DELETE', headers: headers })
+				.then(function (res) {
+					if (!res.ok) throw new Error('delete failed');
+					location.reload();
+				})
+				.catch(function () {
+					alert('첨부파일 삭제에 실패했습니다.');
+				});
+		});
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initAttachDelete);
+	} else {
+		initAttachDelete();
+	}
 })();
 </script>
 <th:block th:if="${issue != null}">
