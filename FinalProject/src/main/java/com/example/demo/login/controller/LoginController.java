@@ -54,12 +54,8 @@ public class LoginController {
 	        return "login/info";
 	    }
   	
-//	    userVO 꺼내서 쓰는 방법 > 참고자료 폴더의 security_userVO 확인
+//	    userVO 꺼내서 쓰는 방법 > 회의록 밑의 개발표준 9번 확인
 	    
 	}
-	
-	@GetMapping("/admin/test1")
-	public String test(Model model) {
-		return "login/test2";
-	}
+
 }

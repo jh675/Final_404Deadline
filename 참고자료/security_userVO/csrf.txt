@@ -1,0 +1,68 @@
+<meta name="_csrf" th:content="${_csrf.token}">
+<meta name="_csrf_header" th:content="${_csrf.headerName}">
+를 레이아웃에 추가함
+
+Security에서 보안 설정하는데 AJAX 통신할때도 영향을 줌
+
+예시
+// csrf 선언 필요
+const csrfToken = csrfMeta.content;
+const csrfHeader = csrfHeaderMeta.content;
+
+const response = await fetch('/email/send', {
+				                    method: 'POST',
+				                    headers: {
+				                        'Content-Type': 'application/json',
+				                        [csrfHeader]: csrfToken // 헤더에 필수
+				                    },
+				                    body: JSON.stringify({
+				                        bizNo: bizNo.value,
+				                        login: login.value,
+				                        email: email.value
+				                    })
+				                });
+
+이걸 안적기 위해서 공통 js를 만들어뒀음
+경로 위치 static/js/common/csrf.js
+
+이걸 레이아웃에 적용을 했기 때문에 일종의 전역함수로 적용이 되고
+fetch 함수 대신 csrfFetch 함수를 사용하면 csrf 선언이랑 헤더에 정보를 적을 필요가 없음.
+
+예시
+const response = await csrfFetch('/email/send', {
+				                    method: 'POST',
+				                    headers: {
+				                        'Content-Type': 'application/json',
+				                    },
+				                    body: JSON.stringify({
+				                        bizNo: bizNo.value,
+				                        login: login.value,
+				                        email: email.value
+				                    })
+				                });
+
+
+
+
+security에서 formaction을 할 경우 input type =”hidden”을 자동으로 삽입됨
+
+(( 아래내용 필요없음
+(만약 RESTController 방식으로 fetch API 방식이 아니라 
+form과 controller를 사용하는경우에는
+
+
+예시 (레이아웃에 있는 로그아웃 기능)
+<form th:action="@{/logout}" method="post">
+<input type="hidden" th:name="${_csrf.parameterName}"
+	th:value="${_csrf.token}"> <!-- 이 부분이 필요함 –>
+	<button type="submit" class="btn btn-outline-danger btn-sm">로그아웃</button>
+
+
+사실상 get방식은 제외하고
+post, put, delete 가 사용되는 곳은 모두 CSRF가 걸리는데 
+fetch 방식으로 사용할것이면 csrfFetch함수 사용하기
+REST API 방식이 아닌 form 형태에서 데이터 전송하거나 formaction 사용할때는
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+넣기)
+))
+

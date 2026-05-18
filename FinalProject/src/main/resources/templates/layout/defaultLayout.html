@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -12,7 +12,7 @@
 <body>
 	<div class="container">
 		<div
-			th:replace="~{layout/fragments/navbar ::	layoutNavbar('유저레이아웃', ~{layout/fragments/navbar-menu :: userMenu})}">
+			th:replace="~{layout/fragments/navbar ::	layoutNavbar('비로그인', ~{layout/fragments/navbar-menu :: defaultMenu})}">
 		</div>
 		<div class="card mt-3">
 			<div class="card-body">

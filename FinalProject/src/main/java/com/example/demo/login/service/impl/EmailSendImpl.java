@@ -24,7 +24,7 @@ public class EmailSendImpl implements EmailSendService {
 		message.setTo(to);
 
 		// 제목
-		message.setSubject("[PMS] 이메일 인증 테스트");
+		message.setSubject("[PMS] 이메일 인증");
 
 		// 내용
 		message.setText("인증번호는 [" + verifyNum + "] 입니다.\n" + "3분 안에 입력해주세요.");

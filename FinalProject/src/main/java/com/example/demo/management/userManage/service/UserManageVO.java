@@ -1,15 +1,11 @@
-package com.example.demo.login.service;
+package com.example.demo.management.userManage.service;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
+import com.example.demo.login.service.UserVO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
@@ -21,12 +17,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserVO implements UserDetails{
-
+public class UserManageVO {
 	private Long id;
 	private String bizNo;
+	private String compNm;
 	private String login;
-	private String password;
 	private String name;
 	private String tel;
 	private String email;
@@ -47,22 +42,4 @@ public class UserVO implements UserDetails{
 	private String mcpNm;
 	private String prjManagerCd;
 	private String prjManagerNm;
-	
-	private List<String> role;
-	
-	private String verifyNum;
-	private String result;
-	
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return role.stream()
-				   .map(a -> new SimpleGrantedAuthority(a))
-				   .collect(Collectors.toList());
-	}
-	
-	@Override
-	public String getUsername() {
-		return login;
-	}
-	
 }
