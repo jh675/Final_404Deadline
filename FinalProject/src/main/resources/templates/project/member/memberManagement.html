@@ -654,6 +654,11 @@
               const btn = e.target.closest("button");
               if (!btn || !btn.id) return;
               if (btn.id === "memberBtnRegister") {
+                var pid = Number(prjId);
+                if (isNaN(pid)) return;
+                location.href =
+                  "/project/member/memberManagementInfo?prjId=" +
+                  encodeURIComponent(String(pid));
                 return;
               }
               if (btn.id === "memberBtnDelete") {
@@ -793,6 +798,32 @@
                   width: 120,
                   align: "center",
                   sortable: true,
+                  formatter: ({ row, value }) => {
+                    const uid =
+                      row.userId != null && row.userId !== ""
+                        ? row.userId
+                        : null;
+                    const gid =
+                      row.grpId != null && row.grpId !== ""
+                        ? row.grpId
+                        : null;
+                    const text = value == null ? "" : value;
+                    if (uid == null || gid == null) return text;
+                    const q =
+                      "prjId=" +
+                      encodeURIComponent(prjId) +
+                      "&userId=" +
+                      encodeURIComponent(String(uid)) +
+                      "&grpId=" +
+                      encodeURIComponent(String(gid));
+                    return (
+                      '<a href="/project/member/memberManagementInfo?' +
+                      q +
+                      '">' +
+                      text +
+                      "</a>"
+                    );
+                  },
                 },
                 {
                   header: "연락처",
@@ -841,6 +872,29 @@
             });
             grid.on("uncheckAll", function () {
               renderToolbar();
+            });
+
+            grid.on("click", function (ev) {
+              if (deleteMode) return;
+              if (ev.columnName !== "userName" || ev.rowKey == null) return;
+              const row = grid.getRow(ev.rowKey);
+              const uid =
+                row && row.userId != null && row.userId !== ""
+                  ? row.userId
+                  : null;
+              const gid =
+                row && row.grpId != null && row.grpId !== ""
+                  ? row.grpId
+                  : null;
+              if (uid != null && gid != null) {
+                location.href =
+                  "/project/member/memberManagementInfo?prjId=" +
+                  encodeURIComponent(prjId) +
+                  "&userId=" +
+                  encodeURIComponent(String(uid)) +
+                  "&grpId=" +
+                  encodeURIComponent(String(gid));
+              }
             });
 
             renderToolbar();

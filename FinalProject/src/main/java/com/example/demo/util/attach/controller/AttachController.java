@@ -14,9 +14,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -64,5 +66,25 @@ public class AttachController {
 		//헤더에 파일명을 기재하여 파일을 반환한다
 		return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM) // 이진 파일
 				.header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString()).body(resource);
+	}
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<Void> deleteFile(@PathVariable Long id) {
+		try {
+			//정보 가져오기기
+			AttachVO attachVO = service.selectAttach(id);
+			//db에서 정보 삭제제
+			service.deleteAttach(id);
+			//파일경로를 지정하여서
+			service.removeAttach(attachVO);
+			
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+		
+		
+
 	}
 }

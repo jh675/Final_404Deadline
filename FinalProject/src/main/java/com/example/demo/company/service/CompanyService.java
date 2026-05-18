@@ -5,7 +5,7 @@ import java.util.List;
 import com.github.pagehelper.PageInfo;
 
 public interface CompanyService {
-	PageInfo<CompanyVO> selectAll(CompanyVO company, int pageNum);
+	List<CompanyVO> selectAll(CompanyVO company);
 	CompanyVO selectOne(String bizNo);
 	int delete(String bizNo);
 	int update(CompanyVO company);

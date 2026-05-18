@@ -3,7 +3,7 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 	<mapper namespace="com.example.demo.util.attach.mapper.AttachMapper">
 
-	<insert id="insertAttach" parameterType="com.example.demo.util.attach.service.AttachVO">
+	<insert id="insertAttach" parameterType="AttachVO">
 		INSERT INTO ATTACHMENTS (
 			ID,
 			TABLE_NAME,
@@ -29,20 +29,9 @@
 		)
 	</insert>
 
-	<resultMap id="attachResultMap" type="com.example.demo.util.attach.service.AttachVO">
-		<id property="id" column="ID" />
-		<result property="tableName" column="TABLE_NAME" />
-		<result property="containerId" column="CONTAINER_ID" />
-		<result property="containerType" column="CONTAINER_TYPE" />
-		<result property="fileName" column="FILENAME" />
-		<result property="diskFileName" column="DISK_FILENAME" />
-		<result property="fileSize" column="FILESIZE" />
-		<result property="contentType" column="CONTENT_TYPE" />
-		<result property="createdOn" column="CREATED_ON" />
-		<result property="diskDirectory" column="DISK_DIRECTORY" />
-	</resultMap>
 
-	<select id="selectAttachList" resultMap="attachResultMap">
+
+	<select id="selectAttachList" resultType="AttachVO">
 		SELECT
 			ID,
 			TABLE_NAME,
@@ -60,7 +49,7 @@
 		ORDER BY ID ASC
 	</select>
 
-	<select id="selectAttach" resultMap="attachResultMap">
+	<select id="selectAttach" resultType="AttachVO">
 		SELECT
 			ID,
 			TABLE_NAME,

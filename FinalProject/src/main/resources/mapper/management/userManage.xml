@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.example.demo.management.userManage.mapper.UserManageMapper">
+
+	<select id="selectAll">
+		SELECT 	 ID
+				,BIZ_NO
+				,get_bizno_to_compname(BIZ_NO) "COMP_NM"
+				,LOGIN
+				,NAME
+				,TEL
+				,EMAIL
+				,HIRE_DATE
+				,GENDER_CD
+				,get_sub_code_name(GENDER_CD)"GENDER_NM"
+				,ADMIN_CD
+				,get_sub_code_name(ADMIN_CD) as "ADMIN_NM"
+				,STATUS_CD
+				,get_sub_code_name(STATUS_CD) "STATUS_NM"
+				,CREATED_ON
+				,PW_UPDATED_ON
+				,PRJ_MANAGER_CD
+				,get_sub_code_name(PRJ_MANAGER_CD) "PRJ_MANAGER_NM"
+				,MCP_CD
+				,get_sub_code_name(MCP_CD) "MCP_NM"
+		FROM 	 users
+		<where>
+			<if test="adminCd != null and adminCd != ''">
+				AND ADMIN_CD = #{adminCd}
+			</if>
+
+		</where>
+		ORDER BY ID
+	</select>
+</mapper>

@@ -55,6 +55,22 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
+	public int updateIssueStartDate(Long id) {
+		if (id == null) {
+			return 0;
+		}
+		return mapper.updateIssueStartDate(id);
+	}
+
+	@Override
+	public int updateIssueClosedDate(Long id) {
+		if (id == null) {
+			return 0;
+		}
+		return mapper.updateIssueClosedDate(id);
+	}
+
+	@Override
 	public int deleteIssue(Long id) {
 		// TODO Auto-generated method stub
 		return mapper.deleteIssue(id);

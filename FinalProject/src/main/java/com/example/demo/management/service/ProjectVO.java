@@ -26,4 +26,5 @@ public class ProjectVO {
 	private String enaNameCd;
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private Date closedDate;
+	private String prjHide;
 }

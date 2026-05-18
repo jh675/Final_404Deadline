@@ -1,9 +1,650 @@
 <!doctype html>
-<html lang="en">
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/userLayout}"
+>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+    <meta
+      th:if="${_csrf != null}"
+      name="_csrf_header"
+      th:content="${_csrf.headerName}"
+    />
+    <title th:text="${registerMode} ? '그룹 등록' : '그룹 상세'">그룹 상세</title>
+    <style>
+      .grp-info-page__back {
+        display: inline-block;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        color: #1976d2;
+        text-decoration: none;
+      }
+      .grp-info-page__back:hover {
+        text-decoration: underline;
+      }
+      .grp-info-page__head {
+        margin-bottom: 1.25rem;
+      }
+      .grp-info-page__title {
+        margin: 0 0 0.35rem;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #222;
+      }
+      .grp-info-page__rule {
+        height: 3px;
+        background: #333;
+        border: 0;
+        margin: 0;
+      }
+      .grp-section {
+        margin-bottom: 2rem;
+      }
+      .grp-section__title {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #222;
+        padding-bottom: 0.35rem;
+        border-bottom: 3px solid #333;
+      }
+      .grp-section__body {
+        padding-top: 0.85rem;
+      }
+      .grp-detail-form {
+        --grp-label-w: 9.75rem;
+        --grp-input-w: 16rem;
+        --grp-font-size: 0.8125rem;
+        --grp-input-bg: #f5f5f5;
+        --grp-input-border: #d0d0d0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .grp-detail-form .grp-basic-form__row {
+        display: grid;
+        grid-template-columns: var(--grp-label-w) var(--grp-input-w);
+        align-items: start;
+        column-gap: 0.75rem;
+      }
+      .grp-detail-form .grp-basic-form__row label {
+        font-size: var(--grp-font-size);
+        color: #333;
+        text-align: right;
+        white-space: nowrap;
+        line-height: 1.35;
+        padding-top: 0.4rem;
+      }
+      .grp-detail-form .grp-basic-form__row label .req {
+        color: #c62828;
+      }
+      .grp-detail-form .grp-basic-form__field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        max-width: var(--grp-input-w);
+      }
+      .grp-detail-form .grp-basic-form__row input {
+        width: 100%;
+        padding: 0.4rem 0.55rem;
+        border: 1px solid var(--grp-input-border);
+        border-radius: 4px;
+        background: var(--grp-input-bg);
+        font-size: var(--grp-font-size);
+        color: #333;
+        line-height: 1.35;
+        box-sizing: border-box;
+      }
+      .grp-detail-form .grp-basic-form__row input.grp-input--editable {
+        background: #fff;
+      }
+      .grp-detail-form .grp-basic-form__row input::placeholder {
+        color: #aaa;
+        font-size: var(--grp-font-size);
+      }
+      .grp-field-hint {
+        margin: 0;
+        font-size: 0.75rem;
+        color: #c62828;
+        line-height: 1.35;
+      }
+      .grp-data-table-wrap {
+        overflow-x: auto;
+        border: 1px solid #cfcfcf;
+        border-radius: 4px;
+        background: #fff;
+      }
+      .grp-data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8125rem;
+        min-width: 40rem;
+      }
+      .grp-data-table--roles {
+        min-width: 52rem;
+      }
+      .grp-data-table th,
+      .grp-data-table td {
+        border: 1px solid #d8d8d8;
+        padding: 0.45rem 0.5rem;
+        text-align: center;
+        vertical-align: middle;
+        color: #333;
+        white-space: nowrap;
+      }
+      .grp-data-table thead th {
+        background: #f0f0f0;
+        font-weight: 600;
+      }
+      .grp-data-table tbody tr:nth-child(even) {
+        background: #fafafa;
+      }
+      .grp-data-table tbody td.empty {
+        color: #999;
+      }
+      .grp-member-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.65rem;
+      }
+      .grp-member-toolbar__btn {
+        padding: 0.35rem 0.95rem;
+        border: 1px solid #555;
+        border-radius: 4px;
+        background: #fff;
+        color: #333;
+        font-size: 0.8125rem;
+        cursor: pointer;
+      }
+      .grp-member-toolbar__btn:hover {
+        background: #f5f5f5;
+      }
+      .grp-empty-msg {
+        margin: 0.5rem 0 0;
+        font-size: 0.8125rem;
+        color: #777;
+      }
+      .grp-actions {
+        display: flex;
+        justify-content: center;
+        padding: 1.5rem 0 0.5rem;
+      }
+      .grp-actions__btn {
+        min-width: 5.5rem;
+        padding: 0.45rem 1.5rem;
+        border: 1px solid #555;
+        border-radius: 6px;
+        background: #666;
+        color: #fff;
+        font-size: 0.875rem;
+        cursor: pointer;
+      }
+      .grp-actions__btn:hover {
+        background: #555;
+      }
+      .grp-member-pick-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .grp-member-pick-overlay.is-open {
+        display: flex;
+      }
+      .grp-member-pick {
+        width: min(28rem, 92vw);
+        max-height: 70vh;
+        background: #fff;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+      }
+      .grp-member-pick__head {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .grp-member-pick__list {
+        overflow: auto;
+        padding: 0.5rem 1rem;
+        flex: 1 1 auto;
+      }
+      .grp-member-pick__item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0;
+        font-size: 0.8125rem;
+      }
+      .grp-member-pick__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-top: 1px solid #e0e0e0;
+      }
+      .grp-member-pick__actions button {
+        padding: 0.35rem 0.9rem;
+        border: 1px solid #555;
+        border-radius: 4px;
+        background: #fff;
+        font-size: 0.8125rem;
+        cursor: pointer;
+      }
+      .grp-member-pick__actions button.primary {
+        background: #666;
+        color: #fff;
+        border-color: #555;
+      }
+    </style>
   </head>
-  <body></body>
+  <body>
+    <div layout:fragment="content">
+      <a class="grp-info-page__back"
+        th:href="@{/project/group/groupManagement(prjId=${prjId})}">
+        ← 그룹 목록으로
+      </a>
+
+      <header class="grp-info-page__head">
+        <h1 class="grp-info-page__title"
+          th:text="${registerMode} ? '그룹 등록' : '그룹 상세'">
+          그룹 상세
+        </h1>
+        <hr class="grp-info-page__rule" />
+      </header>
+
+      <th:block th:if="${registerMode or !groupNotFound}">
+        <section class="grp-section" aria-labelledby="grp-basic-heading">
+          <h2 class="grp-section__title" id="grp-basic-heading">기본정보</h2>
+          <div class="grp-section__body">
+            <div class="grp-basic-form grp-detail-form">
+              <div class="grp-basic-form__row">
+                <label for="detailPrjName"> 프로젝트명 <span class="req">*</span>
+                </label>
+                <div class="grp-basic-form__field">
+                  <input type="text" id="detailPrjName" readonly th:value="${detail.prjName}"/>
+                </div>
+              </div>
+              <div class="grp-basic-form__row">
+                <label for="detailGrpName">그룹명 <span class="req">*</span>
+                </label>
+                <div class="grp-basic-form__field">
+                  <input
+                    th:if="${registerMode}"
+                    type="text"
+                    id="detailGrpName"
+                    placeholder="그룹명을 입력해 주세요."
+                    class="grp-input--editable"
+                    th:value="${detail.grpName}"
+                    autocomplete="off"
+                  />
+                  <input th:unless="${registerMode}"
+                    type="text" id="detailGrpName"
+                    placeholder="텍스트를 입력해 주세요."
+                    readonly th:value="${detail.grpName}"/>
+                  <p class="grp-field-hint" th:if="${registerMode}">
+                    한 번 정해진 그룹명은 변경할 수 없습니다.
+                  </p>
+                </div>
+              </div>
+              <div class="grp-basic-form__row" th:if="${!registerMode}">
+                <label for="detailGrpCreatedOn">그룹생성일 <span class="req">*</span>
+                </label>
+                <div class="grp-basic-form__field">
+                  <input
+                    type="text"
+                    id="detailGrpCreatedOn"
+                    readonly
+                    th:value="${detail.createdOn != null ? #temporals.format(detail.createdOn, 'yyyy-MM-dd') : ''}"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grp-section" aria-labelledby="grp-members-heading">
+          <h2 class="grp-section__title" id="grp-members-heading">구성원 정보</h2>
+          <div class="grp-section__body">
+            <div class="grp-data-table-wrap">
+              <table class="grp-data-table" aria-label="구성원 목록">
+                <thead>
+                  <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">이름</th>
+                    <th scope="col">연락처</th>
+                    <th scope="col">이메일</th>
+                    <th scope="col">소속 그룹명</th>
+                    <th scope="col">프로젝트 투입일</th>
+                  </tr>
+                </thead>
+                <tbody id="grpMembersBody">
+                  <tr th:each="m, stat : ${members}"
+                    th:attr="data-user-id=${m.userId}">
+                    <td th:text="${stat.count}">1</td>
+                    <td th:text="${m.userName} ?: '-'">-</td>
+                    <td th:text="${m.tel} ?: '-'">-</td>
+                    <td th:text="${m.email} ?: '-'">-</td>
+                    <td th:text="${m.grpName} ?: '-'">-</td>
+                    <td th:text="${m.prjStartDate} ?: '-'">-</td>
+                  </tr>
+                  <tr id="grpMembersEmptyRow"
+                    th:if="${members == null or members.isEmpty()}">
+                    <td colspan="6" class="empty">등록된 구성원이 없습니다.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="grp-member-toolbar" th:if="${registerMode}">
+              <button type="button" class="grp-member-toolbar__btn" id="btnAddMember">
+                구성원 추가
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section
+          th:if="${!registerMode}"
+          class="grp-section"
+          aria-labelledby="grp-roles-heading"
+        >
+          <h2 class="grp-section__title" id="grp-roles-heading">보유 권한</h2>
+          <div class="grp-section__body">
+            <div class="grp-data-table-wrap">
+              <table
+                class="grp-data-table grp-data-table--roles"
+                aria-label="보유 권한 목록"
+              >
+                <thead>
+                  <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">권한 코드</th>
+                    <th scope="col">메뉴명</th>
+                    <th scope="col">권한 생성일</th>
+                    <th scope="col">비고</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="r, stat : ${roles}">
+                    <td th:text="${stat.count}">1</td>
+                    <td th:text="${r.roleCd} ?: '-'">-</td>
+                    <td th:text="${r.menuName} ?: '-'">-</td>
+                    <td
+                      th:text="${r.createdOn != null ? #temporals.format(r.createdOn, 'yyyy-MM-dd') : '-'}"
+                    >
+                      -
+                    </td>
+                    <td th:text="${r.remark} ?: '-'">-</td>
+                  </tr>
+                  <tr th:if="${roles == null or roles.isEmpty()}">
+                    <td colspan="8" class="empty">보유 권한이 없습니다.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <div class="grp-actions">
+          <button type="button" class="grp-actions__btn"
+            id="btnGroupSave" th:text="${registerMode} ? '등록' : '수정'">
+            수정
+          </button>
+        </div>
+      </th:block>
+
+      <th:block th:if="${registerMode}">
+        <div th:replace="~{project/role/modal/questionModal :: roleQuestionModal}"></div>
+      </th:block>
+
+      <div
+        th:if="${registerMode}"
+        class="grp-member-pick-overlay"
+        id="grpMemberPickOverlay"
+        aria-hidden="true"
+      >
+        <div class="grp-member-pick" role="dialog" aria-modal="true">
+          <div class="grp-member-pick__head">구성원 선택</div>
+          <div class="grp-member-pick__list" id="grpMemberPickList"></div>
+          <div class="grp-member-pick__actions">
+            <button type="button" id="btnMemberPickCancel">취소</button>
+            <button type="button" class="primary" id="btnMemberPickOk">
+              추가
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <script th:if="${registerMode}" th:inline="javascript">
+        /*<![CDATA[*/
+        (function () {
+          const prjId = /*[[${prjId}]]*/ 0;
+          const grpNameInput = document.getElementById("detailGrpName");
+          const saveBtn = document.getElementById("btnGroupSave");
+          const addMemberBtn = document.getElementById("btnAddMember");
+          const membersBody = document.getElementById("grpMembersBody");
+          const pickOverlay = document.getElementById("grpMemberPickOverlay");
+          const pickList = document.getElementById("grpMemberPickList");
+          const pickCancel = document.getElementById("btnMemberPickCancel");
+          const pickOk = document.getElementById("btnMemberPickOk");
+          if (!grpNameInput) return;
+
+          const pendingMembers = [];
+
+          function buildCsrfHeaders() {
+            const headers = { "Content-Type": "application/json" };
+            const tokenMeta = document.querySelector('meta[name="_csrf"]');
+            const headerMeta = document.querySelector(
+              'meta[name="_csrf_header"]',
+            );
+            if (
+              tokenMeta &&
+              headerMeta &&
+              tokenMeta.content &&
+              headerMeta.content
+            ) {
+              headers[headerMeta.content] = tokenMeta.content;
+            }
+            return headers;
+          }
+
+          function alertMsg(msg, title) {
+            if (window.RoleQuestionModal && window.RoleQuestionModal.alert) {
+              return window.RoleQuestionModal.alert(msg, title || "알림");
+            }
+            window.alert(msg);
+            return Promise.resolve();
+          }
+
+          function refreshMembersTable() {
+            if (!membersBody) return;
+            membersBody.innerHTML = "";
+            if (!pendingMembers.length) {
+              const tr = document.createElement("tr");
+              tr.id = "grpMembersEmptyRow";
+              const td = document.createElement("td");
+              td.colSpan = 6;
+              td.className = "empty";
+              td.textContent = "등록된 구성원이 없습니다.";
+              tr.appendChild(td);
+              membersBody.appendChild(tr);
+              return;
+            }
+            pendingMembers.forEach(function (m, idx) {
+              const tr = document.createElement("tr");
+              tr.setAttribute("data-user-id", String(m.userId));
+              const cols = [
+                String(idx + 1),
+                m.userName || "-",
+                m.tel || "-",
+                m.email || "-",
+                m.grpName || "-",
+                m.prjStartDate || "-",
+              ];
+              cols.forEach(function (text) {
+                const td = document.createElement("td");
+                td.textContent = text;
+                tr.appendChild(td);
+              });
+              membersBody.appendChild(tr);
+            });
+          }
+
+          function hasUserId(uid) {
+            return pendingMembers.some(function (m) {
+              return Number(m.userId) === Number(uid);
+            });
+          }
+
+          async function openMemberPicker() {
+            const pid = Number(prjId);
+            if (isNaN(pid) || !pickOverlay || !pickList) return;
+            pickList.innerHTML = "불러오는 중…";
+            pickOverlay.classList.add("is-open");
+            pickOverlay.setAttribute("aria-hidden", "false");
+            try {
+              const res = await fetch(
+                "/project/member/memberManagementList?prjId=" +
+                  encodeURIComponent(String(pid)),
+                { credentials: "same-origin" },
+              );
+              const data = await res.json().catch(function () {
+                return {};
+              });
+              const rows =
+                data && Array.isArray(data.content) ? data.content : [];
+              pickList.innerHTML = "";
+              if (!rows.length) {
+                pickList.textContent = "선택할 구성원이 없습니다.";
+                return;
+              }
+              rows.forEach(function (r) {
+                if (r.userId == null) return;
+                if (hasUserId(r.userId)) return;
+                const label = document.createElement("label");
+                label.className = "grp-member-pick__item";
+                const cb = document.createElement("input");
+                cb.type = "checkbox";
+                cb.value = String(r.userId);
+                cb.dataset.userName = r.userName || "";
+                cb.dataset.tel = r.tel || "";
+                cb.dataset.email = r.email || "";
+                cb.dataset.grpName = r.grpName || "";
+                cb.dataset.prjStartDate = r.prjStartDate || "";
+                label.appendChild(cb);
+                label.appendChild(
+                  document.createTextNode(
+                    (r.userName || "(이름 없음)") +
+                      (r.grpName ? " · " + r.grpName : ""),
+                  ),
+                );
+                pickList.appendChild(label);
+              });
+              if (!pickList.children.length) {
+                pickList.textContent = "추가 가능한 구성원이 없습니다.";
+              }
+            } catch (e) {
+              pickList.textContent = "구성원 목록을 불러오지 못했습니다.";
+            }
+          }
+
+          function closeMemberPicker() {
+            if (!pickOverlay) return;
+            pickOverlay.classList.remove("is-open");
+            pickOverlay.setAttribute("aria-hidden", "true");
+          }
+
+          if (addMemberBtn) {
+            addMemberBtn.addEventListener("click", openMemberPicker);
+          }
+          if (pickCancel) {
+            pickCancel.addEventListener("click", closeMemberPicker);
+          }
+          if (pickOk) {
+            pickOk.addEventListener("click", function () {
+              if (!pickList) return;
+              const checked = pickList.querySelectorAll(
+                'input[type="checkbox"]:checked',
+              );
+              checked.forEach(function (cb) {
+                const uid = Number(cb.value);
+                if (isNaN(uid) || hasUserId(uid)) return;
+                pendingMembers.push({
+                  userId: uid,
+                  userName: cb.dataset.userName || "",
+                  tel: cb.dataset.tel || "",
+                  email: cb.dataset.email || "",
+                  grpName: cb.dataset.grpName || "",
+                  prjStartDate: cb.dataset.prjStartDate || "",
+                });
+              });
+              refreshMembersTable();
+              closeMemberPicker();
+            });
+          }
+
+          if (saveBtn) {
+            saveBtn.addEventListener("click", async function () {
+              const pid = Number(prjId);
+              const name = grpNameInput.value.trim();
+              if (isNaN(pid)) {
+                await alertMsg("프로젝트 ID가 올바르지 않습니다.", "알림");
+                return;
+              }
+              if (!name) {
+                await alertMsg("그룹명을 입력하세요.", "알림");
+                return;
+              }
+
+              const payload = { prjId: pid, grpName: name };
+              if (pendingMembers.length > 0) {
+                payload.userIds = pendingMembers.map(function (m) {
+                  return m.userId;
+                });
+              }
+
+              saveBtn.disabled = true;
+              try {
+                const res = await fetch("/project/group/registerGroup", {
+                  method: "POST",
+                  headers: buildCsrfHeaders(),
+                  credentials: "same-origin",
+                  body: JSON.stringify(payload),
+                });
+                const data = await res.json().catch(function () {
+                  return {};
+                });
+                if (!res.ok || !data || data.ok !== true) {
+                  const errText =
+                    (data && data.message) ||
+                    (res.status === 403
+                      ? "권한이 없거나 보안 토큰이 만료되었습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요."
+                      : "그룹 등록 중 오류가 발생했습니다.");
+                  await alertMsg(errText, "오류");
+                  return;
+                }
+                await alertMsg("그룹이 등록되었습니다.", "알림");
+                window.location.href =
+                  "/project/group/groupManagement?prjId=" +
+                  encodeURIComponent(String(pid));
+              } catch (e) {
+                await alertMsg("그룹 등록 중 오류가 발생했습니다.", "오류");
+              } finally {
+                saveBtn.disabled = false;
+              }
+            });
+          }
+        })();
+        /*]]>*/
+      </script>
+    </div>
+  </body>
 </html>

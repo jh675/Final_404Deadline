@@ -3,21 +3,28 @@
 <mapper namespace="com.example.demo.login.mapper.LoginMapper">
 
 	<select id="selectOne">
-		select ID
+		SELECT ID
 			  ,BIZ_NO
 	  		  ,LOGIN
 			  ,PASSWORD
 			  ,NAME
 			  ,TEL
 			  ,EMAIL
-			  ,get_sub_code_name(ADMIN_CD) as "ADMIN_CD"
-			  ,get_sub_code_name(STATUS_CD) "STATUS_CD"
+			  ,HIRE_DATE
+			  ,GENDER_CD
+			  ,get_sub_code_name(GENDER_CD)"GENDER_NM"
+			  ,ADMIN_CD
+			  ,get_sub_code_name(ADMIN_CD) as "ADMIN_NM"
+			  ,STATUS_CD
+			  ,get_sub_code_name(STATUS_CD) "STATUS_NM"
 			  ,CREATED_ON
 			  ,PW_UPDATED_ON
-			  ,get_sub_code_name(PRJ_MANAGER_CD) "PRJ_MANAGER_CD"
-			  ,get_sub_code_name(MCP_CD) "MCP_CD"
-	  	from   users
-	 	where  login = #{loginId}
+			  ,PRJ_MANAGER_CD
+			  ,get_sub_code_name(PRJ_MANAGER_CD) "PRJ_MANAGER_NM"
+			  ,MCP_CD
+			  ,get_sub_code_name(MCP_CD) "MCP_NM"
+	  	FROM   users
+	 	WHERE  login = #{loginId}
 	</select>
 
 	<update id="updatePassword">

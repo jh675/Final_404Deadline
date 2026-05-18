@@ -30,8 +30,13 @@ public class UserVO implements UserDetails{
 	private String name;
 	private String tel;
 	private String email;
+	private Date hireDate;
+	private String genderCd;
+	private String genderNm;
 	private String adminCd;
+	private String adminNm;
 	private String statusCd;
+	private String statusNm;
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date createdOn;
@@ -39,7 +44,9 @@ public class UserVO implements UserDetails{
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date pwUpdatedOn;
 	private String mcpCd;
+	private String mcpNm;
 	private String prjManagerCd;
+	private String prjManagerNm;
 	
 	private List<String> role;
 	

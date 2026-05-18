@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.project.notice.mapper.project.NoticeMapper">
+<mapper namespace="com.example.demo.project.notice.mapper.NoticeMapper">
 
 <select id="selectAll" resultType="com.example.demo.project.notice.service.NoticeVO">
  
  select *
  FROM notice
  where prj_id = #{prjId}
- ORDER BY id DESC
+ ORDER BY is_fixed DESC, id ASC
 
 </select>
 
@@ -18,15 +18,16 @@ insert into notice(
 		prj_id, 
 		mem_id, 
 		title, 
-		description
+		description,
+		is_fixed
 		)
 values(
 		news_seq.nextval, 
 		#{prjId}, 
 		#{memId}, 
 		#{title}, 
-		#{description}
-
+		#{description},
+		#{isFixed}
 )
 </insert>
 
@@ -44,7 +45,8 @@ set
     prj_id = #{prjId}, 
     mem_id = #{memId}, 
     title = #{title}, 
-    description = #{description}
+    description = #{description},
+    is_fixed = #{isFixed} 
 where id = #{id}
 </update>
 

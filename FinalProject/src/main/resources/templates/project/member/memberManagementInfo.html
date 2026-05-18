@@ -1,0 +1,598 @@
+<!doctype html>
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/userLayout}"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+    <meta
+      th:if="${_csrf != null}"
+      name="_csrf_header"
+      th:content="${_csrf.headerName}"
+    />
+    <title
+      th:text="${registerMode} ? '구성원 등록' : (${editMode} ? '구성원 수정' : '구성원 상세')"
+    >
+      구성원 상세
+    </title>
+    <style>
+      .mem-detail-form {
+        --mem-label-w: 9.75rem;
+        --mem-input-w: 16rem;
+        --mem-font-size: 0.8125rem;
+        --mem-input-bg: #f5f5f5;
+        --mem-input-border: #d0d0d0;
+      }
+      .mem-info-page__back {
+        display: inline-block;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        color: #1976d2;
+        text-decoration: none;
+      }
+      .mem-info-page__back:hover {
+        text-decoration: underline;
+      }
+      .mem-info-page__head {
+        margin-bottom: 1.25rem;
+      }
+      .mem-info-page__title {
+        margin: 0 0 0.35rem;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #222;
+      }
+      .mem-info-page__rule {
+        height: 3px;
+        background: #333;
+        border: 0;
+        margin: 0;
+      }
+      .mem-section {
+        margin-bottom: 2rem;
+      }
+      .mem-section__title {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #222;
+        padding-bottom: 0.35rem;
+        border-bottom: 3px solid #333;
+      }
+      .mem-section__body {
+        padding-top: 0.85rem;
+      }
+      .mem-basic-layout {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+      }
+      .mem-profile-slot {
+        flex: 0 0 9.5rem;
+        width: 9.5rem;
+        height: 9.5rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aaa;
+        font-size: 0.8125rem;
+        text-align: center;
+        line-height: 1.4;
+      }
+      .mem-basic-fields {
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .mem-detail-form .mem-field-row {
+        display: grid;
+        grid-template-columns: var(--mem-label-w) var(--mem-input-w);
+        align-items: center;
+        column-gap: 0.75rem;
+        row-gap: 0.25rem;
+      }
+      .mem-detail-form .mem-field-row > label {
+        font-size: var(--mem-font-size);
+        color: #333;
+        text-align: right;
+        white-space: nowrap;
+        line-height: 1.35;
+      }
+      .mem-detail-form .mem-field-row > label .req {
+        color: #c62828;
+      }
+      .mem-detail-form .mem-field-row input[type="text"],
+      .mem-detail-form .mem-field-row input[type="password"],
+      .mem-detail-form .mem-period-inputs input[type="text"] {
+        width: 100%;
+        max-width: var(--mem-input-w);
+        padding: 0.4rem 0.55rem;
+        border: 1px solid var(--mem-input-border);
+        border-radius: 4px;
+        background: var(--mem-input-bg);
+        font-size: var(--mem-font-size);
+        color: #333;
+        line-height: 1.35;
+        box-sizing: border-box;
+      }
+      .mem-detail-form .mem-field-row input.mem-input--editable {
+        background: #fff;
+      }
+      .mem-detail-form .mem-period-inputs input[type="text"] {
+        max-width: none;
+      }
+      .mem-detail-form .mem-field-row input::placeholder,
+      .mem-detail-form .mem-period-inputs input::placeholder {
+        color: #aaa;
+        font-size: var(--mem-font-size);
+      }
+      .mem-period-inputs {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        width: 100%;
+        max-width: var(--mem-input-w);
+      }
+      .mem-period-inputs input {
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 7.25rem;
+      }
+      .mem-period-inputs .mem-period-tilde {
+        flex: 0 0 auto;
+        color: #555;
+        font-size: var(--mem-font-size);
+        line-height: 1;
+        padding: 0 0.1rem;
+      }
+      .mem-gender-group {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: var(--mem-font-size);
+        color: #333;
+        max-width: var(--mem-input-w);
+      }
+      .mem-gender-group label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        text-align: left;
+        font-weight: normal;
+        font-size: var(--mem-font-size);
+      }
+      .mem-account-grid {
+        display: grid;
+        grid-template-columns: repeat(
+          2,
+          calc(var(--mem-label-w) + var(--mem-input-w) + 0.75rem)
+        );
+        gap: 0.75rem 1.5rem;
+        max-width: calc(
+          (var(--mem-label-w) + var(--mem-input-w) + 0.75rem) * 2 + 1.5rem
+        );
+      }
+      .mem-account-grid .mem-field-row {
+        grid-template-columns: var(--mem-label-w) var(--mem-input-w);
+      }
+      .mem-account-edit {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-width: calc(var(--mem-label-w) + var(--mem-input-w) + 0.75rem);
+      }
+      .mem-data-table-wrap {
+        overflow-x: auto;
+        border: 1px solid #cfcfcf;
+        border-radius: 4px;
+        background: #fff;
+      }
+      .mem-data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8125rem;
+        min-width: 72rem;
+      }
+      .mem-data-table th,
+      .mem-data-table td {
+        border: 1px solid #d8d8d8;
+        padding: 0.45rem 0.5rem;
+        text-align: center;
+        vertical-align: middle;
+        color: #333;
+        white-space: nowrap;
+      }
+      .mem-data-table thead th {
+        background: #f0f0f0;
+        font-weight: 600;
+      }
+      .mem-data-table tbody tr:nth-child(even) {
+        background: #fafafa;
+      }
+      .mem-data-table tbody td.empty {
+        color: #999;
+      }
+      .mem-empty-msg {
+        margin: 0.5rem 0 0;
+        font-size: 0.8125rem;
+        color: #777;
+      }
+      .mem-actions {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1.5rem 0 0.5rem;
+      }
+      .mem-actions__btn {
+        min-width: 5.5rem;
+        padding: 0.45rem 1.5rem;
+        border: 1px solid #555;
+        border-radius: 6px;
+        background: #666;
+        color: #fff;
+        font-size: 0.875rem;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        line-height: 1.35;
+        box-sizing: border-box;
+      }
+      .mem-actions__btn:hover {
+        background: #555;
+        color: #fff;
+      }
+      .mem-actions__btn--secondary {
+        background: #fff;
+        color: #333;
+      }
+      .mem-actions__btn--secondary:hover {
+        background: #f5f5f5;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <a class="mem-info-page__back"
+        th:href="@{/project/member/memberManagement(prjId=${prjId})}">
+        ← 구성원 목록으로
+      </a>
+
+      <header class="mem-info-page__head">
+        <h1 class="mem-info-page__title"
+          th:text="${registerMode} ? '구성원 등록' : (${editMode} ? '구성원 수정' : '구성원 상세')">
+          구성원 상세
+        </h1>
+        <hr class="mem-info-page__rule" />
+      </header>
+
+      <th:block th:if="${registerMode or !memberNotFound}">
+        <section class="mem-section" aria-labelledby="mem-basic-heading">
+          <h2 class="mem-section__title" id="mem-basic-heading">기본정보</h2>
+          <div class="mem-section__body">
+            <div class="mem-basic-layout">
+              <div class="mem-profile-slot"
+                aria-hidden="true" title="프로필 이미지 영역">
+                이미지
+              </div>
+              <div class="mem-basic-fields mem-detail-form">
+                <div class="mem-field-row">
+                  <label for="detailUserName">이름 <span class="req">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="detailUserName"
+                    th:readonly="${viewMode}"
+                    th:classappend="${!viewMode} ? 'mem-input--editable' : ''"
+                    th:attr="placeholder=${registerMode} ? '이름을 입력해주세요.' : '텍스트를 입력해 주세요.'"
+                    th:value="${detail.userName}"
+                  />
+                </div>
+                <div class="mem-field-row">
+                  <label for="detailHireDate">입사일 <span class="req">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="detailHireDate"
+                    th:readonly="${viewMode}"
+                    th:classappend="${!viewMode} ? 'mem-input--editable' : ''"
+                    th:attr="placeholder=${registerMode} ? '입사일을 선택해주시기 바랍니다.' : '텍스트를 입력해 주세요.'"
+                    th:value="${detail.hireDate}"
+                  />
+                </div>
+                <div class="mem-field-row">
+                  <label>성별 <span class="req">*</span></label>
+                  <div class="mem-gender-group">
+                    <label>
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="01GENDER"
+                        th:disabled="${viewMode}"
+                        th:checked="${#strings.equalsIgnoreCase(detail.genderCd, '01GENDER') or (registerMode and detail.genderCd == null)}"
+                      />
+                      남
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="02GENDER"
+                        th:disabled="${viewMode}"
+                        th:checked="${#strings.equalsIgnoreCase(detail.genderCd, '02GENDER')}"
+                      />
+                      여
+                    </label>
+                  </div>
+                </div>
+                <div class="mem-field-row">
+                  <label for="detailEmail">이메일 <span class="req">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="detailEmail"
+                    th:readonly="${viewMode}"
+                    th:classappend="${!viewMode} ? 'mem-input--editable' : ''"
+                    placeholder="aaa@aaa.com"
+                    th:value="${detail.email}"
+                  />
+                </div>
+                <div class="mem-field-row">
+                  <label for="detailTel">연락처 <span class="req">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="detailTel"
+                    th:readonly="${viewMode}"
+                    th:classappend="${!viewMode} ? 'mem-input--editable' : ''"
+                    placeholder="010-xxxx-xxxx"
+                    th:value="${detail.tel}"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          th:if="${viewMode}"
+          class="mem-section"
+          aria-labelledby="mem-account-heading">
+          <h2 class="mem-section__title" id="mem-account-heading">계정 정보</h2>
+          <div class="mem-section__body">
+            <div class="mem-account-grid mem-detail-form">
+              <div class="mem-field-row">
+                <label for="detailLogin">아이디</label>
+                <input
+                  type="text"
+                  id="detailLogin"
+                  readonly
+                  th:value="${detail.login}"
+                />
+              </div>
+              <div class="mem-field-row">
+                <label for="detailLastLogin">마지막 접속 일자</label>
+                <input
+                  type="text"
+                  id="detailLastLogin"
+                  readonly
+                  placeholder="-"
+                  th:value="${lastLoginOnYmd != null and !#strings.isEmpty(lastLoginOnYmd)} ? lastLoginOnYmd : '-'"
+                />
+              </div>
+              <div class="mem-field-row">
+                <label for="detailPasswordView">패스워드</label>
+                <input
+                  type="password"
+                  id="detailPasswordView"
+                  readonly
+                  value=""
+                  placeholder="••••••••"
+                />
+              </div>
+              <div class="mem-field-row">
+                <label for="detailPwExpiry">패스워드 유효일자</label>
+                <input
+                  type="text"
+                  id="detailPwExpiry"
+                  readonly
+                  placeholder="-"
+                  th:value="${pwUpdatedOnYmd != null and !#strings.isEmpty(pwUpdatedOnYmd)} ? pwUpdatedOnYmd : '-'"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          th:if="${editMode}"
+          class="mem-section"
+          aria-labelledby="mem-account-edit-heading">
+          <h2 class="mem-section__title" id="mem-account-edit-heading">
+            계정 정보
+          </h2>
+          <div class="mem-section__body">
+            <div class="mem-account-edit mem-detail-form">
+              <div class="mem-field-row">
+                <label for="detailLoginEdit">아이디</label>
+                <input
+                  type="text"
+                  id="detailLoginEdit"
+                  readonly
+                  th:value="${detail.login}"
+                />
+              </div>
+              <div class="mem-field-row">
+                <label for="detailPassword">패스워드</label>
+                <input
+                  type="password"
+                  id="detailPassword"
+                  class="mem-input--editable"
+                  value=""
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                />
+              </div>
+              <div class="mem-field-row">
+                <label for="detailPasswordConfirm">패스워드 확인</label>
+                <input
+                  type="password"
+                  id="detailPasswordConfirm"
+                  class="mem-input--editable"
+                  value=""
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mem-section" aria-labelledby="mem-project-heading">
+          <h2 class="mem-section__title" id="mem-project-heading">프로젝트 정보</h2>
+          <div class="mem-section__body">
+            <div class="mem-basic-fields mem-detail-form">
+              <div class="mem-field-row">
+                <label for="detailPrjName">프로젝트명 <span class="req">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="detailPrjName"
+                  readonly
+                  th:attr="placeholder=${registerMode} ? '텍스트를 입력해 주세요.' : ''"
+                  th:value="${detail.prjName}"
+                />
+              </div>
+              <div class="mem-field-row">
+                <label for="detailPrjStart">프로젝트 투입기간 <span class="req">*</span>
+                </label>
+                <div class="mem-period-inputs">
+                  <input
+                    type="date"
+                    id="detailPrjStart"
+                    th:readonly="${viewMode}"
+                    th:classappend="${!viewMode} ? 'mem-input--editable' : ''"
+                    placeholder="연도-월-일"
+                    th:value="${detail.prjStartDate}"
+                  />
+                  <span class="mem-period-tilde" aria-hidden="true">~</span>
+                  <input
+                    type="date"
+                    id="detailPrjEnd"
+                    th:readonly="${viewMode}"
+                    th:classappend="${!viewMode} ? 'mem-input--editable' : ''"
+                    placeholder="연도-월-일"
+                    th:value="${detail.prjEndDate}"
+                  />
+                </div>
+              </div>
+              <div class="mem-field-row">
+                <label for="detailGrpName">소속 그룹 <span class="req">*</span>
+                </label>
+                <input type="text" id="detailGrpName" th:readonly="${viewMode}"
+                  th:classappend="${!viewMode} ? 'mem-input--editable' : ''"
+                  th:value="${detail.grpName}"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          th:if="${viewMode}"
+          class="mem-section"
+          aria-labelledby="mem-issues-heading"
+        >
+          <h2 class="mem-section__title" id="mem-issues-heading">담당 이슈 정보</h2>
+          <div class="mem-section__body">
+            <div class="mem-data-table-wrap">
+              <table class="mem-data-table" aria-label="담당 이슈 목록">
+                <thead>
+                  <tr>
+                    <th scope="col">우선순위</th>
+                    <th scope="col">이슈명</th>
+                    <th scope="col">이슈 타입</th>
+                    <th scope="col">이슈 상태</th>
+                    <th scope="col">이슈 신청자</th>
+                    <th scope="col">이슈 담당자</th>
+                    <th scope="col">시작예정일</th>
+                    <th scope="col">마감희망일</th>
+                    <th scope="col">시작일</th>
+                    <th scope="col">마감일</th>
+                    <th scope="col">진척율(%)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="issue, stat : ${issues}">
+                    <td th:text="${issue.priorityCd} ?: '-'">-</td>
+                    <td th:text="${issue.subject} ?: '-'">-</td>
+                    <td th:text="${issue.categoryCd} ?: '-'">-</td>
+                    <td th:text="${issue.statusCd} ?: '-'">-</td>
+                    <td
+                      th:text="${issue.requesterName != null and !#strings.isEmpty(issue.requesterName)} ? issue.requesterName : '-'"
+                    >
+                      -
+                    </td>
+                    <td th:text="${issue.assigneeName} ?: '-'">-</td>
+                    <td th:text="${issue.estStartDate != null ? #temporals.format(issue.estStartDate, 'yyyy-MM-dd') : '-'}">
+                      -
+                    </td>
+                    <td th:text="${issue.dueDate != null ? #temporals.format(issue.dueDate, 'yyyy-MM-dd') : '-'}">
+                      -
+                    </td>
+                    <td th:text="${issue.startDate != null ? #temporals.format(issue.startDate, 'yyyy-MM-dd') : '-'}">
+                      -
+                    </td>
+                    <td th:text="${issue.closedDate != null ? #temporals.format(issue.closedDate, 'yyyy-MM-dd') : '-'}">
+                      -
+                    </td>
+                    <td th:text="${issue.doneRatio != null ? issue.doneRatio : '-'}">
+                      -
+                    </td>
+                  </tr>
+                  <tr th:if="${issues == null or issues.isEmpty()}">
+                    <td colspan="11" class="empty">담당 이슈가 없습니다.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <div class="mem-actions" th:if="${viewMode}">
+          <a class="mem-actions__btn"
+            th:href="@{/project/member/memberManagementInfo(prjId=${prjId}, userId=${userId}, grpId=${grpId}, edit=true)}">
+            수정
+          </a>
+        </div>
+
+        <div class="mem-actions" th:if="${editMode}">
+          <button type="button" class="mem-actions__btn" id="btnMemberSave">
+            저장
+          </button>
+          <a class="mem-actions__btn mem-actions__btn--secondary"
+            th:href="@{/project/member/memberManagementInfo(prjId=${prjId}, userId=${userId}, grpId=${grpId})}">
+            취소
+          </a>
+        </div>
+
+        <div class="mem-actions" th:if="${registerMode}">
+          <button type="button" class="mem-actions__btn" id="btnMemberRegister">
+            등록
+          </button>
+          <a class="mem-actions__btn mem-actions__btn--secondary"
+            th:href="@{/project/member/memberManagement(prjId=${prjId})}">
+            취소
+          </a>
+        </div>
+      </th:block>
+    </div>
+  </body>
+</html>

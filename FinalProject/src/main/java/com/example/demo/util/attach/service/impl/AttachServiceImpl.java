@@ -34,8 +34,8 @@ public class AttachServiceImpl implements AttachService {
 	AttachMapper mapper;
 
 	// 업로드경로 설정
-	private Path uploadRoot() throws IOException {
-		Path root = Paths.get(uploadDir.trim()).toAbsolutePath().normalize();
+	private Path uploadRoot(String containerType, Long containerId) throws IOException {
+		Path root = Paths.get(uploadDir.trim() + "/" + containerType + "/" + containerId).toAbsolutePath().normalize();
 		Files.createDirectories(root);
 		return root;
 	}
@@ -57,25 +57,27 @@ public class AttachServiceImpl implements AttachService {
 		return 1;
 	}
 
+	// 첨부파일 목록 조회
 	@Override
 	public List<AttachVO> selectAttachList(String tableName, Long containerId) {
 		if (tableName == null || tableName.isBlank() || containerId == null) {
 			return Collections.emptyList();
 		}
 		List<AttachVO> list = mapper.selectAttachList(tableName, containerId);
-		System.out.println(list);
 		return list != null ? list : Collections.emptyList();
 	}
-
+	// 첨부파일 삭제
 	@Override
 	public int deleteAttach(Long id) {
 		// TODO Auto-generated method stub
+		AttachVO attachVO= selectAttach(id);
+		
 		return mapper.deleteAttach(id);
 	}
 
 	// 파일을 저장하고,정보를 추출
 	@Override
-	public List<AttachVO> saveAttach(MultipartFile[] attachments, String tableName) {
+	public List<AttachVO> saveAttach(MultipartFile[] attachments, String containerType, Long containerId,String tableName) {
 		// 없으면 그냥 그대로 종료
 		if (attachments == null || attachments.length == 0) {
 			return Collections.emptyList();
@@ -86,7 +88,7 @@ public class AttachServiceImpl implements AttachService {
 		Path root;
 		// 경로설정
 		try {
-			root = uploadRoot();
+			root = uploadRoot(containerType, containerId);
 		} catch (Exception e) {
 			log.error("Failed to prepare upload directory {}: {}", uploadDir, e.getMessage());
 			return attachmentList;
@@ -126,10 +128,35 @@ public class AttachServiceImpl implements AttachService {
 		return attachmentList;
 	}
 
+	// 첨부파일 저장 및 등록
+	@Override
+	public void saveAndInsertAttachments(Long containerId, MultipartFile[] attachments, String tableName,
+			String containerType) {
+		List<AttachVO> saved = saveAttach(attachments, containerType, containerId,tableName);
+		if (saved.isEmpty()) {
+			return;
+		}
+		for (AttachVO a : saved) {
+			a.setContainerId(containerId);
+			a.setContainerType(containerType);
+			a.setTableName(tableName);
+		}
+		insertAttach(saved);
+	}
+
+	// 첨부파일 조회
 	@Override
 	public AttachVO selectAttach(Long id) {
 		// TODO Auto-generated method stub
 		return mapper.selectAttach(id);
+	}
+
+	@Override
+	public void removeAttach(AttachVO attachVO) throws IOException {
+		// TODO Auto-generated method stub
+		Path filePath = Paths.get(attachVO.getDiskDirectory()).resolve(attachVO.getDiskFileName()).normalize();
+		//파일을 삭제한다
+		Files.delete(filePath);
 	}
 
 

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/userLayout}">
+
+<div layout:fragment="content">
+    <h2>프로젝트 리스트</h2>
+    <p>F12를 눌러 <strong>개발자 도구(Console)</strong> 창에서 날짜 함수 결과를 확인해 보세요!</p>
+</div>
+
+<th:block layout:fragment="script">
+    
+    <script th:src="@{/js/common/dateUtils.js}"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 기준이 되는 오늘 날짜 생성
+            const today = new Date(); 
+
+
+            // 1. 포맷 변환 예시 (서버에서 받은 날짜 표준화)
+            const serverCreatedAt = "2026-05-18T03:24:00.000Z";
+            console.log("=== 1. 포맷 변환 예시 ===");
+            console.log("기본 포맷 (YYYY-MM-DD):", dateUtils.format(serverCreatedAt)); 
+            // 출력: 2026-05-18
+            console.log("상세 포맷:", dateUtils.format(serverCreatedAt, 'YYYY년 MM월 DD일 HH시 mm분')); 
+            // 출력: 2026년 05월 18일 12시 24분
+
+
+            // 2. 날짜 연산 예시 (기간 조회 버튼 등 - 오늘, 1주일 전, 1개월 전)
+            console.log("\n=== 2. 날짜 연산 예시 ===");
+            const oneWeekAgo = dateUtils.add(today, -7, 'day');
+            const oneMonthAgo = dateUtils.add(today, -1, 'month');
+
+            console.log("오늘 날짜:", dateUtils.format(today));       // 출력: 2026-05-18
+            console.log("1주일 전:", dateUtils.format(oneWeekAgo)); // 출력: 2026-05-11
+            console.log("1개월 전:", dateUtils.format(oneMonthAgo)); // 출력: 2026-04-18
+
+
+            // 3. 날짜 차이 계산 예시 (마감일 디데이, D-Day 처리)
+            console.log("\n=== 3. 날짜 차이(D-Day) 계산 예시 ===");
+            const projectEndDate = "2026-05-25"; // 프로젝트 마감일 가정
+            const dDay = dateUtils.getDiff(today, projectEndDate, 'day');
+            console.log(`프로젝트 마감까지 ${dDay}일 남았습니다.`); 
+            // 출력: 프로젝트 마감까지 7일 남았습니다.
+
+
+            // 4. 월 시작/종료일 추출 예시 (월별 통계 및 달력 데이터 조회 조건)
+            console.log("\n=== 4. 월 시작/종료일 추출 예시 ===");
+            const { start, end } = dateUtils.getMonthRange(today);
+            console.log(`이번 달 통계 검색 범위: ${start} ~ ${end}`); 
+            // 출력: 이번 달 통계 검색 범위: 2026-05-01 ~ 2026-05-31
+
+
+            // 5. 유효성 검증 예시 (사용자가 입력한 날짜 오타 체크)
+            console.log("\n=== 5. 유효성 검증 예시 ===");
+            console.log("1995-02-28 검증 결과:", dateUtils.isValid("1995-02-28")); // 출력: true
+            console.log("2026-02-31 검증 결과:", dateUtils.isValid("2026-02-31")); // 출력: false (없는 날짜)
+
+
+            // 6. 상대적 시간 표시 예시 (커뮤니티 게시글 등록 시간 피드)
+            console.log("\n=== 6. 상대적 시간 표시 예시 ===");
+            // 테스트를 위해 지금으로부터 15분 전 시간 생성
+            const commentTime = new Date(today.getTime() - (15 * 60 * 1000)); 
+            console.log("댓글 등록 시간 표시:", dateUtils.toRelative(commentTime)); 
+            // 출력: 15분 전
+            
+        });
+    </script>
+</th:block>
+</html>

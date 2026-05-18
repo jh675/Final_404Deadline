@@ -51,4 +51,14 @@ public class ProjectServiceImpl implements ProjectService {
 	        }
 	    }
 	}
+	
+	@Override
+	public int projectHide(ProjectVO vo) {
+		return projectMapper.projectHide(vo);
+	}
+	
+	@Override
+	public int projectDelete(int id) {
+		return projectMapper.projectDelete(id);
+	}
 }
