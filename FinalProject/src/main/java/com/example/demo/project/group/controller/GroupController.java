@@ -1,5 +1,7 @@
 package com.example.demo.project.group.controller;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.example.demo.project.group.service.GroupDetailVO;
 import com.example.demo.project.group.service.GroupListCriteria;
+import com.example.demo.project.group.service.GroupMemberDetailRowVO;
+import com.example.demo.project.group.service.GroupRoleDetailRowVO;
 import com.example.demo.project.group.service.GroupService;
 import com.example.demo.project.group.service.ProjectGroupRowVO;
 import lombok.RequiredArgsConstructor;
@@ -31,27 +36,79 @@ public class GroupController {
     /** 그룹 목록 화면 — 검색 조건 반영 후 Thymeleaf에 rows 전달 */
     @GetMapping("/groupManagement")
     public String groupManagementPage(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam(required = false) String grpName,
-            @RequestParam(required = false) String createdFrom,
-            @RequestParam(required = false) String createdTo,
+            GroupListCriteria criteria,
             Model model) {
 
-        GroupListCriteria criteria = GroupListCriteria.builder()
-                .prjId(prjId)
-                .grpName(nullToEmpty(grpName))
-                .createdFrom(nullToEmpty(createdFrom))
-                .createdTo(nullToEmpty(createdTo))
-                .build();
+     
 
         List<ProjectGroupRowVO> rows = groupService.selectProjectGroupList(criteria);
 
         model.addAttribute("rows", rows);
-        model.addAttribute("prjId", prjId);
+        model.addAttribute("prjId", criteria.getPrjId());
         model.addAttribute("grpName", criteria.getGrpName());
         model.addAttribute("createdFrom", criteria.getCreatedFrom());
         model.addAttribute("createdTo", criteria.getCreatedTo());
         return "project/group/groupManagement";
+    }
+
+    /** 그룹 상세·등록 — {@code project/group/groupManagementInfo.html} (grpId 없으면 등록) */
+    @GetMapping("/groupManagementInfo")
+    public String groupManagementInfoPage(
+            @RequestParam("prjId") Long prjId,
+            @RequestParam(value = "grpId", required = false) Long grpId,
+            Model model) {
+
+        model.addAttribute("prjId", prjId);
+
+        if (grpId == null) {
+            model.addAttribute("registerMode", true);
+            model.addAttribute("groupNotFound", false);
+            model.addAttribute("detail", GroupDetailVO.builder()
+                    .prjId(prjId)
+                    .prjName(groupService.selectProjectName(prjId))
+                    .grpName("")
+                    .build());
+            model.addAttribute("members", List.<GroupMemberDetailRowVO>of());
+            model.addAttribute("roles", List.<GroupRoleDetailRowVO>of());
+            return "project/group/groupManagementInfo";
+        }
+
+        model.addAttribute("registerMode", false);
+        model.addAttribute("grpId", grpId);
+
+        GroupDetailVO detail = groupService.selectGroupDetail(prjId, grpId);
+        if (detail == null) {
+            model.addAttribute("groupNotFound", true);
+            model.addAttribute("members", List.<GroupMemberDetailRowVO>of());
+            model.addAttribute("roles", List.<GroupRoleDetailRowVO>of());
+            return "project/group/groupManagementInfo";
+        }
+
+        model.addAttribute("groupNotFound", false);
+        model.addAttribute("detail", detail);
+        model.addAttribute("members", groupService.selectGroupMembers(prjId, grpId));
+        model.addAttribute("roles", groupService.selectGroupRoles(prjId, grpId));
+        return "project/group/groupManagementInfo";
+    }
+
+    /** 그룹명 중복 확인 — GRP.PRJ_ID + GRP.NAME */
+    @GetMapping("/checkGrpNameDuplicate")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkGrpNameDuplicate(
+            @RequestParam("prjId") Long prjId,
+            @RequestParam("grpName") String grpName) {
+        if (prjId == null) {
+            return badRequest("프로젝트 ID가 필요합니다.");
+        }
+        String name = grpName == null ? "" : grpName.trim();
+        if (name.isEmpty()) {
+            return badRequest("그룹명을 입력하세요.");
+        }
+        boolean duplicate = groupService.existsGroupName(prjId, name);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("ok", true);
+        body.put("duplicate", duplicate);
+        return ResponseEntity.ok(body);
     }
 
     /** 그룹 목록 JSON (AJAX 검색용, 현재 HTML에서는 미사용) */
@@ -77,7 +134,34 @@ public class GroupController {
         return body;
     }
 
-    /** 선택 그룹 삭제 — 소속 MEMBER·GRP_ROLE 정리 후 GRP 삭제 */
+    /** 그룹 등록 — DB {@code PROC_GRP_INSERT} (userIds 없으면 그룹만 생성) */
+    @PostMapping("/registerGroup")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> registerGroup(
+            @RequestBody(required = false) GroupInsertRequest body) {
+        try {
+            if (body == null || body.prjId() == null) {
+                return badRequest("요청이 올바르지 않습니다.");
+            }
+            String grpName = body.grpName() == null ? "" : body.grpName().trim();
+            if (grpName.isEmpty()) {
+                return badRequest("그룹명을 입력하세요.");
+            }
+            List<Long> userIds = body.userIds();
+            groupService.insertGroup(body.prjId(), grpName, userIds);
+            Map<String, Object> ok = new LinkedHashMap<>();
+            ok.put("ok", true);
+            return ResponseEntity.ok(ok);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("ok", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "그룹 등록 중 오류가 발생했습니다."));
+        }
+    }
+
+    /** 선택 그룹 삭제 — DB {@code PROC_GRP_DELETE} 호출 */
     @PostMapping("/deleteGroups")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteGroups(
@@ -106,8 +190,18 @@ public class GroupController {
     /** deleteGroups 요청 JSON */
     public record GroupDeleteRequest(Long prjId, List<Long> grpIds) {}
 
+    /** registerGroup 요청 JSON — userIds 키는 구성원이 있을 때만 전송 */
+    public record GroupInsertRequest(Long prjId, String grpName, List<Long> userIds) {}
+
     /** MyBatis 동적 SQL에서 null 대신 빈 문자열로 통일 */
     private static String nullToEmpty(String s) {
         return s == null ? "" : s;
+    }
+
+    private static String formatDateYmd(LocalDateTime dt) {
+        if (dt == null) {
+            return "";
+        }
+        return dt.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 }

@@ -9,6 +9,7 @@
   <sql id="groupListWhere">
     <where>
       G.PRJ_ID = #{prjId}
+      AND G.STATUS_CD = '01ACTIVE'
       <if test="grpName != null and grpName != ''">
         AND G.NAME LIKE '%' || #{grpName} || '%'
       </if>
@@ -29,43 +30,98 @@
       COUNT(M.USER_ID) AS cntMem,
       G.CREATED_ON AS createdOn
     FROM GRP G
-    LEFT JOIN MEMBER M ON M.GRP_ID = G.ID
+    LEFT JOIN MEMBER M ON M.GRP_ID = G.ID AND M.PRJ_END_DATE IS NULL
     <include refid="groupListWhere"/>
     GROUP BY G.ID, G.NAME, G.CREATED_ON
     ORDER BY G.ID
   </select>
 
-  <!-- 그룹 삭제 1/3: 소속 MEMBER -->
-  <delete id="deleteGroupMembers">
-    DELETE FROM MEMBER M
-    WHERE EXISTS (
-      SELECT 1 FROM GRP G WHERE G.ID = M.GRP_ID AND G.PRJ_ID = #{prjId}
-    )
-    AND M.GRP_ID IN
-    <foreach collection="grpIds" item="gid" open="(" separator="," close=")">
-      #{gid}
-    </foreach>
-  </delete>
+  <!-- 프로젝트명 — 그룹 등록 화면용 -->
+  <select id="selectProjectNameByPrjId" resultType="string">
+    SELECT P.PRJ_NAME
+    FROM project P
+    WHERE P.ID = #{prjId}
+  </select>
 
-  <!-- 그룹 삭제 2/3: GRP_ROLE -->
-  <delete id="deleteGroupRoles">
-    DELETE FROM GRP_ROLE GR
-    WHERE EXISTS (
-      SELECT 1 FROM GRP G WHERE G.ID = GR.GRP_ID AND G.PRJ_ID = #{prjId}
-    )
-    AND GR.GRP_ID IN
-    <foreach collection="grpIds" item="gid" open="(" separator="," close=")">
-      #{gid}
-    </foreach>
-  </delete>
-
-  <!-- 그룹 삭제 3/3: GRP -->
-  <delete id="deleteGroupRows">
-    DELETE FROM GRP G
+  <!-- 그룹명 중복 — PRJ_ID + NAME 일치 (활성 그룹) -->
+  <select id="countGrpByPrjIdAndName" resultType="int">
+    SELECT COUNT(*)
+    FROM GRP G
     WHERE G.PRJ_ID = #{prjId}
-      AND G.ID IN
-    <foreach collection="grpIds" item="gid" open="(" separator="," close=")">
-      #{gid}
-    </foreach>
-  </delete>
+      AND G.NAME = #{grpName}
+      AND G.STATUS_CD = '01ACTIVE'
+  </select>
+
+  <!-- 그룹 상세 기본 정보 -->
+  <select id="selectGroupDetail" resultType="com.example.demo.project.group.service.GroupDetailVO">
+    SELECT
+      G.PRJ_ID AS prjId,
+      G.ID AS grpId,
+      P.PRJ_NAME AS prjName,
+      G.NAME AS grpName,
+      G.CREATED_ON AS createdOn
+    FROM GRP G
+    LEFT JOIN project P ON P.ID = G.PRJ_ID
+    WHERE G.PRJ_ID = #{prjId}
+      AND G.ID = #{grpId}
+      AND G.STATUS_CD = '01ACTIVE'
+  </select>
+
+  <!-- 그룹 상세 구성원 정보 -->
+  <select id="selectGroupMembers" resultType="com.example.demo.project.group.service.GroupMemberDetailRowVO">
+    SELECT
+      M.USER_ID AS userId,
+      U.NAME AS userName,
+      U.TEL AS tel,
+      U.EMAIL AS email,
+      G.NAME AS grpName,
+      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+    FROM MEMBER M
+    JOIN USERS U ON U.ID = M.USER_ID
+    JOIN GRP G ON G.ID = M.GRP_ID
+    WHERE G.PRJ_ID = #{prjId}
+      AND G.ID = #{grpId}
+      AND G.STATUS_CD = '01ACTIVE'
+      AND M.PRJ_END_DATE IS NULL
+    ORDER BY U.NAME
+  </select>
+
+  <!-- 그룹 상세 보유 권한 정보 -->
+  <select id="selectGroupRoles" resultType="com.example.demo.project.group.service.GroupRoleDetailRowVO">
+    SELECT
+      R.ROLE_CD AS roleCd,
+      (
+        SELECT MIN(M.ROLE_NAME)
+        FROM ROLE_MENU RM
+        JOIN MENU M ON M.ROLE_ID = RM.ROLE_ID
+        WHERE RM.ROLE_CD = R.ROLE_CD
+      ) AS menuName,
+      R.CREATED_ON AS createdOn,
+      NULL AS remark
+    FROM GRP_ROLE GR
+    JOIN ROLE R ON R.ROLE_CD = GR.ROLE_CD AND R.PRJ_ID = #{prjId}
+    WHERE GR.GRP_ID = #{grpId}
+    ORDER BY R.ROLE_CD
+  </select>
+
+  <!-- 그룹 삭제 — DB PROC_GRP_DELETE (GRP_ROLE → MEMBER → GRP, 프로시저 내부 COMMIT) -->
+  <update id="callProcGrpDelete" statementType="CALLABLE">
+    {
+      CALL PROC_GRP_DELETE(
+        #{grpId, mode=IN, jdbcType=NUMERIC}
+      )
+    }
+  </update>
+
+  <!-- 그룹 등록 — DB PROC_GRP_INSERT (memIds null = p_mem_ids 미전달과 동일) -->
+  <update id="callProcGrpInsert" statementType="CALLABLE">
+    {
+      CALL PROC_GRP_INSERT(
+        #{prjId, mode=IN, jdbcType=NUMERIC},
+        #{grpName, mode=IN, jdbcType=VARCHAR},
+        #{memIds, mode=IN, jdbcType=VARCHAR},
+        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
+      )
+    }
+  </update>
 </mapper>
