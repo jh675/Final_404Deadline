@@ -1,5 +1,7 @@
 package com.example.demo.project.member.controller;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.example.demo.project.member.service.MemberDetailVO;
+import com.example.demo.project.member.service.MemberIssueRowVO;
 import com.example.demo.project.member.service.MemberListCriteria;
 import com.example.demo.project.member.service.MemberService;
 import com.example.demo.project.member.service.ProjectMemberRowVO;
@@ -31,30 +35,77 @@ public class MemberController {
     /** 구성원 목록 화면 — 검색 조건 반영 후 Thymeleaf에 rows 전달 */
     @GetMapping("/memberManagement")
     public String memberManagementPage(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam(required = false) String memberName,
-            @RequestParam(required = false) String grpName,
-            @RequestParam(required = false) String prjStartFrom,
-            @RequestParam(required = false) String prjStartTo,
+    		MemberListCriteria criteria,
             Model model) {
-
-        MemberListCriteria criteria = MemberListCriteria.builder()
-                .prjId(prjId)
-                .memberName(nullToEmpty(memberName))
-                .grpName(nullToEmpty(grpName))
-                .prjStartFrom(nullToEmpty(prjStartFrom))
-                .prjStartTo(nullToEmpty(prjStartTo))
-                .build();
 
         List<ProjectMemberRowVO> rows = memberService.selectProjectMemberList(criteria);
 
         model.addAttribute("rows", rows);
-        model.addAttribute("prjId", prjId);
+        model.addAttribute("prjId", criteria.getPrjId());
         model.addAttribute("memberName", criteria.getMemberName());
         model.addAttribute("grpName", criteria.getGrpName());
         model.addAttribute("prjStartFrom", criteria.getPrjStartFrom());
         model.addAttribute("prjStartTo", criteria.getPrjStartTo());
         return "project/member/memberManagement";
+    }
+
+    /**
+     * 구성원 상세·수정·등록 — {@code memberManagementInfo.html}
+     * <ul>
+     *   <li>userId·grpId 없음 → 등록</li>
+     *   <li>{@code edit=true} → 수정(계정·패스워드 포함)</li>
+     *   <li>그 외 → 상세 조회</li>
+     * </ul>
+     */
+    @GetMapping("/memberManagementInfo")
+    public String memberManagementInfoPage(
+            @RequestParam("prjId") Long prjId,
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestParam(value = "grpId", required = false) Long grpId,
+            @RequestParam(value = "edit", defaultValue = "false") boolean edit,
+            Model model) {
+
+        model.addAttribute("prjId", prjId);
+
+        if (userId == null || grpId == null) {
+            model.addAttribute("registerMode", true);
+            model.addAttribute("editMode", false);
+            model.addAttribute("viewMode", false);
+            model.addAttribute("memberNotFound", false);
+            model.addAttribute("detail", MemberDetailVO.builder()
+                    .prjId(prjId)
+                    .prjName(memberService.selectProjectName(prjId))
+                    .build());
+            model.addAttribute("issues", List.<MemberIssueRowVO>of());
+            return "project/member/memberManagementInfo";
+        }
+
+        model.addAttribute("registerMode", false);
+        model.addAttribute("userId", userId);
+        model.addAttribute("grpId", grpId);
+
+        MemberDetailVO detail = memberService.selectMemberDetail(prjId, userId, grpId);
+        if (detail == null) {
+            model.addAttribute("memberNotFound", true);
+            model.addAttribute("editMode", false);
+            model.addAttribute("viewMode", false);
+            model.addAttribute("issues", List.<MemberIssueRowVO>of());
+            return "project/member/memberManagementInfo";
+        }
+
+        boolean editMode = edit;
+        model.addAttribute("memberNotFound", false);
+        model.addAttribute("editMode", editMode);
+        model.addAttribute("viewMode", !editMode);
+        model.addAttribute("detail", detail);
+        model.addAttribute("pwUpdatedOnYmd", formatDateYmd(detail.getPwUpdatedOn()));
+        model.addAttribute("lastLoginOnYmd", formatDateYmd(detail.getLastLoginOn()));
+        model.addAttribute(
+                "issues",
+                editMode
+                        ? List.<MemberIssueRowVO>of()
+                        : memberService.selectMemberIssues(prjId, userId, grpId));
+        return "project/member/memberManagementInfo";
     }
 
     /** 구성원 목록 JSON (AJAX 검색용, 현재 HTML에서는 미사용) */
@@ -125,5 +176,12 @@ public class MemberController {
     /** MyBatis 동적 SQL에서 null 대신 빈 문자열로 통일 */
     private static String nullToEmpty(String s) {
         return s == null ? "" : s;
+    }
+
+    private static String formatDateYmd(LocalDateTime dt) {
+        if (dt == null) {
+            return "";
+        }
+        return dt.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 }
