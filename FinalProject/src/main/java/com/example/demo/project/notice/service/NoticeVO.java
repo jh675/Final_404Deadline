@@ -11,4 +11,6 @@ public class NoticeVO {
 	private String description;
 	private Integer memId;
 	private Date createdOn;
+	private String isFixed;
+	
 }
