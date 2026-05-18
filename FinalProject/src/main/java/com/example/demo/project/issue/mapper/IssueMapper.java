@@ -23,6 +23,10 @@ public interface IssueMapper {
     int insertIssue(IssueInputVO issueVO);
     //수정
     int updateIssue(IssueInputVO issueVO);
+
+    int updateIssueStartDate(Long id);
+
+    int updateIssueClosedDate(Long id);
     //삭제
     int deleteIssue(Long id);
     //하위 이슈 조회

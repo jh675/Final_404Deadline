@@ -17,6 +17,10 @@ public interface IssueService {
 
     int updateIssue(IssueInputVO issueVO);
 
+    int updateIssueStartDate(Long id);
+
+    int updateIssueClosedDate(Long id);
+
     int deleteIssue(Long id);
 
     List<IssueOutputVO> selectChildIssueList(Long id);

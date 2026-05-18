@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>마일스톤 타임라인</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/vis-timeline@8.5.1/styles/vis-timeline-graph2d.min.css"
+    crossorigin="anonymous"
+  />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #f4f5f7;
+      color: #172b4d;
+    }
+    header {
+      padding: 12px 16px;
+      background: #fff;
+      border-bottom: 1px solid #dfe1e6;
+    }
+    header h1 {
+      margin: 0 0 4px;
+      font-size: 1.1rem;
+    }
+    header p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #5e6c84;
+    }
+    .page-body {
+      display: flex;
+      align-items: stretch;
+      min-height: calc(100vh - 72px);
+      margin: 16px;
+      gap: 0;
+      background: #fff;
+      border: 1px solid #dfe1e6;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .milestone-sidebar {
+      flex: 0 0 240px;
+      border-right: 1px solid #dfe1e6;
+      background: #fafbfc;
+      display: flex;
+      flex-direction: column;
+    }
+    .milestone-sidebar h2 {
+      margin: 0;
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #5e6c84;
+      border-bottom: 1px solid #ebecf0;
+    }
+    .milestone-list {
+      list-style: none;
+      margin: 0;
+      padding: 8px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .milestone-list li {
+      margin-bottom: 4px;
+    }
+    .milestone-btn {
+      display: block;
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+    }
+    .milestone-btn:hover {
+      background: #ebecf0;
+    }
+    .milestone-btn.active {
+      background: #deebff;
+      border-color: #4c9aff;
+    }
+    .milestone-btn .name {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    .milestone-btn .period {
+      display: block;
+      font-size: 0.75rem;
+      color: #5e6c84;
+    }
+    .timeline-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .timeline-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #ebecf0;
+    }
+    .timeline-header h3 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+    }
+    .timeline-header p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #5e6c84;
+    }
+    #timeline {
+      flex: 1;
+      min-height: 280px;
+    }
+    #log {
+      margin: 0 16px 16px;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #dfe1e6;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      min-height: 2.5em;
+    }
+    .pill {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: #deebff;
+      color: #0747a6;
+    }
+    .empty-hint {
+      padding: 24px 16px;
+      color: #5e6c84;
+      font-size: 0.9rem;
+    }
+    .vis-item.milestone-range {
+      background-color: #deebff;
+      border-color: #0747a6;
+      color: #0747a6;
+    }
+    .vis-item.issue-event {
+      background-color: #fff;
+      border-color: #6554c0;
+      color: #403294;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>마일스톤 / 이슈 타임라인</h1>
+    <p>
+      왼쪽에서 <strong>마일스톤 선택</strong> → 오른쪽에 해당 마일스톤 기간·등록 이슈·이벤트 표시 ·
+      마일스톤=<code>list</code> (Thymeleaf) · 이슈=<code>GET /api/milestone/{id}/issues</code>
+      <span class="pill">API 없으면 더미 이슈</span>
+    </p>
+  </header>
+
+  <div class="page-body">
+    <aside class="milestone-sidebar">
+      <h2>마일스톤</h2>
+      <ul class="milestone-list" id="milestoneList"></ul>
+    </aside>
+    <section class="timeline-panel">
+      <div class="timeline-header" id="timelineHeader">
+        <h3>마일스톤을 선택하세요</h3>
+        <p>왼쪽 목록에서 마일스톤을 클릭하면 이슈 타임라인이 표시됩니다.</p>
+      </div>
+      <div id="timeline"></div>
+      <p class="empty-hint" id="emptyHint" hidden>이 마일스톤에 등록된 이슈가 없습니다.</p>
+    </section>
+  </div>
+
+  <div id="log">이슈 행의 이벤트를 클릭하면 상세가 표시됩니다.</div>
+
+  <script src="https://unpkg.com/vis-timeline@8.5.1/standalone/umd/vis-timeline-graph2d.min.js" crossorigin="anonymous"></script>
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    var milestoneList = /*[[${list}]]*/ [];
+    /*]]>*/
+  </script>
+  <script>
+    (function () {
+      var sidebarEl = document.getElementById("milestoneList");
+      var headerEl = document.getElementById("timelineHeader");
+      var container = document.getElementById("timeline");
+      var emptyHint = document.getElementById("emptyHint");
+      var logEl = document.getElementById("log");
+
+      var FALLBACK_MILESTONES = [
+        { id: 1, name: "1번 마일스톤 (더미)", startDate: "2026-05-03", endDate: "2026-05-19" },
+        { id: 2, name: "2번 마일스톤 (더미)", startDate: "2026-05-01", endDate: "2026-05-17" },
+        { id: 3, name: "3번 마일스톤 (더미)", startDate: "2026-05-05", endDate: "2026-05-21" },
+        { id: 4, name: "4번 마일스톤 (더미)", startDate: "2026-04-28", endDate: "2026-05-20" },
+      ];
+
+      /** milestoneId → MilestoneIssueVO[] 형태 더미 (API 미구현 시) */
+      var DUMMY_ISSUES = {
+        1: [
+          { id: 11, issueId: 101, issueSubject: "로그인 오류 수정", events: [
+            { id: 1, content: "등록", start: "2026-05-04T10:00:00" },
+            { id: 2, content: "코멘트", start: "2026-05-10T14:30:00" },
+            { id: 3, content: "상태변경", start: "2026-05-15T09:00:00" },
+          ]},
+          { id: 12, issueId: 102, issueSubject: "메인 UI 개선", events: [
+            { id: 4, content: "등록", start: "2026-05-06T11:00:00" },
+          ]},
+        ],
+        2: [
+          { id: 21, issueId: 201, issueSubject: "API 연동", events: [
+            { id: 5, content: "등록", start: "2026-05-02T11:00:00" },
+            { id: 6, content: "첨부", start: "2026-05-12T16:00:00" },
+          ]},
+        ],
+        3: [
+          { id: 31, issueId: 301, issueSubject: "배포 스크립트", events: [
+            { id: 7, content: "등록", start: "2026-05-06T09:30:00" },
+            { id: 8, content: "이벤트A", start: "2026-05-20T10:00:00" },
+            { id: 9, content: "이벤트B", start: "2026-05-20T15:00:00" },
+          ]},
+        ],
+        4: [
+          { id: 41, issueId: 401, issueSubject: "문서화", events: [
+            { id: 10, content: "등록", start: "2026-05-01T08:00:00" },
+            { id: 11, content: "리뷰", start: "2026-05-18T13:15:00" },
+          ]},
+        ],
+      };
+
+      var milestones = milestoneList && milestoneList.length ? milestoneList : FALLBACK_MILESTONES;
+      var selectedMilestoneId = null;
+      var timeline = null;
+      var groups = new vis.DataSet([]);
+      var items = new vis.DataSet([]);
+
+      function toDate(value) {
+        if (value == null || value === "") return null;
+        if (value instanceof Date) return value;
+        if (typeof value === "number") return new Date(value);
+        if (typeof value === "string") return new Date(value);
+        if (Array.isArray(value)) {
+          return new Date(value[0], (value[1] || 1) - 1, value[2] || 1, value[3] || 0, value[4] || 0, value[5] || 0);
+        }
+        return null;
+      }
+
+      function formatPeriod(ms) {
+        var s = toDate(ms.startDate);
+        var e = toDate(ms.endDate);
+        if (!s || !e) return "기간 미설정";
+        return s.toLocaleDateString("ko-KR") + " ~ " + e.toLocaleDateString("ko-KR");
+      }
+
+      function milestoneKey(ms) {
+        return String(ms.id != null ? ms.id : ms.name);
+      }
+
+      function findMilestone(id) {
+        return milestones.find(function (ms) {
+          return milestoneKey(ms) === String(id);
+        });
+      }
+
+      function fetchIssues(milestoneId) {
+        return fetch("/api/milestone/" + encodeURIComponent(milestoneId) + "/issues", {
+          headers: { Accept: "application/json" },
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            if (Array.isArray(data)) return data;
+            if (data && Array.isArray(data.list)) return data.list;
+            if (data && Array.isArray(data.issues)) return data.issues;
+            return [];
+          })
+          .catch(function () {
+            return DUMMY_ISSUES[milestoneId] || DUMMY_ISSUES[Number(milestoneId)] || [];
+          });
+      }
+
+      function computeWindow(ms, issues) {
+        var start = toDate(ms.startDate);
+        var end = toDate(ms.endDate);
+        var min = start ? new Date(start) : null;
+        var max = end ? new Date(end) : null;
+
+        function touch(d) {
+          if (!d) return;
+          if (!min || d < min) min = new Date(d);
+          if (!max || d > max) max = new Date(d);
+        }
+
+        issues.forEach(function (issue) {
+          (issue.events || []).forEach(function (ev) {
+            touch(toDate(ev.start));
+          });
+        });
+
+        if (!min || !max) {
+          min = new Date(2026, 4, 1);
+          max = new Date(2026, 4, 22);
+        } else {
+          min = new Date(min.getTime() - 1000 * 60 * 60 * 24 * 2);
+          max = new Date(max.getTime() + 1000 * 60 * 60 * 24 * 2);
+        }
+        return { start: min, end: max };
+      }
+
+      function buildTimelineForMilestone(ms, issues) {
+        var nextGroups = [];
+        var nextItems = [];
+        var msId = milestoneKey(ms);
+        var rangeGroupId = "milestone-range";
+
+        nextGroups.push({ id: rangeGroupId, content: "마일스톤 기간" });
+
+        var rangeStart = toDate(ms.startDate);
+        var rangeEnd = toDate(ms.endDate);
+        if (rangeStart && rangeEnd && rangeEnd >= rangeStart) {
+          nextItems.push({
+            id: "range-" + msId,
+            group: rangeGroupId,
+            content: (ms.name || "마일스톤") + " 기간",
+            start: rangeStart,
+            end: rangeEnd,
+            type: "range",
+            className: "milestone-range",
+          });
+        }
+
+        issues.forEach(function (issue, index) {
+          var groupId = "issue-" + (issue.id != null ? issue.id : issue.issueId || index);
+          var label = issue.issueSubject || "이슈 " + (index + 1);
+          nextGroups.push({ id: groupId, content: label });
+
+          (issue.events || []).forEach(function (ev, evIdx) {
+            var at = toDate(ev.start);
+            if (!at) return;
+            nextItems.push({
+              id: groupId + "-ev-" + (ev.id != null ? ev.id : evIdx),
+              group: groupId,
+              content: ev.content || ev.contents || "이벤트",
+              start: at,
+              type: "point",
+              className: "issue-event",
+              title: label + " · " + (ev.content || ev.contents || ""),
+            });
+          });
+        });
+
+        return { groups: nextGroups, items: nextItems };
+      }
+
+      function ensureTimeline() {
+        if (timeline) return;
+        timeline = new vis.Timeline(container, items, groups, {
+          stack: true,
+          zoomMin: 1000 * 60 * 60 * 6,
+          zoomMax: 1000 * 60 * 60 * 24 * 31 * 6,
+          editable: false,
+          selectable: true,
+          showCurrentTime: true,
+        });
+        timeline.on("click", function (props) {
+          if (!props.item) {
+            logEl.textContent = "빈 영역 클릭";
+            return;
+          }
+          var it = items.get(props.item);
+          logEl.textContent = "선택: " + JSON.stringify({
+            id: it.id,
+            group: it.group,
+            content: it.content,
+            start: it.start,
+          });
+        });
+      }
+
+      function renderTimeline(ms, issues) {
+        ensureTimeline();
+        var built = buildTimelineForMilestone(ms, issues);
+        var win = computeWindow(ms, issues);
+
+        groups.clear();
+        items.clear();
+        groups.add(built.groups);
+        items.add(built.items);
+
+        var rowCount = built.groups.length;
+        container.style.height = Math.max(240, rowCount * 48) + "px";
+        emptyHint.hidden = issues.length > 0;
+        container.hidden = issues.length === 0 && !built.items.length;
+
+        timeline.setOptions({ start: win.start, end: win.end });
+        timeline.redraw();
+      }
+
+      function setHeader(ms, issueCount) {
+        headerEl.innerHTML =
+          "<h3>" + (ms.name || "마일스톤") + "</h3>" +
+          "<p>" + formatPeriod(ms) + " · 등록 이슈 " + issueCount + "건</p>";
+      }
+
+      function setActiveSidebar(id) {
+        sidebarEl.querySelectorAll(".milestone-btn").forEach(function (btn) {
+          btn.classList.toggle("active", btn.dataset.id === String(id));
+        });
+      }
+
+      function selectMilestone(id) {
+        var ms = findMilestone(id);
+        if (!ms) return;
+        selectedMilestoneId = String(id);
+        setActiveSidebar(id);
+        setHeader(ms, "…");
+        logEl.textContent = "이슈 목록을 불러오는 중…";
+
+        fetchIssues(id).then(function (issues) {
+          setHeader(ms, issues.length);
+          renderTimeline(ms, issues);
+          logEl.textContent = issues.length
+            ? "마일스톤 \"" + (ms.name || id) + "\" · 이슈 " + issues.length + "건"
+            : "등록된 이슈가 없습니다.";
+        });
+      }
+
+      function renderSidebar() {
+        sidebarEl.innerHTML = "";
+        milestones.forEach(function (ms) {
+          var id = milestoneKey(ms);
+          var li = document.createElement("li");
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "milestone-btn";
+          btn.dataset.id = id;
+          btn.innerHTML =
+            '<span class="name">' + (ms.name || "마일스톤") + "</span>" +
+            '<span class="period">' + formatPeriod(ms) + "</span>";
+          btn.addEventListener("click", function () {
+            selectMilestone(id);
+          });
+          li.appendChild(btn);
+          sidebarEl.appendChild(li);
+        });
+
+        if (milestones.length) {
+          selectMilestone(milestoneKey(milestones[0]));
+        }
+      }
+
+      renderSidebar();
+    })();
+  </script>
+</body>
+</html>

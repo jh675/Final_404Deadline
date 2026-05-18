@@ -9,9 +9,6 @@
 <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
 <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
 <style>
-
-
-
 .back-row {
 	margin-bottom: 16px;
 }
@@ -263,6 +260,19 @@
 	cursor: pointer;
 }
 
+.progress-wrap input[type="range"]:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.progress-wrap input[type="range"]:disabled::-webkit-slider-thumb {
+	cursor: not-allowed;
+}
+
+.progress-wrap input[type="range"]:disabled::-moz-range-thumb {
+	cursor: not-allowed;
+}
+
 .progress-wrap .progress-value-pill {
 	grid-column: 2;
 	grid-row: 1;
@@ -364,7 +374,6 @@
 			<div class="field-wrap">
 				<input type="datetime-local" id="estStartDate" name="estStartDate" step="60"
 					th:value="${issue != null and issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd''T''HH:mm') : ''}" />
-				
 			</div>
 
 			<label for="dueDate">종료예정일</label>
@@ -396,13 +405,12 @@
 			<label for="parentIssue">상위 이슈</label>
 			<div class="field-wrap">
 				<select id="parentIssue" name="parentIssue">
-					
 					<option value=""
 						th:selected="${issue == null or issue.parentIssue == null}">없음</option>
-					<option th:each="item :${issueIds}" 
+					<option th:each="item : ${issueIds}"
 						th:value="${item.ID}"
-						th:text="${item.SUBJECT}"
-						th:selected="${ids != null and issue.parentIssue == ids.id }">없음</option>
+						th:text="${item.SUBJECT + ' #' + item.ID}"
+						th:selected="${ids != null and issue.parentIssue == ids.id}">없음</option>
 				</select>
 			</div>
 
@@ -434,6 +442,20 @@
 				</select>
 			</div>
 
+			<label for="statusCd">상태</label>
+			<div class="field-wrap">
+				<select id="statusCd" name="statusCd">
+					<option value="01ISSUESTAT"
+						th:selected="${issue == null or issue.statusCd == null or issue.statusCd == '' or issue.statusCd == '01ISSUESTAT'}">신규</option>
+					<option value="02ISSUESTAT"
+						th:selected="${issue != null and issue.statusCd == '02ISSUESTAT'}">진행중</option>
+					<option value="03ISSUESTAT"
+						th:selected="${issue != null and issue.statusCd == '03ISSUESTAT'}">검토</option>
+					<option value="04ISSUESTAT"
+						th:selected="${issue != null and issue.statusCd == '04ISSUESTAT'}">완료</option>
+				</select>
+			</div>
+
 			<label for="doneRatio">진척율</label>
 			<div class="field-wrap">
 				<div class="progress-wrap">
@@ -449,6 +471,7 @@
 						<span>100</span>
 					</div>
 				</div>
+				<p class="form-hint" id="progressStatusHint">상태에 따라 진척율 범위가 달라집니다.</p>
 				<p class="form-hint">10% 단위로만 조절됩니다.</p>
 			</div>
 
@@ -477,17 +500,63 @@
 	var btnAddFile = document.getElementById('btnAddFile');
 	var btnCancel = document.getElementById('btnCancel');
 	var errAttach = document.getElementById('err-attach');
+	var STATUS_NEW = '01ISSUESTAT';
+	var STATUS_PROGRESS = '02ISSUESTAT';
+	var STATUS_REVIEW = '03ISSUESTAT';
+	var STATUS_DONE = '04ISSUESTAT';
+
+	function getProgressValueClamp() {
+		var statusEl = document.getElementById('statusCd');
+		var status = statusEl ? statusEl.value : STATUS_NEW;
+		if (status === STATUS_NEW) return { min: 0, max: 0 };
+		if (status === STATUS_PROGRESS) return { min: 10, max: 90 };
+		if (status === STATUS_REVIEW || status === STATUS_DONE) return { min: 100, max: 100 };
+		return { min: 0, max: 100 };
+	}
 
 	function syncDoneRatioDisplay() {
 		var r = document.getElementById('doneRatio');
 		var d = document.getElementById('doneRatioDisplay');
 		if (!r || !d) return;
+		var clamp = getProgressValueClamp();
 		var v = Number(r.value);
-		if (isNaN(v)) v = 0;
-		v = Math.max(0, Math.min(100, Math.round(v / 10) * 10));
+		if (isNaN(v)) v = clamp.min;
+		v = Math.max(clamp.min, Math.min(clamp.max, Math.round(v / 10) * 10));
 		if (String(r.value) !== String(v)) r.value = String(v);
 		d.textContent = v + '%';
 		r.style.setProperty('--pct', v + '%');
+	}
+
+	function applyProgressByStatus() {
+		var statusEl = document.getElementById('statusCd');
+		var r = document.getElementById('doneRatio');
+		var hint = document.getElementById('progressStatusHint');
+		if (!statusEl || !r) return;
+
+		var status = statusEl.value || STATUS_NEW;
+		if (status === STATUS_NEW) {
+			r.disabled = true;
+			r.min = 0;
+			r.max = 0;
+			r.value = '0';
+			if (hint) hint.textContent = '신규 상태에서는 진척율이 0%로 고정됩니다.';
+		} else if (status === STATUS_PROGRESS) {
+			r.disabled = false;
+			r.min = 0;
+			r.max = 100;
+			var v = Math.round(Number(r.value) / 10) * 10;
+			if (isNaN(v) || v < 10) v = 10;
+			if (v > 90) v = 90;
+			r.value = String(v);
+			if (hint) hint.textContent = '진행중 상태에서는 진척율 10%~90%만 설정할 수 있습니다.';
+		} else if (status === STATUS_REVIEW || status === STATUS_DONE) {
+			r.disabled = true;
+			r.min = 100;
+			r.max = 100;
+			r.value = '100';
+			if (hint) hint.textContent = '검토·완료 상태에서는 진척율이 100%로 고정됩니다.';
+		}
+		syncDoneRatioDisplay();
 	}
 
 	function applyIssueSelects() {
@@ -510,6 +579,10 @@
 			var m = document.getElementById('memId');
 			if (m) m.value = String(issue.memId);
 		}
+		if (issue.statusCd) {
+			var s = document.getElementById('statusCd');
+			if (s) s.value = issue.statusCd;
+		}
 		if (issue.doneRatio != null && issue.doneRatio !== '') {
 			var r = document.getElementById('doneRatio');
 			if (r) {
@@ -520,12 +593,16 @@
 		}
 	}
 	applyIssueSelects();
-	syncDoneRatioDisplay();
+	applyProgressByStatus();
 
 	var doneRatioEl = document.getElementById('doneRatio');
 	if (doneRatioEl) {
 		doneRatioEl.addEventListener('input', syncDoneRatioDisplay);
 		doneRatioEl.addEventListener('change', syncDoneRatioDisplay);
+	}
+	var statusCdEl = document.getElementById('statusCd');
+	if (statusCdEl) {
+		statusCdEl.addEventListener('change', applyProgressByStatus);
 	}
 
 	function fileRow() {
@@ -603,6 +680,7 @@
 			memId: document.getElementById('memId').value ? Number(document.getElementById('memId').value) : null,
 			categoryCd: document.getElementById('categoryCd').value,
 			priorityCd: document.getElementById('priorityCd').value,
+			statusCd: document.getElementById('statusCd').value,
 			doneRatio: document.getElementById('doneRatio').value ? Number(document.getElementById('doneRatio').value) : 0,
 			description: document.getElementById('description').value || '',
 			parentIssue: document.getElementById('parentIssue').value ? Number(document.getElementById('parentIssue').value) : null
@@ -611,7 +689,7 @@
 		var due = document.getElementById('dueDate').value;
 		if (est) payload.estStartDate = est;
 		if (due) payload.dueDate = due;
-		
+
 		var formData = new FormData();
 		formData.append('issue', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
 		attachRows.querySelectorAll('input[type="file"]').forEach(function (inp) {
