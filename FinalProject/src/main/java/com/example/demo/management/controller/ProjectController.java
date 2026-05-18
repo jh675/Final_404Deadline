@@ -34,17 +34,17 @@ public class ProjectController {
      CompanyService companyService;
 
 	@GetMapping("management/project")
-	public String listProject(ProjectVO vo, Model model, CompanyVO cvo,
-			@RequestParam(name = "pageNum", required = false, defaultValue = "1") int pageNum) {
+	public String listProject(ProjectVO vo, Model model, CompanyVO cvo) {
+	    
 		List<ProjectVO> list = projectservice.listProject(vo);
-		
-		PageInfo<CompanyVO> pageInfo = (PageInfo<CompanyVO>) companyService.selectAll(cvo, pageNum);
-	    List<CompanyVO> Clist = pageInfo.getList();
-		
-		model.addAttribute("projectinfo", Map.of("list", list != null ? list : List.of()));
-		model.addAttribute("companyList", Clist);
-		return "management/projectlist";
+	    List<CompanyVO> companyList = companyService.selectAll(cvo);
+	    
+	    model.addAttribute("projectinfo", Map.of("list", list != null ? list : List.of()));
+	    model.addAttribute("companyList", companyList != null ? companyList : List.of());
+	    
+	    return "management/projectlist";
 	}
+
 	
 	@GetMapping("/management/projectcreate")
 	public String projectCreate(Model model, HttpSession session,ProjectVO vo) {

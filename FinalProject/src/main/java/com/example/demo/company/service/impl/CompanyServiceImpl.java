@@ -1,12 +1,12 @@
 package com.example.demo.company.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.example.demo.company.mapper.CompanyMapper;
 import com.example.demo.company.service.CompanyService;
 import com.example.demo.company.service.CompanyVO;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,12 +17,9 @@ public class CompanyServiceImpl implements CompanyService {
 	private final CompanyMapper companyMapper;
 	
 	@Override
-	public PageInfo<CompanyVO> selectAll(CompanyVO company, int pageNum) {
+	public List<CompanyVO> selectAll(CompanyVO company) {
 		
-		PageInfo<CompanyVO> page = PageHelper.startPage(pageNum, 5)
-				.doSelectPageInfo(()->companyMapper.selectAll(company));
-				
-		return page;
+		return companyMapper.selectAll(company);
 	}
 
 	@Override
