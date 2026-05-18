@@ -48,7 +48,7 @@ public class AttachController {
 		// 키값을 통해 아이디 받아옴
 		AttachVO attachVO = service.selectAttach(id);
 		//업로드 경로에 저장된이름을 더한다
-		Path filePath = Paths.get(uploadDir).resolve(attachVO.getDiskFileName()).normalize();
+		Path filePath = Paths.get(attachVO.getDiskDirectory()).resolve(attachVO.getDiskFileName()).normalize();
 		//위의 경로에서 파일을 받아온다
 		Resource resource = new UrlResource(filePath.toUri());
 		//만약 없으면 없다고 한다
