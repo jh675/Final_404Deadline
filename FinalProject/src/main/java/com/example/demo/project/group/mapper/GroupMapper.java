@@ -5,8 +5,10 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import com.example.demo.project.group.service.GroupDetailVO;
 import com.example.demo.project.group.service.GroupInsertProcParam;
+import com.example.demo.project.group.service.GroupUpdateProcParam;
 import com.example.demo.project.group.service.GroupListCriteria;
 import com.example.demo.project.group.service.GroupMemberDetailRowVO;
+import com.example.demo.project.group.service.GroupMemberPickRowVO;
 import com.example.demo.project.group.service.GroupRoleDetailRowVO;
 import com.example.demo.project.group.service.ProjectGroupRowVO;
 
@@ -29,6 +31,9 @@ public interface GroupMapper {
 
     List<GroupMemberDetailRowVO> selectGroupMembers(@Param("prjId") Long prjId, @Param("grpId") Long grpId);
 
+    /** 그룹 등록 모달 — 프로젝트 구성원 선택 목록 */
+    List<GroupMemberPickRowVO> selectGroupMemberPickList(@Param("prjId") Long prjId);
+
     List<GroupRoleDetailRowVO> selectGroupRoles(@Param("prjId") Long prjId, @Param("grpId") Long grpId);
 
     /** DB {@code PROC_GRP_DELETE} — GRP_ROLE, MEMBER, GRP 정리 후 COMMIT */
@@ -36,4 +41,7 @@ public interface GroupMapper {
 
     /** DB {@code PROC_GRP_INSERT} — memIds null이면 구성원 없이 그룹만 생성 */
     void callProcGrpInsert(GroupInsertProcParam param);
+
+    /** DB {@code PROC_GRP_UPDATE} — memIds null이면 구성원 변경 없음 */
+    void callProcGrpUpdate(GroupUpdateProcParam param);
 }

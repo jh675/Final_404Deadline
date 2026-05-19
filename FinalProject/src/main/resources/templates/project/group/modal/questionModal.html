@@ -1,43 +1,43 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
-    <th:block th:fragment="memberQuestionModal">
+    <th:block th:fragment="groupQuestionModal">
       <div
         class="modal fade"
-        id="memberQuestionModal"
+        id="groupQuestionModal"
         tabindex="-1"
-        aria-labelledby="memberQuestionModalTitle"
+        aria-labelledby="groupQuestionModalTitle"
         aria-hidden="true"
       >
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="memberQuestionModalTitle">알림</h5>
+              <h5 class="modal-title" id="groupQuestionModalTitle">알림</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
             </div>
             <div class="modal-body">
-              <p class="mb-0 text-break" id="memberQuestionModalMessage" style="white-space: pre-wrap"></p>
+              <p class="mb-0 text-break" id="groupQuestionModalMessage" style="white-space: pre-wrap"></p>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" id="memberQuestionModalCancelBtn">취소</button>
-              <button type="button" class="btn btn-primary" id="memberQuestionModalConfirmBtn">확인</button>
+              <button type="button" class="btn btn-secondary" id="groupQuestionModalCancelBtn">취소</button>
+              <button type="button" class="btn btn-primary" id="groupQuestionModalConfirmBtn">확인</button>
             </div>
           </div>
         </div>
       </div>
     </th:block>
-    <th:block th:fragment="memberQuestionModalScript">
+    <th:block th:fragment="groupQuestionModalScript">
       <script>
-        window.MemberQuestionModal = (function () {
+        window.GroupQuestionModal = (function () {
           var modalEl, titleEl, msgEl, btnCancel, btnConfirm;
           function cacheElements() {
             if (!modalEl) {
-              modalEl = document.getElementById("memberQuestionModal");
+              modalEl = document.getElementById("groupQuestionModal");
               if (!modalEl) return false;
-              titleEl = document.getElementById("memberQuestionModalTitle");
-              msgEl = document.getElementById("memberQuestionModalMessage");
-              btnCancel = document.getElementById("memberQuestionModalCancelBtn");
-              btnConfirm = document.getElementById("memberQuestionModalConfirmBtn");
+              titleEl = document.getElementById("groupQuestionModalTitle");
+              msgEl = document.getElementById("groupQuestionModalMessage");
+              btnCancel = document.getElementById("groupQuestionModalCancelBtn");
+              btnConfirm = document.getElementById("groupQuestionModalConfirmBtn");
             }
             return true;
           }

@@ -9,7 +9,7 @@
   <sql id="memberListWhere">
     <where>
       G.PRJ_ID = #{prjId}
-      AND M.PRJ_END_DATE IS NULL
+      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
       <if test="memberName != null and memberName != ''">
         AND U.NAME LIKE '%' || #{memberName} || '%'
       </if>
@@ -49,6 +49,43 @@
     WHERE P.ID = #{prjId}
   </select>
 
+  <!-- 구성원 등록 모달 — 동일 biz_no·활성 사용자, MEMBER 미등록(user_id 없음)만 -->
+  <select id="selectCompanyMembersByPrjId"
+    resultType="com.example.demo.project.member.service.CompanyMemberRowVO">
+    SELECT
+      U.ID AS userId,
+      U.NAME AS userName,
+      TO_CHAR(U.HIRE_DATE, 'YYYY-MM-DD') AS hireDate,
+      U.GENDER_CD AS genderCd,
+      U.EMAIL AS email,
+      U.TEL AS tel
+    FROM USERS U
+    WHERE TRIM(U.BIZ_NO) = TRIM((
+      SELECT P.BIZ_NO FROM project P WHERE P.ID = #{prjId}
+    ))
+    AND UPPER(TRIM(U.STATUS_CD)) = '01ACTIVE'
+    <if test="excludeRegistered">
+      AND NOT EXISTS (
+        SELECT 1
+        FROM MEMBER M
+        WHERE M.USER_ID = U.ID
+      )
+    </if>
+    ORDER BY U.ID
+  </select>
+
+  <!-- 구성원 등록 모달 — 프로젝트 소속 활성 그룹 -->
+  <select id="selectProjectGroupsByPrjId"
+    resultType="com.example.demo.project.member.service.MemberGroupPickRowVO">
+    SELECT
+      G.ID AS id,
+      G.NAME AS grpName
+    FROM GRP G
+    WHERE G.PRJ_ID = #{prjId}
+      AND UPPER(TRIM(G.STATUS_CD)) = '01ACTIVE'
+    ORDER BY G.ID
+  </select>
+
   <select id="selectMemberDetail" resultType="com.example.demo.project.member.service.MemberDetailVO">
     SELECT
       M.ID AS memberId,
@@ -74,7 +111,7 @@
     WHERE G.PRJ_ID = #{prjId}
       AND M.USER_ID = #{userId}
       AND M.GRP_ID = #{grpId}
-      AND M.PRJ_END_DATE IS NULL
+      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
       AND G.STATUS_CD = '01ACTIVE'
   </select>
 
@@ -105,6 +142,81 @@
       )
     ORDER BY I.PRIORITY_CD DESC, I.ID
   </select>
+
+  <select id="countGrpInProject" resultType="int">
+    SELECT COUNT(*)
+    FROM GRP G
+    WHERE G.ID = #{grpId}
+      AND G.PRJ_ID = #{prjId}
+      AND G.STATUS_CD = '01ACTIVE'
+  </select>
+
+  <select id="countActiveMember" resultType="int">
+    SELECT COUNT(*)
+    FROM MEMBER M
+    WHERE M.USER_ID = #{userId}
+      AND M.GRP_ID = #{grpId}
+      AND M.PRJ_END_DATE IS NULL
+  </select>
+
+  <select id="selectUserHireDateYmd" resultType="string">
+    SELECT TO_CHAR(U.HIRE_DATE, 'YYYY-MM-DD')
+    FROM USERS U
+    WHERE U.ID = #{userId}
+  </select>
+
+  <!-- 구성원 등록 — PK: mem_seq → MEMBER.ID -->
+  <insert id="insertMember" parameterType="com.example.demo.project.member.service.MemberRegisterParam">
+    <selectKey keyProperty="memberId" resultType="long" order="BEFORE">
+      SELECT mem_seq.NEXTVAL FROM dual
+    </selectKey>
+    INSERT INTO MEMBER (
+      ID,
+      USER_ID,
+      GRP_ID,
+      PRJ_START_DATE,
+      PRJ_END_DATE
+    ) VALUES (
+      #{memberId},
+      #{userId},
+      #{grpId},
+      TO_DATE(#{prjStartDate}, 'YYYY-MM-DD'),
+      <choose>
+        <when test="prjEndDate != null and prjEndDate != ''">
+          TO_DATE(#{prjEndDate}, 'YYYY-MM-DD')
+        </when>
+        <otherwise>
+          NULL
+        </otherwise>
+      </choose>
+    )
+  </insert>
+
+  <!-- 구성원 수정 — 종료일·소속 그룹 (투입 시작일 변경 없음) -->
+  <update id="updateMember" parameterType="com.example.demo.project.member.service.MemberUpdateParam">
+    UPDATE MEMBER M
+    SET
+      M.GRP_ID = #{grpId},
+      M.PRJ_END_DATE =
+      <choose>
+        <when test="prjEndDate != null and prjEndDate != ''">
+          TO_DATE(#{prjEndDate}, 'YYYY-MM-DD')
+        </when>
+        <otherwise>
+          NULL
+        </otherwise>
+      </choose>
+    WHERE M.USER_ID = #{userId}
+      AND M.GRP_ID = #{oldGrpId}
+      AND M.PRJ_END_DATE IS NULL
+      AND EXISTS (
+        SELECT 1
+        FROM GRP G
+        WHERE G.ID = M.GRP_ID
+          AND G.PRJ_ID = #{prjId}
+          AND G.STATUS_CD = '01ACTIVE'
+      )
+  </update>
 
   <!-- 프로젝트에서 구성원 제거 — (USER_ID, GRP_ID) 복합키, prjId로 오삭제 방지 -->
   <delete id="deleteMemberRows">

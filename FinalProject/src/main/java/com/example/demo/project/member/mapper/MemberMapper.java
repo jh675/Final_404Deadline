@@ -3,7 +3,11 @@ package com.example.demo.project.member.mapper;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import com.example.demo.project.member.service.CompanyMemberRowVO;
 import com.example.demo.project.member.service.MemberDetailVO;
+import com.example.demo.project.member.service.MemberRegisterParam;
+import com.example.demo.project.member.service.MemberUpdateParam;
+import com.example.demo.project.member.service.MemberGroupPickRowVO;
 import com.example.demo.project.member.service.MemberIssueRowVO;
 import com.example.demo.project.member.service.MemberListCriteria;
 import com.example.demo.project.member.service.ProjectMemberRowVO;
@@ -16,6 +20,14 @@ public interface MemberMapper {
     List<ProjectMemberRowVO> selectProjectMemberList(MemberListCriteria criteria);
 
     String selectProjectNameByPrjId(@Param("prjId") Long prjId);
+
+    /** 프로젝트 수행 기업(biz_no) 소속 사용자 목록 */
+    List<CompanyMemberRowVO> selectCompanyMembersByPrjId(
+            @Param("prjId") Long prjId,
+            @Param("excludeRegistered") boolean excludeRegistered);
+
+    /** 구성원 등록 모달 — 프로젝트 내 활성 그룹 */
+    List<MemberGroupPickRowVO> selectProjectGroupsByPrjId(@Param("prjId") Long prjId);
 
     MemberDetailVO selectMemberDetail(
             @Param("prjId") Long prjId,
@@ -31,4 +43,14 @@ public interface MemberMapper {
     int deleteMemberRows(
             @Param("prjId") Long prjId,
             @Param("rows") List<ProjectMemberRowVO> rows);
+
+    int countGrpInProject(@Param("prjId") Long prjId, @Param("grpId") Long grpId);
+
+    int countActiveMember(@Param("userId") Long userId, @Param("grpId") Long grpId);
+
+    String selectUserHireDateYmd(@Param("userId") Long userId);
+
+    int insertMember(MemberRegisterParam param);
+
+    int updateMember(MemberUpdateParam param);
 }
