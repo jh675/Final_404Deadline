@@ -4,6 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.project.member.mapper.MemberMapper;
+import com.example.demo.project.member.service.MemberDetailVO;
+import com.example.demo.project.member.service.MemberIssueRowVO;
 import com.example.demo.project.member.service.MemberListCriteria;
 import com.example.demo.project.member.service.MemberService;
 import com.example.demo.project.member.service.ProjectMemberRowVO;
@@ -22,6 +24,31 @@ public class MemberServiceImpl implements MemberService {
             return List.of();
         }
         return memberMapper.selectProjectMemberList(criteria);
+    }
+
+    @Override
+    public String selectProjectName(Long prjId) {
+        if (prjId == null) {
+            return "";
+        }
+        String name = memberMapper.selectProjectNameByPrjId(prjId);
+        return name == null ? "" : name;
+    }
+
+    @Override
+    public MemberDetailVO selectMemberDetail(Long prjId, Long userId, Long grpId) {
+        if (prjId == null || userId == null || grpId == null) {
+            return null;
+        }
+        return memberMapper.selectMemberDetail(prjId, userId, grpId);
+    }
+
+    @Override
+    public List<MemberIssueRowVO> selectMemberIssues(Long prjId, Long userId, Long grpId) {
+        if (prjId == null || userId == null || grpId == null) {
+            return List.of();
+        }
+        return memberMapper.selectMemberIssues(prjId, userId, grpId);
     }
 
     /** 검증 후 MEMBER 삭제 — 실패 시 롤백 */

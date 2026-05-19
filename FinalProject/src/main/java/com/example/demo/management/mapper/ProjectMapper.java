@@ -15,4 +15,6 @@ public interface ProjectMapper {
 	int projectInsert(ProjectVO vo);
 	List<UserVO> searchUsersByBizNo(@Param("bizNo") String bizNo, @Param("term") String term);
 	void moduleInsert(ModulesVO mVo);
+	int projectHide(ProjectVO vo);
+	int projectDelete(int id);
 } 

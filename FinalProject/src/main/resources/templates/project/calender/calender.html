@@ -38,7 +38,7 @@
 						<option value="company">회사일정</option>
 					</select> <input type="text" class="search-input" id="searchInput"
 						placeholder="검색어를 입력해주세요." />
-					<button class="search-btn" onclick="searchEvents()">검색</button>
+					<button  type ="button" class="search-btn" onclick="searchEvents()">검색</button>
 				</div>
 			</div>
 			<!-- 캘린더 -->
@@ -49,7 +49,6 @@
 
 		<!-- ===== 일정 등록 모달 ===== -->
 
-		
 		<div class="modal fade" id="insertModalOverlay" tabindex="-1" aria-hidden="true">
 		<div class="modal-dialog">
           <div class="modal-content">
@@ -58,7 +57,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-            <input id="test01"/>
+            <!-- <input id="test01"/> -->
 						<div class="row mb-3">
 							<div class="col">
 								<label class="form-label">시작 날짜</label> <input type="date"
@@ -83,22 +82,35 @@
 				</div>
 				<div class="form-row">
 					<div class="checkbox-row">
-						<label class="checkbox-label"> <input type="checkbox"
-							id="ins_sharingAll" checked /> 전체 공유
-						</label> <label class="checkbox-label"> <input type="checkbox"
-							id="ins_sharingMe" /> 나만보기
-						</label> <label class="form-label" style="margin: 0;">일정 유형</label> 
-						<select name="sharingCd"
+					    <label class="form-label" style="margin: 0;">일정유형</label> 
+						<select name="typeCd"
 							class="form-select" id="ins_typeCd" style="width: auto;">
 							<option value="">선택</option>
 							<option value="01CALTYPE">개인일정</option>
 							<option value="02CALTYPE">그룹일정</option>
 							<option value="03CALTYPE">회사일정</option>
 						</select>
+					     <label class="form-label" style="margin: 0;">공유여부</label> 
+						 <label class="checkbox-label"> 
+						 <input type="radio"
+						 	name="sharingCd" 
+						 	value="02CALSHARE"
+							id="ins_sharingMe" checked/> 나만보기
+						</label> 
+						<label class="checkbox-label"> 
+						<input type="radio" 
+						    name="sharingCd"
+						    value="01CALSHARE"
+							id="ins_sharingAll"  /> 전체 공유
+						</label>
 					</div>
 				</div>
 
 				<!-- 일정 등록 모달창 -->
+				
+				<input type="hidden" id="ins_selectedStartDate">
+				<input type="hidden" id="ins_selectedEndDate">
+				
 				<div class="form-row">
 					<div class="time-row">
 						<span class="time-label">시작시간</span> <select class="form-select"
@@ -106,33 +118,37 @@
 							<option value="">선택</option>
 							<option value="09:00:00">오전 09:00</option>
 							<option value="09:15:00">오전 09:15</option>
-							<option value="09:30:00">오전 09:30</option>
-							<option value="10:15:00">오전 10:15</option>
-							<option value="10:30:00">오전 10:30</option>
-							<option value="11:00:00">오전 11:00</option>
+        				    <option value="09:30:00">오전 09:30</option>
+						    <option value="10:00:00">오전 10:00</option>
+						    <option value="10:00:00">오전 10:15</option>
+						    <option value="10:00:00">오전 10:30</option>
+						    <option value="11:00:00">오전 11:00</option>
 							<option value="12:00:00">오후 12:00</option>
 							<option value="13:00:00">오후 01:00</option>
-							<option value="14:00:00">오후 02:00</option>
-							<option value="15:00:00">오후 03:00</option>
-							<option value="16:00:00">오후 04:00</option>
-							<option value="17:00:00">오후 05:00</option>
-							<option value="18:00:00">오후 06:00</option>
-						</select> <span class="time-label">종료시간</span> <select class="form-select"
+							<option value="13:00:00">오후 02:00</option>
+							<option value="13:00:00">오후 03:00</option>
+							<option value="13:00:00">오후 04:00</option>
+							<option value="13:00:00">오후 05:00</option>
+							<option value="13:00:00">오후 06:00</option>
+
+								</select> <span class="time-label">종료시간</span> <select class="form-select"
 							id="ins_calEnd">
 							<option value="">선택</option>
 							<option value="09:00:00">오전 09:00</option>
 							<option value="09:15:00">오전 09:15</option>
-							<option value="09:30:00">오전 09:30</option>
-							<option value="10:15:00">오전 10:15</option>
-							<option value="10:30:00">오전 10:30</option>
-							<option value="11:00:00">오전 11:00</option>
+        				    <option value="09:30:00">오전 09:30</option>
+						    <option value="10:00:00">오전 10:00</option>
+						    <option value="10:00:00">오전 10:15</option>
+						    <option value="10:00:00">오전 10:30</option>
+						    <option value="11:00:00">오전 11:00</option>
 							<option value="12:00:00">오후 12:00</option>
 							<option value="13:00:00">오후 01:00</option>
-							<option value="14:00:00">오후 02:00</option>
-							<option value="15:00:00">오후 03:00</option>
-							<option value="16:00:00">오후 04:00</option>
-							<option value="17:00:00">오후 05:00</option>
-							<option value="18:00:00">오후 06:00</option>
+							<option value="13:00:00">오후 02:00</option>
+							<option value="13:00:00">오후 03:00</option>
+							<option value="13:00:00">오후 04:00</option>
+							<option value="13:00:00">오후 05:00</option>
+							<option value="13:00:00">오후 06:00</option>
+							
 						</select>
 					</div>
 				</div>
@@ -189,16 +205,49 @@
     }
     updateDateLabel();
     
+    
+    // 1. 캘린더 등록 부분 
+    
  // 날짜/시간 클릭 시 모달 띄우기
     calendar.on('selectDateTime', (event) => {
-        // 클릭한 날짜 정보 (필요시 사용)
-        const start = event.start;
-        console.log("선택된 날짜:", start.getYear());
 
+    	// 일정 등록 시 날짜 가져오는 부분 
+    	const startDate = event.start;
+    	const year = startDate.getFullYear();
+    	const month = String(startDate.getMonth() + 1).padStart(2, '0');
+    	const day = String(startDate.getDate()).padStart(2, '0');
+    	const formattedDate = `${year}-${month}-${day}`;
+    	
+    	// 날짜 선택 드롭 박스 
+    	document.getElementById('ins_selectedStartDate').value = formattedDate;
+    	document.getElementById('ins_selectedEndDate').value = formattedDate;
+		
+    	 document.getElementById('ins_calStart').value = '';
+    	 document.getElementById('ins_calEnd').value = '';
+
+    	// 입력폼 초기화 + 등록 모달창에 시작날짜 넣기 
         document.getElementById('ins_place').value = '';
         document.getElementById('ins_calText').value = '';
         document.getElementById('ins_typeCd').value = '';
         
+        // 시작날짜에 값 넣기 + 시작일 변경 불가 설정 부분 (읽기전용)
+        const startInput = document.getElementById('ins_startDate');
+        if(startInput) {
+	      startInput.value = formattedDate;
+	      // 사용자 날짜 변경 방지 
+	      startInput.readOnly = true; 
+        }
+        
+        // 종료날짜에 값 넣기
+        const endInput = document.getElementById('ins_endDate');
+        if(endInput) {
+		  endInput.value = formattedDate;
+        }
+        
+        // 개인일정 선택 시 (공유여부 선택)체크박스 나타나게하기 
+        const checkBox = document.getElementById('sharingCd');
+        if(checkBox) checkBox.classList.add('d-none');
+
         // 부트스트랩 모달 인스턴스 생성 및 표시
         openModal('insertModalOverlay');
     });
@@ -218,23 +267,32 @@
 
     // 서버에서 일정 불러오기
     function loadEvents(typeCd = '') {
-        fetch(`/calender/list?typeCd=${typeCd}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        fetch(`/calender/listJson?typeCd=${typeCd}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(res => res.json())
             .then(data => {
-                calendar.clear();
+                calendar.clear(); // 화면 초기화
+                
                 const events = data.map(item => ({
                     id: String(item.id),
                     calendarId: item.typeCd || 'personal',
-                    title: item.place,
-                    start: item.calStart,
-                    end: item.calEnd,
-                    extendedProps: item
+                    title: item.place || '제목없음',
+                    start: new Date(item.calStart),
+                    end: new Date(item.calEnd),
+                    extendedProps: {
+                    	calStart: item.calStart,
+                        calEnd: item.calEnd,
+                        calText: item.calText,
+                        typeCd: item.typeCd,
+                        sharingCd: item.sharingCd,
+                        stateCd: item.stateCd,
+                        memId: item.memId
+                    } 
                 }));
                 calendar.createEvents(events);
             })
             .catch(() => {
                 // 개발 중 샘플 데이터
-                calendar.createEvents([
+            	calendar.createEvents([
                     { id: '1', calendarId: 'company', title: '총무팀 회의 00관련', start: new Date(), end: new Date(Date.now() + 7200000) },
                     { id: '2', calendarId: 'personal', title: '어버이날 5', start: new Date(Date.now() - 86400000), end: new Date(Date.now() - 82800000) },
                 ]);
@@ -274,32 +332,83 @@
 
 
     // 일정 클릭 → 수정 모달
-    /* calendar.on('clickEvent', ({ event }) => {
-        const p = event.extendedProps || {};
-        document.getElementById('upd_id').value = event.id;
-        document.getElementById('upd_place').value = event.title || '';
-        document.getElementById('upd_calText').value = p.calText || '';
-        document.getElementById('upd_typeCd').value = p.typeCd || '';
+   calendar.on('clickEvent', ({event}) => {
+	   const p = event.extendedProps || {};
+	   
+	 /*   
+	   document.getElementById('upd_id').value = event.id;
+	   document.getElementById('upd_place').value = event.title || '';
+	   document.getElementById('upd_calText').value = p.calText || '';
+	   document.getElementById('upd_typeCd').value = p.typeCd || '';
+ */
+        // 날짜 형태로 바꿔서 띄우기 
+        const parseDate = (val) => {
+		 if(!val) return '';
+		 return new Date(String(val).replace(' ', 'T'));
+	
+        };
+        
+        const start = parseDate(p.calStart);
+        const end = parseDate(p.calEnd);
+        
+        // 시작날짜 종료날짜 세팅   
+        if(start) {
+        	const yyyy = start.getFullYear();
+            const MM = String(start.getMonth() + 1).padStart(2, '0');
+            const dd = String(start.getDate()).padStart(2, '0');
+            const HH = String(start.getHours()).padStart(2, '0');
+            const mm = String(start.getMinutes()).padStart(2, '0');
+            document.getElementById('upd_startDate').value = `${yyyy}-${MM}-${dd}`;
+            document.getElementById('upd_calStart').value = `${HH}:${mm}:00`;
+        }
+        
+        if(end) {
+        	   const yyyy = end.getFullYear();
+               const MM = String(end.getMonth() + 1).padStart(2, '0');
+               const dd = String(end.getDate()).padStart(2, '0');
+               const HH = String(end.getHours()).padStart(2, '0');
+               const mm = String(end.getMinutes()).padStart(2, '0');
+               document.getElementById('upd_endDate').value = `${yyyy}-${MM}-${dd}`;
+               document.getElementById('upd_calEnd').value = `${HH}:${mm}:00`;
+        }
+        
         openModal('updateModalOverlay');
-    }); */
-    
+    });
     // 등록
     function insertEvent() {
         const place = document.getElementById('ins_place').value.trim();
         const calText = document.getElementById('ins_calText').value.trim();
         const typeCd = document.getElementById('ins_typeCd').value;
-        const calStart = document.getElementById('ins_calStart').value;
-        const calEnd = document.getElementById('ins_calEnd').value;
+        
+        // 시작/종료시간 드롭 박스에서 선택 한 날짜 가져오기 
+        const startDate = document.getElementById('ins_startDate').value;
+        const endDate = document.getElementById('ins_endDate').value;
+        const startTime = document.getElementById('ins_calStart').value;
+        const endTime = document.getElementById('ins_calEnd').value;
+		const sharingCd = document.querySelector('input[name="sharingCd"]').value;
+        // 등록 시 시간 표시 (선택한 날짜 + 시간)
+        const calStart = `${startDate} ${startTime}`;
+        const calEnd = `${endDate} ${endTime}`;
 
+       
+        
         if (!place || !typeCd || !calStart || !calEnd) {
             showAlert('필수값 모두 입력해 주세요');
             return;
         }
+ 
+        // 등록 시 입력 받은 데이터 하나로 묶기 
+        const sendParams = `place=${encodeURIComponent(place)}`
+            + `&calText=${encodeURIComponent(calText)}`
+            + `&typeCd=${typeCd}`
+            + `&calStart=${calStart}`
+            + `&calEnd=${calEnd}`
+            + `&sharingCd=${sharingCd}`;
 
-        fetch('/calender/insert', {
+            fetch('/calender/insert', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `place=${place}&calText=${calText}&typeCd=${typeCd}&calStart=${calStart}&calEnd=${calEnd}`
+            body: sendParams
         })
         .then(res => res.text())
         .then(() => {
@@ -308,26 +417,63 @@
             loadEvents();
         });
     }
+    
+    
+    // 등록 시 공유여부 설정 부분 
+    
+	document.getElementById('ins_typeCd').addEventListener('change', function() {
+   		const selectBox = this.value;
+   		
+   	    // 라디오 버튼 활성화(초기화) 
+   	    const radios = document.getElementsByName('sharingCd');
+   	    
+   	    // 선택 값에 따라 특정 라디오버튼 비활성화 
+   	    // 개인일정 선택 시 => 나만보기, 전체공유 둘다 보이기 
+   	    // 그룹일정, 회사일정 선택 시 => 전체공유만 활성화 나만보기 비활성화 
+   	    
+   	    // 1. 개인일정 => 나만보기, 전체공유 둘다 보기
+   	    if(selectBox == 'personal') {
+   	        document.getElementById('ins_sharingMe').disabled = false;
+   	        document.getElementById('ins_sharingAll').disabled = false;
+		} else if (selectBox == 'group'|| selectBox == 'company') {
+			document.getElementById('ins_sharingAll').disabled = false;
+		}
+
+	});
+
+    // 시작/종료 
 
     // 일정수정
     function updateEvent() {
-        const id = document.getElementById('upd_id').value;
-        const place = document.getElementById('upd_place').value.trim();
-        const calText = document.getElementById('upd_calText').value.trim();
-        const typeCd = document.getElementById('upd_typeCd').value;
-        const calStart = document.getElementById('upd_calStart').value;
-        const calEnd = document.getElementById('upd_calEnd').value;
 
+    	const id = document.getElementById('upd_id').value;
+    	const place = document.getElementById('upd_place').value.trim();
+    	const calText = document.getElementById('upd_calText').value.trim();
+    	const typeCd = document.getElementById('upd_typeCd').value;
+    	const startDate = document.getElementById('upd_startDate').value;
+    	const endDate = document.getElementById('upd_endDate').value;  
+    	const startTime = document.getElementById('upd_calStart').value;
+    	const endTime = document.getElementById('upd_calEnd').value;
+    	const calStart = `${startDate} ${startTime}`;
+    	const calEnd = `${endDate} ${endTime}`;  
+        
+        if(!id || !place || !calStart || !calEnd) {
+			showAlert('내용을 모두 입력해주세요')
+			return;
+        }
+        
+        
+ 
         fetch('/calender/update', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `id=${id}&place=${place}&calText=${calText}&typeCd=${typeCd}&calStart=${calStart}&calEnd=${calEnd}`
+            body: `id=${id}&place=${encodeURIComponent(place)}&calText=${encodeURIComponent(calText)}&typeCd=${typeCd}&calStart=${encodeURIComponent(calStart)}&calEnd=${encodeURIComponent(calEnd)}`
         })
         .then(res => res.text())
         .then(() => {
             closeModal('updateModalOverlay');
-            showAlert('변경이 완료 되었습니다');
             loadEvents();
+            showAlert('변경이 완료 되었습니다');
         });
     }
 
@@ -341,7 +487,7 @@
     function deleteEvent() {
         const id = document.getElementById('upd_id').value;
         fetch('/calender/delete', {
-            method: 'delete',
+            method: 'DELETE',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `id=${id}`
         })
@@ -358,12 +504,12 @@
         new bootstrap.Modal(document.getElementById(id)).show();
     }
     
-    function closeModal(id) {
+    function closeModal(modalId) {
     	// 1. 해당 ID를 가진 HTML 요소를 찾습니다.
         const modalElement = document.getElementById(modalId);
         
         // 2. 부트스트랩 모달 인스턴스를 가져옵니다.
-        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
         
         // 3. 인스턴스가 존재하면 닫습니다.
         if (modalInstance) {

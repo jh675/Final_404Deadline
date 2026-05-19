@@ -9,4 +9,6 @@ public interface ProjectService {
 	int projectInsert(ProjectVO vo );
 	List<UserVO> searchUsersByBizNo(String bizNo, String term);
 	void insertProjectWithModules(ProjectVO vo, List<String> moduleList);
+	int projectHide(ProjectVO vo);
+	int projectDelete(int id);
 }

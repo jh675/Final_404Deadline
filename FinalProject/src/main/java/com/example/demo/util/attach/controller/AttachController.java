@@ -14,9 +14,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -46,7 +48,7 @@ public class AttachController {
 		// 키값을 통해 아이디 받아옴
 		AttachVO attachVO = service.selectAttach(id);
 		//업로드 경로에 저장된이름을 더한다
-		Path filePath = Paths.get(uploadDir).resolve(attachVO.getDiskFileName()).normalize();
+		Path filePath = Paths.get(attachVO.getDiskDirectory()).resolve(attachVO.getDiskFileName()).normalize();
 		//위의 경로에서 파일을 받아온다
 		Resource resource = new UrlResource(filePath.toUri());
 		//만약 없으면 없다고 한다
@@ -64,5 +66,25 @@ public class AttachController {
 		//헤더에 파일명을 기재하여 파일을 반환한다
 		return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM) // 이진 파일
 				.header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString()).body(resource);
+	}
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<Void> deleteFile(@PathVariable Long id) {
+		try {
+			//정보 가져오기기
+			AttachVO attachVO = service.selectAttach(id);
+			//db에서 정보 삭제제
+			service.deleteAttach(id);
+			//파일경로를 지정하여서
+			service.removeAttach(attachVO);
+			
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+		
+		
+
 	}
 }

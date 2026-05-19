@@ -1,15 +1,20 @@
 package com.example.demo.project.group.service.impl;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.project.group.mapper.GroupMapper;
+import com.example.demo.project.group.service.GroupDetailVO;
+import com.example.demo.project.group.service.GroupInsertProcParam;
 import com.example.demo.project.group.service.GroupListCriteria;
+import com.example.demo.project.group.service.GroupMemberDetailRowVO;
+import com.example.demo.project.group.service.GroupRoleDetailRowVO;
 import com.example.demo.project.group.service.GroupService;
 import com.example.demo.project.group.service.ProjectGroupRowVO;
 import lombok.RequiredArgsConstructor;
 
-/** 그룹 조회·연쇄 삭제 — @Transactional로 한 번에 커밋 */
+/** 그룹 조회·등록·삭제 — DB 프로시저 호출 */
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
@@ -24,9 +29,89 @@ public class GroupServiceImpl implements GroupService {
         return groupMapper.selectProjectGroupList(criteria);
     }
 
-    /** MEMBER → GRP_ROLE → GRP 순 삭제 — 중간 실패 시 전부 롤백 */
     @Override
-    @Transactional
+    public GroupDetailVO selectGroupDetail(Long prjId, Long grpId) {
+        if (prjId == null || grpId == null) {
+            return null;
+        }
+        return groupMapper.selectGroupDetail(prjId, grpId);
+    }
+
+    @Override
+    public String selectProjectName(Long prjId) {
+        if (prjId == null) {
+            return "";
+        }
+        String name = groupMapper.selectProjectNameByPrjId(prjId);
+        return name == null ? "" : name;
+    }
+
+    @Override
+    public boolean existsGroupName(Long prjId, String grpName) {
+        if (prjId == null || grpName == null || grpName.isBlank()) {
+            return false;
+        }
+        return groupMapper.countGrpByPrjIdAndName(prjId, grpName.trim()) > 0;
+    }
+
+    @Override
+    public List<GroupMemberDetailRowVO> selectGroupMembers(Long prjId, Long grpId) {
+        if (prjId == null || grpId == null) {
+            return List.of();
+        }
+        return groupMapper.selectGroupMembers(prjId, grpId);
+    }
+
+    @Override
+    public List<GroupRoleDetailRowVO> selectGroupRoles(Long prjId, Long grpId) {
+        if (prjId == null || grpId == null) {
+            return List.of();
+        }
+        return groupMapper.selectGroupRoles(prjId, grpId);
+    }
+
+    @Override
+    public void insertGroup(Long prjId, String grpName, List<Long> userIds) {
+        if (prjId == null) {
+            throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
+        }
+        String name = grpName == null ? "" : grpName.trim();
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("그룹명을 입력하세요.");
+        }
+        if (existsGroupName(prjId, name)) {
+            throw new IllegalArgumentException("동일한 그룹이 존재합니다");
+        }
+
+        String memIds = null;
+        if (userIds != null && !userIds.isEmpty()) {
+            String joined = userIds.stream()
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+            if (!joined.isEmpty()) {
+                memIds = joined;
+            }
+        }
+
+        GroupInsertProcParam param = new GroupInsertProcParam();
+        param.setPrjId(prjId);
+        param.setGrpName(name);
+        param.setMemIds(memIds);
+        groupMapper.callProcGrpInsert(param);
+
+        String msg = param.getResultMsg();
+        if (msg == null) {
+            throw new IllegalStateException("그룹 등록 결과를 받지 못했습니다.");
+        }
+        if (!"OK".equalsIgnoreCase(msg.trim())) {
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
+    /** 프로젝트 소속 확인 후 그룹마다 PROC_GRP_DELETE 호출 */
+    @Override
     public void deleteGroups(Long prjId, List<Long> grpIds) {
         if (prjId == null) {
             throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
@@ -34,8 +119,16 @@ public class GroupServiceImpl implements GroupService {
         if (grpIds == null || grpIds.isEmpty()) {
             throw new IllegalArgumentException("삭제할 그룹을 선택하세요.");
         }
-        groupMapper.deleteGroupMembers(prjId, grpIds);
-        groupMapper.deleteGroupRoles(prjId, grpIds);
-        groupMapper.deleteGroupRows(prjId, grpIds);
+        List<Long> distinct =
+                grpIds.stream().filter(Objects::nonNull).distinct().toList();
+        if (distinct.isEmpty()) {
+            throw new IllegalArgumentException("유효한 그룹 ID가 없습니다.");
+        }
+        for (Long grpId : distinct) {
+            if (groupMapper.selectGroupDetail(prjId, grpId) == null) {
+                throw new IllegalArgumentException("프로젝트에 존재하지 않는 그룹입니다: " + grpId);
+            }
+            groupMapper.callProcGrpDelete(grpId);
+        }
     }
 }

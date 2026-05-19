@@ -9,6 +9,7 @@
 	LEFT JOIN company c ON p.biz_no = c.biz_no
  </select>
  
+
 <select id="searchUsersByBizNo" resultType="com.example.demo.login.service.UserVO">
     SELECT 
         id          AS "id", 
@@ -68,7 +69,15 @@
     VALUES (en_mod_seq.nextval, #{prjId}, #{enaNameCd})
 </insert>
  
- 
+ <update id="projectHide" >
+ 	update project
+ 	set prj_hide = 'Y'
+ 	where id = #{id}
+ </update>
+ <delete id="projectDelete">
+ 	delete from project
+ 	where id = #{id}
+ </delete>
  
  
  </mapper>

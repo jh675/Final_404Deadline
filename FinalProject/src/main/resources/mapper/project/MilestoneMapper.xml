@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.project.milestone.mapper.MilestoneMapper">
+
+	<select id="selectMilestoneList" resultType="MilestoneVO">
+		SELECT
+			MI.ID              AS id,
+			MI.MILESTONE_ID    AS milestoneId,
+			MI.ISSUE_ID        AS issueId,
+			I.SUBJECT          AS issueSubject,
+			M.NAME             AS milestoneName
+		FROM milestone_issue MI
+		INNER JOIN milestone M ON M.ID = MI.MILESTONE_ID
+		INNER JOIN ISSUE I ON I.ID = MI.ISSUE_ID
+		WHERE M.PRJ_ID = 4
+		ORDER BY MI.MILESTONE_ID, MI.ID;
+	</select>
+
+	<select id="selectMilestoneIssueList" resultType="Map">
+		SELECT
+			T.ID,
+			T.MILESTONE_ISSUE_ID AS milestoneIssueId,
+			T.YEARS,
+			T.MONTHS,
+			T.DATES,
+			T.TYPE_CD,
+			T.CONTENTS
+		FROM milestone_timeline T
+		INNER JOIN milestone_issue MI ON MI.ID = T.MILESTONE_ISSUE_ID
+		INNER JOIN milestone M ON M.ID = MI.MILESTONE_ID
+		WHERE M.PRJ_ID = 4
+		ORDER BY T.MILESTONE_ISSUE_ID, T.YEARS, T.MONTHS, T.DATES, T.ID;
+	</select>
+
+
+
+
+
+</mapper>

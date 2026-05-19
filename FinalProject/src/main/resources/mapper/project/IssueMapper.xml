@@ -52,6 +52,9 @@
 			<if test="subject != null and subject != ''">
 				AND SUBJECT LIKE '%' || #{subject} || '%'
 			</if>
+			<if test="categoryCd != null and categoryCd != ''">
+				AND CATEGORY_CD = #{categoryCd}
+			</if>
 		</where>
 	</sql>
 
@@ -216,6 +219,7 @@
 			<if test="dueDate != null">DUE_DATE = #{dueDate},</if>
 			<if test="startDate != null">START_DATE = #{startDate},</if>
 			<if test="closedDate != null">CLOSED_DATE = #{closedDate},</if>
+			<if test="parentIssue != null">PARENT_ISSUE = #{parentIssue},</if>
 			<if test="rootIssue != null">ROOT_ISSUE = #{rootIssue},</if>
 			<if test="memId != null">MEM_ID = #{memId},</if>
 			<if test="lft != null">LFT = #{lft},</if>
@@ -224,6 +228,23 @@
 			<if test="isAttachCd != null">IS_ATTACH_CD = #{isAttachCd},</if>
 			UPDATED_ON = SYSDATE
 		</set>
+		WHERE ID = #{id}
+	</update>
+
+	<!-- ===================================================== -->
+	<!-- 목록에서 시작일·완료일 등록 (당일 SYSDATE)                  -->
+	<!-- ===================================================== -->
+	<update id="updateIssueStartDate" parameterType="long">
+		UPDATE ISSUE
+		SET START_DATE = SYSDATE,
+			UPDATED_ON = SYSDATE
+		WHERE ID = #{id}
+	</update>
+
+	<update id="updateIssueClosedDate" parameterType="long">
+		UPDATE ISSUE
+		SET CLOSED_DATE = SYSDATE,
+			UPDATED_ON = SYSDATE
 		WHERE ID = #{id}
 	</update>
 
