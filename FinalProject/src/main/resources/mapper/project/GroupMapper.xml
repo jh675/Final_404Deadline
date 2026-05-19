@@ -113,12 +113,44 @@
     }
   </update>
 
+  <!-- 그룹 등록 모달 — 프로젝트 소속 구성원 (MEMBER + USERS + GRP) -->
+  <select id="selectGroupMemberPickList"
+    resultType="com.example.demo.project.group.service.GroupMemberPickRowVO">
+    SELECT
+      M.ID AS memberId,
+      M.USER_ID AS userId,
+      U.NAME AS userName,
+      U.TEL AS tel,
+      U.EMAIL AS email,
+      G.NAME AS grpName,
+      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+    FROM MEMBER M
+    LEFT JOIN USERS U ON U.ID = M.USER_ID
+    LEFT JOIN GRP G ON G.ID = M.GRP_ID
+    WHERE G.PRJ_ID = #{prjId}
+      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
+      AND G.STATUS_CD = '01ACTIVE'
+    ORDER BY U.NAME, M.ID
+  </select>
+
   <!-- 그룹 등록 — DB PROC_GRP_INSERT (memIds null = p_mem_ids 미전달과 동일) -->
   <update id="callProcGrpInsert" statementType="CALLABLE">
     {
       CALL PROC_GRP_INSERT(
         #{prjId, mode=IN, jdbcType=NUMERIC},
         #{grpName, mode=IN, jdbcType=VARCHAR},
+        #{memIds, mode=IN, jdbcType=VARCHAR},
+        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
+      )
+    }
+  </update>
+
+  <!-- 그룹 수정 — DB PROC_GRP_UPDATE (memIds null = p_mem_ids 미전달과 동일) -->
+  <update id="callProcGrpUpdate" statementType="CALLABLE">
+    {
+      CALL PROC_GRP_UPDATE(
+        #{prjId, mode=IN, jdbcType=NUMERIC},
+        #{grpId, mode=IN, jdbcType=NUMERIC},
         #{memIds, mode=IN, jdbcType=VARCHAR},
         #{resultMsg, mode=OUT, jdbcType=VARCHAR}
       )

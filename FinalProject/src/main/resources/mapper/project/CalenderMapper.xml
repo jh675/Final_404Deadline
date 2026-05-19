@@ -13,7 +13,7 @@
      and type_cd = #{typeCd}
     </if>
      <if test="keyword != null and keyword !=''">
-       and place like '%' || #{place} || '%'
+       and place like '%' || #{keyword} || '%'
      </if>
   </where>
   
@@ -52,9 +52,9 @@
         CAL_TEXT = #{calText},
         SHARING_CD = #{sharingCd},
         TYPE_CD = #{typeCd},
-        CAL_START = #{calStart},
+       CAL_START = #{calStart},
         CAL_END = #{calEnd}
-	where id = ${id}
+	where id = #{id}
    </update>
    
    <delete id="delete">

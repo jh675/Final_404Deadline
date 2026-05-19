@@ -24,7 +24,8 @@
 			  ,MCP_CD
 			  ,get_sub_code_name(MCP_CD) "MCP_NM"
 	  	FROM   users
-	 	WHERE  login = #{loginId}
+	 	WHERE  biz_no = #{bizNo}
+     	AND    login = #{login}
 	</select>
 
 	<update id="updatePassword">

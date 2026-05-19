@@ -14,6 +14,18 @@
       th:content="${_csrf.headerName}"
     />
     <title th:text="${registerMode} ? '그룹 등록' : '그룹 상세'">그룹 상세</title>
+    <th:block th:if="${!groupNotFound}">
+      <link
+        rel="stylesheet"
+        href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css"
+      />
+      <link
+        rel="stylesheet"
+        href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css"
+      />
+      <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+      <script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.js"></script>
+    </th:block>
     <style>
       .grp-info-page__back {
         display: inline-block;
@@ -150,6 +162,9 @@
         justify-content: flex-end;
         margin-top: 0.65rem;
       }
+      .grp-member-toolbar.is-hidden {
+        display: none;
+      }
       .grp-member-toolbar__btn {
         padding: 0.35rem 0.95rem;
         border: 1px solid #555;
@@ -159,8 +174,13 @@
         font-size: 0.8125rem;
         cursor: pointer;
       }
-      .grp-member-toolbar__btn:hover {
+      .grp-member-toolbar__btn:hover:not(:disabled):not(.is-disabled) {
         background: #f5f5f5;
+      }
+      .grp-member-toolbar__btn:disabled,
+      .grp-member-toolbar__btn.is-disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
       }
       .grp-empty-msg {
         margin: 0.5rem 0 0;
@@ -198,8 +218,8 @@
         display: flex;
       }
       .grp-member-pick {
-        width: min(28rem, 92vw);
-        max-height: 70vh;
+        width: min(42rem, 94vw);
+        max-height: 80vh;
         background: #fff;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -212,17 +232,54 @@
         font-weight: 600;
         font-size: 0.9rem;
       }
-      .grp-member-pick__list {
-        overflow: auto;
-        padding: 0.5rem 1rem;
-        flex: 1 1 auto;
-      }
-      .grp-member-pick__item {
+      .grp-member-pick__search {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.35rem 0;
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid #e8e8e8;
+        background: #fafafa;
+      }
+      .grp-member-pick__search select,
+      .grp-member-pick__search input[type="text"] {
         font-size: 0.8125rem;
+        color: #333;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        padding: 0.35rem 0.5rem;
+        line-height: 1.35;
+        box-sizing: border-box;
+        background: #fff;
+      }
+      .grp-member-pick__search select {
+        flex: 0 0 auto;
+        min-width: 5.5rem;
+        max-width: 6.5rem;
+      }
+      .grp-member-pick__search input[type="text"] {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .grp-member-pick__search .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .grp-member-pick__grid-host {
+        flex: 1 1 auto;
+        min-height: 12rem;
+        max-height: 50vh;
+        overflow: auto;
+        margin: 0.5rem 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        background: #fff;
       }
       .grp-member-pick__actions {
         display: flex;
@@ -343,9 +400,14 @@
                 </tbody>
               </table>
             </div>
-            <div class="grp-member-toolbar" th:if="${registerMode}">
+            <div
+              id="grpMemberToolbar"
+              class="grp-member-toolbar"
+              th:if="${registerMode or !groupNotFound}"
+              th:classappend="${!registerMode} ? 'is-hidden' : ''"
+            >
               <button type="button" class="grp-member-toolbar__btn" id="btnAddMember">
-                구성원 추가
+                구성원 관리
               </button>
             </div>
           </div>
@@ -401,43 +463,68 @@
         </div>
       </th:block>
 
-      <th:block th:if="${registerMode}">
-        <div th:replace="~{project/role/modal/questionModal :: roleQuestionModal}"></div>
+      <th:block th:if="${!groupNotFound}">
+        <th:block th:replace="~{project/group/modal/questionModal :: groupQuestionModal}"></th:block>
+        <th:block th:replace="~{project/group/modal/questionModal :: groupQuestionModalScript}"></th:block>
       </th:block>
 
-      <div
-        th:if="${registerMode}"
-        class="grp-member-pick-overlay"
-        id="grpMemberPickOverlay"
-        aria-hidden="true"
-      >
-        <div class="grp-member-pick" role="dialog" aria-modal="true">
-          <div class="grp-member-pick__head">구성원 선택</div>
-          <div class="grp-member-pick__list" id="grpMemberPickList"></div>
-          <div class="grp-member-pick__actions">
-            <button type="button" id="btnMemberPickCancel">취소</button>
-            <button type="button" class="primary" id="btnMemberPickOk">
-              추가
-            </button>
-          </div>
-        </div>
-      </div>
+      <th:block th:if="${!groupNotFound}">
+        <div
+          th:replace="~{project/group/modal/groupMemberModal :: groupMemberPickOverlay}"
+        ></div>
+      </th:block>
 
-      <script th:if="${registerMode}" th:inline="javascript">
+      <script th:if="${!groupNotFound}" th:inline="javascript">
         /*<![CDATA[*/
         (function () {
           const prjId = /*[[${prjId}]]*/ 0;
+          const registerMode = /*[[${registerMode}]]*/ false;
+          const grpId = /*[[${grpId}]]*/ null;
+          let groupEditMode = registerMode;
           const grpNameInput = document.getElementById("detailGrpName");
           const saveBtn = document.getElementById("btnGroupSave");
           const addMemberBtn = document.getElementById("btnAddMember");
+          const memberToolbar = document.getElementById("grpMemberToolbar");
           const membersBody = document.getElementById("grpMembersBody");
           const pickOverlay = document.getElementById("grpMemberPickOverlay");
-          const pickList = document.getElementById("grpMemberPickList");
+          const pickGridEl = document.getElementById("grpMemberPickGrid");
+          const pickSearchType = document.getElementById("grpMemberSearchType");
+          const pickSearchKeyword = document.getElementById(
+            "grpMemberSearchKeyword",
+          );
           const pickCancel = document.getElementById("btnMemberPickCancel");
           const pickOk = document.getElementById("btnMemberPickOk");
           if (!grpNameInput) return;
 
           const pendingMembers = [];
+
+          function setMemberToolbarVisible(visible) {
+            if (!memberToolbar) return;
+            memberToolbar.classList.toggle("is-hidden", !visible);
+          }
+
+          function initPendingFromServerTable() {
+            if (registerMode || !membersBody) return;
+            pendingMembers.length = 0;
+            membersBody.querySelectorAll("tr[data-user-id]").forEach(function (tr) {
+              const uid = Number(tr.getAttribute("data-user-id"));
+              const tds = tr.querySelectorAll("td");
+              if (isNaN(uid) || tds.length < 6) return;
+              pendingMembers.push({
+                userId: uid,
+                userName: (tds[1].textContent || "").trim() || "-",
+                tel: (tds[2].textContent || "").trim() || "-",
+                email: (tds[3].textContent || "").trim() || "-",
+                grpName: (tds[4].textContent || "").trim() || "-",
+                prjStartDate: (tds[5].textContent || "").trim() || "-",
+              });
+            });
+          }
+          let allPickMembers = [];
+          let pickGrid = null;
+          let isSyncingPickGrid = false;
+          /** 모달 내 체크 상태 (저장 전까지 구성원 정보 테이블과 분리) */
+          let modalCheckedUserIds = new Set();
 
           function buildCsrfHeaders() {
             const headers = { "Content-Type": "application/json" };
@@ -457,10 +544,9 @@
           }
 
           function alertMsg(msg, title) {
-            if (window.RoleQuestionModal && window.RoleQuestionModal.alert) {
-              return window.RoleQuestionModal.alert(msg, title || "알림");
+            if (window.GroupQuestionModal && window.GroupQuestionModal.alert) {
+              return window.GroupQuestionModal.alert(msg, title || "알림");
             }
-            window.alert(msg);
             return Promise.resolve();
           }
 
@@ -498,68 +584,287 @@
             });
           }
 
-          function hasUserId(uid) {
-            return pendingMembers.some(function (m) {
-              return Number(m.userId) === Number(uid);
+          function rowToPendingMember(row) {
+            return {
+              userId: Number(row.userId),
+              memberId: row.memberId,
+              userName: row.userName || "",
+              tel: row.tel || "",
+              email: row.email || "",
+              grpName: row.grpName || "",
+              prjStartDate: row.prjStartDate || "",
+            };
+          }
+
+          function initModalDraftFromPending() {
+            modalCheckedUserIds = new Set(
+              pendingMembers
+                .map(function (m) {
+                  return Number(m.userId);
+                })
+                .filter(function (id) {
+                  return !isNaN(id);
+                }),
+            );
+          }
+
+          function isModalDraftChecked(uid) {
+            return modalCheckedUserIds.has(Number(uid));
+          }
+
+          function getCheckedPickRows() {
+            if (!pickGrid) return [];
+            if (typeof pickGrid.getCheckedRowKeys === "function") {
+              const keys = pickGrid.getCheckedRowKeys();
+              if (Array.isArray(keys) && typeof pickGrid.getRow === "function") {
+                return keys
+                  .map(function (k) {
+                    return pickGrid.getRow(k);
+                  })
+                  .filter(Boolean);
+              }
+            }
+            if (typeof pickGrid.getCheckedRows === "function") {
+              const arr = pickGrid.getCheckedRows();
+              return Array.isArray(arr) ? arr : [];
+            }
+            return [];
+          }
+
+          function captureModalDraftFromGrid() {
+            if (!pickGrid || typeof pickGrid.getData !== "function") return;
+            const checkedKeys = new Set();
+            if (typeof pickGrid.getCheckedRowKeys === "function") {
+              pickGrid.getCheckedRowKeys().forEach(function (k) {
+                checkedKeys.add(k);
+              });
+            }
+            pickGrid.getData().forEach(function (row) {
+              const uid = Number(row.userId);
+              if (isNaN(uid)) return;
+              if (checkedKeys.has(row.rowKey)) {
+                modalCheckedUserIds.add(uid);
+              } else {
+                modalCheckedUserIds.delete(uid);
+              }
             });
           }
 
+          function commitModalSelection() {
+            pendingMembers.length = 0;
+            allPickMembers.forEach(function (row) {
+              const uid = Number(row.userId);
+              if (!isNaN(uid) && modalCheckedUserIds.has(uid)) {
+                pendingMembers.push(rowToPendingMember(row));
+              }
+            });
+            refreshMembersTable();
+          }
+
+          function includesKeyword(val, keyword) {
+            if (val == null) return false;
+            return String(val).toLowerCase().includes(keyword);
+          }
+
+          function filterPickMembers(rows) {
+            const type = pickSearchType ? pickSearchType.value : "userName";
+            const keyword = pickSearchKeyword
+              ? pickSearchKeyword.value.trim().toLowerCase()
+              : "";
+            if (!keyword) return rows;
+            return rows.filter(function (r) {
+              if (type === "memberId") {
+                return includesKeyword(r.memberId, keyword);
+              }
+              return includesKeyword(r.userName, keyword);
+            });
+          }
+
+          function getPickGridRows() {
+            return filterPickMembers(
+              allPickMembers.filter(function (r) {
+                return r.userId != null;
+              }),
+            );
+          }
+
+          function resetPickSearch() {
+            if (pickSearchType) pickSearchType.value = "userName";
+            if (pickSearchKeyword) pickSearchKeyword.value = "";
+          }
+
+          function applyPickGridChecks() {
+            if (!pickGrid || typeof pickGrid.getData !== "function") return;
+            isSyncingPickGrid = true;
+            try {
+              pickGrid.getData().forEach(function (row) {
+                if (row.rowKey == null) return;
+                if (isModalDraftChecked(row.userId)) {
+                  pickGrid.check(row.rowKey);
+                } else if (typeof pickGrid.uncheck === "function") {
+                  pickGrid.uncheck(row.rowKey);
+                }
+              });
+            } finally {
+              isSyncingPickGrid = false;
+            }
+          }
+
+          function bindPickGridSyncEvents() {
+            if (!pickGrid) return;
+            pickGrid.on("check", function (ev) {
+              if (isSyncingPickGrid) return;
+              const row = pickGrid.getRow(ev.rowKey);
+              if (row && row.userId != null) {
+                modalCheckedUserIds.add(Number(row.userId));
+              }
+            });
+            pickGrid.on("uncheck", function (ev) {
+              if (isSyncingPickGrid) return;
+              const row = pickGrid.getRow(ev.rowKey);
+              if (row && row.userId != null) {
+                modalCheckedUserIds.delete(Number(row.userId));
+              }
+            });
+            pickGrid.on("checkAll", function () {
+              if (isSyncingPickGrid) return;
+              if (typeof pickGrid.getData !== "function") return;
+              pickGrid.getData().forEach(function (row) {
+                if (row.userId != null) {
+                  modalCheckedUserIds.add(Number(row.userId));
+                }
+              });
+            });
+            pickGrid.on("uncheckAll", function () {
+              if (isSyncingPickGrid) return;
+              if (typeof pickGrid.getData !== "function") return;
+              pickGrid.getData().forEach(function (row) {
+                if (row.userId != null) {
+                  modalCheckedUserIds.delete(Number(row.userId));
+                }
+              });
+            });
+          }
+
+          function recreatePickGrid() {
+            if (!pickGridEl || typeof tui === "undefined" || !tui.Grid) {
+              return;
+            }
+            if (pickGrid) {
+              captureModalDraftFromGrid();
+              pickGrid.destroy();
+              pickGrid = null;
+            }
+            const data = getPickGridRows();
+            pickGrid = new tui.Grid({
+              el: pickGridEl,
+              data: data,
+              rowHeaders: [{ type: "checkbox", header: "선택" }],
+              scrollX: false,
+              scrollY: true,
+              bodyHeight: 280,
+              rowHeight: 36,
+              minBodyHeight: 100,
+              columns: [
+                {
+                  header: "사번",
+                  name: "memberId",
+                  width: 90,
+                  align: "center",
+                  sortable: true,
+                },
+                {
+                  header: "이름",
+                  name: "userName",
+                  width: 120,
+                  align: "center",
+                  sortable: true,
+                },
+                {
+                  header: "그룹명",
+                  name: "grpName",
+                  align: "center",
+                  sortable: true,
+                },
+              ],
+              pageOptions: {
+                useClient: true,
+                perPage: 8,
+              },
+            });
+            bindPickGridSyncEvents();
+            applyPickGridChecks();
+          }
+
+          setMemberToolbarVisible(registerMode);
+          if (!registerMode) {
+            initPendingFromServerTable();
+          }
+
           async function openMemberPicker() {
+            if (!groupEditMode) return;
             const pid = Number(prjId);
-            if (isNaN(pid) || !pickOverlay || !pickList) return;
-            pickList.innerHTML = "불러오는 중…";
+            if (isNaN(pid) || !pickOverlay || !pickGridEl) return;
+            resetPickSearch();
+            if (pickGrid) {
+              pickGrid.destroy();
+              pickGrid = null;
+            }
+            pickGridEl.innerHTML =
+              '<p style="margin:0.75rem 1rem;font-size:0.8125rem;color:#777">불러오는 중…</p>';
             pickOverlay.classList.add("is-open");
             pickOverlay.setAttribute("aria-hidden", "false");
             try {
               const res = await fetch(
-                "/project/member/memberManagementList?prjId=" +
+                "/project/group/groupMemberPickList?prjId=" +
                   encodeURIComponent(String(pid)),
                 { credentials: "same-origin" },
               );
               const data = await res.json().catch(function () {
                 return {};
               });
-              const rows =
+              allPickMembers =
                 data && Array.isArray(data.content) ? data.content : [];
-              pickList.innerHTML = "";
-              if (!rows.length) {
-                pickList.textContent = "선택할 구성원이 없습니다.";
+              initModalDraftFromPending();
+              pickGridEl.innerHTML = "";
+              if (!allPickMembers.length) {
+                pickGridEl.innerHTML =
+                  '<p style="margin:0.75rem 1rem;font-size:0.8125rem;color:#777">선택할 구성원이 없습니다.</p>';
                 return;
               }
-              rows.forEach(function (r) {
-                if (r.userId == null) return;
-                if (hasUserId(r.userId)) return;
-                const label = document.createElement("label");
-                label.className = "grp-member-pick__item";
-                const cb = document.createElement("input");
-                cb.type = "checkbox";
-                cb.value = String(r.userId);
-                cb.dataset.userName = r.userName || "";
-                cb.dataset.tel = r.tel || "";
-                cb.dataset.email = r.email || "";
-                cb.dataset.grpName = r.grpName || "";
-                cb.dataset.prjStartDate = r.prjStartDate || "";
-                label.appendChild(cb);
-                label.appendChild(
-                  document.createTextNode(
-                    (r.userName || "(이름 없음)") +
-                      (r.grpName ? " · " + r.grpName : ""),
-                  ),
-                );
-                pickList.appendChild(label);
-              });
-              if (!pickList.children.length) {
-                pickList.textContent = "추가 가능한 구성원이 없습니다.";
-              }
+              recreatePickGrid();
             } catch (e) {
-              pickList.textContent = "구성원 목록을 불러오지 못했습니다.";
+              allPickMembers = [];
+              pickGridEl.innerHTML =
+                '<p style="margin:0.75rem 1rem;font-size:0.8125rem;color:#777">구성원 목록을 불러오지 못했습니다.</p>';
             }
           }
 
           function closeMemberPicker() {
             if (!pickOverlay) return;
+            if (pickGrid) {
+              pickGrid.destroy();
+              pickGrid = null;
+            }
             pickOverlay.classList.remove("is-open");
             pickOverlay.setAttribute("aria-hidden", "true");
+          }
+
+          if (pickSearchType) {
+            pickSearchType.addEventListener("change", function () {
+              if (!pickOverlay || !pickOverlay.classList.contains("is-open")) {
+                return;
+              }
+              recreatePickGrid();
+            });
+          }
+          if (pickSearchKeyword) {
+            pickSearchKeyword.addEventListener("input", function () {
+              if (!pickOverlay || !pickOverlay.classList.contains("is-open")) {
+                return;
+              }
+              recreatePickGrid();
+            });
           }
 
           if (addMemberBtn) {
@@ -568,31 +873,78 @@
           if (pickCancel) {
             pickCancel.addEventListener("click", closeMemberPicker);
           }
+          if (pickOverlay) {
+            pickOverlay.addEventListener("click", function (e) {
+              if (e.target === pickOverlay) {
+                closeMemberPicker();
+              }
+            });
+          }
           if (pickOk) {
             pickOk.addEventListener("click", function () {
-              if (!pickList) return;
-              const checked = pickList.querySelectorAll(
-                'input[type="checkbox"]:checked',
-              );
-              checked.forEach(function (cb) {
-                const uid = Number(cb.value);
-                if (isNaN(uid) || hasUserId(uid)) return;
-                pendingMembers.push({
-                  userId: uid,
-                  userName: cb.dataset.userName || "",
-                  tel: cb.dataset.tel || "",
-                  email: cb.dataset.email || "",
-                  grpName: cb.dataset.grpName || "",
-                  prjStartDate: cb.dataset.prjStartDate || "",
-                });
-              });
-              refreshMembersTable();
+              if (pickGrid) {
+                captureModalDraftFromGrid();
+              }
+              commitModalSelection();
               closeMemberPicker();
             });
           }
 
           if (saveBtn) {
             saveBtn.addEventListener("click", async function () {
+              if (!registerMode) {
+                const pid = Number(prjId);
+                const gid = Number(grpId);
+                if (!groupEditMode) {
+                  groupEditMode = true;
+                  setMemberToolbarVisible(true);
+                  saveBtn.textContent = "저장";
+                  return;
+                }
+                if (isNaN(pid) || isNaN(gid)) {
+                  await alertMsg("그룹 정보가 올바르지 않습니다.", "알림");
+                  return;
+                }
+                const payload = { prjId: pid, grpId: gid };
+                if (pendingMembers.length > 0) {
+                  payload.userIds = pendingMembers.map(function (m) {
+                    return m.userId;
+                  });
+                }
+                saveBtn.disabled = true;
+                try {
+                  const res = await fetch("/project/group/updateGroup", {
+                    method: "POST",
+                    headers: buildCsrfHeaders(),
+                    credentials: "same-origin",
+                    body: JSON.stringify(payload),
+                  });
+                  const data = await res.json().catch(function () {
+                    return {};
+                  });
+                  if (!res.ok || !data || data.ok !== true) {
+                    const errText =
+                      (data && data.message) ||
+                      (res.status === 403
+                        ? "권한이 없거나 보안 토큰이 만료되었습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요."
+                        : "그룹 수정 중 오류가 발생했습니다.");
+                    await alertMsg(errText, "오류");
+                    return;
+                  }
+                  await alertMsg("그룹 구성원이 수정되었습니다.", "알림");
+                  window.location.href =
+                    "/project/group/groupManagementInfo?prjId=" +
+                    encodeURIComponent(String(pid)) +
+                    "&grpId=" +
+                    encodeURIComponent(String(gid));
+                } catch (e) {
+                  await alertMsg("그룹 수정 중 오류가 발생했습니다.", "오류");
+                } finally {
+                  saveBtn.disabled = false;
+                }
+                return;
+              }
+
               const pid = Number(prjId);
               const name = grpNameInput.value.trim();
               if (isNaN(pid)) {
