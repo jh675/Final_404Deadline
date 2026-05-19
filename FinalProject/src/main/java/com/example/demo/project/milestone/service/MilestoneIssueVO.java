@@ -1,5 +1,7 @@
 package com.example.demo.project.milestone.service;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +16,7 @@ public class MilestoneIssueVO {
 	private Long id;
 	private Long milestoneId;
 	private Long issueId;
-	private String issueSubject;
+	private String name;
+	
+	private List<MilestoneTimelineVO> events;
 }

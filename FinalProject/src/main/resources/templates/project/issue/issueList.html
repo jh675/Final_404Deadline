@@ -280,21 +280,6 @@
 			// 공식 문서: https://github.com/nhn/tui.grid
 			// ============================================================
 
-			/**
-			 * 날짜 포맷 함수
-			 * - 서버 Date 가 JSON 직렬화될 때 timestamp(Long) 또는 ISO 문자열로 내려옴
-			 * - 두 경우 모두 new Date(value) 로 받을 수 있음
-			 * - 결과 형태: "2026-05-13 14:00"
-			 */
-			function formatDate(value) {
-				if (!value) return '';                              // null / undefined / 빈 값 처리
-				const d = new Date(value);
-				if (isNaN(d.getTime())) return value;               // 변환 실패 시 원본 반환
-				const pad = (n) => String(n).padStart(2, '0');      // 1 → "01" 형태로 0 채움
-				return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
-					+ ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-			}
-
 			function hasIssueDate(value) {
 				if (value == null || value === '') return false;
 				const d = new Date(value);
@@ -390,13 +375,13 @@
 						comparator: priorityComparator
 					},
 					{
-						// 수정일: Date 값을 yyyy-MM-dd HH:mm 으로 가공
+						// 수정일: 공통 dateUtils.format 으로 yyyy-MM-dd HH:mm 포맷 출력
 						header: '수정일',
 						name: 'updatedOn',
 						width: 160,
 						align: 'center',
 						sortable: true,
-						formatter: ({ value }) => formatDate(value)
+						formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm')
 					},
 					{
 						// 진척도: 숫자 뒤에 % 자동 추가

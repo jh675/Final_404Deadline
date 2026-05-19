@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<div th:fragment="timelineAddModal">
+	<div class="modal fade" id="timelineAddModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">타임라인 추가</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="timelineAddForm" autocomplete="off">
+						<div class="mb-3">
+							<label class="form-label d-block">유형</label>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="typeCd" id="tlType01" value="01TIMELINE" checked>
+								<label class="form-check-label" for="tlType01">기능</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="typeCd" id="tlType02" value="02TIMELINE">
+								<label class="form-check-label" for="tlType02">개선</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="typeCd" id="tlType03" value="03TIMELINE">
+								<label class="form-check-label" for="tlType03">관리</label>
+							</div>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">대상 이슈</label>
+							<select class="form-select" name="milestoneIssueId" required>
+								<option value="">이슈를 선택하세요</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">설명</label>
+							<input type="text" class="form-control" name="contents" maxlength="200" placeholder="설명입력" />
+						</div>
+						<div class="mb-3">
+							<label class="form-label">날짜</label>
+							<input type="date" class="form-control" name="entryDate" required />
+						</div>
+						<small class="text-danger d-none" data-tl-err></small>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-primary" data-tl-save>추가</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			var modalEl = document.getElementById("timelineAddModal");
+			if (!modalEl) return;
+			var form = modalEl.querySelector("#timelineAddForm");
+			var errEl = modalEl.querySelector("[data-tl-err]");
+			var saveBtn = modalEl.querySelector("[data-tl-save]");
+			var selectEl = form.querySelector('[name="milestoneIssueId"]');
+
+			function setErr(msg) {
+				if (!errEl) return;
+				if (msg) { errEl.textContent = msg; errEl.classList.remove("d-none"); }
+				else     { errEl.textContent = ""; errEl.classList.add("d-none"); }
+			}
+
+			function loadIssues(milestoneId) {
+				selectEl.innerHTML = '<option value="">불러오는 중…</option>';
+				return fetch("/api/milestone/list/" + encodeURIComponent(milestoneId), {
+					headers: { Accept: "application/json" },
+				})
+					.then(function (r) { return r.ok ? r.json() : []; })
+					.then(function (data) {
+						var list = Array.isArray(data) ? data
+							: data && Array.isArray(data.list)   ? data.list
+							: data && Array.isArray(data.issues) ? data.issues : [];
+						selectEl.innerHTML = '<option value="">이슈를 선택하세요</option>';
+						list.forEach(function (it) {
+							var opt = document.createElement("option");
+							opt.value = it.id;
+							opt.textContent = (it.issueSubject || ("이슈 #" + it.issueId))
+								+ (it.issueId ? " (#" + it.issueId + ")" : "");
+							selectEl.appendChild(opt);
+						});
+						if (!list.length) {
+							selectEl.innerHTML = '<option value="">등록된 이슈가 없습니다</option>';
+						}
+					})
+					.catch(function () {
+						selectEl.innerHTML = '<option value="">이슈 목록 로드 실패</option>';
+					});
+			}
+
+			modalEl.addEventListener("show.bs.modal", function () {
+				setErr("");
+				form.reset();
+				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
+					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
+				if (!msId) {
+					selectEl.innerHTML = '<option value="">마일스톤을 먼저 선택하세요</option>';
+					return;
+				}
+				loadIssues(msId);
+			});
+
+			saveBtn.addEventListener("click", function () {
+				setErr("");
+				var fd = new FormData(form);
+				var payload = {
+					typeCd: (fd.get("typeCd") || "").toString(),
+					milestoneIssueId: fd.get("milestoneIssueId") ? Number(fd.get("milestoneIssueId")) : null,
+					contents: (fd.get("contents") || "").toString().trim(),
+					entryDate: (fd.get("entryDate") || "").toString(),
+				};
+				if (!payload.milestoneIssueId) { setErr("이슈를 선택하세요."); return; }
+				if (!payload.entryDate)       { setErr("날짜를 입력하세요."); return; }
+				if (!payload.typeCd)          { setErr("유형을 선택하세요."); return; }
+
+				saveBtn.disabled = true;
+				fetch("/api/milestone/timeline", {
+					method: "POST",
+					headers: { "Content-Type": "application/json", "Accept": "application/json" },
+					body: JSON.stringify(payload),
+				})
+					.then(function (res) {
+						if (!res.ok) throw new Error("HTTP " + res.status);
+						return res.json().catch(function () { return null; });
+					})
+					.then(function () {
+						if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
+						bootstrap.Modal.getInstance(modalEl).hide();
+					})
+					.catch(function (err) {
+						setErr("저장 실패: " + (err && err.message ? err.message : err));
+					})
+					.finally(function () { saveBtn.disabled = false; });
+			});
+		})();
+	</script>
+</div>
+</body>
+</html>

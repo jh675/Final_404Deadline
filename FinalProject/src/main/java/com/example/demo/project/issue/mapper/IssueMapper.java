@@ -1,7 +1,6 @@
 package com.example.demo.project.issue.mapper;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -9,6 +8,7 @@ import com.example.demo.project.issue.service.CommentInputVO;
 import com.example.demo.project.issue.service.CommentOutputVO;
 import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
+import com.example.demo.project.issue.service.IssueSummaryVO;
 
 @Mapper
 public interface IssueMapper {
@@ -34,9 +34,9 @@ public interface IssueMapper {
     //하위 이슈 갯수
     long countChildIssues(Long id);
     
-    Map<Long, String> getParentIssue(Long id);
+    IssueSummaryVO getParentIssue(Long id);
     List<CommentOutputVO> getComment(Long id);
 
     int insertComment(CommentInputVO vo);
-    List<Map<Long, String>> getIssueIds();
+    List<IssueSummaryVO> getIssueIds();
 }

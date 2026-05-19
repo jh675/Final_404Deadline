@@ -408,9 +408,9 @@
 					<option value=""
 						th:selected="${issue == null or issue.parentIssue == null}">없음</option>
 					<option th:each="item : ${issueIds}"
-						th:value="${item.ID}"
-						th:text="${item.SUBJECT + ' #' + item.ID}"
-						th:selected="${ids != null and issue.parentIssue == ids.id}">없음</option>
+						th:value="${item.id}"
+						th:text="|${item.subject} #${item.id}|"
+						th:selected="${issue != null and issue.parentIssue != null and issue.parentIssue == item.id}">없음</option>
 				</select>
 			</div>
 

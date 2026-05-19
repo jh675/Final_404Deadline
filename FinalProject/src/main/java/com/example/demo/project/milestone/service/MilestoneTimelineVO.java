@@ -1,5 +1,7 @@
 package com.example.demo.project.milestone.service;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,13 +11,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MilestoneTimeline {
+public class MilestoneTimelineVO {
 
 	private Long id;
 	private Long milestoneIssueId;
-	private Long years;
-	private Long months;
-	private Long dates;
+	private Date entryDate;
 	private String typeCd;
 	private String contents;
 }

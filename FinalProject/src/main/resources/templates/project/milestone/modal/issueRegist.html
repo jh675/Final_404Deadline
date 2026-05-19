@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<div th:fragment="issueRegistModal">
+	<div class="modal fade" id="issueRegistModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">이슈 등록</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="issueRegistForm" autocomplete="off">
+						<div class="mb-3">
+							<label class="form-label">등록할 이슈</label>
+							<select class="form-select" name="issueId" required>
+								<option value="">이슈를 선택하세요</option>
+							</select>
+							<small class="form-text text-muted">현재 마일스톤에 아직 등록되지 않은 이슈만 표시됩니다.</small>
+						</div>
+						<small class="text-danger d-none" data-ir-err></small>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-primary" data-ir-save>등록</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			var modalEl = document.getElementById("issueRegistModal");
+			if (!modalEl) return;
+			var form = modalEl.querySelector("#issueRegistForm");
+			var errEl = modalEl.querySelector("[data-ir-err]");
+			var saveBtn = modalEl.querySelector("[data-ir-save]");
+			var selectEl = form.querySelector('[name="issueId"]');
+
+			function setErr(msg) {
+				if (!errEl) return;
+				if (msg) { errEl.textContent = msg; errEl.classList.remove("d-none"); }
+				else     { errEl.textContent = ""; errEl.classList.add("d-none"); }
+			}
+
+			function loadAvailableIssues(milestoneId) {
+				selectEl.innerHTML = '<option value="">불러오는 중…</option>';
+				return fetch("/api/milestone/" + encodeURIComponent(milestoneId) + "/not-registered-issues", {
+					headers: { Accept: "application/json" },
+				})
+					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (data) {
+						selectEl.innerHTML = '<option value="">이슈를 선택하세요</option>';
+						if (!data) return;
+						if (Array.isArray(data)) {
+							data.forEach(function (it) {
+								var opt = document.createElement("option");
+								opt.value = it.id != null ? it.id : it.issueId;
+								opt.textContent = it.subject || it.issueSubject || ("이슈 #" + (it.id || it.issueId));
+								selectEl.appendChild(opt);
+							});
+						} else if (typeof data === "object") {
+							Object.keys(data).forEach(function (k) {
+								var opt = document.createElement("option");
+								opt.value = k;
+								opt.textContent = data[k];
+								selectEl.appendChild(opt);
+							});
+						}
+						if (selectEl.options.length <= 1) {
+							selectEl.innerHTML = '<option value="">등록 가능한 이슈가 없습니다</option>';
+						}
+					})
+					.catch(function () {
+						selectEl.innerHTML = '<option value="">이슈 목록 로드 실패</option>';
+					});
+			}
+
+			modalEl.addEventListener("show.bs.modal", function () {
+				setErr("");
+				form.reset();
+				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
+					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
+				if (!msId) {
+					selectEl.innerHTML = '<option value="">마일스톤을 먼저 선택하세요</option>';
+					return;
+				}
+				loadAvailableIssues(msId);
+			});
+
+			saveBtn.addEventListener("click", function () {
+				setErr("");
+				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
+					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
+				if (!msId) { setErr("마일스톤을 먼저 선택하세요."); return; }
+				var fd = new FormData(form);
+				var issueId = fd.get("issueId");
+				if (!issueId) { setErr("이슈를 선택하세요."); return; }
+				var payload = {
+					milestoneId: Number(msId),
+					issueId: Number(issueId),
+				};
+				saveBtn.disabled = true;
+				fetch("/api/milestone/" + encodeURIComponent(msId) + "/issues", {
+					method: "POST",
+					headers: { "Content-Type": "application/json", "Accept": "application/json" },
+					body: JSON.stringify(payload),
+				})
+					.then(function (res) {
+						if (!res.ok) throw new Error("HTTP " + res.status);
+						return res.json().catch(function () { return null; });
+					})
+					.then(function () {
+						if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
+						bootstrap.Modal.getInstance(modalEl).hide();
+					})
+					.catch(function (err) {
+						setErr("등록 실패: " + (err && err.message ? err.message : err));
+					})
+					.finally(function () { saveBtn.disabled = false; });
+			});
+		})();
+	</script>
+</div>
+</body>
+</html>

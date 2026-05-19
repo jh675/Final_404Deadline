@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<div th:fragment="issueDelistModal">
+	<div class="modal fade" id="issueDelistModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">이슈 해제</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="issueDelistForm" autocomplete="off">
+						<div class="mb-3">
+							<label class="form-label">해제할 이슈</label>
+							<select class="form-select" name="milestoneIssueId" required>
+								<option value="">이슈를 선택하세요</option>
+							</select>
+							<small class="form-text text-muted">
+								등록된 타임라인 이벤트가 있는 이슈는 해제할 수 없습니다.
+							</small>
+						</div>
+						<small class="text-danger d-none" data-id-err></small>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-danger" data-id-delete>해제</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			var modalEl = document.getElementById("issueDelistModal");
+			if (!modalEl) return;
+			var form = modalEl.querySelector("#issueDelistForm");
+			var errEl = modalEl.querySelector("[data-id-err]");
+			var deleteBtn = modalEl.querySelector("[data-id-delete]");
+			var selectEl = form.querySelector('[name="milestoneIssueId"]');
+
+			function getCsrfHeaders() {
+				var headers = {};
+				var tokenMeta = document.querySelector('meta[name="_csrf"]');
+				var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+				if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
+					headers[headerMeta.content] = tokenMeta.content;
+				}
+				return headers;
+			}
+
+			function setErr(msg) {
+				if (!errEl) return;
+				if (msg) { errEl.textContent = msg; errEl.classList.remove("d-none"); }
+				else     { errEl.textContent = ""; errEl.classList.add("d-none"); }
+			}
+
+			function hasTimeline(issue) {
+				return Array.isArray(issue.events) && issue.events.some(function (e) {
+					return e && (e.id != null || e.entryDate || e.contents);
+				});
+			}
+
+			function populate(issues) {
+				selectEl.innerHTML = '<option value="">이슈를 선택하세요</option>';
+				if (!issues || !issues.length) {
+					selectEl.innerHTML = '<option value="">등록된 이슈가 없습니다</option>';
+					return;
+				}
+				issues.forEach(function (it) {
+					var opt = document.createElement("option");
+					opt.value = it.id != null ? it.id : "";
+					var label = (it.name || ("이슈 #" + (it.issueId != null ? it.issueId : it.id)));
+					if (hasTimeline(it)) {
+						opt.disabled = true;
+						opt.textContent = label + " · 타임라인 있음(해제 불가)";
+					} else {
+						opt.textContent = label;
+					}
+					selectEl.appendChild(opt);
+				});
+			}
+
+			modalEl.addEventListener("show.bs.modal", function () {
+				setErr("");
+				form.reset();
+				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
+					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
+				if (!msId) {
+					selectEl.innerHTML = '<option value="">마일스톤을 먼저 선택하세요</option>';
+					return;
+				}
+				var issues = (window.MilestoneTimeline && window.MilestoneTimeline.getCurrentIssues)
+					? window.MilestoneTimeline.getCurrentIssues() : [];
+				populate(issues);
+			});
+
+			deleteBtn.addEventListener("click", function () {
+				setErr("");
+				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
+					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
+				if (!msId) { setErr("마일스톤을 먼저 선택하세요."); return; }
+
+				var fd = new FormData(form);
+				var miId = fd.get("milestoneIssueId");
+				if (!miId) { setErr("해제할 이슈를 선택하세요."); return; }
+
+				var opt = selectEl.options[selectEl.selectedIndex];
+				if (opt && opt.disabled) { setErr("타임라인이 등록된 이슈는 해제할 수 없습니다."); return; }
+
+				var label = opt ? opt.textContent : ("이슈 #" + miId);
+				if (!window.confirm("\"" + label + "\" 이슈를 해제할까요?")) return;
+
+				deleteBtn.disabled = true;
+				fetch("/api/milestone/" + encodeURIComponent(msId) + "/issues/" + encodeURIComponent(miId), {
+					method: "DELETE",
+					headers: getCsrfHeaders(),
+				})
+					.then(function (res) {
+						if (!res.ok) throw new Error("HTTP " + res.status);
+					})
+					.then(function () {
+						if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
+						bootstrap.Modal.getInstance(modalEl).hide();
+					})
+					.catch(function (err) {
+						setErr("해제 실패: " + (err && err.message ? err.message : err));
+					})
+					.finally(function () { deleteBtn.disabled = false; });
+			});
+		})();
+	</script>
+</div>
+</body>
+</html>
