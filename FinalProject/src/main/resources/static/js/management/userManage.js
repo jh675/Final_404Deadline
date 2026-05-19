@@ -54,7 +54,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             {
                 header: '이메일',
+				width: 260,
                 name: 'email',
+				align: 'center',
             },
 
             {
@@ -302,3 +304,34 @@ function changeRoleArea(adminCd) {
         roleArea.style.display = '';
     }
 }
+
+// 검색 조건 없이 검색하려고 할 때
+const searchForm = document.getElementById('searchForm');
+
+searchForm.addEventListener('submit', function(e) {
+    const searchType = document.getElementById('searchType').value;
+    const keyword = document.getElementById('keyword').value.trim();
+    const warning = document.getElementById('searchWarning');
+
+    // 검색어는 있는데 검색조건이 없는 경우
+    if (keyword !== '' && searchType === '') {
+        e.preventDefault();
+		document.getElementById('searchType').classList.add('is-invalid');
+        warning.classList.remove('d-none');
+        return;
+    }
+	
+	// 검색조건은 있는데 검색어가 없는 경우
+	if (searchType !== '' && keyword === '') {
+	    e.preventDefault();
+		document.getElementById('searchType').classList.remove('is-invalid');
+	    warning.innerText = '검색어를 입력해주세요.';
+	    warning.classList.remove('d-none');
+
+	    return;
+	}
+
+    // 정상일 경우 경고 숨김
+	document.getElementById('searchType').classList.remove('is-invalid');
+    warning.classList.add('d-none');
+});

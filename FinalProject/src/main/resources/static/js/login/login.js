@@ -35,3 +35,25 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 	}
 
 });
+
+const bizNoInput = document.getElementById('bizNo');
+
+bizNoInput.addEventListener('input', function(e) {
+
+    let value = e.target.value;
+
+    // 숫자만 추출
+    value = value.replace(/[^0-9]/g, '');
+
+    // 최대 10자리
+    value = value.substring(0, 10);
+
+    // 하이픈 자동 추가
+    if (value.length > 5) {
+        value = value.replace(/^(\d{3})(\d{2})(\d{0,5})$/, '$1-$2-$3');
+    } else if (value.length > 3) {
+        value = value.replace(/^(\d{3})(\d{0,2})$/, '$1-$2');
+    }
+
+    e.target.value = value;
+});

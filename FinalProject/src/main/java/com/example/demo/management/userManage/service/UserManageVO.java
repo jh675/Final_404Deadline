@@ -46,5 +46,10 @@ public class UserManageVO {
 	private String prjManagerCd;
 	private String prjManagerNm;
 	
+	// 등록, 수정 결과
 	private String result;
+	
+	// 검색 타입
+	private String searchType;
+	private String keyword;
 }

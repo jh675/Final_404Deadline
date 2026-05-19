@@ -26,10 +26,26 @@
 				,get_sub_code_name(MCP_CD) "MCP_NM"
 		FROM 	 users
 		<where>
-			<if test="adminCd != null and adminCd != ''">
-				AND ADMIN_CD = #{adminCd}
-			</if>
-
+		    <!-- 권한 필터 -->
+		    <if test="adminCd != null and adminCd != ''">
+		        AND ADMIN_CD = #{adminCd}
+		    </if>
+		    <!-- 검색 -->
+		    <if test="keyword != null and keyword != ''">
+		        <if test="searchType == 'login'">
+		            AND LOGIN LIKE '%' || #{keyword} || '%'
+		        </if>
+		        <if test="searchType == 'compNm'">
+		            AND get_bizno_to_compname(BIZ_NO)
+		                LIKE '%' || #{keyword} || '%'
+		        </if>
+		        <if test="searchType == 'name'">
+		            AND NAME LIKE '%' || #{keyword} || '%'
+		        </if>
+		        <if test="searchType == 'email'">
+		            AND EMAIL LIKE '%' || #{keyword} || '%'
+		        </if>
+		    </if>
 		</where>
 		ORDER BY ID
 	</select>
