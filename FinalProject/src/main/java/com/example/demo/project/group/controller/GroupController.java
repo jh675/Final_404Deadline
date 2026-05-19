@@ -1,7 +1,5 @@
 package com.example.demo.project.group.controller;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.demo.project.group.service.GroupDetailVO;
 import com.example.demo.project.group.service.GroupListCriteria;
 import com.example.demo.project.group.service.GroupMemberDetailRowVO;
+import com.example.demo.project.group.service.GroupMemberPickRowVO;
 import com.example.demo.project.group.service.GroupRoleDetailRowVO;
 import com.example.demo.project.group.service.GroupService;
 import com.example.demo.project.group.service.ProjectGroupRowVO;
@@ -134,6 +133,17 @@ public class GroupController {
         return body;
     }
 
+    /** 그룹 등록 모달 — 프로젝트 구성원 선택 목록 JSON */
+    @GetMapping("/groupMemberPickList")
+    @ResponseBody
+    public Map<String, Object> groupMemberPickList(@RequestParam("prjId") Long prjId) {
+        List<GroupMemberPickRowVO> rows = groupService.selectGroupMemberPickList(prjId);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", rows);
+        body.put("prjId", prjId);
+        return body;
+    }
+
     /** 그룹 등록 — DB {@code PROC_GRP_INSERT} (userIds 없으면 그룹만 생성) */
     @PostMapping("/registerGroup")
     @ResponseBody
@@ -158,6 +168,26 @@ public class GroupController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("ok", false, "message", "그룹 등록 중 오류가 발생했습니다."));
+        }
+    }
+
+    /** 그룹 수정 — DB {@code PROC_GRP_UPDATE} (userIds 없으면 구성원 변경 없음) */
+    @PostMapping("/updateGroup")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateGroup(
+            @RequestBody(required = false) GroupUpdateRequest body) {
+        try {
+            if (body == null || body.prjId() == null || body.grpId() == null) {
+                return badRequest("요청이 올바르지 않습니다.");
+            }
+            groupService.updateGroup(body.prjId(), body.grpId(), body.userIds());
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("ok", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "그룹 수정 중 오류가 발생했습니다."));
         }
     }
 
@@ -193,15 +223,11 @@ public class GroupController {
     /** registerGroup 요청 JSON — userIds 키는 구성원이 있을 때만 전송 */
     public record GroupInsertRequest(Long prjId, String grpName, List<Long> userIds) {}
 
+    /** updateGroup 요청 JSON */
+    public record GroupUpdateRequest(Long prjId, Long grpId, List<Long> userIds) {}
+
     /** MyBatis 동적 SQL에서 null 대신 빈 문자열로 통일 */
     private static String nullToEmpty(String s) {
         return s == null ? "" : s;
-    }
-
-    private static String formatDateYmd(LocalDateTime dt) {
-        if (dt == null) {
-            return "";
-        }
-        return dt.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 }
