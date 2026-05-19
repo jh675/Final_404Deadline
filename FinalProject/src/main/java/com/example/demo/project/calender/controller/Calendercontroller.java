@@ -59,8 +59,16 @@ public class Calendercontroller {
 	@PutMapping("/calender/update")
 	@ResponseBody
 	 public int update(CalenderVO vo) {
-		return calenderService.updete(vo);
+		return calenderService.update(vo);
 	}
+	
+	// 일정 수정에서 가져온 데이터 단건 조회 API 
+	@GetMapping("/calender/detail")
+	@ResponseBody
+	public CalenderVO getEventDetail(@RequestParam("id") int id) {
+	    return calenderService.selectOne(id); 
+	}
+	
 	// 일정 삭제 
 	@DeleteMapping("/calender/delete")
 	@ResponseBody
@@ -72,11 +80,17 @@ public class Calendercontroller {
 	@GetMapping("calender/search")
 	@ResponseBody
 	 public List<CalenderVO>search(CalenderVO vo) {
-		 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	        Object principal = auth.getPrincipal();
-	    if (principal instanceof UserVO user) {
-	    	vo.setMemId(user.getId().intValue()); 
-	    }
+		vo.setMemId(2);
+		
+		 System.out.println("keyword: " + vo.getKeyword());
+		    System.out.println("memId: " + vo.getMemId());
+//		 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//	        Object principal = auth.getPrincipal();
+//	    if (principal instanceof UserVO user) {
+//	    	vo.setMemId(user.getId().intValue()); 
+//	    }
+	    
+	    // System.out.println("principal 타입: " + principal.getClass().getName());
 		return calenderService.selectAll(vo);
 	}
 	
