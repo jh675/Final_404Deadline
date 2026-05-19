@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<div th:fragment="milestoneAddModal">
+	<div class="modal fade" id="milestoneAddModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" data-ms-title>마일스톤 추가/수정</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="milestoneAddForm" autocomplete="off">
+						<input type="hidden" name="id" />
+						<input type="hidden" name="prjId" />
+						<div class="mb-3" data-ms-select-wrap hidden>
+							<label class="form-label">대상 마일스톤</label>
+							<select class="form-select" name="selectId">
+								<option value="">선택하세요</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">마일스톤명</label>
+							<input type="text" class="form-control" name="name" maxlength="50" placeholder="마일스톤명" required />
+						</div>
+						<div class="mb-3">
+							<label class="form-label">시작일</label>
+							<input type="date" class="form-control" name="startDate" required />
+						</div>
+						<div class="mb-3">
+							<label class="form-label">마감일</label>
+							<input type="date" class="form-control" name="endDate" required />
+						</div>
+						<small class="text-danger d-none" data-ms-err></small>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-danger" data-ms-delete hidden>삭제</button>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-primary" data-ms-save>추가/수정</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			var modalEl = document.getElementById("milestoneAddModal");
+			if (!modalEl) return;
+			var form = modalEl.querySelector("#milestoneAddForm");
+			var titleEl = modalEl.querySelector("[data-ms-title]");
+			var errEl = modalEl.querySelector("[data-ms-err]");
+			var selectWrap = modalEl.querySelector("[data-ms-select-wrap]");
+			var selectEl = selectWrap ? selectWrap.querySelector("select") : null;
+			var deleteBtn = modalEl.querySelector("[data-ms-delete]");
+			var saveBtn = modalEl.querySelector("[data-ms-save]");
+
+			function getCsrfHeaders() {
+				var headers = {};
+				var tokenMeta = document.querySelector('meta[name="_csrf"]');
+				var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+				if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
+					headers[headerMeta.content] = tokenMeta.content;
+				}
+				return headers;
+			}
+
+			function setErr(msg) {
+				if (!errEl) return;
+				if (msg) {
+					errEl.textContent = msg;
+					errEl.classList.remove("d-none");
+				} else {
+					errEl.textContent = "";
+					errEl.classList.add("d-none");
+				}
+			}
+
+			function syncPrjId(msOpt) {
+				var inp = form.querySelector('[name="prjId"]');
+				if (!inp) return;
+				var v;
+				if (msOpt && msOpt.prjId != null) {
+					v = msOpt.prjId;
+				} else if (window.MilestoneTimeline && typeof window.MilestoneTimeline.getPrjId === "function") {
+					v = window.MilestoneTimeline.getPrjId();
+				} else if (typeof window.prjId !== "undefined" && window.prjId !== "" && window.prjId != null) {
+					v = Number(window.prjId);
+				} else {
+					v = 3;
+				}
+				inp.value = v != null ? String(v) : "3";
+			}
+
+			function fillForm(ms) {
+				if (!ms) {
+					form.reset();
+					form.querySelector('[name="id"]').value = "";
+					syncPrjId(null);
+					return;
+				}
+				form.querySelector('[name="id"]').value = ms.id  != null ? ms.id : "";
+				form.querySelector('[name="name"]').value = ms.name || "";
+				form.querySelector('[name="startDate"]').value = (ms.startDate || "").toString().slice(0, 10);
+				form.querySelector('[name="endDate"]').value = (ms.endDate || "").toString().slice(0, 10);
+				syncPrjId(ms);
+			}
+
+			function populateSelect(milestones, currentId) {
+				if (!selectEl) return;
+				selectEl.innerHTML = '<option value="">선택하세요</option>';
+				milestones.forEach(function (m) {
+					var opt = document.createElement("option");
+					opt.value = m.id;
+					opt.textContent = m.name || ("마일스톤 #" + m.id);
+					if (currentId != null && String(currentId) === String(m.id)) opt.selected = true;
+					selectEl.appendChild(opt);
+				});
+			}
+
+			modalEl.addEventListener("show.bs.modal", function (event) {
+				setErr("");
+				syncPrjId(null);
+				var trigger = event.relatedTarget;
+				var mode = trigger && trigger.getAttribute("data-mode") === "edit" ? "edit" : "add";
+				var ms = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestone)
+					? window.MilestoneTimeline.getSelectedMilestone()
+					: null;
+				var list = (window.MilestoneTimeline && window.MilestoneTimeline.getMilestones)
+					? window.MilestoneTimeline.getMilestones()
+					: [];
+
+				if (mode === "edit") {
+					titleEl.textContent = "마일스톤 관리";
+					selectWrap.hidden = false;
+					if (deleteBtn) deleteBtn.hidden = false;
+					populateSelect(list, ms ? ms.id : null);
+					fillForm(ms);
+					saveBtn.textContent = "수정";
+				} else {
+					titleEl.textContent = "마일스톤 추가";
+					selectWrap.hidden = true;
+					if (deleteBtn) deleteBtn.hidden = true;
+					fillForm(null);
+					saveBtn.textContent = "추가";
+				}
+			});
+
+			if (selectEl) {
+				selectEl.addEventListener("change", function () {
+					var id = selectEl.value;
+					var list = (window.MilestoneTimeline && window.MilestoneTimeline.getMilestones)
+						? window.MilestoneTimeline.getMilestones() : [];
+					var ms = list.find(function (m) { return String(m.id) === String(id); });
+					fillForm(ms || null);
+				});
+			}
+
+			saveBtn.addEventListener("click", function () {
+				setErr("");
+				var fd = new FormData(form);
+				var payload = {
+					id: fd.get("id") ? Number(fd.get("id")) : null,
+					prjId: fd.get("prjId") ? Number(fd.get("prjId")) : null,
+					name: (fd.get("name") || "").toString().trim(),
+					startDate: (fd.get("startDate") || "").toString(),
+					endDate: (fd.get("endDate") || "").toString(),
+				};
+				if (!payload.name || !payload.startDate || !payload.endDate) {
+					setErr("모든 항목을 입력하세요."); return;
+				}
+				if (payload.startDate > payload.endDate) {
+					setErr("마감일은 시작일 이후여야 합니다."); return;
+				}
+				var isEdit = payload.id != null;
+				var url = "/api/milestone/milestone";
+				var method = isEdit ? "PUT" : "POST";
+				console.log(payload);
+				saveBtn.disabled = true;
+				fetch(url, {
+					method: method,
+					headers: Object.assign(
+						{ "Content-Type": "application/json", "Accept": "application/json" },
+						getCsrfHeaders()
+					),
+					body: JSON.stringify(payload),
+				})
+					.then(function (res) {
+						if (!res.ok) throw new Error("HTTP " + res.status);
+						return res.json().catch(function () { return null; });
+					})
+					.then(function (saved) {
+						var ms = saved && saved.id != null ? saved : Object.assign(
+							{ id: isEdit ? payload.id : Date.now() }, payload
+						);
+						if (isEdit) {
+							window.MilestoneTimeline.updateMilestoneLocal(ms);
+						} else {
+							window.MilestoneTimeline.addMilestoneLocal(ms);
+						}
+						bootstrap.Modal.getInstance(modalEl).hide();
+					})
+					.catch(function (err) {
+						setErr("저장 실패: " + (err && err.message ? err.message : err));
+					})
+					.finally(function () { saveBtn.disabled = false; });
+			});
+
+			if (deleteBtn) {
+				deleteBtn.addEventListener("click", function () {
+					setErr("");
+					var idVal = form.querySelector('[name="id"]').value;
+					if (!idVal) { setErr("삭제할 마일스톤을 선택하세요."); return; }
+					if (!window.confirm("이 마일스톤을 삭제할까요?")) return;
+					deleteBtn.disabled = true;
+					fetch("/api/milestone/" + idVal, {
+						method: "DELETE",
+						headers: getCsrfHeaders()
+					})
+						.then(function (res) {
+							if (!res.ok) throw new Error("HTTP " + res.status);
+							window.MilestoneTimeline.removeMilestoneLocal(idVal);
+							bootstrap.Modal.getInstance(modalEl).hide();
+						})
+						.catch(function (err) {
+							setErr("삭제 실패: " + (err && err.message ? err.message : err));
+						})
+						.finally(function () { deleteBtn.disabled = false; });
+				});
+			}
+		})();
+	</script>
+</div>
+</body>
+</html>

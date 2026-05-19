@@ -298,8 +298,8 @@
 	<!-- ===================================================== -->
 	<!--  아이디랑키 이름 받아오기(단건)      -->
 	<!-- ===================================================== -->
-	<select id="getParentIssue" resultType="map">
-		SELECT id,subject
+	<select id="getParentIssue" resultType="IssueSummaryVO">
+		SELECT id AS id, subject AS subject
 		FROM ISSUE
 		WHERE id = #{id}
 	</select>
@@ -342,8 +342,8 @@
 		)
 	</insert>
 	
-	<select id="getIssueIds" resultType="map">
-		SELECT id,subject
+	<select id="getIssueIds" resultType="IssueSummaryVO">
+		SELECT id AS id, subject AS subject
 		FROM ISSUE
 	</select>
 </mapper>

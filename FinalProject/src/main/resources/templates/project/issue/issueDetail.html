@@ -495,11 +495,11 @@ table.data-table tbody td {
 		</div>
 		<div class="meta-item">
 			<label>상위 이슈</label>
-			<th:block th:if="${ParentIssue != null and !#maps.isEmpty(ParentIssue)}">
-				<a class="parent-issue-link" th:href="@{/issue/detail(id=${ParentIssue['ID']})}"
-					th:text="${ParentIssue['SUBJECT'] != null and !#strings.isEmpty(ParentIssue['SUBJECT'])} ? ${ParentIssue['SUBJECT']} : '제목 없음'">상위 이슈</a>
+			<th:block th:if="${ParentIssue != null and ParentIssue.id != null}">
+				<a class="parent-issue-link" th:href="@{/issue/detail(id=${ParentIssue.id})}"
+					th:text="${ParentIssue.subject != null and !#strings.isEmpty(ParentIssue.subject)} ? ${ParentIssue.subject} : '제목 없음'">상위 이슈</a>
 			</th:block>
-			<span class="meta-empty" th:unless="${ParentIssue != null and !#maps.isEmpty(ParentIssue)}">—</span>
+			<span class="meta-empty" th:unless="${ParentIssue != null and ParentIssue.id != null}">—</span>
 		</div>
 		<div class="meta-item">
 			<label>상태</label>
@@ -512,12 +512,12 @@ table.data-table tbody td {
 		<div class="meta-item">
 			<label>시작 예정일</label>
 			<input type="text" readonly
-				th:value="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yy-MM-dd HH:mm') : '—'}" />
+				th:attr="data-server-date=${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd''T''HH:mm:ss') : ''}" />
 		</div>
 		<div class="meta-item">
 			<label>종료 예정일</label>
 			<input type="text" readonly
-				th:value="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yy-MM-dd HH:mm') : '—'}" />
+				th:attr="data-server-date=${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd''T''HH:mm:ss') : ''}" />
 		</div>
 		<div class="meta-item">
 			<label>우선순위</label>
@@ -581,7 +581,7 @@ table.data-table tbody td {
 						<div class="meta">
 							<span class="comment-num" th:text="|${cStat.count}번 댓글|">1번 댓글</span>
 							<strong th:text="${c.memId != null and !#strings.isEmpty(c.memId)} ? ${c.memId} : '—'">작성자</strong>
-							<span th:text="${c.writeDate != null ? #dates.format(c.writeDate, 'yy-MM-dd HH:mm') : '—'}">날짜</span>
+							<span th:attr="data-server-date=${c.writeDate != null ? #dates.format(c.writeDate, 'yyyy-MM-dd''T''HH:mm:ss') : ''}">날짜</span>
 						</div>
 						<div th:text="${c.content != null ? c.content : ''}">댓글내용</div>
 						<div class="comment-actions" th:if="${c.id != null}">
@@ -677,6 +677,30 @@ table.data-table tbody td {
 </div>
 
 <script th:inline="javascript">
+(function () {
+	// 서버에서 data-server-date 속성으로 내려준 날짜를 dateUtils.format 으로 일괄 변환
+	// - input/textarea: value 에 세팅, 그 외 요소: textContent 에 세팅
+	// - 기본 포맷은 'YYYY-MM-DD HH:mm', data-date-format 속성으로 개별 지정 가능
+	function applyServerDates(scope) {
+		var root = scope || document;
+		root.querySelectorAll('[data-server-date]').forEach(function (el) {
+			var raw = el.getAttribute('data-server-date');
+			var fmt = el.getAttribute('data-date-format') || 'YYYY-MM-DD HH:mm';
+			var out = raw ? dateUtils.format(raw, fmt) : '—';
+			if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+				el.value = out;
+			} else {
+				el.textContent = out;
+			}
+		});
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', function () { applyServerDates(); });
+	} else {
+		applyServerDates();
+	}
+})();
+
 (function () {
 	var tabs = document.querySelectorAll('.tab-btn');
 	var panels = document.querySelectorAll('.tab-panel');

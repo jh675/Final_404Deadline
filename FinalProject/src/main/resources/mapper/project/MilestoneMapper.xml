@@ -3,36 +3,49 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.project.milestone.mapper.MilestoneMapper">
 
+	<resultMap type="MilestoneIssueVO" id="MilestoneIssueResultMap">
+		<id     column="id"           property="id"/>
+		<result column="milestone_id" property="milestoneId"/>
+		<result column="issue_id"     property="issueId"/>
+		<result column="name"         property="name"/>
+		<collection property="events"
+					ofType="MilestoneTimelineVO"
+					resultMap="MilestoneTimelineResultMap"/>
+	</resultMap>
+	<resultMap type="MilestoneTimelineVO" id="MilestoneTimelineResultMap">
+		<id column="timeline_id" property="id" />
+		<result column="contents" property="contents" />
+		<result column="entry_date" property="entryDate" />
+		<result column="type_cd" property="typeCd" />
+	</resultMap>
 	<select id="selectMilestoneList" resultType="MilestoneVO">
-		SELECT
-			MI.ID              AS id,
-			MI.MILESTONE_ID    AS milestoneId,
-			MI.ISSUE_ID        AS issueId,
-			I.SUBJECT          AS issueSubject,
-			M.NAME             AS milestoneName
-		FROM milestone_issue MI
-		INNER JOIN milestone M ON M.ID = MI.MILESTONE_ID
-		INNER JOIN ISSUE I ON I.ID = MI.ISSUE_ID
-		WHERE M.PRJ_ID = 4
-		ORDER BY MI.MILESTONE_ID, MI.ID;
+		select * from milestone 
+		where prj_id=#{id}
 	</select>
 
-	<select id="selectMilestoneIssueList" resultType="Map">
-		SELECT
-			T.ID,
-			T.MILESTONE_ISSUE_ID AS milestoneIssueId,
-			T.YEARS,
-			T.MONTHS,
-			T.DATES,
-			T.TYPE_CD,
-			T.CONTENTS
-		FROM milestone_timeline T
-		INNER JOIN milestone_issue MI ON MI.ID = T.MILESTONE_ISSUE_ID
-		INNER JOIN milestone M ON M.ID = MI.MILESTONE_ID
-		WHERE M.PRJ_ID = 4
-		ORDER BY T.MILESTONE_ISSUE_ID, T.YEARS, T.MONTHS, T.DATES, T.ID;
+	<select id="selectMilestoneIssueList" resultMap="MilestoneIssueResultMap">
+		select i.id id,
+		i.milestone_id,
+		GET_ISSID_TO_NAME(i.issue_id) name,
+		i.issue_id issue_id,
+		t.id timeline_id,
+		t.contents contents,
+		t.entry_date entry_date,
+		t.type_cd type_cd
+		from milestone_issue i
+		left join milestone_timeline t
+		on t.milestone_issue_id = i.id
+		join milestone m
+		on m.id=i.milestone_id
+		where i.milestone_id=#{id}
 	</select>
-
+	<insert id="insertMilestone">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT ISS_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		insert into milestone (id, prj_id, name, start_date, end_date)
+		values (${id}, #{prjId}, #{name}, #{startDate}, #{endDate})
+	</insert>
 
 
 

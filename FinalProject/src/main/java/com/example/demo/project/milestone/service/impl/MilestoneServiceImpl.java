@@ -5,11 +5,13 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import com.example.demo.project.issue.service.IssueSummaryVO;
 import com.example.demo.project.milestone.mapper.MilestoneMapper;
 import com.example.demo.project.milestone.service.MilestoneIssueVO;
 import com.example.demo.project.milestone.service.MilestoneService;
-import com.example.demo.project.milestone.service.MilestoneTimeline;
+import com.example.demo.project.milestone.service.MilestoneTimelineVO;
 import com.example.demo.project.milestone.service.MilestoneVO;
 
 @Service
@@ -25,43 +27,43 @@ public class MilestoneServiceImpl implements MilestoneService {
 	}
 
 	@Override
-	public Map<Long,List<MilestoneTimeline>> selectMilestoneIssueList(Long id) {
+	public List<MilestoneIssueVO> selectMilestoneIssueList(Long id) {
 		// TODO Auto-generated method stub
 		return mapper.selectMilestoneIssueList(id);
 	}
 
 	@Override
-	public List<MilestoneTimeline> selectTimelineList(Long id) {
+	public List<MilestoneTimelineVO> selectTimelineList(Long id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Map<Long,String>> selectNotExistsIssueList(Long projectId) {
+	public Map<Long,String> selectNotExistsIssueList(Long projectId) {
 		// TODO Auto-generated method stub
 		return mapper.selectNotExistsIssueList(projectId);
 	}
 
 	@Override
-	public int insertMilestone(MilestoneVO milestoneVO) {
+	public Long insertMilestone(MilestoneVO milestoneVO) {
 		// TODO Auto-generated method stub
-		return 0;
+		return mapper.insertMilestone(milestoneVO);
 	}
 
 	@Override
-	public int insertMilestoneIssue(MilestoneIssueVO milestoneIssueVO) {
+	public Long insertMilestoneIssue(MilestoneIssueVO milestoneIssueVO) {
 		// TODO Auto-generated method stub
-		return 0;
+		return mapper.insertMilestoneIssue(milestoneIssueVO);
 	}
 
 	@Override
-	public int insertTimeline(MilestoneTimeline timelineVO) {
+	public Long insertTimeline(MilestoneTimelineVO timelineVO) {
 		// TODO Auto-generated method stub
-		return 0;
+		return mapper.insertTimeline(timelineVO);
 	}
 
 	@Override
-	public int updateTimeline(MilestoneTimeline timelineVO) {
+	public int updateTimeline(MilestoneTimelineVO timelineVO) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -82,6 +84,11 @@ public class MilestoneServiceImpl implements MilestoneService {
 	public int deleteTimeline(Long id) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public List<IssueSummaryVO> selectMilestoneNotInIssue(@PathVariable("id") Long id) {
+		return mapper.selectMilestoneNotInIssue(id);
 	}
 
 }
