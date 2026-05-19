@@ -5,45 +5,85 @@
 	layout:decorate="~{layout/sysAdminLayout}">
 <head>
 <title>회원관리(sysadmin)</title>
-	<link rel="stylesheet"
-		href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
-	<link rel="stylesheet"
-		href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">
 </head>
 <body>
 	<div layout:fragment="content">
+	<div id="wrapper">
 		<h3 class="mb-3">회원 목록</h3>
 		<div>
-			<form id="searchForm" th:action="@{/admin/userList}" method="get"
-				th:object="${filter01}" class="d-flex align-items-end gap-3 mb-3">
+			<form id="searchForm"
+			      th:action="@{/admin/userList}"
+			      method="get"
+			      th:object="${filter01}"
+			      class="d-flex align-items-end gap-3 mb-3 flex-wrap">
 
-				<div>
-					<label for="categoryCd" class="form-label">계정 권한</label> 
-					<select id="categoryCd" 
-							th:field="*{adminCd}" 
-							class="form-select">
-
-						<option value="">미선택</option>
-						<option value="01ROLE">시스템관리자</option>
-						<option value="02ROLE">기업관리자</option>
-						<option value="03ROLE">사원</option>
-					</select>
+			    <!-- 권한 -->
+			    <div>
+			        <label for="categoryCd" class="form-label">계정 권한</label>
+			
+			        <select id="categoryCd"
+			                th:field="*{adminCd}"
+			                class="form-select">
+			            <option value="">전체</option>
+			            <option value="01ROLE">시스템관리자</option>
+			            <option value="02ROLE">기업관리자</option>
+			            <option value="03ROLE">사원</option>
+			        </select>
+			    </div>
+			
+			    <!-- 검색 종류 -->
+			    <div>
+			        <label for="searchType" class="form-label">검색 조건</label>
+			        <select id="searchType"
+			                th:field="*{searchType}"
+			                class="form-select">
+			            <option value="">선택</option>
+			            <option value="login">아이디</option>
+			            <option value="compNm">소속기업</option>
+			            <option value="name">이름</option>
+			            <option value="email">이메일</option>
+			        </select>
+			    </div>
+			    <!-- 검색어 -->
+			    <div>
+			        <label for="keyword" class="form-label">검색어</label>
+			        <input type="text"
+			               id="keyword"
+			               th:field="*{keyword}"
+			               class="form-control"
+			               placeholder="검색어 입력">
+			    </div>
+				<div id="searchWarning"
+				     class="text-danger small mt-1 d-none">
+					검색 조건을 선택해주세요.
 				</div>
-
-				<div>
-					<button type="submit" class="btn btn-primary">검색</button>
+			    <!-- 버튼 -->
+			    <div class="d-flex gap-2">
+				    <button type="submit"
+				            class="btn btn-primary">
+				        검색
+				    </button>
+				    <a th:href="@{/admin/userList}"
+				       class="btn btn-outline-secondary">
+				        초기화
+				    </a>
+				
 				</div>
 			</form>
 		</div>
-
-		<div class="d-flex justify-content-end mb-3">
-			<button type="button" class="btn btn-primary" data-bs-toggle="modal"
-				data-bs-target="#resetPwModal"
-				onclick="location.href='/admin/userManage/insert'">회원 등록</button>
-		</div>
+		
 		<div id="grid"></div>
+		<div class="d-flex justify-content-end mb-3">
+			<button type="button" class="btn btn-primary" onclick="openInsertModal()">회원 등록</button>
+		</div>
 
-		<div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
+		</div>
+		<div th:replace="~{management/modal/userInsert :: userInsert}"></div>
 
 		<script th:inline="javascript">
 			const userData = /*[[${userList}]]*/[];

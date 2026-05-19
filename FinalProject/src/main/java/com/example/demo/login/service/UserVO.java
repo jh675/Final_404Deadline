@@ -30,6 +30,8 @@ public class UserVO implements UserDetails{
 	private String name;
 	private String tel;
 	private String email;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date hireDate;
 	private String genderCd;
 	private String genderNm;

@@ -14,12 +14,18 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @EnableWebSecurity
 class WebSecurityConfig {
 
+    private final CustomAuthenticationDetailsSource detailsSource;
+
+    public WebSecurityConfig(CustomAuthenticationDetailsSource detailsSource) {
+        this.detailsSource = detailsSource;
+    }
+    
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		// @formatter:off
 		http
 			.authorizeHttpRequests((requests) -> requests
-				.requestMatchers("/**", "/login/**").permitAll()
+				.requestMatchers("/**", "/login/**", "/css/**", "/js/**").permitAll()
 				.requestMatchers("/admin/**").hasAnyRole("ADMIN") // 시스템관리자 01ROLE
 				.requestMatchers("/cadmin/**").hasAnyRole("CADMIN") // 기업관리자 02ROLE
 				.requestMatchers("/user/**").hasAnyRole("USER") // 일반 이용자 03ROLE
@@ -27,8 +33,9 @@ class WebSecurityConfig {
 			)
 			.formLogin((form) -> form
 				.loginPage("/login")
-				.permitAll()
+				.authenticationDetailsSource(detailsSource)
 				.successHandler(successHandler())
+				.permitAll()
 			)
 			.logout(LogoutConfigurer::permitAll)
 //			 .csrf(a -> a.disable())
