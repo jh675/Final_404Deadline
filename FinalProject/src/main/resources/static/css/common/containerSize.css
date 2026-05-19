@@ -3,4 +3,7 @@
     max-width: 1280px;
     margin: 0 auto;
     overflow-x: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px;
 }

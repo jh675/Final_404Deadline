@@ -7,12 +7,13 @@
 <head>
 <title>Spring Security Example</title>
 <link rel="stylesheet" th:href="@{/css/login/login.css}">
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">
 </head>
 
 <body>
 
 <div layout:fragment="content">
-
+<div id="wrapper">
 	<div th:if="${param.error}" class="alert alert-danger">
 		회원정보가 일치하지 않습니다.
 	</div>
@@ -85,6 +86,14 @@
 		admin 기업번호 : 124-87-03358
 		<br>
 		그 외 기업번호 : 124-81-56789
+		<br>
+		시스템 관리자 : admin
+		<br>
+		기업 관리자 : cadmin
+		<br>
+		일반 유저 : user1, user2 ...
+		<br>
+		비밀번호는 아이디와 동일
 		</div>
 		<div>
 			<button type="submit" class="btn btn-primary">
@@ -110,6 +119,7 @@
 
 <script th:src="@{/js/login/login.js}"></script>
 <script th:src="@{/js/login/resetPw.js}"></script>
+</div>
 </div>
 </body>
 </html>

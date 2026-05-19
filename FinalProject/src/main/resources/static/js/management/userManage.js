@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         data: userData,
 
-        scrollX: false,
+        scrollX: true,
         scrollY: false,
 
         bodyHeight: 'auto',
