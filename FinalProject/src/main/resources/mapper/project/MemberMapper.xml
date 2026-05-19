@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 프로젝트 구성원: USERS + MEMBER + GRP -->
+<mapper namespace="com.example.demo.project.member.mapper.MemberMapper">
+
+  <!-- 목록 검색 WHERE (prjId 필수, 나머지 선택) -->
+  <sql id="memberListWhere">
+    <where>
+      G.PRJ_ID = #{prjId}
+      AND M.PRJ_END_DATE IS NULL
+      <if test="memberName != null and memberName != ''">
+        AND U.NAME LIKE '%' || #{memberName} || '%'
+      </if>
+      <if test="grpName != null and grpName != ''">
+        AND G.NAME LIKE '%' || #{grpName} || '%'
+      </if>
+      <if test="prjStartFrom != null and prjStartFrom != ''">
+        AND TRUNC(M.PRJ_START_DATE) &gt;= TO_DATE(#{prjStartFrom}, 'YYYY-MM-DD')
+      </if>
+      <if test="prjStartTo != null and prjStartTo != ''">
+        AND TRUNC(M.PRJ_START_DATE) &lt;= TO_DATE(#{prjStartTo}, 'YYYY-MM-DD')
+      </if>
+    </where>
+  </sql>
+
+  <!-- 구성원 목록 — Grid·Thymeleaf rows -->
+  <select id="selectProjectMemberList" resultType="com.example.demo.project.member.service.ProjectMemberRowVO">
+    SELECT
+      M.USER_ID AS userId,
+      M.GRP_ID AS grpId,
+      U.NAME AS userName,
+      U.TEL AS tel,
+      U.EMAIL AS email,
+      G.NAME AS grpName,
+      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+    FROM USERS U
+    JOIN MEMBER M ON U.ID = M.USER_ID
+    JOIN GRP G ON M.GRP_ID = G.ID
+    <include refid="memberListWhere"/>
+    ORDER BY M.USER_ID
+  </select>
+
+  <!-- 등록 화면 — 프로젝트명 -->
+  <select id="selectProjectNameByPrjId" resultType="string">
+    SELECT P.PRJ_NAME
+    FROM project P
+    WHERE P.ID = #{prjId}
+  </select>
+
+  <select id="selectMemberDetail" resultType="com.example.demo.project.member.service.MemberDetailVO">
+    SELECT
+      M.ID AS memberId,
+      M.USER_ID AS userId,
+      M.GRP_ID AS grpId,
+      G.PRJ_ID AS prjId,
+      U.NAME AS userName,
+      TO_CHAR(U.HIRE_DATE, 'YYYY-MM-DD') AS hireDate,
+      U.GENDER_CD AS genderCd,
+      U.EMAIL AS email,
+      U.TEL AS tel,
+      U.LOGIN AS login,
+      NULL AS lastLoginOn,
+      U.PW_UPDATED_ON AS pwUpdatedOn,
+      P.PRJ_NAME AS prjName,
+      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate,
+      TO_CHAR(M.PRJ_END_DATE, 'YYYY-MM-DD') AS prjEndDate,
+      G.NAME AS grpName
+    FROM MEMBER M
+    JOIN USERS U ON U.ID = M.USER_ID
+    JOIN GRP G ON G.ID = M.GRP_ID
+    LEFT JOIN project P ON P.ID = G.PRJ_ID
+    WHERE G.PRJ_ID = #{prjId}
+      AND M.USER_ID = #{userId}
+      AND M.GRP_ID = #{grpId}
+      AND M.PRJ_END_DATE IS NULL
+      AND G.STATUS_CD = '01ACTIVE'
+  </select>
+
+  <select id="selectMemberIssues" resultType="com.example.demo.project.member.service.MemberIssueRowVO">
+    SELECT
+      get_sub_code_name(I.PRIORITY_CD) AS priorityCd,
+      I.SUBJECT AS subject,
+      get_sub_code_name(I.CATEGORY_CD) AS categoryCd,
+      get_sub_code_name(I.STATUS_CD) AS statusCd,
+      NULL AS requesterName,
+      GET_USERID_TO_NAME(I.MEM_ID) AS assigneeName,
+      I.EST_START_DATE AS estStartDate,
+      I.DUE_DATE AS dueDate,
+      I.START_DATE AS startDate,
+      I.CLOSED_DATE AS closedDate,
+      I.DONE_RATIO AS doneRatio
+    FROM ISSUE I
+    WHERE I.PRJ_ID = #{prjId}
+      AND I.MEM_ID = (
+        SELECT M.ID
+        FROM MEMBER M
+        JOIN GRP G ON G.ID = M.GRP_ID
+        WHERE G.PRJ_ID = #{prjId}
+          AND M.USER_ID = #{userId}
+          AND M.GRP_ID = #{grpId}
+          AND M.PRJ_END_DATE IS NULL
+          AND G.STATUS_CD = '01ACTIVE'
+      )
+    ORDER BY I.PRIORITY_CD DESC, I.ID
+  </select>
+
+  <!-- 프로젝트에서 구성원 제거 — (USER_ID, GRP_ID) 복합키, prjId로 오삭제 방지 -->
+  <delete id="deleteMemberRows">
+    DELETE FROM MEMBER M
+    WHERE EXISTS (
+      SELECT 1 FROM GRP G WHERE G.ID = M.GRP_ID AND G.PRJ_ID = #{prjId}
+    )
+    AND (
+      <foreach collection="rows" item="r" separator=" OR ">
+        (M.USER_ID = #{r.userId} AND M.GRP_ID = #{r.grpId})
+      </foreach>
+    )
+  </delete>
+</mapper>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/compAdminLayout}">
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항 관리</title>
+    <style>
+        .container-fluid { font-size: 0.875rem; } /* 기본 14px 수준으로 축소 */
+        .form-control, .form-select { font-size: 0.85rem; padding: 0.4rem 0.75rem !important; }
+        textarea.form-control { font-size: 0.85rem; padding: 0.6rem 0.75rem !important; }
+        
+        .text-success-dark { color: #2e7d32 !important; }
+        
+        .btn-green { background-color: #66bb6a; color: white; border: none; border-radius: 50px; font-size: 0.85rem; padding: 0.4rem 1.2rem !important; }
+        .btn-green:hover { background-color: #43a047; color: white; }
+        .btn-outline-danger, .btn-light { font-size: 0.85rem; padding: 0.4rem 1rem !important; }
+        
+        .form-label { font-weight: 600; color: #495057; font-size: 0.825rem; margin-bottom: 0.3rem; }
+        .form-check-input:checked { background-color: #66bb6a; border-color: #66bb6a; }
+        .form-check-label { font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content" class="container-fluid py-3">
+
+    <div class="mb-3">
+
+        <h4 class="fw-bold text-success-dark mb-1" th:text="${notice.id != null} ? '공지사항 수정' : '공지사항 등록'">공지사항 등록</h4>
+        <p class="text-muted small mb-0">시스템에 표시될 공지사항 정보를 입력해 주세요.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-3">
+            <form th:action="${notice.id != null} ? @{/notice/modify} : @{/notice/insert}" 
+                  method="post" 
+                  enctype="multipart/form-data">
+                
+                <input type="hidden" name="id" th:value="${notice.id}">
+                <input type="hidden" name="prjId" th:value="${4}">
+                <input type="hidden" name="memId" th:value="${1}">
+                
+                <div class="mb-3 p-2.5 bg-light rounded-3 d-flex align-items-center" style="padding: 0.6rem 1rem !important;">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input style-checkbox" type="checkbox" role="switch" id="isFixed" name="isFixed" th:checked="${notice.isFixed == '01ACTIVE'}" value="01ACTIVE">
+                        <label class="form-check-label fw-bold text-dark ms-2" for="isFixed">이 공지사항을 목록 상단에 항상 고정합니다.</label>
+                    </div>
+                </div>
+
+                <div class="mb-2.5">
+                    <label class="form-label">제목 <span class="text-danger">*</span></label>
+                    <input type="text" name="title" class="form-control border-secondary-subtle" th:value="${notice.title}" placeholder="공지사항 제목을 입력하세요" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">내용</label>
+                    <textarea name="description" class="form-control border-secondary-subtle" rows="10" placeholder="공지사항 상세 내용을 작성하세요" th:text="${notice.description}"></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">첨부파일</label>
+                    <div class="input-group">
+                        <input type="file" name="file" class="form-control border-secondary-subtle">
+                    </div>
+                </div>
+
+                <hr class="text-secondary opacity-25 my-3">
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <button type="button" th:if="${notice.id != null}" class="btn btn-outline-danger px-3" style="border-radius: 50px;"
+                                th:onclick="|if(confirm('정말 삭제하시겠습니까?')) location.href='@{/notice/delete(id=${notice.id})}'|">삭제하기</button>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-light border px-3" style="border-radius: 50px;" th:onclick="|location.href='@{/notice/list}'|">취소</button>
+                        <button type="submit" class="btn btn-green shadow-sm px-4" th:text="${notice.id != null} ? '수정 완료' : '등록 완료'">등록 완료</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

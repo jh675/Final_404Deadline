@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.project.boards.mapper.BoardsMapper">
+
+<select id="selectAll" resultType="com.example.demo.project.boards.service.BoardsVO">
+ select *
+ FROM boards
+ where prj_id = #{prjId}
+ ORDER BY id DESC
+</select>
+
+<insert id="insert">
+insert into boards(
+		id, 
+		prj_id, 
+		name, 
+		description, 
+		topics_count
+		)
+values(
+		bd_seq.nextval, 
+		#{prjId}, 
+		#{name}, 
+		#{description},
+		0
+)
+</insert>
+
+<select id="selectOne" resultType="com.example.demo.project.boards.service.BoardsVO">
+ select *
+ from boards
+ where id = #{id}
+</select>
+
+<update id="update">
+update boards
+set 
+    prj_id = #{prjId}, 
+    name = #{name}, 
+    description = #{description}
+where id = #{id}
+</update>
+
+<delete id="delete">
+delete from boards
+where id = #{id}
+</delete>
+
+</mapper>

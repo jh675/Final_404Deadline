@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+		xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>프로젝트 생성</title>
+    <style>
+        .form-group { margin-bottom: 15px; }
+        .module-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 300px; }
+    </style>
+</head>
+<body>
+ <span><strong sec:authentication="principal.name"></strong>님</span>
+
+<form th:action="@{/management/projectcreate}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <h3>프로젝트 생성</h3>
+
+    <div class="form-group">
+        이름 <input type="text" class="form-control" name="prjName" required autocomplete="off">
+    </div>
+    <div class="form-group">
+        식별자 <input type="text" class="form-control" name="prjIdentifier" required autocomplete="off">
+    </div>
+    <div class="form-group" style="position: relative;">
+    프로젝트 매니저 
+    <input type="text" id="managerSearch" class="form-control" placeholder="이름 입력..." autocomplete="off">
+    <!-- 실제 서버로 전송될 숫자 ID값은 hidden에 저장 -->
+    <input type="hidden" name="userId" id="realUserId">
+    
+    <!-- 검색 결과가 나타날 드롭다운 박스 -->
+    <div id="userDropdown" style="
+    display:none; 
+    position:absolute; 
+    top: 100%;             /* 입력창 바로 아래에 붙도록 추가 */
+    left: 0;
+    width: 100%; 
+    background:white; 
+    border:1px solid #ccc; 
+    z-index: 9999; 
+    max-height:200px; 
+    overflow-y:auto;
+    color: black;
+	"></div>
+</div>
+    <div class="form-group">
+        설명 <textarea class="form-control" name="prjDesc"></textarea>
+    </div>
+    <div class="form-group">
+        상위프로젝트
+        <select name="prjParId">
+            <option value="">=== 선택 ===</option>
+            <option th:each="p : ${projectList}"
+                    th:value="${p.id}"
+                    th:text="${p.prjName}">프로젝트명</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        기본 모듈
+        <div class="module-container">
+            <label><input type="checkbox" name="moduleList" value="GANTT" checked> 간트차트</label>
+            <label><input type="checkbox" name="moduleList" value="CALENDAR" checked> 캘린더</label>
+            <label><input type="checkbox" name="moduleList" value="BOARD" checked> 게시판</label>
+            <label><input type="checkbox" name="moduleList" value="ISSUE" checked> 이슈</label>
+            <label><input type="checkbox" name="moduleList" value="WIKI" checked> 위키</label>
+            <label><input type="checkbox" name="moduleList" value="MILESTONE" checked> 마일스톤</label>
+            <label><input type="checkbox" name="moduleList" value="DOCS" checked> 문서</label>
+            <label><input type="checkbox" name="moduleList" value="NOTICE" checked> 공지사항</label>
+        </div>
+    </div>
+
+    <button type="submit">생성</button>
+    <a th:href="@{/management/project}">취소</a>
+</form>
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const managerSearch = document.getElementById('managerSearch');
+        const realUserId = document.getElementById('realUserId');
+        const dropdown = document.getElementById('userDropdown');
+
+        managerSearch.addEventListener('input', function() {
+            const term = this.value.trim();
+
+            if (term.length < 1) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            const searchUrl = /*[[@{/management/searchUsers}]]*/ '/management/searchUsers';	
+            // AJAX 호출
+           fetch(`${searchUrl}?term=${encodeURIComponent(term)}`)
+			    .then(response => {
+			        if (!response.ok) throw new Error('서버 에러 발생'); // 500 에러 등을 잡기 위함
+			        return response.json();
+			    })
+                .then(data => {
+                    dropdown.innerHTML = '';
+                    if (data && data.length > 0) {
+                        data.forEach(user => {
+                            const item = document.createElement('div');
+                            // userVO의 필드명(userName, id)을 확인하세요!
+                            item.textContent = `${user.name}`;
+                            item.style.padding = '8px 12px';
+                            item.style.cursor = 'pointer';
+                            item.style.borderBottom = '1px solid #eee';
+
+                            // 마우스 오버 효과
+                            item.onmouseover = () => item.style.backgroundColor = '#f8f9fa';
+                            item.onmouseout = () => item.style.backgroundColor = 'white';
+
+                            // 선택 이벤트
+                            item.onclick = function() {
+                            	managerSearch.value = user.name; // 화면에 보일 이름
+                                realUserId.value = user.id;          // 서버로 보낼 숫자 PK
+                                dropdown.style.display = 'none';
+                            };
+                            dropdown.appendChild(item);
+                        });
+                        dropdown.style.display = 'block';
+                    } else {
+                        dropdown.style.display = 'none';
+                    }
+                })
+                .catch(err => console.error('검색 중 오류 발생:', err));
+        });
+
+        // 다른 곳 클릭하면 드롭다운 닫기
+        document.addEventListener('click', function(e) {
+            if (!managerSearch.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>

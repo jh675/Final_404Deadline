@@ -1,0 +1,35 @@
+부트스트랩 모달 호출
+레이아웃에 부트스트랩 스타일 CDN (제일 위에 넣는 링크), 모달 호출을 위한 부트스트랩 자바스크립트 (제일 하단에 넣는 코드) 다 적용 완료
+
+각자 페이지를 만들면서 어떤 부분을 클릭했을 때 모달 생성이 필요하면 속성을 추가하는 것으로 간단히 나옴
+
+예시 (로그인 부분의 비밀번호 재설정을 눌렀을 때 모달창 표시)
+
+<a href="#" data-bs-toggle="modal" data-bs-target="#resetPwModal">비밀번호 재설정 </a>
+
+data-bs-toggle="modal" 이거는 부트스트랩 모달 속성이라 꼭 들어가야하고 (토글방식, 버튼이나 a태그 상관없이 적용 됨)
+data-bs-target="#resetPwModal" 의 "#resetPwModal" 이거는 커스텀하면 됨
+
+그리고 빈 공간에
+
+<div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
+
+를 적으면 됨. 레이아웃의 푸터 붙여넣는거랑 같은 개념인데 th:replace라서 항상 붙어나오는게 아니라 호출해야 생기는 방식
+login/modals/resetPw :: resetPwModal 에서 login/modal/resetPw는 모달 창 html 경로를 적어주고 resetPwModal 는 모달창 html에서  resetPwModal를 찾아서 연결하는 방식
+
+login/modals/resetPw.html 에서 모달창 화면을 따로 만들면 되는데 
+
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="resetPwModal">
+모달창 화면구성하기
+</div>
+</html>
+
+이런 식으로 레이아웃처럼  th:fragment="resetPwModal" 로 감싸줘야하고 resetPwModal라는 이름도 맞춰줘야함
+
+구현해둔 것 참고하려면
+
+/FinalProject/src/main/resources/templates/login 경로의 
+login.html이랑 modals/resetPw.html 참고하면 됨

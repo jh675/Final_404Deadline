@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<body>
+
+<th:block th:fragment="defaultMenu">
+
+	<li class="nav-item">
+		<a class="nav-link" th:href="@{/login}">
+			로그인화면
+		</a>
+	</li>
+
+</th:block>
+
+<th:block th:fragment="adminMenu">
+
+	<li class="nav-item">
+		<a class="nav-link" th:href="@{/admin/userList}">
+			회원관리
+		</a>
+	</li>
+
+</th:block>
+
+
+<th:block th:fragment="userMenu">
+
+	<li class="nav-item">
+		<a class="nav-link" th:href="@{/}">
+			마이페이지(링크없음)
+		</a>
+	</li>
+
+</th:block>
+
+
+<th:block th:fragment="companyMenu">
+
+	<li class="nav-item">
+		<a class="nav-link" th:href="@{/}">
+			회원관리(링크없음)
+		</a>
+	</li>
+
+</th:block>
+
+</body>
+</html>

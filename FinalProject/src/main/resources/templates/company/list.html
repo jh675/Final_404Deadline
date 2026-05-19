@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/compAdminLayout}">
+<head>
+<meta charset="UTF-8">
+<title>기업정보</title>
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script
+	src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
+
+<style>
+#grid {
+	width: 100%;
+}
+</style>
+
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<h2>기업리스트</h2>
+		<div class="d-flex justify-content-end mb-3">
+
+			<form class="d-flex" th:action="@{/company/list}" method="get">
+
+				<!-- 검색조건 -->
+				<select class="form-select me-2" name="searchType"
+					style="width: 150px;">
+
+					<option value="" th:selected="${company.searchType == null}">
+						선택</option>
+
+					<option value="bizNo"
+						th:selected="${company.searchType == 'bizNo'}">사업자번호</option>
+
+					<option value="companyName"
+						th:selected="${company.searchType == 'companyName'}">기업명
+					</option>
+
+					<option value="tel" th:selected="${company.searchType == 'tel'}">
+						전화번호</option>
+
+					<option value="address"
+						th:selected="${company.searchType == 'address'}">주소</option>
+
+				</select> <input class="form-control me-2" type="search" name="keyword"
+					placeholder="기업명 검색">
+
+				<button class="btn btn-success text-nowrap" type="submit">검색</button>
+
+			</form>
+
+		</div>
+
+		<div id="grid"></div>
+
+		<div class="d-flex justify-content-end">
+			<a class="btn btn-info text-nowrap" th:href="@{/company/form}"
+				type="submit">등록</a>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+		<script src="https://uicdn.toast.com/tui-grid/latest/tui-grid.js"></script>
+
+		<script th:inline="javascript">
+	const companyData = /*[[${companyList}]]*/ [];	
+    
+	const grid = new tui.Grid({
+		el: document.getElementById('grid'), 
+		autowidth: true,
+		scrollX: false,        // 가로 스크롤바 숨김
+		scrollY: false,        // 세로 스크롤바 숨김 (rowHeight × 행수 만큼 자동 확장)
+		bodyHeight: 'auto',    // 본문 높이를 데이터 양에 맞춰 자동 조절
+		rowHeight: 36,         // 한 행의 높이(px)
+		minBodyHeight: 100,    // 데이터 0건일 때 최소 높이(px)
+
+		data: companyData,
+		columns: [
+			 { header: '사업자번호', name: 'bizNo', width: 150 , align:'center',  sortable:true },
+			    { header: '기업명', name: 'companyName', width: 200, align:'center', sortable: true },
+			    { header: '전화번호', name: 'tel', width: 150, align:'center', sortable: true },
+			    { header: '주소', name: 'address', align:'center', sortable: true },
+			    { header: '활성여부',
+			        name: 'isActiveCd',
+			        width: 120, align:'center', sortable: true, 
+			        formatter: ({value}) => value === '01ACTIVE' ? '활성' : '비활성'
+			        },
+			    {  header: '생성일',
+			            name: 'createdOn',
+			            width: 120, align:'center', sortable: true, 
+			            formatter: ({ value }) => {
+			                if (!value) return '';
+			                return dayjs(value).format('YYYY.MM.DD');
+			            } },
+			    {  header: '수정',
+			        name: 'edit',
+			        width: 100, align:'center', sortable: true, 
+			        formatter: function() {
+			            return '<button class="btn btn-secondary btn-sm">수정</button>';
+		
+		
+			        } }
+
+		],
+		pageOptions: {
+			useClient: true,
+			perPage: 10
+
+			// ---- 아래는 pageOptions 에서 지원하지만 여기서는 쓰지 않는 옵션 예시 ----
+			// page: 1,
+			//   초기 활성 페이지 번호(1부터). 생략 시 1.
+			// visiblePages: 10,
+			//   페이지 번호 버튼을 한 번에 최대 몇 개까지 보일지 (Grid v4.14.0 이상).
+			// position: 'bottom',
+			//   페이징 바 위치. 'bottom'(기본값) | 'top'(그리드 상단).
+		}
+
+	});
+	grid.on('click', (ev) => {
+	    if (ev.rowKey == null) return;
+	    
+	    if (ev.columnName === 'edit') {
+	        const isButton = ev.nativeEvent && ev.nativeEvent.target.closest('button');
+	        
+	        if (isButton) {
+	            const row = grid.getRow(ev.rowKey); 
+	            if (row && row.bizNo) {
+	                location.href = '/company/form?bizNo=' + row.bizNo;
+	            }
+	        }
+	    }
+	});
+
+
+
+</script>
+	</div>
+</body>
+</html>

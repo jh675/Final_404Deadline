@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/userLayout}">
+<head>
+<meta charset="UTF-8">
+<title>테스트페이지</title>
+</head>
+<body>
+<div layout:fragment="content">
+<h1>유저 로그인 이후 메인페이지입니다.</h1>
+<h3>페이지 만들어지면 추가 예정</h3>
+
+<!-- <h3>아래는 userVO를 로그인 세션에서 가져와지는지 테스트</h3>
+<table>
+	<tr>
+		<td>식별자</td>
+		<td>기업번호</td>
+		<td>아이디</td>
+		<td>비밀번호</td>
+		<td>이름</td>
+		<td>전화번호</td>
+		<td>이메일</td>
+		<td>계정권한</td>
+		<td>상태</td>
+		<td>생성날짜</td>
+		<td>비밀번호 최근변경</td>
+		<td>비번 변경 필요</td>
+		<td>프로젝트 생성 권한</td>
+	</tr>
+	<tr>
+    	<td th:text="${user.id}"></td>
+    	<td th:text="${user.bizNo}"></td>
+    	<td th:text="${user.login}"></td>
+    	<td th:text="${user.password}"></td>
+    	<td>비밀번호</td>
+    	<td th:text="${user.name}"></td>
+    	<td th:text="${user.tel}"></td>
+    	<td th:text="${user.email}"></td>
+    	<td th:text="${user.adminCd}"></td>
+    	<td th:text="${user.statusCd}"></td>
+    	<td th:text="${user.createdOn}"></td>
+    	<td th:text="${user.pwUpdatedOn}"></td>
+    	<td th:text="${user.mcpCd}"></td>
+    	<td th:text="${user.prjManagerCd}"></td>
+  	</tr>
+</table>
+ -->
+</div>
+</body>
+</html>

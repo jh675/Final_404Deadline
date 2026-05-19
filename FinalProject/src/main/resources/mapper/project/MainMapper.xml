@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.example.demo.project.main.mapper.MainMapper">
+ 
+ <select id="issueBugFinishCount" resultType="int" >
+ 	select count(category_cd) 
+ 	from issue 
+ 	where category_cd='01ISSUECATE' and status_cd= '04ISSUESTAT' and prj_id=1001
+ </select>
+ <select id="issueBugOngoingCount" resultType="int" >
+ 	select count(category_cd) 
+	from issue 
+	where category_cd='01ISSUECATE' and status_cd= '01ISSUESTAT' or status_cd= '02ISSUESTAT' or status_cd= '03ISSUESTAT' and prj_id=1001;
+ </select>
+ 
+ <select id="issueFunctionFinishCount" resultType="int" >
+ 	select count(category_cd) 
+ 	from issue 
+ 	where category_cd='02ISSUECATE' and status_cd= '04ISSUESTAT' and prj_id=1001
+ </select>
+ <select id="issueFunctionOngoingCount" resultType="int" >
+ 	select count(category_cd) 
+	from issue 
+	where category_cd='02ISSUECATE' and status_cd= '01ISSUESTAT' or status_cd= '02ISSUESTAT' or status_cd= '03ISSUESTAT' and prj_id=1001;
+ </select>
+ 
+ <select id="issueWorkFinishCount" resultType="int" >
+ 	select count(category_cd) 
+ 	from issue 
+ 	where category_cd='03ISSUECATE' and status_cd= '04ISSUESTAT' and prj_id=1001
+ </select>
+ <select id="issueWorkOngoingCount" resultType="int" >
+ 	select count(category_cd) 
+	from issue 
+	where category_cd='03ISSUECATE' and status_cd= '01ISSUESTAT' or status_cd= '02ISSUESTAT' or status_cd= '03ISSUESTAT' and prj_id=1001;
+ </select>
+ 
+ <select id="issueImpFinishCount" resultType="int" >
+ 	select count(category_cd) 
+ 	from issue 
+ 	where category_cd='04ISSUECATE' and status_cd= '04ISSUESTAT' and prj_id=1001
+ </select>
+ <select id="issueImpOngoingCount" resultType="int" >
+ 	select count(category_cd) 
+	from issue 
+	where category_cd='04ISSUECATE' and status_cd= '01ISSUESTAT' or status_cd= '02ISSUESTAT' or status_cd= '03ISSUESTAT' and prj_id=1001;
+ </select>
+ 
+
+ 
+ </mapper>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="calenderAddModal">
+
+
+		
+			<!-- ===== 일정 변경/삭제 모달 ===== -->
+<div class="modal fade" id="updateModalOverlay" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">일정변경/삭제</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+            <!-- <input id="test01"/> -->
+						<div class="row mb-3">
+							<div class="col">
+								<label class="form-label">시작 날짜</label> <input type="date"
+									id="ins_startDate" class="form-control bg-light" readonly>
+								<div class="form-text">시작일은 선택한 날짜로 고정됩니다.</div>
+							</div>
+
+							<div class="col">
+								<label class="form-label">종료 날짜</label> <input type="date"
+									id="ins_endDate" class="form-control" min="">
+							</div>
+						</div>
+						<div class="form-row">
+					<label class="form-label">일정장소 <span></span></label> <input
+						type="text" class="form-input" id="ins_place"
+						placeholder="텍스트를 입력해 주세요." />
+				</div>
+						
+						<div class="form-row">
+					<label class="form-label">일정 내용</label> <input type="text"
+						class="form-input" id="ins_calText" placeholder="텍스트를 입력해 주세요." />
+				</div>
+				<div class="form-row">
+					<div class="checkbox-row">
+					    <label class="form-label" style="margin: 0;">일정유형</label> 
+						<select name="typeCd"
+							class="form-select" id="ins_typeCd" style="width: auto;">
+							<option value="">선택</option>
+							<option value="01CALTYPE">개인일정</option>
+							<option value="02CALTYPE">그룹일정</option>
+							<option value="03CALTYPE">회사일정</option>
+						</select>
+					     <label class="form-label" style="margin: 0;">공유여부</label> 
+						 <label class="checkbox-label"> 
+						 <input type="radio"
+						 	name="sharingCd" 
+						 	value="02CALSHARE"
+							id="ins_sharingMe" checked/> 나만보기
+						</label> 
+						<label class="checkbox-label"> 
+						<input type="radio" 
+						    name="sharingCd"
+						    value="01CALSHARE"
+							id="ins_sharingAll"  /> 전체 공유
+						</label>
+					</div>
+				</div>
+
+				<!-- 일정 등록 모달창 -->
+				
+				<input type="hidden" id="ins_selectedStartDate">
+				<input type="hidden" id="ins_selectedEndDate">
+				
+				<div class="form-row">
+					<div class="time-row">
+						<span class="time-label">시작시간</span> <select class="form-select"
+							id="ins_calStart">
+							<option value="">선택</option>
+							<option value="09:00:00">오전 09:00</option>
+							<option value="09:15:00">오전 09:15</option>
+        				    <option value="09:30:00">오전 09:30</option>
+						    <option value="10:00:00">오전 10:00</option>
+						    <option value="10:00:00">오전 10:15</option>
+						    <option value="10:00:00">오전 10:30</option>
+						    <option value="11:00:00">오전 11:00</option>
+							<option value="12:00:00">오후 12:00</option>
+							<option value="13:00:00">오후 01:00</option>
+							<option value="13:00:00">오후 02:00</option>
+							<option value="13:00:00">오후 03:00</option>
+							<option value="13:00:00">오후 04:00</option>
+							<option value="13:00:00">오후 05:00</option>
+							<option value="13:00:00">오후 06:00</option>
+
+								</select> <span class="time-label">종료시간</span> <select class="form-select"
+							id="ins_calEnd">
+							<option value="">선택</option>
+							<option value="09:00:00">오전 09:00</option>
+							<option value="09:15:00">오전 09:15</option>
+        				    <option value="09:30:00">오전 09:30</option>
+						    <option value="10:00:00">오전 10:00</option>
+						    <option value="10:00:00">오전 10:15</option>
+						    <option value="10:00:00">오전 10:30</option>
+						    <option value="11:00:00">오전 11:00</option>
+							<option value="12:00:00">오후 12:00</option>
+							<option value="13:00:00">오후 01:00</option>
+							<option value="13:00:00">오후 02:00</option>
+							<option value="13:00:00">오후 03:00</option>
+							<option value="13:00:00">오후 04:00</option>
+							<option value="13:00:00">오후 05:00</option>
+							<option value="13:00:00">오후 06:00</option>
+							
+						</select>
+					</div>
+				</div>
+            
+            </div>
+            
+            <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button class="btn btn-primary" onclick="insertEvent()">확인</button>
+			</div>
+          </div>
+		</div>
+</div>
+<!-- ===== 안내 매새지 모달창 부분 ===== -->
+<div class="modal fade" id="alertModalOverlay" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"> <div class="modal-content">
+            
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel">안내 메시지</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="alert-msg" id="alertMsg">
+                    </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="alertConfirmBtn" data-bs-dismiss="modal">확인</button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<!-- ===== 일정 삭제 확인모달창 부분 ===== -->
+<div class="modal fade" id="deleteConfirmOverlay" tabindex="-1" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmLabel">안내 메시지</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body text-center py-4">
+                <p class="mb-0">일정을 삭제 하시겠습니까?</p>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-danger" onclick="deleteEvent()">삭제</button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+</div>
+</html>

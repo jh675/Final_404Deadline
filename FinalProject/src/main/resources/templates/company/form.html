@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/compAdminLayout}">
+<head>
+<meta charset="UTF-8">
+<title>기업정보등록/수정</title>
+</head>
+<body>
+<div layout:fragment="content">
+<h2>기업정보등록/수정</h2>
+
+<form th:action="@{/company/insert}" method="post">
+
+    <div>
+        <label>사업자번호:</label>
+        <input type="text" name="bizNo" placeholder="000-00-00000">
+    </div>
+
+    <div>
+        <label>기업명:</label>
+        <input type="text" name="companyName" placeholder="기업명 입력">
+    </div>
+
+    <div>
+        <label>전화번호:</label>
+        <input type="text" name="tel" placeholder="02-1234-5678">
+    </div>
+    
+    <div>
+        <label>주소:</label>
+        <input type="text" name="address" placeholder="대구 중구 국채보상로">
+    </div>
+    
+    <div>
+        <label>활성여부:</label>
+        <input type="text" name="isActiveCd" placeholder="활성">
+    </div>
+
+    <div>
+        <button type="submit">등록하기</button>
+    </div>
+
+</form>
+
+
+
+</body>
+</div>
+</html>
