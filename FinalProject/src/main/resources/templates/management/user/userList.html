@@ -5,10 +5,10 @@
 	layout:decorate="~{layout/sysAdminLayout}">
 <head>
 <title>회원관리(sysadmin)</title>
-	<link rel="stylesheet"
-		href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
-	<link rel="stylesheet"
-		href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 </head>
 <body>
 	<div layout:fragment="content">
@@ -18,10 +18,8 @@
 				th:object="${filter01}" class="d-flex align-items-end gap-3 mb-3">
 
 				<div>
-					<label for="categoryCd" class="form-label">계정 권한</label> 
-					<select id="categoryCd" 
-							th:field="*{adminCd}" 
-							class="form-select">
+					<label for="categoryCd" class="form-label">계정 권한</label> <select
+						id="categoryCd" th:field="*{adminCd}" class="form-select">
 
 						<option value="">미선택</option>
 						<option value="01ROLE">시스템관리자</option>
@@ -37,13 +35,11 @@
 		</div>
 
 		<div class="d-flex justify-content-end mb-3">
-			<button type="button" class="btn btn-primary" data-bs-toggle="modal"
-				data-bs-target="#resetPwModal"
-				onclick="location.href='/admin/userManage/insert'">회원 등록</button>
+			<button type="button" class="btn btn-primary" onclick="openInsertModal()">회원 등록</button>
 		</div>
 		<div id="grid"></div>
 
-		<div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
+		<div th:replace="~{management/modal/userInsert :: userInsert}"></div>
 
 		<script th:inline="javascript">
 			const userData = /*[[${userList}]]*/[];

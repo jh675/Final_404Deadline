@@ -22,9 +22,12 @@ public class UserManageVO {
 	private String bizNo;
 	private String compNm;
 	private String login;
+	private String password;
 	private String name;
 	private String tel;
 	private String email;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date hireDate;
 	private String genderCd;
 	private String genderNm;
@@ -42,4 +45,6 @@ public class UserManageVO {
 	private String mcpNm;
 	private String prjManagerCd;
 	private String prjManagerNm;
+	
+	private String result;
 }

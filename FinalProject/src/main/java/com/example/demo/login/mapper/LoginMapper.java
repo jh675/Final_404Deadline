@@ -6,6 +6,6 @@ import com.example.demo.login.service.UserVO;
 
 @Mapper
 public interface LoginMapper {
-	UserVO selectOne(String loginId);
+	UserVO selectOne(UserVO vo);
 	int updatePassword(UserVO user);
 }

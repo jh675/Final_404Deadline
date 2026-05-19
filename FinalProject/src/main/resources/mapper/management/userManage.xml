@@ -33,4 +33,49 @@
 		</where>
 		ORDER BY ID
 	</select>
+	
+	<insert id="insertUser"
+        statementType="CALLABLE">
+	
+	    { CALL PROC_USER_INSERT(
+	
+	        #{bizNo},
+	        #{login},
+	        #{password},
+	        #{name},
+	        #{tel},
+	        #{email},
+	        #{adminCd},
+	        #{statusCd},
+	        #{prjManagerCd},
+			#{hireDate, jdbcType=DATE},
+        	#{genderCd},
+	
+	        #{result, mode=OUT, jdbcType=VARCHAR}
+	
+	    ) }
+
+	</insert>
+
+	<update id="updateUser">
+	    UPDATE USERS
+	    SET
+	        BIZ_NO = #{bizNo},
+	        NAME = #{name},
+	        TEL = #{tel},
+	        EMAIL = #{email},
+	        ADMIN_CD = #{adminCd},
+	        STATUS_CD = #{statusCd},
+	        PRJ_MANAGER_CD = #{prjManagerCd}
+	    WHERE ID = #{id}
+	</update>
+	
+	<select id="selectCompanyList">
+        SELECT	BIZ_NO
+               ,COMPANY_NAME
+        FROM 	COMPANY
+        WHERE 	IS_ACTIVE_CD = '01ACTIVE'
+        ORDER BY COMPANY_NAME
+
+    </select>
 </mapper>
