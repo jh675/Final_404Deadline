@@ -187,6 +187,58 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 });
 
+document.getElementById('uploadBtn').addEventListener('click', function () {
+    document.getElementById('profileImage').click();
+});
+
+document.getElementById('profileImage').addEventListener('change', async function () {
+
+	const file = this.files[0];
+	   if (!file) return;
+
+	   const userId = document.getElementById("userId").value; // 핵심
+
+	   const formData = new FormData();
+	   formData.append("userId", userId);
+	   formData.append("file", file);
+
+	   const res = await csrfFetch("/admin/user/profile", {
+	       method: "POST",
+	       body: formData
+	   });
+
+	   if (res.ok) {
+	       alert("프로필 등록 완료");
+	       location.reload();
+	   }
+});
+
+document.getElementById('deleteImageBtn').addEventListener('click', async function () {
+
+    const userId = document.getElementById("userId").value;
+
+    const res = await csrfFetch(`/admin/user/profile/${userId}`, {
+        method: "DELETE"
+    });
+
+    if (res.ok) {
+        alert("삭제 완료");
+        location.reload();
+    }
+});
+
+const img = document.getElementById("profilePreview");
+
+csrfFetch(`/admin/user/profile/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+        if (data) {
+            img.src = `/download/${data.id}`;
+            img.classList.remove("d-none");
+            document.getElementById("emptyImageText").style.display = "none";
+        }
+    });
+	
 document.getElementById('bizNo').addEventListener('change', function() {
     document.getElementById('bizNoView').value = this.value;
 });
