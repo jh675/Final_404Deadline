@@ -1,15 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    //   csrf
     const csrfMeta = document.querySelector('meta[name="_csrf"]');
-
     const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
 
     if (!csrfMeta || !csrfHeaderMeta) {
         return;
     }
 
-    const bizNo = document.querySelector('#bizNo');
+    // 화면 타겟 설정
+    const resetBizNo = document.querySelector('#resetBizNo');
+    const resetCompanyNameInput = document.querySelector('#resetCompanyNameInput');
+    const resetCompanyDropdown = document.querySelector('#resetCompanyDropdown');
+    
     const login = document.querySelector('#login');
     const email = document.querySelector('#email');
     const verifyNum = document.querySelector('#verifyNum');
@@ -22,26 +24,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const newPassword = document.querySelector('#newPassword');
     const newPasswordCheck = document.querySelector('#newPasswordCheck');
     const passwordError = document.querySelector('#passwordError');
-	const resultMsg = document.querySelector('#resultMsg');
+    const resultMsg = document.querySelector('#resultMsg');
 
-    //메시지 출력
+    // 기업 검색 및 자동완성 로직
+    let resetDebounceTimer;
+
+    resetCompanyNameInput.addEventListener('input', function(e) {
+        const keyword = e.target.value.trim();
+        resetBizNo.value = ''; // 타이핑 수정 시 hidden 기업번호 초기화
+
+        if (keyword.length === 0) {
+            resetCompanyDropdown.style.display = 'none';
+            resetCompanyDropdown.innerHTML = '';
+            return;
+        }
+
+        clearTimeout(resetDebounceTimer);
+        resetDebounceTimer = setTimeout(() => {
+            fetch(`/login/companies/search?keyword=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(data => {
+                    resetCompanyDropdown.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(company => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item list-group-item-action cursor-pointer';
+                            li.style.cursor = 'pointer';
+                            li.textContent = company.companyName;
+
+                            li.addEventListener('click', function() {
+                                resetCompanyNameInput.value = company.companyName;
+                                resetBizNo.value = company.bizNo;
+                                resetCompanyDropdown.style.display = 'none';
+                            });
+                            resetCompanyDropdown.appendChild(li);
+                        });
+                        resetCompanyDropdown.style.display = 'block';
+                    } else {
+                        resetCompanyDropdown.innerHTML = '<li class="list-group-item text-muted">검색 결과가 없습니다.</li>';
+                        resetCompanyDropdown.style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }, 300);
+    });
+
+    // 외부 클릭 시 드롭다운 닫기
+    document.addEventListener('click', function(e) {
+        if (!resetCompanyNameInput.contains(e.target) && !resetCompanyDropdown.contains(e.target)) {
+            resetCompanyDropdown.style.display = 'none';
+        }
+    });
+
     function showMessage(message, type) {
         messageArea.className = `alert alert-${type}`;
         messageArea.textContent = message;
     }
 
-    //	메시지 숨김
     function clearMessage() {
         messageArea.className = 'alert d-none';
         messageArea.textContent = '';
     }
 
-    //	경고기능
     function validateSendForm() {
         clearMessage();
-        if (!bizNo.value.trim()) {
-            showMessage('기업번호를 입력하세요.', 'danger');
-            bizNo.focus();
+        
+        // ⭐ 유효성 검사 기준 변경 (hidden 값 체크)
+        if (!resetBizNo.value.trim()) {
+            showMessage('기업을 검색하여 선택해주세요.', 'danger');
+            resetCompanyNameInput.focus();
             return false;
         }
 
@@ -60,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    //		인증번호 발송
     sendBtn.addEventListener('click', async () => {
         try {
             if (!validateSendForm()) {
@@ -73,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    bizNo: bizNo.value,
+                    bizNo: resetBizNo.value, // ⭐ 수정됨
                     login: login.value,
                     email: email.value
                 })
@@ -97,14 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(error);
-            showMessage(
-                '서버 통신 중 오류가 발생했습니다.',
-                'danger'
-            );
+            showMessage('서버 통신 중 오류가 발생했습니다.', 'danger');
         }
     });
 
-    //		인증번호 확인
     verifyBtn.addEventListener('click', async () => {
         try {
             if (!verifyNum.value.trim()) {
@@ -124,10 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     verifyNum: verifyNum.value
                 })
             });
+            
             if (!response.ok) {
                 throw new Error('서버 오류');
             }
             const result = await response.text();
+            
             if (result === 'success') {
                 passwordArea.classList.remove('d-none');
                 confirmBtn.classList.remove('d-none');
@@ -147,8 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 입력창에 입력되면 경고문구 지우기
-    [bizNo, login, email, verifyNum].forEach(e => {
+    // ⭐ 경고문구 지우기 타겟 변경
+    [resetCompanyNameInput, login, email, verifyNum].forEach(e => {
         e.addEventListener('input', () => {
             clearMessage();
         });
@@ -159,11 +207,11 @@ document.addEventListener('DOMContentLoaded', () => {
         passwordError.classList.remove('d-none');
     }
 
-	function showResultmsg (message) {
-	    resultMsg.textContent = message;
-	    resultMsg.classList.remove('d-none');
-	}
-	
+    function showResultmsg(message) {
+        resultMsg.textContent = message;
+        resultMsg.classList.remove('d-none');
+    }
+    
     function clearPasswordMsg() {
         passwordError.textContent = '';
         resultMsg.textContent = '';
@@ -175,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             clearPasswordMsg();
 
-            // 빈값 체크
             if (!newPassword.value.trim()) {
                 showPasswordError('새 비밀번호를 입력하세요.');
                 newPassword.focus();
@@ -186,13 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 newPasswordCheck.focus();
                 return;
             }
-
-            // 비밀번호 비교
             if (newPassword.value !== newPasswordCheck.value) {
                 showPasswordError('비밀번호가 일치하지 않습니다.');
                 newPasswordCheck.focus();
                 return;
             }
+            
             confirmBtn.disabled = true;
 
             const response = await csrfFetch('/email/resetPw', {
@@ -201,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    bizNo: bizNo.value,
+                    bizNo: resetBizNo.value, // ⭐ 수정됨
                     login: login.value,
                     password: newPassword.value
                 })
@@ -216,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result === 'success') {
                 showResultmsg('비밀번호가 변경되었습니다.');
                 confirmBtn.disabled = true;
-
             } else {
                 showResultmsg('비밀번호 변경에 실패했습니다.');
                 confirmBtn.disabled = false;
@@ -232,32 +277,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // 모달 초기화
     const resetPwModal = document.querySelector('#resetPwModal');
     resetPwModal.addEventListener('hidden.bs.modal', () => {
-        // 입력값 초기화
-        bizNo.value = '';
+        
+        // ⭐ 새로 추가된 인풋들 및 드롭다운 초기화
+        resetCompanyNameInput.value = '';
+        resetBizNo.value = '';
+        resetCompanyDropdown.innerHTML = '';
+        resetCompanyDropdown.style.display = 'none';
+        
         login.value = '';
         email.value = '';
         verifyNum.value = '';
 
-        const newPassword = document.querySelector('#newPassword');
-        const newPasswordCheck = document.querySelector('#newPasswordCheck');
         newPassword.value = '';
         newPasswordCheck.value = '';
 
-        // 메시지 초기화
         clearMessage();
-
-        // 영역 숨김
         verifyArea.classList.add('d-none');
         passwordArea.classList.add('d-none');
         confirmBtn.classList.add('d-none');
-		clearPasswordMsg();
-		
-        // 버튼 상태 초기화
+        clearPasswordMsg();
+        
         sendBtn.disabled = false;
         verifyBtn.disabled = false;
-		confirmBtn.disabled = false;
-		
-        // 인증 버튼 텍스트 원상복구
+        confirmBtn.disabled = false;
+        
         sendBtn.textContent = '인증요청';
         verifyBtn.textContent = '인증';
     });

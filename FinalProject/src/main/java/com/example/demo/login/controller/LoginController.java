@@ -8,11 +8,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.demo.company.service.CompanyVO;
+import com.example.demo.login.service.LoginService;
 import com.example.demo.login.service.UserVO;
 
+import lombok.RequiredArgsConstructor;
+
 @Controller
+@RequiredArgsConstructor
 public class LoginController {
+	private final LoginService loginService;
 	
 	@GetMapping("/")
 	public String main(Model model) {
@@ -56,6 +64,15 @@ public class LoginController {
   	
 //	    userVO 꺼내서 쓰는 방법 > 회의록 밑의 개발표준 9번 확인
 	    
+	}
+	
+	@GetMapping("/login/companies/search")
+	@ResponseBody
+	public List<CompanyVO> searchCompanies(@RequestParam("keyword") String keyword) {
+	    if (keyword == null || keyword.trim().isEmpty()) {
+	        return List.of(); // 빈 리스트 반환
+	    }
+	    return loginService.searchActiveCompanies(keyword);
 	}
 
 }

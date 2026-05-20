@@ -67,7 +67,8 @@
 			#{hireDate, jdbcType=DATE},
         	#{genderCd},
 	
-	        #{result, mode=OUT, jdbcType=VARCHAR}
+	        #{result, mode=OUT, jdbcType=VARCHAR},
+	        #{id, mode=OUT, jdbcType=NUMERIC, javaType=java.lang.Long}
 	
 	    ) }
 

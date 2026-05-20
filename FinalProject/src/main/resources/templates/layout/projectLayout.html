@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultLayout}">
+
+<head>
+    <th:block layout:fragment="head-content"></th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        
+        <div class="project-header mb-4">
+            <!-- 프로젝트 제목 -->
+            <div class="d-flex justify-content-between align-items-end mb-3 border-bottom pb-2">
+                <h4 class="m-0 fw-bold" th:text="${project != null ? project.prjName : '프로젝트 명'}"></h4>
+            </div>
+
+            <!-- 서브 메뉴 탭 -->
+            <ul class="nav nav-tabs">
+                
+                <!-- (기본으로 항상 있는 항목) -->
+                <li class="nav-item">
+                    <a class="nav-link" 
+                       th:classappend="${currentMenu == 'dashboard' ? 'active fw-bold' : ''}" 
+                       th:href="@{#}">
+                        개요
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" 
+                       th:classappend="${currentMenu == 'history' ? 'active fw-bold' : ''}" 
+                       th:href="@{#}">
+                        작업내역
+                    </a>
+                </li>
+
+                <!-- DB에서 가져온 활성화 모듈을 반복하면서 메뉴 그리기 -->
+                <li class="nav-item" th:each="mod : ${moduleList}">
+
+                    <!-- ENA_NAME_CD가 'NOTICE'면 공지사항 탭 생성 -->
+                    <a th:if="${mod.enaNameCd == 'NOTICE'}" 
+                       class="nav-link" 
+                       th:classappend="${currentMenu == 'notice' ? 'active fw-bold' : ''}" 
+                       th:href="@{/notice/list}">공지사항</a>
+
+                    <a th:if="${mod.enaNameCd == 'WIKI'}" 
+                       class="nav-link" 
+                       th:classappend="${currentMenu == 'wiki' ? 'active fw-bold' : ''}" 
+                       th:href="@{#}">위키</a>
+
+                    <a th:if="${mod.enaNameCd == 'ISSUE'}" 
+                       class="nav-link" 
+                       th:classappend="${currentMenu == 'issue' ? 'active fw-bold' : ''}" 
+                       th:href="@{/issue/list}">이슈</a>
+
+                    <a th:if="${mod.enaNameCd == 'MILESTONE'}" 
+                       class="nav-link" 
+                       th:classappend="${currentMenu == 'milestone' ? 'active fw-bold' : ''}" 
+                       th:href="@{/milestone}">마일스톤</a>
+                    
+                    <a th:if="${mod.enaNameCd == 'BOARD'}" 
+                       class="nav-link" 
+                       th:classappend="${currentMenu == 'board' ? 'active fw-bold' : ''}" 
+                       th:href="@{/boards/list}">게시판</a>
+                       
+                    <a th:if="${mod.enaNameCd == 'GANTT'}" 
+                       class="nav-link" 
+                       th:classappend="${currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
+                       th:href="@{#}">간트차트</a>
+
+                    <a th:if="${mod.enaNameCd == 'CALENDAR'}" 
+                       class="nav-link" 
+                       th:classappend="${currentMenu == 'calendar' ? 'active fw-bold' : ''}" 
+                       th:href="@{/calender/list}">일정</a>
+                       
+                    <a th:if="${mod.enaNameCd == 'DOCS'}" 
+                       class="nav-link" 
+                       th:classappend="${currentMenu == 'docs' ? 'active fw-bold' : ''}" 
+                       th:href="@{#}">문서</a> 
+                </li>
+            </ul>
+        </div>
+
+        <!-- 실제 본문(이슈, 위키 등)이 들어갈 영역 -->
+        <div layout:fragment="project-content">
+        </div>
+
+    </div>
+
+</body>
+</html>

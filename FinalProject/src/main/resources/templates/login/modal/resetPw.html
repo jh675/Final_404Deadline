@@ -16,10 +16,21 @@
 					<div class="modal-body">
 
 						<!-- 기업번호 -->
-						<div class="mb-3">
-							<label class="form-label">기업번호</label> <input type="text"
-								id="bizNo" class="form-control"> <small id="bizNoError"
-								class="text-danger d-none"></small>
+						<div class="mb-3 position-relative">
+						   <label class="form-label">소속 기업명</label> 
+						   
+						   <!-- 화면에 보여지는 검색창 -->
+						   <input type="text" id="resetCompanyNameInput" class="form-control" placeholder="기업명을 검색하세요" autocomplete="off">
+						   
+						   <!-- 실제 전송되는 기업번호 (hidden) -->
+						   <input type="hidden" id="resetBizNo">
+						   
+						   <!-- 자동완성 드롭다운 -->
+						   <ul id="resetCompanyDropdown" class="list-group position-absolute w-100 shadow" 
+						       style="display: none; z-index: 1100; max-height: 200px; overflow-y: auto;">
+						    </ul>
+						    
+						    <small id="bizNoError" class="text-danger d-none"></small>
 						</div>
 
 						<!-- 아이디 -->

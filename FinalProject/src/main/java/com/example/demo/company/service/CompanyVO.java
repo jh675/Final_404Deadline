@@ -9,7 +9,6 @@ import lombok.Setter;
 @Data
 @Getter
 @Setter
-
 public class CompanyVO {
 	
 	private String bizNo;
