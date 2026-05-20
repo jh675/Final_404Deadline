@@ -3,50 +3,61 @@
  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
  <mapper namespace="com.example.demo.project.main.mapper.MainMapper">
  
- <select id="issueBugFinishCount" resultType="int" >
- 	select count(category_cd) 
- 	from issue 
- 	where category_cd='01ISSUECATE' and status_cd= '04ISSUESTAT' and prj_id=1001
- </select>
- <select id="issueBugOngoingCount" resultType="int" >
- 	select count(category_cd) 
-	from issue 
-	where category_cd='01ISSUECATE' and status_cd= '01ISSUESTAT' or status_cd= '02ISSUESTAT' or status_cd= '03ISSUESTAT' and prj_id=1001;
+ <select id="issueCount" resultType="com.example.demo.project.main.service.IssueCountVO">
+ 	SELECT
+    SUM(CASE
+            WHEN STATUS_CD = '01ISSUESTAT'
+             AND PRIORITY_CD != '04ISSUEPRI'
+            THEN 1 ELSE 0
+        END) AS bGoCount,
+
+    SUM(CASE
+            WHEN STATUS_CD = '01ISSUESTAT'
+             AND PRIORITY_CD = '04ISSUEPRI'
+            THEN 1 ELSE 0
+        END) AS bEndCount,
+
+    SUM(CASE
+            WHEN STATUS_CD = '02ISSUESTAT'
+             AND PRIORITY_CD != '04ISSUEPRI'
+            THEN 1 ELSE 0
+        END) AS fGoCount,
+
+    SUM(CASE
+            WHEN STATUS_CD = '02ISSUESTAT'
+             AND PRIORITY_CD = '04ISSUEPRI'
+            THEN 1 ELSE 0
+        END) AS fEndCount,
+
+    SUM(CASE
+            WHEN STATUS_CD = '03ISSUESTAT'
+             AND PRIORITY_CD != '04ISSUEPRI'
+            THEN 1 ELSE 0
+        END) AS wGoCount,
+
+    SUM(CASE
+            WHEN STATUS_CD = '03ISSUESTAT'
+             AND PRIORITY_CD = '04ISSUEPRI'
+            THEN 1 ELSE 0
+        END) AS wEndCount,
+
+    SUM(CASE
+            WHEN STATUS_CD = '04ISSUESTAT'
+             AND PRIORITY_CD != '04ISSUEPRI'
+            THEN 1 ELSE 0
+        END) AS iGoCount,
+
+    SUM(CASE
+            WHEN STATUS_CD = '04ISSUESTAT'
+             AND PRIORITY_CD = '04ISSUEPRI'
+            THEN 1 ELSE 0
+        END) AS iEndCount
+
+	FROM issue
+	WHERE prj_id = #{prjId}
  </select>
  
- <select id="issueFunctionFinishCount" resultType="int" >
- 	select count(category_cd) 
- 	from issue 
- 	where category_cd='02ISSUECATE' and status_cd= '04ISSUESTAT' and prj_id=1001
- </select>
- <select id="issueFunctionOngoingCount" resultType="int" >
- 	select count(category_cd) 
-	from issue 
-	where category_cd='02ISSUECATE' and status_cd= '01ISSUESTAT' or status_cd= '02ISSUESTAT' or status_cd= '03ISSUESTAT' and prj_id=1001;
- </select>
- 
- <select id="issueWorkFinishCount" resultType="int" >
- 	select count(category_cd) 
- 	from issue 
- 	where category_cd='03ISSUECATE' and status_cd= '04ISSUESTAT' and prj_id=1001
- </select>
- <select id="issueWorkOngoingCount" resultType="int" >
- 	select count(category_cd) 
-	from issue 
-	where category_cd='03ISSUECATE' and status_cd= '01ISSUESTAT' or status_cd= '02ISSUESTAT' or status_cd= '03ISSUESTAT' and prj_id=1001;
- </select>
- 
- <select id="issueImpFinishCount" resultType="int" >
- 	select count(category_cd) 
- 	from issue 
- 	where category_cd='04ISSUECATE' and status_cd= '04ISSUESTAT' and prj_id=1001
- </select>
- <select id="issueImpOngoingCount" resultType="int" >
- 	select count(category_cd) 
-	from issue 
-	where category_cd='04ISSUECATE' and status_cd= '01ISSUESTAT' or status_cd= '02ISSUESTAT' or status_cd= '03ISSUESTAT' and prj_id=1001;
- </select>
- 
+  
 
  
  </mapper>

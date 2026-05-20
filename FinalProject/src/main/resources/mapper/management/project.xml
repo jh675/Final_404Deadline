@@ -75,7 +75,7 @@
    SELECT grp_seq.NEXTVAL FROM dual
    </selectKey>
 	insert into grp (id,prj_id,name,status_cd)
-	values (#{grpId},#{prjId},'기본 그룹','01ACTIVE')
+	values (#{grpId},#{prjId},'관리 그룹','01ACTIVE')
 </insert>
 
 
@@ -94,9 +94,18 @@
 		select role_seq.NEXTVAL FROM dual
 	</selectKey>
 	INSERT INTO role(role_cd, role_name, prj_id)
-	VALUES(#{roleCd}, '관리 권한', #{prjId});
+	VALUES(#{roleCd}, '관리 권한', #{prjId})
 </insert>
 
+<insert id="rolemenuInsert" parameterType="com.example.demo.project.option.service.RoleVO">
+	insert into role_menu(rm_id,role_id,role_cd)
+	values(rm_seq.nextval,#{roleId},#{roleCd})
+</insert>
+ 
+ <insert id="grproleInsert" parameterType="com.example.demo.project.option.service.RoleVO">
+ 	insert into grp_role(id,grp_id,role_cd)
+ 	values(GRP_ROLE_SEQ.nextval,#{grpId},#{roleCd})
+ </insert>
  
  <update id="projectHide" parameterType="ProjectVO" >
  	update project

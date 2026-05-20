@@ -1,5 +1,6 @@
 <!doctype html>
-<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+		layout:decorate="~{layout/compAdminLayout}">
   <head>
     <meta charset="UTF-8" />
     <title>Insert title here</title>
@@ -37,6 +38,7 @@
     </style>
   </head>
   <body>
+  <div layout:fragment="content">
     <h2>프로젝트</h2>
     <a th:if="${#authentication.principal.adminNm == '기업관리자'}"
        href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
@@ -67,7 +69,7 @@
             th:if="${#authentication.principal.adminNm == '시스템관리자' or pro.bizNo == #authentication.principal.bizNo and pro.prjHide =='N'}"
             th:data-status="${pro.closedDate == null ? 'progress' : 'complete'}">
           <td class="row-index"></td>
-          <td th:text="${pro.prjName}"></td>
+          <td ><a th:text="${pro.prjName}" th:href="@{/project/main/{id}(id=${pro.id})}"></a></td>
           <td th:text="${pro.prjIdentifier}"></td>
           <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
 			    <th:block th:each="c : ${companyList}">
@@ -163,5 +165,6 @@
       /*]]>*/
       
     </script>
+    </div>
   </body>
 </html>

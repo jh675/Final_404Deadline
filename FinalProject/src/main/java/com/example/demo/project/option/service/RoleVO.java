@@ -59,4 +59,7 @@ public class RoleVO {
 
     /** 목록: 이 역할을 보유한 {@code GRP} 수 */
     private int grpCnt;
+    
+    /* 그룹 권한에 사용 */
+    private Long grpId;
 }
