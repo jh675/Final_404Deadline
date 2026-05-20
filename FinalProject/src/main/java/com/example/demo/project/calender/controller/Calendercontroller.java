@@ -17,8 +17,6 @@ import com.example.demo.login.service.UserVO;
 import com.example.demo.project.calender.service.CalenderService;
 import com.example.demo.project.calender.service.CalenderVO;
 
-
-
 @Controller
 public class Calendercontroller {
 	
@@ -27,8 +25,7 @@ public class Calendercontroller {
  
 	// 캘린더 페이지접속 
 	@GetMapping({"/calender/list"})
-	 public String callenderlist() {
-	  
+	 public String callenderlist() {	  
 	  return "project/calender/calender";
 	}
 	
@@ -46,13 +43,7 @@ public class Calendercontroller {
 	@PostMapping("calender/insert")
 	@ResponseBody
 	 public int post(CalenderVO vo) {
-			/*
-			 * Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			 * Object principal = auth.getPrincipal(); if (principal instanceof UserVO user)
-			 * { vo.setMemId(user.getId().intValue()); }
-			 */
 	    vo.setMemId(2); 
-		
 		return calenderService.insert(vo);
 	}
 	// 일정 수정
@@ -81,19 +72,7 @@ public class Calendercontroller {
 	@ResponseBody
 	 public List<CalenderVO>search(CalenderVO vo) {
 		vo.setMemId(2);
-		
-		 System.out.println("keyword: " + vo.getKeyword());
-		    System.out.println("memId: " + vo.getMemId());
-//		 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//	        Object principal = auth.getPrincipal();
-//	    if (principal instanceof UserVO user) {
-//	    	vo.setMemId(user.getId().intValue()); 
-//	    }
-	    
-	    // System.out.println("principal 타입: " + principal.getClass().getName());
 		return calenderService.selectAll(vo);
 	}
-	
-	
-	
+
 }

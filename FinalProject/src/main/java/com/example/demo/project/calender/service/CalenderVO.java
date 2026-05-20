@@ -18,10 +18,10 @@ public class CalenderVO {
 	private String colorTagCd;
 	private String keyword;
 	
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date calStart;
 	
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date calEnd;
 	private Date createdOn;
 	private Date updatedOn;
