@@ -15,13 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.example.demo.project.member.service.CompanyMemberRowVO;
-import com.example.demo.project.member.service.MemberDetailVO;
-import com.example.demo.project.member.service.MemberGroupPickRowVO;
-import com.example.demo.project.member.service.MemberIssueRowVO;
-import com.example.demo.project.member.service.MemberListCriteria;
-import com.example.demo.project.member.service.MemberService;
-import com.example.demo.project.member.service.ProjectMemberRowVO;
+import com.example.demo.project.member.service.*;
 import lombok.RequiredArgsConstructor;
 
 /**

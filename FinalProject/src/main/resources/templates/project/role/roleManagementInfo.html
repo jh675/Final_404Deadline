@@ -7,6 +7,12 @@
 >
   <head>
     <meta charset="UTF-8" />
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+    <meta
+      th:if="${_csrf != null}"
+      name="_csrf_header"
+      th:content="${_csrf.headerName}"
+    />
     <title>역할 상세</title>
     <link
       rel="stylesheet"
@@ -55,6 +61,21 @@
         padding-bottom: 0.35rem;
         border-bottom: 3px solid #333;
       }
+      .role-section__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem 0.75rem;
+        margin: 0 0 0.5rem;
+        padding-bottom: 0.35rem;
+        border-bottom: 3px solid #333;
+      }
+      .role-section__head .role-section__title {
+        margin: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
       .role-section__body {
         padding-top: 0.75rem;
       }
@@ -99,8 +120,50 @@
         line-height: 1.35;
         box-sizing: border-box;
       }
+      .perm-sub__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+      .perm-sub__head .perm-sub__title {
+        margin: 0;
+      }
+      .perm-toggle-btn {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #1976d2;
+        background: #fff;
+        border: 1px solid #90caf9;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .perm-toggle-btn:hover:not(:disabled) {
+        background: #e3f2fd;
+      }
+      .perm-toggle-btn[aria-pressed="true"] {
+        color: #0d47a1;
+        background: #e3f2fd;
+        border-color: #42a5f5;
+      }
+      .perm-toggle-btn:disabled {
+        color: #9e9e9e;
+        border-color: #e0e0e0;
+        background: #f5f5f5;
+        cursor: not-allowed;
+      }
+      .perm-toggle-btn.is-hidden {
+        display: none !important;
+      }
       .perm-sub {
         margin-bottom: 1.25rem;
+      }
+      .perm-sub--view-only .perm-crud-row {
+        justify-content: flex-start;
       }
       .perm-full-block {
         margin-bottom: 1rem;
@@ -143,6 +206,9 @@
         cursor: default;
         min-width: 0;
       }
+      .perm-grid__cell:has(input:not(:disabled)) {
+        cursor: pointer;
+      }
       .perm-grid__cell span {
         line-height: 1.35;
         word-break: keep-all;
@@ -177,6 +243,131 @@
         border-radius: 6px;
         overflow: hidden;
       }
+      .role-group-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.65rem;
+      }
+      .role-group-toolbar.is-hidden {
+        display: none;
+      }
+      .role-group-toolbar__btn {
+        padding: 0.35rem 0.95rem;
+        border: 1px solid #555;
+        border-radius: 4px;
+        background: #fff;
+        color: #333;
+        font-size: 0.8125rem;
+        cursor: pointer;
+      }
+      .role-group-toolbar__btn:hover:not(:disabled) {
+        background: #f5f5f5;
+      }
+      .role-group-pick-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .role-group-pick-overlay.is-open {
+        display: flex;
+      }
+      .role-group-pick {
+        width: min(44rem, 94vw);
+        max-height: 82vh;
+        background: #fff;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+      }
+      .role-group-pick__head {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .role-group-pick__search {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.45rem 0.5rem;
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid #e8e8e8;
+        background: #fafafa;
+      }
+      .role-group-pick__search select,
+      .role-group-pick__search input[type="text"],
+      .role-group-pick__search input[type="date"] {
+        font-size: 0.8125rem;
+        color: #333;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        padding: 0.35rem 0.5rem;
+        line-height: 1.35;
+        box-sizing: border-box;
+        background: #fff;
+      }
+      .role-group-pick__search select {
+        flex: 0 0 auto;
+        min-width: 6.5rem;
+      }
+      .role-group-pick__search input[type="text"] {
+        flex: 1 1 8rem;
+        min-width: 6rem;
+      }
+      .role-group-pick__search input[type="date"] {
+        flex: 0 0 auto;
+        min-width: 8.5rem;
+      }
+      .role-group-pick__search-sep {
+        font-size: 0.8125rem;
+        color: #666;
+      }
+      .role-group-pick__search .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .role-group-pick__grid-host {
+        flex: 1 1 auto;
+        min-height: 12rem;
+        max-height: 50vh;
+        overflow: auto;
+        margin: 0.5rem 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        background: #fff;
+      }
+      .role-group-pick__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-top: 1px solid #e0e0e0;
+      }
+      .role-group-pick__actions button {
+        padding: 0.35rem 0.9rem;
+        border: 1px solid #555;
+        border-radius: 4px;
+        background: #fff;
+        font-size: 0.8125rem;
+        cursor: pointer;
+      }
+      .role-group-pick__actions button.primary {
+        background: #555;
+        color: #fff;
+        border-color: #555;
+      }
       .btn-revoke {
         padding: 0.2rem 0.65rem;
         font-size: 0.75rem;
@@ -189,6 +380,43 @@
       .btn-revoke:hover {
         background: #f8bbd0;
       }
+      .role-detail-form input.role-input--editable {
+        background: #fff;
+      }
+      .role-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 2rem 0 1rem;
+        padding-top: 0.5rem;
+      }
+      .role-actions__btn {
+        min-width: 5.5rem;
+        padding: 0.45rem 1.25rem;
+        font-size: 0.875rem;
+        border-radius: 6px;
+        border: 1px solid #555;
+        background: #555;
+        color: #fff;
+        cursor: pointer;
+      }
+      .role-actions__btn:hover {
+        background: #444;
+        border-color: #444;
+      }
+      .role-actions__btn--secondary {
+        background: #fff;
+        color: #333;
+        border-color: #bbb;
+      }
+      .role-actions__btn--secondary:hover {
+        background: #f5f5f5;
+        border-color: #999;
+      }
+      .role-actions .is-hidden {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
@@ -200,7 +428,12 @@
       >
 
       <div class="role-page-head">
-        <h1 class="role-page-head__title">역할 상세</h1>
+        <h1
+          class="role-page-head__title"
+          th:text="${registerMode} ? '역할 등록' : '역할 상세'"
+        >
+          역할 상세
+        </h1>
         <hr class="role-page-head__rule" />
       </div>
 
@@ -211,12 +444,21 @@
         </p>
       </th:block>
 
-      <th:block th:if="${currentRole != null}">
+      <th:block th:if="${registerMode or currentRole != null}">
         <section class="role-section">
           <h2 class="role-section__title">역할 정보</h2>
           <div class="role-section__body">
             <div class="role-info-fields role-detail-form">
-              <div class="role-info-fields__row">
+              <div class="role-info-fields__row" th:if="${registerMode}">
+                <label for="detailPrjName">프로젝트명</label>
+                <input
+                  type="text"
+                  id="detailPrjName"
+                  readonly
+                  th:value="${prjName}"
+                />
+              </div>
+              <div class="role-info-fields__row" th:if="${!registerMode}">
                 <label for="detailRoleCd">역할 코드</label>
                 <input
                   type="text"
@@ -228,13 +470,22 @@
               <div class="role-info-fields__row">
                 <label for="detailRoleName">역할명</label>
                 <input
+                  th:if="${registerMode}"
+                  type="text"
+                  id="detailRoleName"
+                  class="role-input--editable"
+                  placeholder="역할명을 입력해 주세요."
+                  autocomplete="off"
+                />
+                <input
+                  th:unless="${registerMode}"
                   type="text"
                   id="detailRoleName"
                   readonly
                   th:value="${currentRole.roleName}"
                 />
               </div>
-              <div class="role-info-fields__row">
+              <div class="role-info-fields__row" th:if="${!registerMode}">
                 <label for="detailCreatedOn">권한 생성일</label>
                 <input
                   type="text"
@@ -248,37 +499,45 @@
         </section>
 
         <section class="role-section">
-          <h2 class="role-section__title">메뉴 권한 연결</h2>
+          <div class="role-section__head">
+            <h2 class="role-section__title">메뉴 권한 연결</h2>
+            <button
+              th:if="${menuSections != null and !menuSections.isEmpty()}"
+              type="button"
+              class="perm-toggle-btn perm-toggle-btn--global"
+              id="permToggleGlobal"
+              aria-pressed="false"
+              th:classappend="${!registerMode} ? ' is-hidden' : ''"
+              th:disabled="${!registerMode}"
+            >
+              전체 구역 선택
+            </button>
+          </div>
           <div class="role-section__body">
             <th:block
               th:if="${menuSections != null and !menuSections.isEmpty()}"
             >
-              <div class="perm-sub" th:each="sec, secStat : ${menuSections}">
-                <h3 class="perm-sub__title" th:text="${sec.sectionTitle}">
-                  구분
-                </h3>
+              <div
+                class="perm-sub"
+                th:each="sec, secStat : ${menuSections}"
+                th:classappend="${#strings.equalsIgnoreCase(sec.sectionTitle, 'HISTORY')} ? ' perm-sub--view-only' : ''"
+                th:attr="data-section-key=${sec.sectionTitle}"
+              >
+                <div class="perm-sub__head">
+                  <h3 class="perm-sub__title" th:text="${sec.sectionTitle}">
+                    구분
+                  </h3>
+                  <button
+                    type="button"
+                    class="perm-toggle-btn perm-toggle-btn--section"
+                    aria-pressed="false"
+                    th:classappend="${!registerMode} ? ' is-hidden' : ''"
+                    th:disabled="${!registerMode}"
+                  >
+                    전체 선택
+                  </button>
+                </div>
                 <hr class="role-section__divider" />
-                <th:block
-                  th:if="${sec.fullControlSlots != null and !sec.fullControlSlots.isEmpty()}"
-                >
-                  <div class="perm-full-block">
-                    <div class="perm-grid">
-                      <label
-                        class="perm-grid__cell"
-                        th:each="fs, fsStat : ${sec.fullControlSlots}"
-                        th:for="|cb-full-${secStat.index}-${fsStat.index}|"
-                      >
-                        <input
-                          disabled
-                          type="checkbox"
-                          th:id="|cb-full-${secStat.index}-${fsStat.index}|"
-                          th:checked="${fs.checked}"
-                        />
-                        <span th:text="${fs.label}">전체</span>
-                      </label>
-                    </div>
-                  </div>
-                </th:block>
                 <div
                   class="perm-full-block"
                   th:if="${sec.crudSlots != null and !sec.crudSlots.isEmpty()}"
@@ -290,10 +549,12 @@
                       th:for="|cb-crud-${secStat.index}-${cStat.index}|"
                     >
                       <input
-                        disabled
                         type="checkbox"
+                        class="perm-menu-cb perm-menu-cb--crud"
+                        th:disabled="${!registerMode}"
                         th:id="|cb-crud-${secStat.index}-${cStat.index}|"
                         th:checked="${c.checked}"
+                        th:attr="data-role-id=${c.roleId}"
                       />
                       <span th:text="${c.label}">조회</span>
                     </label>
@@ -311,10 +572,12 @@
                         th:for="|cb-extra-${secStat.index}-${exStat.index}|"
                       >
                         <input
-                          disabled
                           type="checkbox"
+                          class="perm-menu-cb perm-menu-cb--extra"
+                          th:disabled="${!registerMode}"
                           th:id="|cb-extra-${secStat.index}-${exStat.index}|"
                           th:checked="${ex.checked}"
+                          th:attr="data-role-id=${ex.roleId}"
                         />
                         <span th:text="${ex.label}">권한</span>
                       </label>
@@ -332,7 +595,11 @@
           </div>
         </section>
 
-        <section class="role-section" aria-labelledby="role-groups-heading">
+        <section
+          th:if="${registerMode or currentRole != null}"
+          class="role-section"
+          aria-labelledby="role-groups-heading"
+        >
           <h2 class="role-section__title" id="role-groups-heading">
             이 역할을 보유한 그룹
           </h2>
@@ -341,19 +608,620 @@
               <div
                 id="roleGroupsGrid"
                 class="role-groups-panel__grid-host"
-                th:attr="data-prj-id=${prjId},data-role-cd=${roleCd}"
+                th:attr="data-prj-id=${prjId},data-page-mode=${registerMode ? 'register' : 'detail'},data-role-cd=${registerMode ? '' : roleCd}"
                 role="region"
                 aria-label="역할 보유 그룹 목록"
               ></div>
+              <div
+                id="roleGroupToolbar"
+                class="role-group-toolbar"
+                th:classappend="${registerMode} ? '' : ' is-hidden'"
+              >
+                <button
+                  type="button"
+                  class="role-group-toolbar__btn"
+                  id="btnManageRoleGroups"
+                >
+                  그룹 관리
+                </button>
+              </div>
             </div>
           </div>
         </section>
+        <div class="role-actions" th:if="${registerMode}">
+          <button type="button" class="role-actions__btn" id="btnRoleSave">
+            저장
+          </button>
+          <button
+            type="button"
+            class="role-actions__btn role-actions__btn--secondary"
+            id="btnRoleCancel"
+          >
+            취소
+          </button>
+        </div>
+
+        <div
+          class="role-actions"
+          th:if="${!registerMode and currentRole != null}"
+        >
+          <button
+            type="button"
+            class="role-actions__btn"
+            id="btnRoleEdit"
+            data-label-edit="수정"
+            data-label-save="저장"
+          >
+            수정
+          </button>
+          <button
+            type="button"
+            class="role-actions__btn role-actions__btn--secondary is-hidden"
+            id="btnRoleCancelEdit"
+          >
+            취소
+          </button>
+        </div>
+
       </th:block>
 
-      <script>
+      <th:block th:if="${registerMode or currentRole != null}">
+        <th:block
+          th:replace="~{project/role/modal/questionModal :: roleQuestionModal}"
+        ></th:block>
+        <th:block
+          th:replace="~{project/role/modal/questionModal :: roleQuestionModalScript}"
+        ></th:block>
+      </th:block>
+
+      <th:block th:if="${registerMode or currentRole != null}">
+        <div
+          th:replace="~{project/role/modal/roleGroupModal :: roleGroupPickOverlay}"
+        ></div>
+      </th:block>
+
+      <script
+        th:if="${menuSections != null and !menuSections.isEmpty() and (registerMode or currentRole != null)}"
+      >
+        window.RolePermToggle = (function () {
+          var SECTION_OFF = "전체 선택";
+          var SECTION_ON = "전체 해제";
+          var GLOBAL_OFF = "전체 구역 선택";
+          var GLOBAL_ON = "전체 구역 해제";
+
+          function getSectionCheckboxes(section) {
+            var list = [];
+            section.querySelectorAll(".perm-menu-cb").forEach(function (cb) {
+              if (!cb.disabled) {
+                list.push(cb);
+              }
+            });
+            return list;
+          }
+
+          function isSectionFullySelected(section) {
+            var cbs = getSectionCheckboxes(section);
+            if (!cbs.length) {
+              return false;
+            }
+            return cbs.every(function (cb) {
+              return cb.checked;
+            });
+          }
+
+          function setToggleBtnLabel(btn, allOn, offText, onText) {
+            if (!btn) {
+              return;
+            }
+            btn.textContent = allOn ? onText : offText;
+            btn.setAttribute("aria-pressed", allOn ? "true" : "false");
+          }
+
+          function updateSectionToggleBtn(section) {
+            var btn = section.querySelector(".perm-toggle-btn--section");
+            var allOn = isSectionFullySelected(section);
+            setToggleBtnLabel(btn, allOn, SECTION_OFF, SECTION_ON);
+          }
+
+          function updateGlobalToggleBtn() {
+            var globalBtn = document.getElementById("permToggleGlobal");
+            if (!globalBtn) {
+              return;
+            }
+            var sections = document.querySelectorAll(".perm-sub");
+            var allOn = sections.length > 0;
+            sections.forEach(function (section) {
+              if (!isSectionFullySelected(section)) {
+                allOn = false;
+              }
+            });
+            if (!sections.length) {
+              allOn = false;
+            }
+            setToggleBtnLabel(globalBtn, allOn, GLOBAL_OFF, GLOBAL_ON);
+          }
+
+          function setSectionAll(section, checked) {
+            getSectionCheckboxes(section).forEach(function (cb) {
+              cb.checked = checked;
+            });
+            updateSectionToggleBtn(section);
+          }
+
+          function toggleSection(section) {
+            setSectionAll(section, !isSectionFullySelected(section));
+            updateGlobalToggleBtn();
+          }
+
+          function toggleAllSections() {
+            var sections = document.querySelectorAll(".perm-sub");
+            var allOn = sections.length > 0;
+            sections.forEach(function (section) {
+              if (!isSectionFullySelected(section)) {
+                allOn = false;
+              }
+            });
+            if (!sections.length) {
+              allOn = false;
+            }
+            var next = !allOn;
+            sections.forEach(function (section) {
+              setSectionAll(section, next);
+            });
+            updateGlobalToggleBtn();
+          }
+
+          function refreshAllToggleBtns() {
+            document.querySelectorAll(".perm-sub").forEach(function (section) {
+              updateSectionToggleBtn(section);
+            });
+            updateGlobalToggleBtn();
+          }
+
+          return {
+            init: function (opts) {
+              opts = opts || {};
+              var canInteract =
+                opts.canInteract ||
+                function () {
+                  return true;
+                };
+
+              document
+                .querySelectorAll(".perm-toggle-btn--section")
+                .forEach(function (btn) {
+                  btn.addEventListener("click", function () {
+                    if (!canInteract() || btn.disabled) {
+                      return;
+                    }
+                    var section = btn.closest(".perm-sub");
+                    if (section) {
+                      toggleSection(section);
+                    }
+                  });
+                });
+
+              var globalBtn = document.getElementById("permToggleGlobal");
+              if (globalBtn) {
+                globalBtn.addEventListener("click", function () {
+                  if (!canInteract() || globalBtn.disabled) {
+                    return;
+                  }
+                  toggleAllSections();
+                });
+              }
+
+              document.querySelectorAll(".perm-menu-cb").forEach(function (cb) {
+                cb.addEventListener("change", function () {
+                  if (!canInteract()) {
+                    return;
+                  }
+                  var section = cb.closest(".perm-sub");
+                  if (section) {
+                    updateSectionToggleBtn(section);
+                  }
+                  updateGlobalToggleBtn();
+                });
+              });
+
+              refreshAllToggleBtns();
+            },
+            setToggleButtonsEnabled: function (enabled) {
+              document.querySelectorAll(".perm-toggle-btn").forEach(function (btn) {
+                btn.disabled = !enabled;
+              });
+            },
+            setToggleButtonsVisible: function (visible) {
+              document.querySelectorAll(".perm-toggle-btn").forEach(function (btn) {
+                btn.classList.toggle("is-hidden", !visible);
+              });
+            },
+            refreshAllToggleBtns: refreshAllToggleBtns,
+          };
+        })();
+      </script>
+
+      <script th:if="${registerMode}" th:inline="javascript">
+        /*<![CDATA[*/
         document.addEventListener("DOMContentLoaded", function () {
+          var prjId = /*[[${prjId}]]*/ 0;
+          var listUrl =
+            "/project/option/role/roleManagement?prjId=" +
+            encodeURIComponent(String(prjId));
+
+          function confirmModal(message, title) {
+            if (window.RoleQuestionModal && window.RoleQuestionModal.confirm) {
+              return window.RoleQuestionModal.confirm(message, title || "확인");
+            }
+            return Promise.resolve(false);
+          }
+
+          function alertModal(message, title) {
+            if (window.RoleQuestionModal && window.RoleQuestionModal.alert) {
+              return window.RoleQuestionModal.alert(message, title || "알림");
+            }
+            return Promise.resolve();
+          }
+
+          function buildCsrfHeaders() {
+            var headers = { "Content-Type": "application/json" };
+            var tokenMeta = document.querySelector('meta[name="_csrf"]');
+            var headerMeta = document.querySelector(
+              'meta[name="_csrf_header"]',
+            );
+            if (
+              tokenMeta &&
+              headerMeta &&
+              tokenMeta.content &&
+              headerMeta.content
+            ) {
+              headers[headerMeta.content] = tokenMeta.content;
+            }
+            return headers;
+          }
+
+          function collectMenuRoleIds() {
+            var ids = [];
+            document
+              .querySelectorAll(".perm-menu-cb:checked[data-role-id]")
+              .forEach(function (cb) {
+                var id = (cb.getAttribute("data-role-id") || "").trim();
+                if (id && ids.indexOf(id) === -1) {
+                  ids.push(id);
+                }
+              });
+            return ids;
+          }
+
+          function collectRegisterGrpIds() {
+            var ref = window.__rolePendingGroupsRef;
+            if (!ref || !ref.length) return [];
+            var ids = [];
+            ref.forEach(function (g) {
+              var id = g && g.id != null ? Number(g.id) : NaN;
+              if (!isNaN(id) && ids.indexOf(id) === -1) ids.push(id);
+            });
+            return ids;
+          }
+
+          if (window.RolePermToggle) {
+            window.RolePermToggle.init({
+              canInteract: function () {
+                return true;
+              },
+            });
+            window.RolePermToggle.setToggleButtonsEnabled(true);
+          }
+
+          var cancelBtn = document.getElementById("btnRoleCancel");
+          if (cancelBtn) {
+            cancelBtn.addEventListener("click", async function () {
+              var ok = await confirmModal(
+                "입력한 내용을 저장하지 않고 목록으로 돌아가시겠습니까?",
+                "취소 확인",
+              );
+              if (ok) window.location.href = listUrl;
+            });
+          }
+
+          var saveBtn = document.getElementById("btnRoleSave");
+          if (saveBtn) {
+            saveBtn.addEventListener("click", async function () {
+              var nameEl = document.getElementById("detailRoleName");
+              var name = nameEl ? nameEl.value.trim() : "";
+              if (!name) {
+                await alertModal("역할명을 입력하세요.", "알림");
+                return;
+              }
+
+              var pid = Number(prjId);
+              if (isNaN(pid)) {
+                await alertModal("프로젝트 ID가 올바르지 않습니다.", "알림");
+                return;
+              }
+
+              var menuRoleIds = collectMenuRoleIds();
+              saveBtn.disabled = true;
+              try {
+                var res = await fetch("/project/option/role/registerRole", {
+                  method: "POST",
+                  headers: buildCsrfHeaders(),
+                  credentials: "same-origin",
+                body: JSON.stringify({
+                  prjId: pid,
+                  roleName: name,
+                  menuRoleIds: menuRoleIds,
+                  grpIds: collectRegisterGrpIds(),
+                }),
+                });
+                var data = await res.json().catch(function () {
+                  return {};
+                });
+                var status =
+                  data && data.resultStatus ? String(data.resultStatus) : "";
+                var msg =
+                  data && data.resultMessage
+                    ? String(data.resultMessage)
+                    : data && data.message
+                      ? String(data.message)
+                      : "권한 등록 처리 중 오류가 발생했습니다.";
+                var isOk = status.toUpperCase() === "OK";
+
+                await alertModal(
+                  msg,
+                  isOk ? "권한 등록 완료" : "권한 등록 실패",
+                );
+
+                if (isOk) {
+                  window.location.href = listUrl;
+                }
+              } catch (e) {
+                await alertModal(
+                  "권한 등록 중 오류가 발생했습니다.",
+                  "권한 등록 실패",
+                );
+              } finally {
+                saveBtn.disabled = false;
+              }
+            });
+          }
+        });
+        /*]]>*/
+      </script>
+
+      <script
+        th:if="${registerMode or currentRole != null}"
+        th:inline="javascript"
+      >
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function () {
+          var isRegisterMode = /*[[${registerMode}]]*/ false;
+          var prjId = /*[[${prjId}]]*/ 0;
+          var roleCd = /*[[${roleCd}]]*/ null;
+          var roleEditMode = false;
+          var editBtn = document.getElementById("btnRoleEdit");
+          var cancelEditBtn = document.getElementById("btnRoleCancelEdit");
+          var groupToolbar = document.getElementById("roleGroupToolbar");
+          var manageGroupsBtn = document.getElementById("btnManageRoleGroups");
+          var pickOverlay = document.getElementById("roleGroupPickOverlay");
+          var pickGridEl = document.getElementById("roleGroupPickGrid");
+          var pickSearchType = document.getElementById("roleGroupSearchType");
+          var pickSearchKeyword = document.getElementById(
+            "roleGroupSearchKeyword",
+          );
+          var pickCreatedFrom = document.getElementById("roleGroupCreatedFrom");
+          var pickCreatedTo = document.getElementById("roleGroupCreatedTo");
+          var pickCancel = document.getElementById("btnRoleGroupPickCancel");
+          var pickOk = document.getElementById("btnRoleGroupPickOk");
+          var editLabel =
+            editBtn && editBtn.getAttribute("data-label-edit")
+              ? editBtn.getAttribute("data-label-edit")
+              : "수정";
+          var saveLabel =
+            editBtn && editBtn.getAttribute("data-label-save")
+              ? editBtn.getAttribute("data-label-save")
+              : "저장";
+          var pid = String(prjId);
+          var rc =
+            roleCd != null &&
+            roleCd !== "" &&
+            !isNaN(Number(roleCd))
+              ? String(roleCd)
+              : "";
+
+          function setPermCheckboxesEditable(editable) {
+            document.querySelectorAll(".perm-menu-cb").forEach(function (cb) {
+              cb.disabled = !editable;
+            });
+          }
+
+          if (!isRegisterMode && window.RolePermToggle) {
+            window.RolePermToggle.init({
+              canInteract: function () {
+                return roleEditMode;
+              },
+            });
+            window.RolePermToggle.setToggleButtonsEnabled(false);
+          }
+
+          function enterRoleEditMode() {
+            roleEditMode = true;
+            setPermCheckboxesEditable(true);
+            if (window.RolePermToggle) {
+              window.RolePermToggle.setToggleButtonsVisible(true);
+              window.RolePermToggle.setToggleButtonsEnabled(true);
+              window.RolePermToggle.refreshAllToggleBtns();
+            }
+            if (editBtn) {
+              editBtn.textContent = saveLabel;
+            }
+            if (cancelEditBtn) {
+              cancelEditBtn.classList.remove("is-hidden");
+            }
+            setRoleGroupToolbarVisible(true);
+            createRoleGroupsGrid();
+          }
+
+          function setRoleGroupToolbarVisible(visible) {
+            if (!groupToolbar) return;
+            if (isRegisterMode) {
+              if (visible) {
+                groupToolbar.classList.remove("is-hidden");
+              }
+              return;
+            }
+            groupToolbar.classList.toggle("is-hidden", !visible);
+          }
+
+          function confirmModal(message, title) {
+            if (window.RoleQuestionModal && window.RoleQuestionModal.confirm) {
+              return window.RoleQuestionModal.confirm(message, title || "확인");
+            }
+            return Promise.resolve(false);
+          }
+
+          function alertModal(message, title) {
+            if (window.RoleQuestionModal && window.RoleQuestionModal.alert) {
+              return window.RoleQuestionModal.alert(message, title || "알림");
+            }
+            return Promise.resolve();
+          }
+
+          function buildCsrfHeaders() {
+            var headers = { "Content-Type": "application/json" };
+            var tokenMeta = document.querySelector('meta[name="_csrf"]');
+            var headerMeta = document.querySelector(
+              'meta[name="_csrf_header"]',
+            );
+            if (
+              tokenMeta &&
+              headerMeta &&
+              tokenMeta.content &&
+              headerMeta.content
+            ) {
+              headers[headerMeta.content] = tokenMeta.content;
+            }
+            return headers;
+          }
+
+          function collectMenuRoleIds() {
+            var ids = [];
+            document
+              .querySelectorAll(".perm-menu-cb:checked[data-role-id]")
+              .forEach(function (cb) {
+                var id = (cb.getAttribute("data-role-id") || "").trim();
+                if (id && ids.indexOf(id) === -1) {
+                  ids.push(id);
+                }
+              });
+            return ids;
+          }
+
+          function collectPendingGrpIds() {
+            var ids = [];
+            pendingGroups.forEach(function (g) {
+              var id = g && g.id != null ? Number(g.id) : NaN;
+              if (!isNaN(id) && ids.indexOf(id) === -1) {
+                ids.push(id);
+              }
+            });
+            return ids;
+          }
+
+          async function saveRoleMenus() {
+            var pidNum = Number(prjId);
+            var roleCdNum = rc ? Number(rc) : NaN;
+            if (isNaN(pidNum) || isNaN(roleCdNum)) {
+              await alertModal("프로젝트 또는 역할 코드가 올바르지 않습니다.", "알림");
+              return;
+            }
+
+            var menuRoleIds = collectMenuRoleIds();
+            var grpIds = collectPendingGrpIds();
+            if (editBtn) {
+              editBtn.disabled = true;
+            }
+            try {
+              var res = await fetch("/project/option/role/updateRole", {
+                method: "POST",
+                headers: buildCsrfHeaders(),
+                credentials: "same-origin",
+                body: JSON.stringify({
+                  prjId: pidNum,
+                  roleCd: roleCdNum,
+                  menuRoleIds: menuRoleIds,
+                  grpIds: grpIds,
+                }),
+              });
+              var data = await res.json().catch(function () {
+                return {};
+              });
+              var status =
+                data && data.resultStatus ? String(data.resultStatus) : "";
+              var msg =
+                data && data.resultMessage
+                  ? String(data.resultMessage)
+                  : data && data.message
+                    ? String(data.message)
+                    : "권한 수정 처리 중 오류가 발생했습니다.";
+              var isOk = status.toUpperCase() === "OK";
+
+              await alertModal(msg, isOk ? "수정 완료" : "수정 실패");
+
+              if (isOk) {
+                window.location.reload();
+              }
+            } catch (e) {
+              await alertModal(
+                "권한 수정 중 오류가 발생했습니다.",
+                "수정 실패",
+              );
+            } finally {
+              if (editBtn) {
+                editBtn.disabled = false;
+              }
+            }
+          }
+
+          if (editBtn) {
+            editBtn.addEventListener("click", async function () {
+              if (!roleEditMode) {
+                enterRoleEditMode();
+                return;
+              }
+              await saveRoleMenus();
+            });
+          }
+
+          if (cancelEditBtn) {
+            cancelEditBtn.addEventListener("click", async function () {
+              var ok = await confirmModal(
+                "변경 내용을 저장하지 않고 되돌리시겠습니까?",
+                "취소 확인",
+              );
+              if (ok) {
+                window.location.reload();
+              }
+            });
+          }
+
           var host = document.getElementById("roleGroupsGrid");
-          if (!host || typeof tui === "undefined" || !tui.Grid) return;
+          var pendingGroups = [];
+          window.__rolePendingGroupsRef = pendingGroups;
+          var grpRoleCount = 0;
+          var roleGroupsGrid = null;
+          var allPickGroups = [];
+          var pickGrid = null;
+          var isSyncingPickGrid = false;
+          var modalCheckedGrpIds = new Set();
+
+          if (!host || typeof tui === "undefined" || !tui.Grid) {
+            return;
+          }
+
+          if (!host.getAttribute("data-prj-id")) {
+            host.setAttribute("data-prj-id", pid);
+          }
 
           function formatDate(value) {
             if (value == null || value === "") return "";
@@ -371,85 +1239,554 @@
             );
           }
 
-          var pid = (host.getAttribute("data-prj-id") || "").trim();
-          var rc = (host.getAttribute("data-role-cd") || "").trim();
-          if (!pid || !rc) {
+          function pendingToGridRows() {
+            return pendingGroups.map(function (g) {
+              return {
+                id: g.id,
+                grpName: g.grpName || "",
+                grpMemberCnt:
+                  g.grpMemberCnt != null ? Number(g.grpMemberCnt) : 0,
+                createdOn: g.createdOn,
+              };
+            });
+          }
+
+          function initPendingFromRows(rows) {
+            pendingGroups.length = 0;
+            (rows || []).forEach(function (row) {
+              if (row == null || row.id == null) return;
+              pendingGroups.push({
+                id: Number(row.id),
+                grpName: row.grpName || "",
+                grpMemberCnt:
+                  row.grpMemberCnt != null ? Number(row.grpMemberCnt) : 0,
+                createdOn: row.createdOn,
+              });
+            });
+            grpRoleCount = pendingGroups.length;
+          }
+
+          function rowToPendingGroup(row) {
+            return {
+              id: Number(row.id),
+              grpName: row.grpName || "",
+              grpMemberCnt:
+                row.cntMem != null
+                  ? Number(row.cntMem)
+                  : row.grpMemberCnt != null
+                    ? Number(row.grpMemberCnt)
+                    : 0,
+              createdOn: row.createdOn,
+            };
+          }
+
+          function getRoleGroupsColumns(showRevoke) {
+            var cols = [
+              {
+                header: "그룹아이디",
+                name: "id",
+                width: 90,
+                align: "center",
+                sortable: true,
+              },
+              {
+                header: "그룹명",
+                name: "grpName",
+                align: "center",
+                sortable: true,
+              },
+              {
+                header: "그룹인원",
+                name: "grpMemberCnt",
+                width: 90,
+                align: "center",
+                sortable: true,
+                formatter: function (ctx) {
+                  var v = ctx.value;
+                  return v == null ? "0" : String(v);
+                },
+              },
+              {
+                header: "그룹 생성일",
+                name: "createdOn",
+                width: 120,
+                align: "center",
+                sortable: true,
+                formatter: function (ctx) {
+                  return formatDate(ctx.value);
+                },
+              },
+            ];
+            if (showRevoke) {
+              cols.push({
+                header: "권한 회수",
+                name: "revoke",
+                width: 100,
+                align: "center",
+                sortable: false,
+                formatter: function () {
+                  return '<button type="button" class="btn-revoke">회수</button>';
+                },
+              });
+            }
+            return cols;
+          }
+
+          function createRoleGroupsGrid() {
+            if (!host) return;
+            if (roleGroupsGrid) {
+              roleGroupsGrid.destroy();
+              roleGroupsGrid = null;
+            }
+            roleGroupsGrid = new tui.Grid({
+              el: host,
+              data: pendingToGridRows(),
+              rowHeaders: ["rowNum"],
+              scrollX: false,
+              scrollY: false,
+              bodyHeight: "auto",
+              rowHeight: 36,
+              minBodyHeight: 100,
+              columns: getRoleGroupsColumns(!roleEditMode && !isRegisterMode),
+              pageOptions: {
+                useClient: true,
+                perPage: 10,
+              },
+            });
+            roleGroupsGrid.on("click", onRoleGroupsGridClick);
+          }
+
+          function refreshRoleGroupsTable() {
+            if (!host) return;
+            if (roleGroupsGrid && typeof roleGroupsGrid.resetData === "function") {
+              roleGroupsGrid.resetData(pendingToGridRows());
+              return;
+            }
+            createRoleGroupsGrid();
+          }
+
+          function reloadRoleGroupsFromServer() {
+            if (isRegisterMode) {
+              return Promise.resolve();
+            }
+            if (!pid || !rc) return Promise.resolve();
+            var url =
+              "/project/option/role/roleGroups?prjId=" +
+              encodeURIComponent(pid) +
+              "&roleCd=" +
+              encodeURIComponent(rc);
+            return fetch(url, { credentials: "same-origin" })
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (body) {
+                var rows = body && body.content ? body.content : [];
+                grpRoleCount =
+                  body && body.grpRoleCount != null
+                    ? Number(body.grpRoleCount)
+                    : rows.length;
+                initPendingFromRows(rows);
+                refreshRoleGroupsTable();
+              });
+          }
+
+          function parseRowDateYmd(value) {
+            if (value == null || value === "") return "";
+            if (Array.isArray(value) && value.length >= 3) {
+              var y = value[0];
+              var m = String(value[1]).padStart(2, "0");
+              var d = String(value[2]).padStart(2, "0");
+              return y + "-" + m + "-" + d;
+            }
+            var dt = new Date(value);
+            if (isNaN(dt.getTime())) {
+              var s = String(value);
+              return s.length >= 10 ? s.substring(0, 10) : s;
+            }
+            var pad = function (n) {
+              return String(n).padStart(2, "0");
+            };
+            return (
+              dt.getFullYear() +
+              "-" +
+              pad(dt.getMonth() + 1) +
+              "-" +
+              pad(dt.getDate())
+            );
+          }
+
+          function includesKeyword(val, keyword) {
+            if (val == null) return false;
+            return String(val).toLowerCase().includes(keyword);
+          }
+
+          function initModalDraftFromPending() {
+            modalCheckedGrpIds = new Set(
+              pendingGroups
+                .map(function (g) {
+                  return Number(g.id);
+                })
+                .filter(function (id) {
+                  return !isNaN(id);
+                }),
+            );
+          }
+
+          function isModalDraftChecked(grpId) {
+            return modalCheckedGrpIds.has(Number(grpId));
+          }
+
+          function filterPickGroups(rows) {
+            var type = pickSearchType ? pickSearchType.value : "grpName";
+            var keyword = pickSearchKeyword
+              ? pickSearchKeyword.value.trim().toLowerCase()
+              : "";
+            var from = pickCreatedFrom ? pickCreatedFrom.value : "";
+            var to = pickCreatedTo ? pickCreatedTo.value : "";
+            return rows.filter(function (r) {
+              if (keyword) {
+                if (type === "id") {
+                  if (!includesKeyword(r.id, keyword)) return false;
+                } else if (!includesKeyword(r.grpName, keyword)) {
+                  return false;
+                }
+              }
+              if (from || to) {
+                var ymd = parseRowDateYmd(r.createdOn);
+                if (!ymd) return false;
+                if (from && ymd < from) return false;
+                if (to && ymd > to) return false;
+              }
+              return true;
+            });
+          }
+
+          function getPickGridRows() {
+            return filterPickGroups(
+              allPickGroups.filter(function (r) {
+                return r.id != null;
+              }),
+            );
+          }
+
+          function resetPickSearch() {
+            if (pickSearchType) pickSearchType.value = "grpName";
+            if (pickSearchKeyword) pickSearchKeyword.value = "";
+            if (pickCreatedFrom) pickCreatedFrom.value = "";
+            if (pickCreatedTo) pickCreatedTo.value = "";
+          }
+
+          function applyPickGridChecks() {
+            if (!pickGrid || typeof pickGrid.getData !== "function") return;
+            isSyncingPickGrid = true;
+            try {
+              pickGrid.getData().forEach(function (row) {
+                if (row.rowKey == null) return;
+                if (isModalDraftChecked(row.id)) {
+                  pickGrid.check(row.rowKey);
+                } else if (typeof pickGrid.uncheck === "function") {
+                  pickGrid.uncheck(row.rowKey);
+                }
+              });
+            } finally {
+              isSyncingPickGrid = false;
+            }
+          }
+
+          function bindPickGridSyncEvents() {
+            if (!pickGrid) return;
+            pickGrid.on("check", function (ev) {
+              if (isSyncingPickGrid) return;
+              var row = pickGrid.getRow(ev.rowKey);
+              if (row && row.id != null) {
+                modalCheckedGrpIds.add(Number(row.id));
+              }
+            });
+            pickGrid.on("uncheck", function (ev) {
+              if (isSyncingPickGrid) return;
+              var row = pickGrid.getRow(ev.rowKey);
+              if (row && row.id != null) {
+                modalCheckedGrpIds.delete(Number(row.id));
+              }
+            });
+            pickGrid.on("checkAll", function () {
+              if (isSyncingPickGrid) return;
+              pickGrid.getData().forEach(function (row) {
+                if (row.id != null) {
+                  modalCheckedGrpIds.add(Number(row.id));
+                }
+              });
+            });
+            pickGrid.on("uncheckAll", function () {
+              if (isSyncingPickGrid) return;
+              pickGrid.getData().forEach(function (row) {
+                if (row.id != null) {
+                  modalCheckedGrpIds.delete(Number(row.id));
+                }
+              });
+            });
+          }
+
+          function recreatePickGrid() {
+            if (!pickGridEl || typeof tui === "undefined" || !tui.Grid) {
+              return;
+            }
+            if (pickGrid) {
+              pickGrid.destroy();
+              pickGrid = null;
+            }
+            pickGrid = new tui.Grid({
+              el: pickGridEl,
+              data: getPickGridRows(),
+              rowHeaders: [{ type: "checkbox", header: "선택" }],
+              scrollX: false,
+              scrollY: true,
+              bodyHeight: 280,
+              rowHeight: 36,
+              minBodyHeight: 100,
+              columns: [
+                {
+                  header: "그룹아이디",
+                  name: "id",
+                  width: 90,
+                  align: "center",
+                  sortable: true,
+                },
+                {
+                  header: "그룹명",
+                  name: "grpName",
+                  align: "center",
+                  sortable: true,
+                },
+                {
+                  header: "그룹 생성일",
+                  name: "createdOn",
+                  width: 120,
+                  align: "center",
+                  sortable: true,
+                  formatter: function (ctx) {
+                    return formatDate(ctx.value);
+                  },
+                },
+              ],
+              pageOptions: {
+                useClient: true,
+                perPage: 8,
+              },
+            });
+            bindPickGridSyncEvents();
+            applyPickGridChecks();
+          }
+
+          function commitModalSelection() {
+            pendingGroups.length = 0;
+            allPickGroups.forEach(function (row) {
+              var gid = Number(row.id);
+              if (!isNaN(gid) && modalCheckedGrpIds.has(gid)) {
+                pendingGroups.push(rowToPendingGroup(row));
+              }
+            });
+            grpRoleCount = pendingGroups.length;
+            refreshRoleGroupsTable();
+          }
+
+          async function openGroupPicker() {
+            if (!isRegisterMode && !roleEditMode) return;
+            var pidNum = Number(prjId);
+            if (isNaN(pidNum) || !pickOverlay || !pickGridEl) return;
+            resetPickSearch();
+            if (pickGrid) {
+              pickGrid.destroy();
+              pickGrid = null;
+            }
+            pickGridEl.innerHTML =
+              '<p style="margin:0.75rem 1rem;font-size:0.8125rem;color:#777">불러오는 중…</p>';
+            pickOverlay.classList.add("is-open");
+            pickOverlay.setAttribute("aria-hidden", "false");
+            try {
+              var res = await fetch(
+                "/project/option/role/roleGroupPickList?prjId=" +
+                  encodeURIComponent(String(pidNum)),
+                { credentials: "same-origin" },
+              );
+              var data = await res.json().catch(function () {
+                return {};
+              });
+              allPickGroups =
+                data && Array.isArray(data.content) ? data.content : [];
+              initModalDraftFromPending();
+              pickGridEl.innerHTML = "";
+              if (!allPickGroups.length) {
+                pickGridEl.innerHTML =
+                  '<p style="margin:0.75rem 1rem;font-size:0.8125rem;color:#777">선택할 그룹이 없습니다.</p>';
+                return;
+              }
+              recreatePickGrid();
+            } catch (e) {
+              allPickGroups = [];
+              pickGridEl.innerHTML =
+                '<p style="margin:0.75rem 1rem;font-size:0.8125rem;color:#777">그룹 목록을 불러오지 못했습니다.</p>';
+            }
+          }
+
+          function closeGroupPicker() {
+            if (!pickOverlay) return;
+            if (pickGrid) {
+              pickGrid.destroy();
+              pickGrid = null;
+            }
+            pickOverlay.classList.remove("is-open");
+            pickOverlay.setAttribute("aria-hidden", "true");
+          }
+
+          if (manageGroupsBtn) {
+            manageGroupsBtn.addEventListener("click", openGroupPicker);
+          }
+          if (pickCancel) {
+            pickCancel.addEventListener("click", closeGroupPicker);
+          }
+          if (pickOverlay) {
+            pickOverlay.addEventListener("click", function (e) {
+              if (e.target === pickOverlay) {
+                closeGroupPicker();
+              }
+            });
+          }
+          if (pickOk) {
+            pickOk.addEventListener("click", function () {
+              commitModalSelection();
+              closeGroupPicker();
+            });
+          }
+          if (pickSearchType) {
+            pickSearchType.addEventListener("change", function () {
+              if (!pickOverlay || !pickOverlay.classList.contains("is-open")) {
+                return;
+              }
+              recreatePickGrid();
+            });
+          }
+          if (pickSearchKeyword) {
+            pickSearchKeyword.addEventListener("input", function () {
+              if (!pickOverlay || !pickOverlay.classList.contains("is-open")) {
+                return;
+              }
+              recreatePickGrid();
+            });
+          }
+          if (pickCreatedFrom) {
+            pickCreatedFrom.addEventListener("change", function () {
+              if (!pickOverlay || !pickOverlay.classList.contains("is-open")) {
+                return;
+              }
+              recreatePickGrid();
+            });
+          }
+          if (pickCreatedTo) {
+            pickCreatedTo.addEventListener("change", function () {
+              if (!pickOverlay || !pickOverlay.classList.contains("is-open")) {
+                return;
+              }
+              recreatePickGrid();
+            });
+          }
+
+          async function onRoleGroupsGridClick(ev) {
+            if (isRegisterMode) return;
+            if (roleEditMode) return;
+            if (!roleGroupsGrid || ev.columnName !== "revoke") return;
+            var row = roleGroupsGrid.getRow(ev.rowKey);
+            if (!row || row.id == null) return;
+
+            var grpId = Number(row.id);
+            var apiRoleCd = Number(rc);
+            var grpName = row.grpName || "해당 그룹";
+            if (isNaN(grpId) || isNaN(apiRoleCd)) return;
+
+            var firstOk = await confirmModal(
+              '"' +
+                grpName +
+                '" 그룹에서 이 권한을 회수하시겠습니까?',
+              "권한 회수 확인",
+            );
+            if (!firstOk) return;
+
+            var deleteRoleIfUnused = false;
+            if (grpRoleCount <= 1) {
+              deleteRoleIfUnused = await confirmModal(
+                "이 권한을 사용하는 그룹이 더 이상 없습니다.\n권한(역할) 자체를 삭제하시겠습니까?",
+                "권한 삭제 확인",
+              );
+            }
+
+            try {
+              var res = await fetch("/project/option/role/revokeRoleFromGroup", {
+                method: "POST",
+                headers: buildCsrfHeaders(),
+                credentials: "same-origin",
+                body: JSON.stringify({
+                  roleCd: apiRoleCd,
+                  grpId: grpId,
+                  deleteRoleIfUnused: deleteRoleIfUnused,
+                }),
+              });
+              var data = await res.json().catch(function () {
+                return {};
+              });
+              var status =
+                data && data.resultStatus ? String(data.resultStatus) : "";
+              var msg =
+                data && data.resultMessage
+                  ? String(data.resultMessage)
+                  : data && data.message
+                    ? String(data.message)
+                    : "권한 회수 처리 중 오류가 발생했습니다.";
+              var isOk = status.toUpperCase() === "OK";
+
+              await alertModal(
+                msg,
+                isOk ? "권한 회수 완료" : "권한 회수 실패",
+              );
+
+              if (isOk) {
+                if (deleteRoleIfUnused && grpRoleCount <= 1) {
+                  window.location.href =
+                    "/project/option/role/roleManagement?prjId=" +
+                    encodeURIComponent(pid);
+                  return;
+                }
+                await reloadRoleGroupsFromServer();
+              }
+            } catch (e) {
+              await alertModal(
+                "권한 회수 중 오류가 발생했습니다.",
+                "권한 회수 실패",
+              );
+            }
+          }
+
+          if (!pid || (!isRegisterMode && !rc)) {
             host.innerHTML =
               '<p class="perm-empty" style="padding:1rem">프로젝트 또는 역할 코드가 없어 그룹을 조회할 수 없습니다.</p>';
             return;
           }
 
-          var url =
-            "/project/option/role/roleGroups?prjId=" +
-            encodeURIComponent(pid) +
-            "&roleCd=" +
-            encodeURIComponent(rc);
-
-          fetch(url)
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (body) {
-              var rows = body && body.content ? body.content : [];
-              new tui.Grid({
-                el: host,
-                data: rows,
-                rowHeaders: ["rowNum"],
-                scrollX: false,
-                scrollY: false,
-                bodyHeight: "auto",
-                rowHeight: 36,
-                minBodyHeight: 100,
-                columns: [
-                  {
-                    header: "그룹명",
-                    name: "grpName",
-                    align: "center",
-                    sortable: true,
-                  },
-                  {
-                    header: "그룹인원",
-                    name: "grpMemberCnt",
-                    width: 100,
-                    align: "center",
-                    sortable: true,
-                    formatter: function (ctx) {
-                      var v = ctx.value;
-                      return v == null ? "0" : String(v);
-                    },
-                  },
-                  {
-                    header: "그룹 생성일",
-                    name: "createdOn",
-                    width: 120,
-                    align: "center",
-                    sortable: true,
-                    formatter: function (ctx) {
-                      return formatDate(ctx.value);
-                    },
-                  },
-                  {
-                    header: "권한 회수",
-                    name: "revoke",
-                    width: 100,
-                    align: "center",
-                    sortable: false,
-                    formatter: function () {
-                      return '<button type="button" class="btn-revoke">회수</button>';
-                    },
-                  },
-                ],
-                pageOptions: {
-                  useClient: true,
-                  perPage: 10,
-                },
+          if (isRegisterMode) {
+            grpRoleCount = 0;
+            setRoleGroupToolbarVisible(true);
+            createRoleGroupsGrid();
+          } else {
+            reloadRoleGroupsFromServer()
+              .then(function () {
+                createRoleGroupsGrid();
+              })
+              .catch(function () {
+                host.innerHTML =
+                  '<p class="perm-empty" style="padding:1rem">그룹 목록을 불러오지 못했습니다.</p>';
               });
-            })
-            .catch(function () {
-              host.innerHTML =
-                '<p class="perm-empty" style="padding:1rem">그룹 목록을 불러오지 못했습니다.</p>';
-            });
+          }
         });
+        /*]]>*/
       </script>
     </div>
   </body>

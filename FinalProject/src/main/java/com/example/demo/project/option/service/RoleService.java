@@ -17,6 +17,9 @@ public interface RoleService {
     /** 상세 화면 — 이 ROLE에 연결된 MENU.ROLE_ID 목록 */
     List<String> selectMenuRoleIdsByRoleCd(Long roleCd);
 
+    /** 역할에 매핑된 메뉴 표시명 목록(프로젝트 소속 검증 후). */
+    List<String> selectMenuNamesByRoleCd(Long prjId, Long roleCd);
+
     /** 상세 화면 — 이 ROLE을 보유한 GRP 목록 */
     List<RoleGroupRowVO> selectRoleGroupsList(Long prjId, Long roleCd);
 
@@ -26,4 +29,18 @@ public interface RoleService {
      * @throws IllegalArgumentException 요청 값이 비었거나, 해당 프로젝트에 없는 역할이 포함된 경우
      */
     void deleteRolesForProject(Long prjId, List<Long> roleCds);
+
+    /** 그룹에서 권한 회수 — {@code PROC_GRP_ROLE_DELETE} */
+    RoleRevokeResultVO revokeRoleFromGroup(Long roleCd, Long grpId, boolean deleteRoleIfUnused);
+
+    /** 권한 등록 — {@code PROC_ROLE_CREATE} */
+    RoleRevokeResultVO createRole(
+            Long prjId, String roleName, List<String> menuRoleIds, List<Long> grpIds);
+
+    /** 권한(메뉴·그룹) 수정 — {@code PROC_ROLE_UPDATE} */
+    RoleRevokeResultVO updateRole(
+            Long prjId, Long roleCd, List<String> menuRoleIds, List<Long> grpIds);
+
+    /** {@code GRP_ROLE}에 역할을 보유한 그룹 수 */
+    int countGroupsWithRole(Long roleCd);
 }

@@ -1,0 +1,27 @@
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <!-- 그룹 상세 — 권한별 메뉴 목록 오버레이 (스타일은 groupManagementInfo.html) -->
+    <th:block th:fragment="groupRoleMenusOverlay">
+      <div class="grp-role-menus-overlay" id="grpRoleMenusOverlay" aria-hidden="true">
+        <div class="grp-role-menus-modal" role="dialog" aria-modal="true" aria-labelledby="grpRoleMenusTitle" tabindex="-1">
+          <div class="grp-role-menus-modal__head">
+            <span id="grpRoleMenusTitle">메뉴 목록</span>
+          </div>
+          <div class="grp-role-menus-modal__sub" id="grpRoleMenusRoleCaption" aria-live="polite"></div>
+          <div class="grp-role-menus-modal__body">
+            <ul class="grp-role-menus-list" id="grpRoleMenusList"></ul>
+            <p class="grp-role-menus-empty" id="grpRoleMenusEmpty" hidden>
+              연결된 메뉴가 없습니다.
+            </p>
+            <p class="grp-role-menus-loading" id="grpRoleMenusLoading" hidden>
+              불러오는 중…
+            </p>
+          </div>
+          <div class="grp-role-menus-modal__actions">
+            <button type="button" id="btnGrpRoleMenusClose">닫기</button>
+          </div>
+        </div>
+      </div>
+    </th:block>
+  </body>
+</html>
