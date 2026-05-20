@@ -20,6 +20,9 @@
 			<ul class="navbar-nav me-auto">
 
 				<!-- 공통 메뉴 -->
+				<li class="nav-item small">
+					편의를 위한 임시 메뉴입니다
+				</li>
 				<li class="nav-item">
 					<a class="nav-link" th:href="@{/}">
 						홈화면
@@ -50,10 +53,54 @@
 
 				<!-- 일반회원 -->
 				<th:block sec:authorize="hasRole('USER')">
-
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/mypage}">
-							마이페이지
+						<a class="nav-link" th:href="@{/issue/list}">
+							이슈
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{/milestone}">
+							마일스톤
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{/calender/list}">
+							일정
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{/notice/list}">
+							공지사항
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{/boards/list}">
+							게시판
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{#}">
+							문서(미연결)
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{#}">
+							간트차트(미연결)
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{#}">
+							위키(미연결)
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{#}">
+							작업내역(미연결)
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{#}">
+							프로젝트개요(미연결)
 						</a>
 					</li>
 
@@ -63,8 +110,8 @@
 				<th:block sec:authorize="hasRole('CADMIN')">
 
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/company/member}">
-							기업회원관리
+						<a class="nav-link" th:href="@{/company/list}">
+							기업관리
 						</a>
 					</li>
 
