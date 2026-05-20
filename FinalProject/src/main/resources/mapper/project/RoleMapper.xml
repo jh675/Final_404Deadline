@@ -75,6 +75,21 @@
     WHERE RM.ROLE_CD = #{roleCd}
   </select>
 
+  <!-- 역할에 연결된 메뉴명 목록(그룹 상세 모달용, 조인 중복 제거) -->
+  <select id="selectMenuNamesByRoleCd" resultType="java.lang.String">
+    SELECT sub.menuName
+    FROM (
+      SELECT DISTINCT
+        M.ROLE_NAME AS menuName,
+        M.ROLE_TP AS roleTp,
+        M.ROLE_ID AS roleId
+      FROM ROLE_MENU RM
+      INNER JOIN MENU M ON M.ROLE_ID = RM.ROLE_ID
+      WHERE RM.ROLE_CD = #{roleCd}
+    ) sub
+    ORDER BY sub.roleTp, sub.roleId
+  </select>
+
   <!-- 해당 ROLE_CD를 GRP_ROLE로 보유한 그룹 -->
   <select id="selectRoleGroupsList" resultType="com.example.demo.project.option.service.RoleGroupRowVO">
     SELECT
@@ -95,7 +110,7 @@
     ORDER BY G.ID
   </select>
 
-  <!-- 역할 삭제 — DB 프로시저 (ROLE_MENU·GRP_ROLE·ROLE 등 DB 내부에서 정리) -->
+  <!-- PROC_ROLE_DELETE(p_role_cd, p_prj_id) — ROLE_MENU·GRP_ROLE·ROLE 은 DB 프로시저에서 정리 -->
   <update id="callProcRoleDelete" statementType="CALLABLE">
     {
       CALL PROC_ROLE_DELETE(
@@ -104,4 +119,50 @@
       )
     }
   </update>
+
+  <!-- 권한 등록 — PROC_ROLE_CREATE -->
+  <update id="callProcRoleCreate" statementType="CALLABLE">
+    {
+      CALL PROC_ROLE_CREATE(
+        #{prjId, mode=IN, jdbcType=NUMERIC},
+        #{roleName, mode=IN, jdbcType=VARCHAR},
+        #{roleDetail, mode=IN, jdbcType=VARCHAR},
+        #{grpIds, mode=IN, jdbcType=VARCHAR},
+        #{resultStatus, mode=OUT, jdbcType=VARCHAR},
+        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
+      )
+    }
+  </update>
+
+  <!-- 권한 수정 — PROC_ROLE_UPDATE -->
+  <update id="callProcRoleUpdate" statementType="CALLABLE">
+    {
+      CALL PROC_ROLE_UPDATE(
+        #{roleCd, mode=IN, jdbcType=NUMERIC},
+        #{roleDetail, mode=IN, jdbcType=VARCHAR},
+        #{grpIds, mode=IN, jdbcType=VARCHAR},
+        #{resultStatus, mode=OUT, jdbcType=VARCHAR},
+        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
+      )
+    }
+  </update>
+
+  <!-- 권한 회수 — PROC_GRP_ROLE_DELETE (그룹별) -->
+  <update id="callProcRoleRevokeFromGroup" statementType="CALLABLE">
+    {
+      CALL PROC_GRP_ROLE_DELETE(
+        #{roleCd, mode=IN, jdbcType=NUMERIC},
+        #{grpId, mode=IN, jdbcType=NUMERIC},
+        #{isDelete, mode=IN, jdbcType=VARCHAR},
+        #{resultStatus, mode=OUT, jdbcType=VARCHAR},
+        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
+      )
+    }
+  </update>
+
+  <select id="countGrpByRoleCd" resultType="int">
+    SELECT COUNT(*)
+    FROM GRP_ROLE
+    WHERE ROLE_CD = #{roleCd}
+  </select>
 </mapper>

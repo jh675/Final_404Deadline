@@ -23,7 +23,10 @@ public interface ProjectMapper {
 	void memberInsert(MemberDetailVO mvo);
 	void wikiInsert(WikiVO wVo);
 	void roleInsert(RoleVO rVo);
+	void rolemenuInsert(RoleVO rVo);
+	void grproleInsert(RoleVO rVo);
 	int projectHide(ProjectVO vo);
 	int projectDelete(ProjectVO vo);
 	int countChildProject(int id);
+	ProjectVO gomain(ProjectVO vo);
 } 

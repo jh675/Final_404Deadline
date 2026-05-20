@@ -3,7 +3,7 @@
   lang="ko"
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/userLayout}"
+  layout:decorate="~{layout/defaultLayout}"
 >
   <head>
     <meta charset="UTF-8" />
@@ -123,6 +123,19 @@
         color: #c62828;
         line-height: 1.35;
       }
+      .grp-grid-panel {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fafafa;
+        padding: 0.75rem 0.75rem 0.5rem;
+      }
+      .grp-grid-host {
+        min-height: 120px;
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 6px;
+        overflow: hidden;
+      }
       .grp-data-table-wrap {
         overflow-x: auto;
         border: 1px solid #cfcfcf;
@@ -134,9 +147,6 @@
         border-collapse: collapse;
         font-size: 0.8125rem;
         min-width: 40rem;
-      }
-      .grp-data-table--roles {
-        min-width: 52rem;
       }
       .grp-data-table th,
       .grp-data-table td {
@@ -301,6 +311,85 @@
         color: #fff;
         border-color: #555;
       }
+      .grp-role-name-link {
+        color: #1976d2;
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .grp-role-name-link:hover {
+        color: #0d47a1;
+      }
+      .grp-role-menus-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+      }
+      .grp-role-menus-overlay.is-open {
+        display: flex;
+      }
+      .grp-role-menus-modal {
+        width: min(28rem, 92vw);
+        max-height: 78vh;
+        background: #fff;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+      }
+      .grp-role-menus-modal__head {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .grp-role-menus-modal__sub {
+        padding: 0.5rem 1rem 0;
+        font-size: 0.8125rem;
+        color: #444;
+      }
+      .grp-role-menus-modal__body {
+        padding: 0.65rem 1rem 0.75rem;
+        overflow: auto;
+        max-height: 48vh;
+      }
+      .grp-role-menus-list {
+        margin: 0;
+        padding-left: 1.15rem;
+        font-size: 0.8125rem;
+        color: #333;
+        line-height: 1.55;
+      }
+      .grp-role-menus-empty,
+      .grp-role-menus-loading {
+        margin: 0.35rem 0 0;
+        font-size: 0.8125rem;
+        color: #777;
+      }
+      .grp-role-menus-modal__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding: 0.65rem 1rem;
+        border-top: 1px solid #e0e0e0;
+      }
+      .grp-role-menus-modal__actions button {
+        padding: 0.35rem 0.9rem;
+        border: 1px solid #555;
+        border-radius: 4px;
+        background: #666;
+        color: #fff;
+        font-size: 0.8125rem;
+        cursor: pointer;
+      }
+      .grp-role-menus-modal__actions button:hover {
+        background: #555;
+      }
     </style>
   </head>
   <body>
@@ -371,44 +460,20 @@
         <section class="grp-section" aria-labelledby="grp-members-heading">
           <h2 class="grp-section__title" id="grp-members-heading">구성원 정보</h2>
           <div class="grp-section__body">
-            <div class="grp-data-table-wrap">
-              <table class="grp-data-table" aria-label="구성원 목록">
-                <thead>
-                  <tr>
-                    <th scope="col">No</th>
-                    <th scope="col">이름</th>
-                    <th scope="col">연락처</th>
-                    <th scope="col">이메일</th>
-                    <th scope="col">소속 그룹명</th>
-                    <th scope="col">프로젝트 투입일</th>
-                  </tr>
-                </thead>
-                <tbody id="grpMembersBody">
-                  <tr th:each="m, stat : ${members}"
-                    th:attr="data-user-id=${m.userId}">
-                    <td th:text="${stat.count}">1</td>
-                    <td th:text="${m.userName} ?: '-'">-</td>
-                    <td th:text="${m.tel} ?: '-'">-</td>
-                    <td th:text="${m.email} ?: '-'">-</td>
-                    <td th:text="${m.grpName} ?: '-'">-</td>
-                    <td th:text="${m.prjStartDate} ?: '-'">-</td>
-                  </tr>
-                  <tr id="grpMembersEmptyRow"
-                    th:if="${members == null or members.isEmpty()}">
-                    <td colspan="6" class="empty">등록된 구성원이 없습니다.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div
-              id="grpMemberToolbar"
-              class="grp-member-toolbar"
-              th:if="${registerMode or !groupNotFound}"
-              th:classappend="${!registerMode} ? 'is-hidden' : ''"
-            >
-              <button type="button" class="grp-member-toolbar__btn" id="btnAddMember">
-                구성원 관리
-              </button>
+            <div class="grp-grid-panel">
+              <div id="grpMembersGrid"
+                class="grp-grid-host"
+                role="region"
+                aria-label="구성원 목록">
+              </div>
+              <div id="grpMemberToolbar"
+                class="grp-member-toolbar"
+                th:if="${registerMode or !groupNotFound}"
+                th:classappend="${!registerMode} ? 'is-hidden' : ''">
+                <button type="button" class="grp-member-toolbar__btn" id="btnAddMember">
+                  구성원 관리
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -420,37 +485,13 @@
         >
           <h2 class="grp-section__title" id="grp-roles-heading">보유 권한</h2>
           <div class="grp-section__body">
-            <div class="grp-data-table-wrap">
-              <table
-                class="grp-data-table grp-data-table--roles"
+            <div class="grp-grid-panel">
+              <div
+                id="grpRolesGrid"
+                class="grp-grid-host"
+                role="region"
                 aria-label="보유 권한 목록"
-              >
-                <thead>
-                  <tr>
-                    <th scope="col">No</th>
-                    <th scope="col">권한 코드</th>
-                    <th scope="col">메뉴명</th>
-                    <th scope="col">권한 생성일</th>
-                    <th scope="col">비고</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr th:each="r, stat : ${roles}">
-                    <td th:text="${stat.count}">1</td>
-                    <td th:text="${r.roleCd} ?: '-'">-</td>
-                    <td th:text="${r.menuName} ?: '-'">-</td>
-                    <td
-                      th:text="${r.createdOn != null ? #temporals.format(r.createdOn, 'yyyy-MM-dd') : '-'}"
-                    >
-                      -
-                    </td>
-                    <td th:text="${r.remark} ?: '-'">-</td>
-                  </tr>
-                  <tr th:if="${roles == null or roles.isEmpty()}">
-                    <td colspan="8" class="empty">보유 권한이 없습니다.</td>
-                  </tr>
-                </tbody>
-              </table>
+              ></div>
             </div>
           </div>
         </section>
@@ -472,6 +513,9 @@
         <div
           th:replace="~{project/group/modal/groupMemberModal :: groupMemberPickOverlay}"
         ></div>
+        <div
+          th:replace="~{project/group/modal/groupRoleModal :: groupRoleMenusOverlay}"
+        ></div>
       </th:block>
 
       <script th:if="${!groupNotFound}" th:inline="javascript">
@@ -480,12 +524,15 @@
           const prjId = /*[[${prjId}]]*/ 0;
           const registerMode = /*[[${registerMode}]]*/ false;
           const grpId = /*[[${grpId}]]*/ null;
+          const serverMembers = /*[[${members}]]*/ [];
+          const serverRoles = /*[[${roles}]]*/ [];
           let groupEditMode = registerMode;
           const grpNameInput = document.getElementById("detailGrpName");
           const saveBtn = document.getElementById("btnGroupSave");
           const addMemberBtn = document.getElementById("btnAddMember");
           const memberToolbar = document.getElementById("grpMemberToolbar");
-          const membersBody = document.getElementById("grpMembersBody");
+          const membersGridEl = document.getElementById("grpMembersGrid");
+          const rolesGridEl = document.getElementById("grpRolesGrid");
           const pickOverlay = document.getElementById("grpMemberPickOverlay");
           const pickGridEl = document.getElementById("grpMemberPickGrid");
           const pickSearchType = document.getElementById("grpMemberSearchType");
@@ -494,6 +541,19 @@
           );
           const pickCancel = document.getElementById("btnMemberPickCancel");
           const pickOk = document.getElementById("btnMemberPickOk");
+          const roleMenusOverlay = document.getElementById(
+            "grpRoleMenusOverlay",
+          );
+          const btnGrpRoleMenusClose = document.getElementById(
+            "btnGrpRoleMenusClose",
+          );
+          const grpRoleMenusList = document.getElementById("grpRoleMenusList");
+          const grpRoleMenusEmpty = document.getElementById("grpRoleMenusEmpty");
+          const grpRoleMenusLoading =
+            document.getElementById("grpRoleMenusLoading");
+          const grpRoleMenusRoleCaption = document.getElementById(
+            "grpRoleMenusRoleCaption",
+          );
           if (!grpNameInput) return;
 
           const pendingMembers = [];
@@ -503,21 +563,269 @@
             memberToolbar.classList.toggle("is-hidden", !visible);
           }
 
-          function initPendingFromServerTable() {
-            if (registerMode || !membersBody) return;
+          let membersGrid = null;
+          let rolesGrid = null;
+
+          function formatGridDate(value) {
+            if (value == null || value === "") return "-";
+            if (Array.isArray(value) && value.length >= 3) {
+              const y = value[0];
+              const m = String(value[1]).padStart(2, "0");
+              const d = String(value[2]).padStart(2, "0");
+              return y + "-" + m + "-" + d;
+            }
+            const dt = new Date(value);
+            if (isNaN(dt.getTime())) return String(value);
+            const pad = function (n) {
+              return String(n).padStart(2, "0");
+            };
+            return (
+              dt.getFullYear() +
+              "-" +
+              pad(dt.getMonth() + 1) +
+              "-" +
+              pad(dt.getDate())
+            );
+          }
+
+          function escapeHtmlText(s) {
+            return String(s)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/"/g, "&quot;");
+          }
+
+          function pendingToGridRows() {
+            return pendingMembers.map(function (m) {
+              return {
+                userId: m.userId,
+                userName: m.userName || "-",
+                tel: m.tel || "-",
+                email: m.email || "-",
+                grpName: m.grpName || "-",
+                prjStartDate: m.prjStartDate || "-",
+              };
+            });
+          }
+
+          function initPendingFromServer() {
+            if (registerMode) return;
             pendingMembers.length = 0;
-            membersBody.querySelectorAll("tr[data-user-id]").forEach(function (tr) {
-              const uid = Number(tr.getAttribute("data-user-id"));
-              const tds = tr.querySelectorAll("td");
-              if (isNaN(uid) || tds.length < 6) return;
+            (serverMembers || []).forEach(function (m) {
+              if (m == null || m.userId == null) return;
               pendingMembers.push({
-                userId: uid,
-                userName: (tds[1].textContent || "").trim() || "-",
-                tel: (tds[2].textContent || "").trim() || "-",
-                email: (tds[3].textContent || "").trim() || "-",
-                grpName: (tds[4].textContent || "").trim() || "-",
-                prjStartDate: (tds[5].textContent || "").trim() || "-",
+                userId: Number(m.userId),
+                userName: m.userName || "-",
+                tel: m.tel || "-",
+                email: m.email || "-",
+                grpName: m.grpName || "-",
+                prjStartDate: m.prjStartDate || "-",
               });
+            });
+          }
+
+          function createMembersGrid() {
+            if (!membersGridEl || typeof tui === "undefined" || !tui.Grid) {
+              return;
+            }
+            if (membersGrid) {
+              membersGrid.destroy();
+              membersGrid = null;
+            }
+            membersGrid = new tui.Grid({
+              el: membersGridEl,
+              data: pendingToGridRows(),
+              rowHeaders: ["rowNum"],
+              scrollX: false,
+              scrollY: false,
+              bodyHeight: "auto",
+              rowHeight: 36,
+              minBodyHeight: 80,
+              columns: [
+                {
+                  header: "이름",
+                  name: "userName",
+                  align: "center",
+                  width: 300,
+                  sortable: true,
+                },
+                {
+                  header: "연락처",
+                  name: "tel",
+                  width: 120,
+                  align: "center",
+                  sortable: false,
+                },
+                {
+                  header: "이메일",
+                  name: "email",
+                  align: "center",
+                  sortable: true,
+                },
+                {
+                  header: "프로젝트 투입일",
+                  name: "prjStartDate",
+                  align: "center",
+                  sortable: true,
+                },
+              ],
+              pageOptions: {
+                useClient: true,
+                perPage: 10,
+              },
+            });
+          }
+
+          function closeGroupRoleMenusModal() {
+            if (!roleMenusOverlay) return;
+            roleMenusOverlay.classList.remove("is-open");
+            roleMenusOverlay.setAttribute("aria-hidden", "true");
+            if (grpRoleMenusLoading) grpRoleMenusLoading.hidden = true;
+          }
+
+          async function openGroupRoleMenusModal(fallbackRoleName, pid, gid, rc) {
+            if (
+              !roleMenusOverlay ||
+              !grpRoleMenusList ||
+              !grpRoleMenusEmpty ||
+              !grpRoleMenusLoading ||
+              !grpRoleMenusRoleCaption
+            ) {
+              return;
+            }
+            grpRoleMenusRoleCaption.textContent =
+              fallbackRoleName && fallbackRoleName !== "-"
+                ? "권한: " + fallbackRoleName
+                : "권한 코드: " + rc;
+            grpRoleMenusList.innerHTML = "";
+            grpRoleMenusEmpty.hidden = true;
+            grpRoleMenusLoading.hidden = false;
+            roleMenusOverlay.classList.add("is-open");
+            roleMenusOverlay.setAttribute("aria-hidden", "false");
+            try {
+              var url =
+                "/project/group/groupRoleMenus?prjId=" +
+                encodeURIComponent(String(pid)) +
+                "&grpId=" +
+                encodeURIComponent(String(gid)) +
+                "&roleCd=" +
+                encodeURIComponent(String(rc));
+              var res = await fetch(url, { credentials: "same-origin" });
+              var data = await res.json().catch(function () {
+                return {};
+              });
+              grpRoleMenusLoading.hidden = true;
+              if (!res.ok || !data || data.ok !== true) {
+                var msg =
+                  (data && data.message) ||
+                  "메뉴 목록을 불러오지 못했습니다.";
+                await alertMsg(msg, "오류");
+                closeGroupRoleMenusModal();
+                return;
+              }
+              var name = data.roleName || fallbackRoleName || "";
+              if (name && name !== "-") {
+                grpRoleMenusRoleCaption.textContent = "권한: " + name;
+              }
+              var menus = data.menus || [];
+              if (!menus.length) {
+                grpRoleMenusEmpty.hidden = false;
+                return;
+              }
+              menus.forEach(function (label) {
+                var li = document.createElement("li");
+                li.textContent =
+                  label == null || label === "" ? "-" : String(label);
+                grpRoleMenusList.appendChild(li);
+              });
+            } catch (err) {
+              grpRoleMenusLoading.hidden = true;
+              await alertMsg(
+                "메뉴 목록을 불러오지 못했습니다.",
+                "오류",
+              );
+              closeGroupRoleMenusModal();
+            }
+          }
+
+          function createRolesGrid() {
+            if (!rolesGridEl || typeof tui === "undefined" || !tui.Grid) {
+              return;
+            }
+            if (rolesGrid) {
+              rolesGrid.destroy();
+              rolesGrid = null;
+            }
+            const rows = (serverRoles || []).map(function (r) {
+              return {
+                roleCd: r.roleCd,
+                roleName: r.roleName || "-",
+                createdOn: r.createdOn,
+                remark: r.remark || "-",
+              };
+            });
+            rolesGrid = new tui.Grid({
+              el: rolesGridEl,
+              data: rows,
+              rowHeaders: ["rowNum"],
+              scrollX: false,
+              scrollY: false,
+              bodyHeight: "auto",
+              rowHeight: 36,
+              minBodyHeight: 80,
+              columns: [
+                {
+                  header: "권한명",
+                  name: "roleName",
+                  align: "center",
+                  sortable: true,
+                  escapeHTML: false,
+                  formatter: function (ctx) {
+                    var raw =
+                      ctx.value == null || ctx.value === ""
+                        ? "-"
+                        : String(ctx.value);
+                    var v = raw === "-" ? raw : escapeHtmlText(raw);
+                    return (
+                      '<span class="grp-role-name-link" tabindex="0">' +
+                      v +
+                      "</span>"
+                    );
+                  },
+                },
+                {
+                  header: "권한 생성일",
+                  name: "createdOn",
+                  width: 200,
+                  align: "center",
+                  sortable: true,
+                  formatter: function (ctx) {
+                    return formatGridDate(ctx.value);
+                  },
+                },
+                {
+                  header: "비고",
+                  name: "remark",
+                  width: 100,
+                  align: "center",
+                  sortable: false,
+                },
+              ],
+              pageOptions: {
+                useClient: true,
+                perPage: 10,
+              },
+            });
+            rolesGrid.on("click", function (ev) {
+              if (!rolesGrid || ev.columnName !== "roleName") return;
+              var row = rolesGrid.getRow(ev.rowKey);
+              if (!row || row.roleCd == null) return;
+              var pid = Number(prjId);
+              var gid = Number(grpId);
+              var rc = Number(row.roleCd);
+              if (isNaN(pid) || isNaN(gid) || isNaN(rc)) return;
+              var label = row.roleName || "";
+              openGroupRoleMenusModal(label, pid, gid, rc);
             });
           }
           let allPickMembers = [];
@@ -551,37 +859,12 @@
           }
 
           function refreshMembersTable() {
-            if (!membersBody) return;
-            membersBody.innerHTML = "";
-            if (!pendingMembers.length) {
-              const tr = document.createElement("tr");
-              tr.id = "grpMembersEmptyRow";
-              const td = document.createElement("td");
-              td.colSpan = 6;
-              td.className = "empty";
-              td.textContent = "등록된 구성원이 없습니다.";
-              tr.appendChild(td);
-              membersBody.appendChild(tr);
+            if (!membersGridEl) return;
+            if (membersGrid && typeof membersGrid.resetData === "function") {
+              membersGrid.resetData(pendingToGridRows());
               return;
             }
-            pendingMembers.forEach(function (m, idx) {
-              const tr = document.createElement("tr");
-              tr.setAttribute("data-user-id", String(m.userId));
-              const cols = [
-                String(idx + 1),
-                m.userName || "-",
-                m.tel || "-",
-                m.email || "-",
-                m.grpName || "-",
-                m.prjStartDate || "-",
-              ];
-              cols.forEach(function (text) {
-                const td = document.createElement("td");
-                td.textContent = text;
-                tr.appendChild(td);
-              });
-              membersBody.appendChild(tr);
-            });
+            createMembersGrid();
           }
 
           function rowToPendingMember(row) {
@@ -798,7 +1081,11 @@
 
           setMemberToolbarVisible(registerMode);
           if (!registerMode) {
-            initPendingFromServerTable();
+            initPendingFromServer();
+          }
+          createMembersGrid();
+          if (!registerMode) {
+            createRolesGrid();
           }
 
           async function openMemberPicker() {
@@ -887,6 +1174,20 @@
               }
               commitModalSelection();
               closeMemberPicker();
+            });
+          }
+
+          if (btnGrpRoleMenusClose) {
+            btnGrpRoleMenusClose.addEventListener(
+              "click",
+              closeGroupRoleMenusModal,
+            );
+          }
+          if (roleMenusOverlay) {
+            roleMenusOverlay.addEventListener("click", function (e) {
+              if (e.target === roleMenusOverlay) {
+                closeGroupRoleMenusModal();
+              }
             });
           }
 

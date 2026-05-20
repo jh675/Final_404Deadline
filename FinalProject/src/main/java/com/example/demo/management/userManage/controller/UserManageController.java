@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,8 +26,10 @@ import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/admin")
 public class UserManageController {
@@ -67,23 +70,64 @@ public class UserManageController {
 	    return result;
 	}
 
-	@PostMapping("/user/profile")
-	@ResponseBody
-	public ResponseEntity<?> uploadProfile(
-	        @RequestParam Long userId,
-	        @RequestParam MultipartFile[] file) {
-		attachService.saveAndInsertAttachments(userId, file,"09MODULE" , "user");
-//	    attachService.saveUserProfile(userId, file);
-
-	    return ResponseEntity.ok().build();
-	}
-	
+	// 1. 프로필 이미지 조회 (최신 1건의 정보만 반환)
 	@GetMapping("/user/profile/{userId}")
 	@ResponseBody
-	public AttachVO getProfile(@PathVariable Long userId) {
-	    List<AttachVO> list =
-	        attachService.selectAttachList("09MODULE", userId);
+	public ResponseEntity<AttachVO> getProfileImage(@PathVariable("userId") Long userId) {
+	    // 조건에 맞춰 검색
+	    List<AttachVO> list = attachService.selectAttachList("09MODULE", userId);
+	    
+	    if (list != null && !list.isEmpty()) {
+	        // 가장 최근에 등록된 이미지를 가져옴 (또는 리스트의 마지막 값)
+	        return ResponseEntity.ok(list.get(list.size() - 1)); 
+	    }
+	    // 이미지가 없으면 빈 상태 반환
+	    return ResponseEntity.ok().build(); 
+	}
 
-	    return list.isEmpty() ? null : list.get(0);
+	// 2. 프로필 이미지 업로드
+	@PostMapping("/user/profile")
+	@ResponseBody
+	public ResponseEntity<?> uploadProfileImage(@RequestParam("userId") Long userId, 
+	                                            @RequestParam("file") MultipartFile file) {
+	    
+	    // 1단계: 기존 프로필 이미지가 있다면 물리적 파일과 DB 데이터 삭제
+	    List<AttachVO> existList = attachService.selectAttachList("09MODULE", userId);
+	    if (existList != null) {
+	        for (AttachVO attach : existList) {
+	            try {
+	                attachService.removeAttach(attach); // 디스크 물리 파일 삭제
+	                attachService.deleteAttach(attach.getId()); // DB 삭제
+	            } catch (Exception e) {
+	                log.error("기존 프로필 삭제 실패: {}", e.getMessage());
+	            }
+	        }
+	    }
+
+	    // 2단계: 새 프로필 이미지 저장 (DB 등록까지)
+	    attachService.saveAndInsertAttachments(userId, new MultipartFile[]{file}, "09MODULE", "users");
+	    
+	    return ResponseEntity.ok().body("SUCCESS");
+	}
+
+	// 3. 프로필 이미지 삭제
+	@DeleteMapping("/user/profile/{userId}")
+	@ResponseBody
+	public ResponseEntity<?> deleteProfileImage(@PathVariable("userId") Long userId) {
+	    
+	    List<AttachVO> existList = attachService.selectAttachList("09MODULE", userId);
+	    if (existList != null) {
+	        for (AttachVO attach : existList) {
+	            try {
+	                attachService.removeAttach(attach); // 디스크 물리 파일 삭제
+	                attachService.deleteAttach(attach.getId()); // DB 삭제
+	            } catch (Exception e) {
+	                log.error("프로필 삭제 실패: {}", e.getMessage());
+	                return ResponseEntity.internalServerError().build();
+	            }
+	        }
+	    }
+	    
+	    return ResponseEntity.ok().body("SUCCESS");
 	}
 }

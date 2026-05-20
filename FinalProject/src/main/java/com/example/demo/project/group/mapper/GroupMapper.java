@@ -3,14 +3,7 @@ package com.example.demo.project.group.mapper;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import com.example.demo.project.group.service.GroupDetailVO;
-import com.example.demo.project.group.service.GroupInsertProcParam;
-import com.example.demo.project.group.service.GroupUpdateProcParam;
-import com.example.demo.project.group.service.GroupListCriteria;
-import com.example.demo.project.group.service.GroupMemberDetailRowVO;
-import com.example.demo.project.group.service.GroupMemberPickRowVO;
-import com.example.demo.project.group.service.GroupRoleDetailRowVO;
-import com.example.demo.project.group.service.ProjectGroupRowVO;
+import com.example.demo.project.group.service.*;
 
 /** 그룹 MyBatis — GRP 목록·연쇄 삭제 */
 @Mapper
@@ -35,6 +28,12 @@ public interface GroupMapper {
     List<GroupMemberPickRowVO> selectGroupMemberPickList(@Param("prjId") Long prjId);
 
     List<GroupRoleDetailRowVO> selectGroupRoles(@Param("prjId") Long prjId, @Param("grpId") Long grpId);
+
+    /** 그룹·프로젝트 내 GRP_ROLE 바인드 존재 여부 */
+    int countGrpRoleAssignment(
+            @Param("prjId") Long prjId,
+            @Param("grpId") Long grpId,
+            @Param("roleCd") Long roleCd);
 
     /** DB {@code PROC_GRP_DELETE} — GRP_ROLE, MEMBER, GRP 정리 후 COMMIT */
     void callProcGrpDelete(@Param("grpId") Long grpId);

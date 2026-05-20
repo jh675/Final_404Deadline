@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.project.messages.mapper.MessagesMapper">
+
+	<select id="selectAll" resultType="com.example.demo.project.messages.service.MessagesVO">
+		SELECT 
+			id,
+			board_id AS boardId,
+			Fieldparent_id AS fieldparentId,
+			content,
+			user_id AS userId,
+			replies_count AS repliesCount,
+			last_reply_id AS lastReplyId,
+			created_on AS createdOn,
+			updated_on AS updatedOn
+		FROM messages
+		WHERE board_id = #{boardId}
+		ORDER BY id DESC
+	</select>
+
+	<insert id="insert">
+		INSERT INTO messages (
+			id, 
+			board_id, 
+			Fieldparent_id, 
+			content, 
+			user_id, 
+			replies_count, 
+			last_reply_id, 
+			created_on
+		) VALUES (
+			msg_seq.nextval, #{boardId}, 
+			#{fieldparentId}, 
+			#{content}, 
+			#{userId},
+			0,
+			NULL,
+			SYSDATE )
+	</insert>
+
+	<select id="selectOne" resultType="com.example.demo.project.messages.service.MessagesVO">
+		SELECT 
+			id,
+			board_id AS boardId,
+			Fieldparent_id AS fieldparentId,
+			content,
+			user_id AS userId,
+			replies_count AS repliesCount,
+			last_reply_id AS lastReplyId,
+			created_on AS createdOn,
+			updated_on AS updatedOn
+		FROM messages
+		WHERE id = #{id}
+	</select>
+
+	<update id="update">
+		UPDATE messages
+		SET 
+			Fieldparent_id = #{fieldparentId}, 
+			content = #{content}, 
+			user_id = #{userId},
+			updated_on = SYSDATE WHERE id = #{id}
+	</update>
+
+	<delete id="delete">
+		DELETE FROM messages
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

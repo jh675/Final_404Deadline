@@ -13,13 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.example.demo.project.group.service.GroupDetailVO;
-import com.example.demo.project.group.service.GroupListCriteria;
-import com.example.demo.project.group.service.GroupMemberDetailRowVO;
-import com.example.demo.project.group.service.GroupMemberPickRowVO;
-import com.example.demo.project.group.service.GroupRoleDetailRowVO;
-import com.example.demo.project.group.service.GroupService;
-import com.example.demo.project.group.service.ProjectGroupRowVO;
+import com.example.demo.project.group.service.*;
+import com.example.demo.project.option.service.RoleService;
+import com.example.demo.project.option.service.RoleVO;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -31,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class GroupController {
 
     private final GroupService groupService;
+    private final RoleService roleService;
 
     /** 그룹 목록 화면 — 검색 조건 반영 후 Thymeleaf에 rows 전달 */
     @GetMapping("/groupManagement")
@@ -131,6 +128,37 @@ public class GroupController {
         body.put("content", rows);
         body.put("prjId", prjId);
         return body;
+    }
+
+    /**
+     * 그룹 보유 권한 — 역할에 연결된 메뉴명 목록.
+     * 해당 그룹에 {@code GRP_ROLE}로 부여된 역할만 조회 가능합니다.
+     */
+    @GetMapping("/groupRoleMenus")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> groupRoleMenus(
+            @RequestParam("prjId") Long prjId,
+            @RequestParam("grpId") Long grpId,
+            @RequestParam("roleCd") Long roleCd) {
+        if (prjId == null || grpId == null || roleCd == null) {
+            return badRequest("요청이 올바르지 않습니다.");
+        }
+        if (groupService.selectGroupDetail(prjId, grpId) == null) {
+            return badRequest("그룹을 찾을 수 없습니다.");
+        }
+        if (!groupService.isRoleAssignedToGroup(prjId, grpId, roleCd)) {
+            return badRequest("이 그룹에 부여된 권한이 아닙니다.");
+        }
+        RoleVO role = roleService.selectRoleByPrjAndCd(prjId, roleCd);
+        if (role == null) {
+            return badRequest("권한을 찾을 수 없습니다.");
+        }
+        List<String> menus = roleService.selectMenuNamesByRoleCd(prjId, roleCd);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("ok", true);
+        body.put("roleName", role.getRoleName());
+        body.put("menus", menus == null ? List.of() : menus);
+        return ResponseEntity.ok(body);
     }
 
     /** 그룹 등록 모달 — 프로젝트 구성원 선택 목록 JSON */

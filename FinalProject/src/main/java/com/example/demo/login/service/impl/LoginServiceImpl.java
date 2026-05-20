@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.example.demo.company.service.CompanyVO;
 import com.example.demo.login.mapper.LoginMapper;
 import com.example.demo.login.service.LoginService;
 import com.example.demo.login.service.UserVO;
@@ -65,5 +66,10 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 
 		vo.setRole(List.of(role));
 		return vo;
+	}
+	
+	@Override
+	public List<CompanyVO> searchActiveCompanies(String keyword) {
+		return loginMapper.searchActiveCompanies(keyword);
 	}
 }

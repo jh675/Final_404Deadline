@@ -81,6 +81,14 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    public boolean isRoleAssignedToGroup(Long prjId, Long grpId, Long roleCd) {
+        if (prjId == null || grpId == null || roleCd == null) {
+            return false;
+        }
+        return groupMapper.countGrpRoleAssignment(prjId, grpId, roleCd) > 0;
+    }
+
+    @Override
     public void insertGroup(Long prjId, String grpName, List<Long> userIds) {
         if (prjId == null) {
             throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");

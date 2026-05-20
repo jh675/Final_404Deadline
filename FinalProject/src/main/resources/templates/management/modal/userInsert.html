@@ -163,18 +163,20 @@
 								<!-- 우측 이미지 -->
 								<div class="col-lg-4">
 									<div class="border rounded p-3 text-center">
-										<div
-											class="border
-													d-flex
-													justify-content-center
-													align-items-center
-													mb-3"
-											style="height: 260px;">
-											<img id="profilePreview" src="" class="img-fluid d-none">
-											<span id="emptyImageText" class="text-muted"> 프로필 이미지
+										<div class="border d-flex justify-content-center align-items-center mb-3 overflow-hidden"
+        									 style="width: 150px; 	
+        									 aspect-ratio: 3/4; 
+        									 margin: 0 auto; 
+        									 background-color: #f8f9fa;">
+											<img id="profilePreview" 
+												 src="" 
+												 class="d-none"
+												 style="width: 100%; height: 100%; object-fit: cover;">
+											<span id="emptyImageText" class="text-muted small"> 프로필 이미지
 											</span>
 										</div>
-										<div class="small text-muted mb-3">업로드 할 수 있는 사진의 크기는 가로	3cm, 세로 4cm로 제한됩니다.</div>
+										<div class="small text-muted mb-3">업로드 할 수 있는 사진의 크기는 <br>가로	3cm, 세로 4cm 비율(0.75)로 제한됩니다.</div>
+										<div id="wrongImageSize" class="small text-danger"></div>
 										<input type="file" id="profileImage" class="form-control d-none" accept="image/*">
 										<div class="d-flex justify-content-center gap-2">
 											<button type="button" class="btn btn-sm btn-outline-primary" id="uploadBtn">등록</button>
