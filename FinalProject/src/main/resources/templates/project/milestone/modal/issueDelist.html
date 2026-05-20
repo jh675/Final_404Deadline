@@ -41,6 +41,9 @@
 			var selectEl = form.querySelector('[name="milestoneIssueId"]');
 
 			function getCsrfHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getCsrfHeaders) {
+					return window.MilestoneTimeline.getCsrfHeaders();
+				}
 				var headers = {};
 				var tokenMeta = document.querySelector('meta[name="_csrf"]');
 				var headerMeta = document.querySelector('meta[name="_csrf_header"]');
@@ -113,9 +116,9 @@
 				if (!window.confirm("\"" + label + "\" 이슈를 해제할까요?")) return;
 
 				deleteBtn.disabled = true;
-				fetch("/api/milestone/" + encodeURIComponent(msId) + "/issues/" + encodeURIComponent(miId), {
+				fetch("/api/milestone/issue/" + encodeURIComponent(miId), {
 					method: "DELETE",
-					headers: getCsrfHeaders(),
+					headers: Object.assign({ Accept: "application/json" }, getCsrfHeaders()),
 				})
 					.then(function (res) {
 						if (!res.ok) throw new Error("HTTP " + res.status);

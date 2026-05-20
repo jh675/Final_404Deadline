@@ -489,15 +489,16 @@
 					? '/issue/register-start-date'
 					: '/issue/register-closed-date';
 				const label = action === 'start' ? '시작일' : '완료일';
-				const now = new Date();
 
 				postIssueDate(url, row.id)
-					.then(function () {
+					.then(function (data) {
 						const updated = Object.assign({}, row);
+						const registeredAt = data.registeredAt ? new Date(data.registeredAt) : new Date();
+						updated.updatedOn = registeredAt;
 						if (action === 'start') {
-							updated.startDate = now;
+							updated.startDate = registeredAt;
 						} else {
-							updated.closedDate = now;
+							updated.closedDate = registeredAt;
 						}
 						grid.setRow(rowKey, updated);
 						alert(label + '이 등록되었습니다.');

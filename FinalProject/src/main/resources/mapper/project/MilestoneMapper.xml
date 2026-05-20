@@ -39,14 +39,55 @@
 		on m.id=i.milestone_id
 		where i.milestone_id=#{id}
 	</select>
+	<select id="selectMilestoneNotInIssue">
+		select id,subject from issue
+		where id not in(
+			select issue_id from milestone_issue
+		)
+		and prj_id = #{id}
+		order by id
+	</select>
 	<insert id="insertMilestone">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
-			SELECT ISS_SEQ.NEXTVAL FROM DUAL
+			SELECT ML_SEQ.NEXTVAL FROM DUAL
 		</selectKey>
 		insert into milestone (id, prj_id, name, start_date, end_date)
 		values (${id}, #{prjId}, #{name}, #{startDate}, #{endDate})
 	</insert>
-
+	
+	<insert id="insertMilestoneIssue">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT ML_ISS_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		insert into milestone_issue (id, milestone_id,issue_id)
+		values (${id}, #{milestoneId}, #{issueId})
+	</insert>
+	<insert id="insertTimeline">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT ML_TL_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		insert into milestone_timeline (id, milestone_issue_id, contents, entry_date, type_cd)
+		values (${id}, #{milestoneIssueId}, #{contents}, #{entryDate}, #{typeCd})
+	</insert>
+	<update id="updateMilestone">
+		update milestone
+		set name=#{name}, start_date=#{startDate}, end_date=#{endDate}
+		where id=#{id}
+	</update>
+	<delete id="deleteMilestone">
+		delete from milestone
+		where id=#{id}
+	</delete>
+	<delete id="deleteMilestoneIssue">
+		delete from milestone_issue
+		where id=#{id}
+	</delete>
+	<select id="getAvg" resultType="long">
+		select avg(done_ratio) from issue where id in(
+			select issue_id from milestone_issue 
+			where milestone_id=${id}
+		)
+	</select>
 
 
 
