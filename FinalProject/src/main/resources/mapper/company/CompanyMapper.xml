@@ -9,8 +9,19 @@
             parameterType="com.example.demo.company.service.CompanyVO"
             resultType="com.example.demo.company.service.CompanyVO">
 
-        select *
-        from company
+     select 
+        c.biz_no,
+        c.company_name,
+        c.tel, 
+        c.address,
+        c.is_active_cd,
+        c.created_on,
+        u.login,
+        u.email
+    from company c
+    left join users u
+        on c.biz_no = u.biz_no
+        and u.admin_cd = '02ROLE'
 
         <where>
 
@@ -46,10 +57,20 @@
     <select id="selectOne"
             resultType="com.example.demo.company.service.CompanyVO">
 
-        select *
-        from company
-        where biz_no = #{bizNo}
-
+        select 
+        	c.biz_no,
+        	c.company_name,
+        	c.tel,
+        	c.address,
+        	c.is_active_cd,
+        	c.created_on,
+        	u.login,
+        	u.email
+        from company c
+        left join users u
+        	on c.biz_no = u.biz_no	
+        	and u.admin_cd = '02ROLE'
+		where c.biz_no = #{bizNo}
     </select>
 
     <!-- ===================== INSERT ===================== -->

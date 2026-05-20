@@ -20,7 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.example.demo.project.group.service.GroupListCriteria;
+import com.example.demo.project.group.service.GroupService;
+import com.example.demo.project.group.service.ProjectGroupRowVO;
 import com.example.demo.project.option.service.RoleGroupRowVO;
+import com.example.demo.project.option.service.RoleRevokeResultVO;
 import com.example.demo.project.option.service.RoleMenuSectionVO;
 import com.example.demo.project.option.service.RoleMenuSectionVO.CrudSlot;
 import com.example.demo.project.option.service.RoleMenuSectionVO.LabelSlot;
@@ -37,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 public class RoleController {
 
     private final RoleService roleService;
+    private final GroupService groupService;
 
     /** 권한(역할) 목록 화면 — 검색 조건 반영 후 Thymeleaf에 rows 전달 */
     @GetMapping("/roleManagement")
@@ -74,15 +79,29 @@ public class RoleController {
     @GetMapping("/roleManagementInfo")
     public String roleManagementInfoPage(
             @RequestParam("prjId") Long prjId,
-            @RequestParam("roleCd") Long roleCd,
+            @RequestParam(value = "roleCd", required = false) Long roleCd,
             Model model) {
 
         model.addAttribute("prjId", prjId);
+        List<RoleVO> allMenus = roleService.selectAllMenus();
+
+        if (roleCd == null) {
+            model.addAttribute("registerMode", true);
+            model.addAttribute("roleNotFound", false);
+            model.addAttribute("roleCd", null);
+            model.addAttribute("prjName", groupService.selectProjectName(prjId));
+            model.addAttribute("menuSections", buildMenuSections(allMenus, Set.of()));
+            return "project/role/roleManagementInfo";
+        }
+
+        model.addAttribute("registerMode", false);
         model.addAttribute("roleCd", roleCd);
 
         RoleVO currentRole = roleService.selectRoleByPrjAndCd(prjId, roleCd);
         if (currentRole == null) {
+            model.addAttribute("registerMode", false);
             model.addAttribute("roleNotFound", true);
+            model.addAttribute("roleCd", roleCd);
             model.addAttribute("menuSections", List.of());
             return "project/role/roleManagementInfo";
         }
@@ -91,7 +110,6 @@ public class RoleController {
         model.addAttribute("currentRole", currentRole);
         model.addAttribute("roleCreatedOnYmd", formatRoleDateYmd(currentRole.getCreatedOn()));
 
-        List<RoleVO> allMenus = roleService.selectAllMenus();
         Set<String> linked = new HashSet<>(roleService.selectMenuRoleIdsByRoleCd(roleCd));
         model.addAttribute("menuSections", buildMenuSections(allMenus, linked));
         return "project/role/roleManagementInfo";
@@ -165,7 +183,124 @@ public class RoleController {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("content", list);
         body.put("prjId", prjId);
+        body.put(
+                "grpRoleCount",
+                roleCd == null ? 0 : roleService.countGroupsWithRole(roleCd));
         return body;
+    }
+
+    /** 역할 등록 — {@code PROC_ROLE_CREATE} */
+    @PostMapping("/registerRole")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> registerRole(
+            @RequestBody(required = false) RoleCreateRequest body) {
+        Map<String, Object> resp = new LinkedHashMap<>();
+        try {
+            if (body == null || body.prjId() == null) {
+                return badRequest("요청이 올바르지 않습니다.");
+            }
+            String roleName = body.roleName() == null ? "" : body.roleName().trim();
+            if (roleName.isEmpty()) {
+                return badRequest("역할명을 입력하세요.");
+            }
+            RoleRevokeResultVO result =
+                    roleService.createRole(
+                            body.prjId(), roleName, body.menuRoleIds(), body.grpIds());
+            resp.put("resultStatus", result.getResultStatus());
+            resp.put("resultMessage", result.getResultMsg());
+            resp.put("ok", result.isOk());
+            if (!result.isOk()) {
+                return ResponseEntity.badRequest().body(resp);
+            }
+            return ResponseEntity.ok(resp);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("ok", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "권한 등록 중 오류가 발생했습니다."));
+        }
+    }
+
+    /** 역할 상세 그룹 관리 모달 — 프로젝트 그룹 선택 목록 */
+    @GetMapping("/roleGroupPickList")
+    @ResponseBody
+    public Map<String, Object> roleGroupPickList(@RequestParam("prjId") Long prjId) {
+        GroupListCriteria criteria =
+                GroupListCriteria.builder()
+                        .prjId(prjId)
+                        .grpName("")
+                        .createdFrom("")
+                        .createdTo("")
+                        .build();
+        List<ProjectGroupRowVO> rows = groupService.selectProjectGroupList(criteria);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", rows);
+        body.put("prjId", prjId);
+        return body;
+    }
+
+    /** 역할 상세 — 메뉴 권한 수정 ({@code PROC_ROLE_UPDATE}) */
+    @PostMapping("/updateRole")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateRole(
+            @RequestBody(required = false) RoleUpdateRequest body) {
+        Map<String, Object> resp = new LinkedHashMap<>();
+        try {
+            if (body == null || body.prjId() == null || body.roleCd() == null) {
+                return badRequest("요청이 올바르지 않습니다.");
+            }
+            RoleRevokeResultVO result =
+                    roleService.updateRole(
+                            body.prjId(),
+                            body.roleCd(),
+                            body.menuRoleIds(),
+                            body.grpIds());
+            resp.put("resultStatus", result.getResultStatus());
+            resp.put("resultMessage", result.getResultMsg());
+            resp.put("ok", result.isOk());
+            if (!result.isOk()) {
+                return ResponseEntity.badRequest().body(resp);
+            }
+            return ResponseEntity.ok(resp);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("ok", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "권한 수정 중 오류가 발생했습니다."));
+        }
+    }
+
+    /** 역할 상세 — 그룹에서 권한 회수 ({@code PROC_GRP_ROLE_DELETE}) */
+    @PostMapping("/revokeRoleFromGroup")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> revokeRoleFromGroup(
+            @RequestBody(required = false) RoleRevokeRequest body) {
+        Map<String, Object> resp = new LinkedHashMap<>();
+        try {
+            if (body == null || body.roleCd() == null || body.grpId() == null) {
+                return badRequest("요청이 올바르지 않습니다.");
+            }
+            RoleRevokeResultVO result =
+                    roleService.revokeRoleFromGroup(
+                            body.roleCd(),
+                            body.grpId(),
+                            Boolean.TRUE.equals(body.deleteRoleIfUnused()));
+            resp.put("resultStatus", result.getResultStatus());
+            resp.put("resultMessage", result.getResultMsg());
+            resp.put("ok", result.isOk());
+            if (!result.isOk()) {
+                return ResponseEntity.badRequest().body(resp);
+            }
+            return ResponseEntity.ok(resp);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("ok", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "권한 회수 중 오류가 발생했습니다."));
+        }
     }
 
     /** MyBatis 동적 SQL에서 null 대신 빈 문자열로 통일 */
@@ -209,32 +344,64 @@ public class RoleController {
             boolean anyFullLinked =
                     fullRows.stream().anyMatch(m -> safeLinked.contains(m.getRoleId()));
 
-            List<LabelSlot> fullSlots = fullRows.stream()
-                    .map(m -> new LabelSlot(
-                            m.getRoleName() != null ? m.getRoleName() : "전체 관리",
-                            safeLinked.contains(m.getRoleId())))
-                    .collect(Collectors.toList());
+            boolean viewOnlySection = isViewOnlySection(e.getKey());
 
             String[] mths = {"GET", "POST", "PUT", "DELETE"};
             String[] labels = {"조회", "등록", "수정", "삭제"};
             List<CrudSlot> crud = new ArrayList<>(4);
             for (int i = 0; i < mths.length; i++) {
+                if (viewOnlySection && !"GET".equals(mths[i])) {
+                    continue;
+                }
                 RoleVO row = findFirstByMth(nonFullRows, mths[i]);
                 boolean checked = anyFullLinked
                         || (row != null && safeLinked.contains(row.getRoleId()));
-                crud.add(new CrudSlot(labels[i], checked));
+                String menuRoleId = row != null ? row.getRoleId() : null;
+                crud.add(new CrudSlot(labels[i], checked, menuRoleId));
             }
 
-            List<LabelSlot> extras = nonFullRows.stream()
-                    .filter(m -> !isCrudMth(m.getRoleMth()))
-                    .map(m -> new LabelSlot(
-                            m.getRoleName() != null ? m.getRoleName() : m.getRoleId(),
-                            safeLinked.contains(m.getRoleId())))
-                    .collect(Collectors.toList());
+            boolean allCrudChecked =
+                    crud.size() == mths.length
+                            && crud.stream().allMatch(CrudSlot::isChecked);
+
+            List<LabelSlot> fullSlots;
+            if (viewOnlySection) {
+                fullSlots = List.of();
+            } else if (fullRows.isEmpty()) {
+                fullSlots =
+                        crud.isEmpty()
+                                ? List.of()
+                                : List.of(new LabelSlot("전체 관리", allCrudChecked, null));
+            } else {
+                fullSlots = fullRows.stream()
+                        .map(m -> new LabelSlot(
+                                m.getRoleName() != null ? m.getRoleName() : "전체 관리",
+                                safeLinked.contains(m.getRoleId()) || allCrudChecked,
+                                m.getRoleId()))
+                        .collect(Collectors.toList());
+            }
+
+            List<LabelSlot> extras =
+                    viewOnlySection
+                            ? List.of()
+                            : nonFullRows.stream()
+                                    .filter(m -> !isCrudMth(m.getRoleMth()))
+                                    .map(m -> new LabelSlot(
+                                            m.getRoleName() != null
+                                                    ? m.getRoleName()
+                                                    : m.getRoleId(),
+                                            safeLinked.contains(m.getRoleId()),
+                                            m.getRoleId()))
+                                    .collect(Collectors.toList());
 
             sections.add(new RoleMenuSectionVO(e.getKey(), fullSlots, crud, extras));
         }
         return sections;
+    }
+
+    /** HISTORY 구역은 조회(GET) 체크박스만 노출 */
+    private static boolean isViewOnlySection(String sectionTp) {
+        return sectionTp != null && "HISTORY".equalsIgnoreCase(sectionTp.trim());
     }
 
     private static boolean isAllMth(String roleMth) {
@@ -289,4 +456,16 @@ public class RoleController {
 
     /** {@link #deleteRoles} JSON 본문 */
     public static record RoleDeleteRequest(Long prjId, List<Long> roleCds) {}
+
+    /** {@link #registerRole} JSON 본문 — {@code grpIds} 없거나 빈 배열이면 {@code p_grp_ids} 미전달과 동일(null) */
+    public static record RoleCreateRequest(
+            Long prjId, String roleName, List<String> menuRoleIds, List<Long> grpIds) {}
+
+    /** {@link #updateRole} JSON 본문 — {@code grpIds} 없거나 빈 배열이면 {@code p_grp_ids} 미전달과 동일(null) */
+    public static record RoleUpdateRequest(
+            Long prjId, Long roleCd, List<String> menuRoleIds, List<Long> grpIds) {}
+
+    /** {@link #revokeRoleFromGroup} JSON 본문 */
+    public static record RoleRevokeRequest(
+            Long roleCd, Long grpId, Boolean deleteRoleIfUnused) {}
 }

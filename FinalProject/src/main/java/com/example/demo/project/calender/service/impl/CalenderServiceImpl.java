@@ -39,8 +39,8 @@ public class CalenderServiceImpl implements CalenderService{
   }
   
   @Override
-  public int updete(CalenderVO vo) {
-	  return calenderMapper.updete(vo);
+  public int update(CalenderVO vo) {
+	  return calenderMapper.update(vo);
   }
   
   @Override

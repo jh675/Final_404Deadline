@@ -8,7 +8,7 @@ public interface CalenderService {
 	List<CalenderVO> getList(CalenderVO vo);
 	 CalenderVO selectOne(int id);
 	 int insert(CalenderVO vo);
-	 int updete(CalenderVO vo);
+	 int update(CalenderVO vo);
 	 int delete(int id);
 }
 

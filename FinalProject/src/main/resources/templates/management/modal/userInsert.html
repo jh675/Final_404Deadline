@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+	<div th:fragment="userInsert">
+		<div class="modal fade" id="userInsert" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-xl modal-dialog-centered">
+				<div class="modal-content">
+					<!-- header -->
+					<div class="modal-header">
+						<h5 class="modal-title" id="modalTitle"></h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal">
+						</button>
+					</div>
+					<!-- body -->
+					<div class="modal-body">
+						<form id="userForm">
+							<input type="hidden" id="userId">
+							<div class="row">
+								<!-- 좌측 -->
+								<div class="col-lg-8">
+									<!-- 아이디 -->
+									<div class="row mb-3 align-items-center">
+										<label class="col-sm-3 col-form-label"> 아이디 </label>
+										<div class="col-sm-9">
+											<input type="text" id="login" class="form-control">
+										</div>
+									</div>
+
+									<!-- 회원권한 -->
+									<div class="row mb-3 align-items-center">
+										<label class="col-sm-3 col-form-label"> 회원 권한 </label>
+										<div class="col-sm-9">
+											<select id="adminCd" class="form-select">
+												<option value="">선택</option>
+												<option value="01ROLE">시스템관리자</option>
+												<option value="02ROLE">기업관리자</option>
+												<option value="03ROLE">사원</option>
+											</select>
+										</div>
+									</div>
+
+									<!-- 소속기업 -->
+									<div class="row mb-3 align-items-center">
+										<label class="col-sm-3 col-form-label"> 소속기업 </label>
+										<div class="col-sm-9">
+											<select id="bizNo" class="form-select">
+												<option value="">선택</option>
+											</select>
+										</div>
+									</div>
+
+									<!-- 기업번호 -->
+									<div class="row mb-3 align-items-center">
+										<label class="col-sm-3 col-form-label"> 기업번호 </label>
+										<div class="col-sm-9">
+											<input type="text" id="bizNoView" class="form-control" readonly>
+										</div>
+									</div>
+
+									<!-- 이름 -->
+									<div class="row mb-3 align-items-center">
+										<label class="col-sm-3 col-form-label"> 이름 </label>
+										<div class="col-sm-9">
+											<input type="text" id="name" class="form-control">
+										</div>
+									</div>
+
+									<!-- 이메일 -->
+									<div class="row mb-3 align-items-center">
+										<label class="col-sm-3 col-form-label"> 이메일 </label>
+										<div class="col-sm-9">
+											<input type="email" id="email" class="form-control">
+										</div>
+									</div>
+
+									<!-- 전화번호 -->
+									<div class="row mb-3 align-items-center">
+										<label class="col-sm-3 col-form-label"> 전화번호 </label>
+										<div class="col-sm-9">
+											<input type="text" id="tel" class="form-control">
+										</div>
+									</div>
+									<!-- 고용일자 -->
+									<div class="row mb-3 align-items-center">
+									    <label class="col-sm-3 col-form-label"> 고용일자 </label>
+									    <div class="col-sm-9">
+									        <input type="date" id="hireDate" class="form-control">
+									    </div>
+									</div>
+									<!-- 성별 -->
+									<div class="row mb-3 align-items-center">
+									    <label class="col-sm-3 col-form-label"> 성별 </label>
+									    <div class="col-sm-9">
+									        <div class="d-flex gap-4">
+									            <div class="form-check">
+									                <input class="form-check-input"
+									                       type="radio"
+									                       name="genderCd"
+									                       id="male"
+									                       value="01GENDER"
+									                       checked>
+									                <label class="form-check-label" for="male">
+									                    남
+									                </label>
+									            </div>
+									            <div class="form-check">
+									                <input class="form-check-input"
+									                       type="radio"
+									                       name="genderCd"
+									                       id="female"
+									                       value="02GENDER">
+									                <label class="form-check-label" for="female">
+									                    여
+									                </label>
+									            </div>
+									        </div>
+									    </div>
+									</div>
+
+									<!-- 역할 -->
+									<div class="row mb-3 align-items-center" id="prjManagerArea">
+										<label class="col-sm-3 col-form-label"> 역할 </label>
+										<div class="col-sm-9">
+											<div class="d-flex gap-4">
+												<div class="form-check">
+													<input class="form-check-input" type="radio"
+														name="prjManagerCd" id="teamMember" value="02ACTIVE" checked>
+													<label class="form-check-label" for="teamMember">
+														팀원 </label>
+												</div>
+												<div class="form-check">
+													<input class="form-check-input" type="radio"
+														name="prjManagerCd" id="projectManager" value="01ACTIVE">
+													<label class="form-check-label" for="projectManager">
+														프로젝트 매니저 </label>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- 계정상태 -->
+									<div class="row mb-3 align-items-center">
+										<label class="col-sm-3 col-form-label"> 계정상태 </label>
+										<div class="col-sm-9">
+											<div class="d-flex gap-4">
+												<div class="form-check">
+													<input class="form-check-input" type="radio"
+														name="statusCd" id="statusActive" value="01ACTIVE" checked>
+													<label class="form-check-label" for="statusActive">
+														활성 </label>
+												</div>
+												<div class="form-check">
+													<input class="form-check-input" type="radio"
+														name="statusCd" id="statusInactive" value="02ACTIVE">
+													<label class="form-check-label" for="statusInactive">
+														비활성 </label>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- 우측 이미지 -->
+								<div class="col-lg-4">
+									<div class="border rounded p-3 text-center">
+										<div class="border d-flex justify-content-center align-items-center mb-3 overflow-hidden"
+        									 style="width: 150px; 	
+        									 aspect-ratio: 3/4; 
+        									 margin: 0 auto; 
+        									 background-color: #f8f9fa;">
+											<img id="profilePreview" 
+												 src="" 
+												 class="d-none"
+												 style="width: 100%; height: 100%; object-fit: cover;">
+											<span id="emptyImageText" class="text-muted small"> 프로필 이미지
+											</span>
+										</div>
+										<div class="small text-muted mb-3">업로드 할 수 있는 사진의 크기는 <br>가로	3cm, 세로 4cm 비율(0.75)로 제한됩니다.</div>
+										<div id="wrongImageSize" class="small text-danger"></div>
+										<input type="file" id="profileImage" class="form-control d-none" accept="image/*">
+										<div class="d-flex justify-content-center gap-2">
+											<button type="button" class="btn btn-sm btn-outline-primary" id="uploadBtn">등록</button>
+											<button type="button" class="btn btn-sm btn-outline-danger" id="deleteImageBtn">삭제</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+					
+					<!-- footer -->
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"	data-bs-dismiss="modal">닫기</button>
+						<button type="button" id="saveBtn" class="btn btn-primary">등록</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

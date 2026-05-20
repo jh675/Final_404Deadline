@@ -3,36 +3,119 @@
 	xmlns:th="https://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layout/defaultLayout}">
+
 <head>
 <title>Spring Security Example</title>
 <link rel="stylesheet" th:href="@{/css/login/login.css}">
-<script th:src="@{/js/login/resetPw.js}"></script>
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">
 </head>
-<body>
-	<div layout:fragment="content">
-		<div th:if="${param.error}">회원정보가 일치하지 않습니다.</div>
-		<div th:if="${param.logout}">로그아웃 했습니다.</div>
-		<form th:action="@{/login}" method="post">
-			<div>
-				<label> User Name : <input type="text" name="username" />
-				</label>
-			</div>
-			<div>
-				<label id="test"> Password: <input type="password"
-					name="password" />
-				</label>
-			</div>
-			<div>
-				<input type="submit" value="Sign In" />
-			</div>
-		</form>
 
-		<div>
-			<a th:href="@{/}">홈으로 돌아가기</a> <a href="#" data-bs-toggle="modal"
-				data-bs-target="#resetPwModal">비밀번호 재설정 </a>
+<body>
+
+<div layout:fragment="content">
+<div id="wrapper">
+	<div th:if="${param.error}" class="alert alert-danger">
+		회원정보가 일치하지 않습니다.
+	</div>
+
+	<div th:if="${param.logout}" class="alert alert-success">
+		로그아웃 했습니다.
+	</div>
+
+	<form th:action="@{/login}"
+		  method="post"
+		  id="loginForm"
+		  novalidate>
+
+		<!-- 기업번호 -->
+		<div class="mb-3 position-relative">
+	        <label for="companyNameInput" class="form-label">소속 기업명</label>
+	        <!-- 화면에 보여지는 기업명 입력창 -->
+	        <input type="text" id="companyNameInput" class="form-control" placeholder="기업명을 입력하세요" autocomplete="off">
+	        
+	        <!-- 실제 서버로 전송되는 사업자번호 (hidden) -->
+	        <input type="hidden" id="bizNo" name="bizNo">
+	        
+	        <!-- 자동완성 드롭다운 결과창 -->
+	        <ul id="companyDropdown" class="list-group position-absolute w-100 shadow" 
+	            style="display: none; z-index: 1000; max-height: 200px; overflow-y: auto;">
+	        </ul>
+	        <div class="invalid-feedback">기업을 검색하여 선택해주세요.</div>
+    	</div>
+
+		<!-- 아이디 -->
+		<div class="mb-3">
+
+			<label class="form-label">
+				User Name
+			</label>
+
+			<input type="text"
+				   name="username"
+				   id="username"
+				   class="form-control">
+
+			<div class="invalid-feedback">
+				아이디를 입력해주세요.
+			</div>
+
 		</div>
 
-		<div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
+		<!-- 비밀번호 -->
+		<div class="mb-3">
+
+			<label class="form-label">
+				Password
+			</label>
+
+			<input type="password"
+				   name="password"
+				   id="password"
+				   class="form-control">
+
+			<div class="invalid-feedback">
+				비밀번호를 입력해주세요.
+			</div>
+
+		</div>
+		<div class="mb-3">
+		admin(시스템관리자) 기업명 : 알에스오토메이션
+		<br>
+		그 외 기업명 : 미래소프트웨어
+		<br>
+		시스템 관리자 : admin
+		<br>
+		기업 관리자 : cadmin
+		<br>
+		일반 유저 : user1, user2 ...
+		<br>
+		<span id="test">비밀번호는 아이디와 동일</span>
+		</div>
+		<div>
+			<button type="submit" class="btn btn-primary">
+				로그인
+			</button>
+		</div>
+
+	</form>
+
+	<div class="mt-3">
+		<a th:href="@{/}">홈으로 돌아가기</a>
+
+		<a href="#"
+		   data-bs-toggle="modal"
+		   data-bs-target="#resetPwModal">
+			비밀번호 재설정
+		</a>
 	</div>
+
+	<div th:replace="~{login/modal/resetPw :: resetPwModal}"></div>
+
+
+
+<script th:src="@{/js/login/login.js}"></script>
+<script th:src="@{/js/login/resetPw.js}"></script>
+</div>
+</div>
 </body>
 </html>

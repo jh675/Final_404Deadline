@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="https://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout/compAdminLayout}">
+	layout:decorate="~{layout/defaultLayout}">
 <head>
 <meta charset="UTF-8">
 <title>기업정보</title>
@@ -71,6 +71,7 @@
 
 		<script th:inline="javascript">
 	const companyData = /*[[${companyList}]]*/ [];	
+	console.log(companyData);
     
 	const grid = new tui.Grid({
 		el: document.getElementById('grid'), 
@@ -84,31 +85,34 @@
 		data: companyData,
 		columns: [
 			 { header: '사업자번호', name: 'bizNo', width: 150 , align:'center',  sortable:true },
-			    { header: '기업명', name: 'companyName', width: 200, align:'center', sortable: true },
+			    { header: '기업명', name: 'companyName', width: 150, align:'center', sortable: true },
 			    { header: '전화번호', name: 'tel', width: 150, align:'center', sortable: true },
-			    { header: '주소', name: 'address', align:'center', sortable: true },
+			    { header: '주소', name: 'address', width: 300, align:'left', sortable: true },
+			    { header: '관리자ID', name: 'login', width: 150, align:'center', sortable: true },
+			    { header: '이메일', name: 'email', width: 150, align:'center', sortable: true },
 			    { header: '활성여부',
-			        name: 'isActiveCd',
-			        width: 120, align:'center', sortable: true, 
-			        formatter: ({value}) => value === '01ACTIVE' ? '활성' : '비활성'
+			       name: 'isActiveCd',
+			       width: 120, align:'center', sortable: true, 
+			       formatter: ({value}) => value === '01ACTIVE' ? '활성' : '비활성'
 			        },
-			    {  header: '생성일',
-			            name: 'createdOn',
-			            width: 120, align:'center', sortable: true, 
-			            formatter: ({ value }) => {
-			                if (!value) return '';
-			                return dayjs(value).format('YYYY.MM.DD');
+			    { header: '생성일',
+			       name: 'createdOn',
+			       width: 120, align:'center', sortable: true, 
+			       formatter: ({ value }) => {
+			            if (!value) return '';
+			            return dayjs(value).format('YYYY.MM.DD');
 			            } },
-			    {  header: '수정',
-			        name: 'edit',
-			        width: 100, align:'center', sortable: true, 
-			        formatter: function() {
+			    { header: '수정',
+			       name: 'edit',
+			       width: 100, align:'center', sortable: true, 
+			       formatter: function() {
 			            return '<button class="btn btn-secondary btn-sm">수정</button>';
-		
-		
-			        } }
+			        }
+            }
 
 		],
+		rowHeaders: ['rowNum'],
+		
 		pageOptions: {
 			useClient: true,
 			perPage: 10

@@ -68,8 +68,46 @@
     INSERT INTO enabled_modules (ena_id, prj_id, ena_name_cd)
     VALUES (en_mod_seq.nextval, #{prjId}, #{enaNameCd})
 </insert>
+
+<insert id="groupInsert" parameterType="com.example.demo.project.group.service.GroupDetailVO" useGeneratedKeys="true"
+        keyProperty="id">
+   <selectKey keyProperty="grpId" resultType="long" order="BEFORE">
+   SELECT grp_seq.NEXTVAL FROM dual
+   </selectKey>
+	insert into grp (id,prj_id,name,status_cd)
+	values (#{grpId},#{prjId},'관리 그룹','01ACTIVE')
+</insert>
+
+
+<insert id="memberInsert" parameterType="com.example.demo.project.member.service.MemberDetailVO">
+	
+	insert into member(id,user_id,grp_id)
+	values (mem_seq.nextval,#{userId},#{grpId})
+</insert>
  
- <update id="projectHide" >
+ <insert id="wikiInsert" parameterType="com.example.demo.project.wiki.service.WikiVO">
+ 	insert into wiki(id,prj_id)
+ 	values (wiki_seq.nextval,#{prjId})
+ </insert>
+<insert id="roleInsert" parameterType="com.example.demo.project.option.service.RoleVO">
+	<selectKey keyProperty="roleCd" resultType="long" order="BEFORE">
+		select role_seq.NEXTVAL FROM dual
+	</selectKey>
+	INSERT INTO role(role_cd, role_name, prj_id)
+	VALUES(#{roleCd}, '관리 권한', #{prjId})
+</insert>
+
+<insert id="rolemenuInsert" parameterType="com.example.demo.project.option.service.RoleVO">
+	insert into role_menu(rm_id,role_id,role_cd)
+	values(rm_seq.nextval,#{roleId},#{roleCd})
+</insert>
+ 
+ <insert id="grproleInsert" parameterType="com.example.demo.project.option.service.RoleVO">
+ 	insert into grp_role(id,grp_id,role_cd)
+ 	values(GRP_ROLE_SEQ.nextval,#{grpId},#{roleCd})
+ </insert>
+ 
+ <update id="projectHide" parameterType="ProjectVO" >
  	update project
  	set prj_hide = 'Y'
  	where id = #{id}
@@ -78,6 +116,10 @@
  	delete from project
  	where id = #{id}
  </delete>
- 
+ <select id="countChildProject" resultType="int">
+    SELECT COUNT(*)
+    FROM project
+    WHERE prj_par_id = #{id}
+</select>
  
  </mapper>

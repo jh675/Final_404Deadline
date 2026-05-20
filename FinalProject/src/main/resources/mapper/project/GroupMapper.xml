@@ -86,22 +86,34 @@
     ORDER BY U.NAME
   </select>
 
-  <!-- 그룹 상세 보유 권한 정보 -->
+  <!-- 그룹 상세 보유 권한 — 역할(권한) 단위 행만 (메뉴 폭증 없음) -->
   <select id="selectGroupRoles" resultType="com.example.demo.project.group.service.GroupRoleDetailRowVO">
-    SELECT
+    SELECT DISTINCT
       R.ROLE_CD AS roleCd,
-      (
-        SELECT MIN(M.ROLE_NAME)
-        FROM ROLE_MENU RM
-        JOIN MENU M ON M.ROLE_ID = RM.ROLE_ID
-        WHERE RM.ROLE_CD = R.ROLE_CD
-      ) AS menuName,
+      R.ROLE_NAME AS roleName,
       R.CREATED_ON AS createdOn,
-      NULL AS remark
+      CAST(NULL AS VARCHAR2(4000)) AS remark
     FROM GRP_ROLE GR
-    JOIN ROLE R ON R.ROLE_CD = GR.ROLE_CD AND R.PRJ_ID = #{prjId}
+    INNER JOIN ROLE R
+      ON R.ROLE_CD = GR.ROLE_CD
+     AND R.PRJ_ID = #{prjId}
     WHERE GR.GRP_ID = #{grpId}
     ORDER BY R.ROLE_CD
+  </select>
+
+  <!-- 그룹에 해당 역할이 실제 매핑되어 있는지 — 모달/API 스니핑 방지용 -->
+  <select id="countGrpRoleAssignment" resultType="int">
+    SELECT COUNT(*)
+    FROM GRP_ROLE GR
+    INNER JOIN GRP G
+      ON G.ID = GR.GRP_ID
+     AND G.PRJ_ID = #{prjId}
+     AND G.STATUS_CD = '01ACTIVE'
+    INNER JOIN ROLE R
+      ON R.ROLE_CD = GR.ROLE_CD
+     AND R.PRJ_ID = #{prjId}
+    WHERE GR.GRP_ID = #{grpId}
+      AND GR.ROLE_CD = #{roleCd}
   </select>
 
   <!-- 그룹 삭제 — DB PROC_GRP_DELETE (GRP_ROLE → MEMBER → GRP, 프로시저 내부 COMMIT) -->
@@ -113,12 +125,44 @@
     }
   </update>
 
+  <!-- 그룹 등록 모달 — 프로젝트 소속 구성원 (MEMBER + USERS + GRP) -->
+  <select id="selectGroupMemberPickList"
+    resultType="com.example.demo.project.group.service.GroupMemberPickRowVO">
+    SELECT
+      M.ID AS memberId,
+      M.USER_ID AS userId,
+      U.NAME AS userName,
+      U.TEL AS tel,
+      U.EMAIL AS email,
+      G.NAME AS grpName,
+      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+    FROM MEMBER M
+    LEFT JOIN USERS U ON U.ID = M.USER_ID
+    LEFT JOIN GRP G ON G.ID = M.GRP_ID
+    WHERE G.PRJ_ID = #{prjId}
+      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
+      AND G.STATUS_CD = '01ACTIVE'
+    ORDER BY U.NAME, M.ID
+  </select>
+
   <!-- 그룹 등록 — DB PROC_GRP_INSERT (memIds null = p_mem_ids 미전달과 동일) -->
   <update id="callProcGrpInsert" statementType="CALLABLE">
     {
       CALL PROC_GRP_INSERT(
         #{prjId, mode=IN, jdbcType=NUMERIC},
         #{grpName, mode=IN, jdbcType=VARCHAR},
+        #{memIds, mode=IN, jdbcType=VARCHAR},
+        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
+      )
+    }
+  </update>
+
+  <!-- 그룹 수정 — DB PROC_GRP_UPDATE (memIds null = p_mem_ids 미전달과 동일) -->
+  <update id="callProcGrpUpdate" statementType="CALLABLE">
+    {
+      CALL PROC_GRP_UPDATE(
+        #{prjId, mode=IN, jdbcType=NUMERIC},
+        #{grpId, mode=IN, jdbcType=NUMERIC},
         #{memIds, mode=IN, jdbcType=VARCHAR},
         #{resultMsg, mode=OUT, jdbcType=VARCHAR}
       )

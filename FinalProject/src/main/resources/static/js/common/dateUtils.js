@@ -6,7 +6,7 @@ const dateUtils = {
 	today: function()	{
 		format(new Date(),'YYYY-MM-DD')
 	},
-	gettime: function(date, 'YYYY-MM-DD HH:mm')	{
+	gettime: function(date, formatStr ='YYYY-MM-DD HH:mm')	{
 		format(date,'YYYY-MM-DD')
 	},
 

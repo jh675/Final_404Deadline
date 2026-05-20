@@ -18,7 +18,13 @@ public interface GroupService {
 
     List<GroupMemberDetailRowVO> selectGroupMembers(Long prjId, Long grpId);
 
+    /** 그룹 등록 모달 — 프로젝트 구성원 선택 목록 */
+    List<GroupMemberPickRowVO> selectGroupMemberPickList(Long prjId);
+
     List<GroupRoleDetailRowVO> selectGroupRoles(Long prjId, Long grpId);
+
+    /** 해당 그룹에 역할이 GRP_ROLE로 연결되어 있는지(프로젝트 일치 포함) */
+    boolean isRoleAssignedToGroup(Long prjId, Long grpId, Long roleCd);
 
     /** 그룹 제거 — Oracle {@code PROC_GRP_DELETE}를 그룹 ID마다 호출 */
     void deleteGroups(Long prjId, List<Long> grpIds);
@@ -28,4 +34,10 @@ public interface GroupService {
      * {@code userIds}가 null이거나 비어 있으면 프로시저에 memIds를 넘기지 않음(null).
      */
     void insertGroup(Long prjId, String grpName, List<Long> userIds);
+
+    /**
+     * 그룹 구성원 수정 — Oracle {@code PROC_GRP_UPDATE}.
+     * {@code userIds}가 null이거나 비어 있으면 프로시저에 memIds를 넘기지 않음(null).
+     */
+    void updateGroup(Long prjId, Long grpId, List<Long> userIds);
 }

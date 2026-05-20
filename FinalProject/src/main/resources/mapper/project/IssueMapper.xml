@@ -236,15 +236,13 @@
 	<!-- ===================================================== -->
 	<update id="updateIssueStartDate" parameterType="long">
 		UPDATE ISSUE
-		SET START_DATE = SYSDATE,
-			UPDATED_ON = SYSDATE
+		SET (START_DATE, UPDATED_ON) = (SELECT SYSDATE, SYSDATE FROM DUAL)
 		WHERE ID = #{id}
 	</update>
 
 	<update id="updateIssueClosedDate" parameterType="long">
 		UPDATE ISSUE
-		SET CLOSED_DATE = SYSDATE,
-			UPDATED_ON = SYSDATE
+		SET (CLOSED_DATE, UPDATED_ON) = (SELECT SYSDATE, SYSDATE FROM DUAL)
 		WHERE ID = #{id}
 	</update>
 
@@ -298,8 +296,8 @@
 	<!-- ===================================================== -->
 	<!--  아이디랑키 이름 받아오기(단건)      -->
 	<!-- ===================================================== -->
-	<select id="getParentIssue" resultType="map">
-		SELECT id,subject
+	<select id="getParentIssue" resultType="IssueSummaryVO">
+		SELECT id AS id, subject AS subject
 		FROM ISSUE
 		WHERE id = #{id}
 	</select>
@@ -342,8 +340,8 @@
 		)
 	</insert>
 	
-	<select id="getIssueIds" resultType="map">
-		SELECT id,subject
+	<select id="getIssueIds" resultType="IssueSummaryVO">
+		SELECT id AS id, subject AS subject
 		FROM ISSUE
 	</select>
 </mapper>
