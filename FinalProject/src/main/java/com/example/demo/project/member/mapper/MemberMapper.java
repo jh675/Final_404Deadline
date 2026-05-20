@@ -3,14 +3,7 @@ package com.example.demo.project.member.mapper;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import com.example.demo.project.member.service.CompanyMemberRowVO;
-import com.example.demo.project.member.service.MemberDetailVO;
-import com.example.demo.project.member.service.MemberRegisterParam;
-import com.example.demo.project.member.service.MemberUpdateParam;
-import com.example.demo.project.member.service.MemberGroupPickRowVO;
-import com.example.demo.project.member.service.MemberIssueRowVO;
-import com.example.demo.project.member.service.MemberListCriteria;
-import com.example.demo.project.member.service.ProjectMemberRowVO;
+import com.example.demo.project.member.service.*;
 
 /** 구성원 MyBatis — USERS + MEMBER + GRP 조인 */
 @Mapper

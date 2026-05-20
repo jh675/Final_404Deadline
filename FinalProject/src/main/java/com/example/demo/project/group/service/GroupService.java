@@ -23,6 +23,9 @@ public interface GroupService {
 
     List<GroupRoleDetailRowVO> selectGroupRoles(Long prjId, Long grpId);
 
+    /** 해당 그룹에 역할이 GRP_ROLE로 연결되어 있는지(프로젝트 일치 포함) */
+    boolean isRoleAssignedToGroup(Long prjId, Long grpId, Long roleCd);
+
     /** 그룹 제거 — Oracle {@code PROC_GRP_DELETE}를 그룹 ID마다 호출 */
     void deleteGroups(Long prjId, List<Long> grpIds);
 

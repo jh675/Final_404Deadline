@@ -581,6 +581,9 @@
               const btn = e.target.closest("button");
               if (!btn || !btn.id) return;
               if (btn.id === "roleBtnRegister") {
+                location.href =
+                  "/project/option/role/roleManagementInfo?prjId=" +
+                  encodeURIComponent(String(prjId));
                 return;
               }
               if (btn.id === "roleBtnDelete") {
@@ -719,7 +722,7 @@
               minBodyHeight: 100,
               columns: [
                 {
-                  header: "ROLE_CD",
+                  header: "역할코드",
                   name: "roleCd",
                   width: 110,
                   align: "center",
