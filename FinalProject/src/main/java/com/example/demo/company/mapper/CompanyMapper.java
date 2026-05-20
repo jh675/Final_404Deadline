@@ -7,7 +7,6 @@ import org.apache.ibatis.annotations.Mapper;
 import com.example.demo.company.service.CompanyVO;
 
 @Mapper
-
 public interface CompanyMapper {
 	List<CompanyVO> selectAll(CompanyVO company);
 	CompanyVO selectOne(String bizNo);

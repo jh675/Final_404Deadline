@@ -1,5 +1,8 @@
 <!doctype html>
-<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/defaultLayout}">
   <head>
     <meta charset="UTF-8" />
     <title>Insert title here</title>
@@ -37,6 +40,7 @@
     </style>
   </head>
   <body>
+  <div layout:fragment="content">
     <h2>프로젝트</h2>
     <a th:if="${#authentication.principal.adminNm == '기업관리자'}"
        href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
@@ -163,5 +167,6 @@
       /*]]>*/
       
     </script>
+    </div>
   </body>
 </html>
