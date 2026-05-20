@@ -38,11 +38,7 @@ public class MilestoneServiceImpl implements MilestoneService {
 		return null;
 	}
 
-	@Override
-	public Map<Long,String> selectNotExistsIssueList(Long projectId) {
-		// TODO Auto-generated method stub
-		return mapper.selectNotExistsIssueList(projectId);
-	}
+
 
 	@Override
 	public Long insertMilestone(MilestoneVO milestoneVO) {
@@ -63,32 +59,45 @@ public class MilestoneServiceImpl implements MilestoneService {
 	}
 
 	@Override
-	public int updateTimeline(MilestoneTimelineVO timelineVO) {
+	public Long updateTimeline(MilestoneTimelineVO timelineVO) {
 		// TODO Auto-generated method stub
-		return 0;
+		return null;
+	}
+
+
+	@Override
+	public Long deleteMilestoneIssue(Long id) {
+		// TODO Auto-generated method stub
+		return mapper.deleteMilestoneIssue(id);
 	}
 
 	@Override
-	public int deleteMilestone(Long id) {
+	public Long deleteTimeline(Long id) {
 		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int deleteMilestoneIssue(Long id) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int deleteTimeline(Long id) {
-		// TODO Auto-generated method stub
-		return 0;
+		return null;
 	}
 
 	@Override
 	public List<IssueSummaryVO> selectMilestoneNotInIssue(@PathVariable("id") Long id) {
 		return mapper.selectMilestoneNotInIssue(id);
+	}
+
+	@Override
+	public Long updateMilestone(MilestoneVO milestoneVO) {
+		// TODO Auto-generated method stub
+		return mapper.updateMilestone(milestoneVO);
+	}
+
+	@Override
+	public Long deleteMilestone(Long id) {
+		// TODO Auto-generated method stub
+		return mapper.deleteMilestone(id);
+	}
+
+	@Override
+	public Long getAvg(Long id) {
+		// TODO Auto-generated method stub
+		return mapper.getAvg(id);
 	}
 
 }

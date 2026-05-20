@@ -1,6 +1,7 @@
 package com.example.demo.project.issue.controller;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,6 +161,7 @@ public class IssueController {
 		Map<String, Object> body = new LinkedHashMap<>();
 		body.put("ok", true);
 		body.put("id", id);
+		body.put("registeredAt", new Date());
 		return ResponseEntity.ok(body);
 	}
 
@@ -173,6 +175,7 @@ public class IssueController {
 		Map<String, Object> body = new LinkedHashMap<>();
 		body.put("ok", true);
 		body.put("id", id);
+		body.put("registeredAt", new Date());
 		return ResponseEntity.ok(body);
 	}
 

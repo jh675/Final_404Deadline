@@ -68,7 +68,7 @@ public class AttachController {
 				.header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString()).body(resource);
 	}
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<Void> deleteFile(@PathVariable Long id) {
+	public ResponseEntity<Void> deleteFile(@PathVariable("id") Long id) {
 		try {
 			//정보 가져오기기
 			AttachVO attachVO = service.selectAttach(id);
@@ -83,8 +83,5 @@ public class AttachController {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
-		
-		
-
 	}
 }
