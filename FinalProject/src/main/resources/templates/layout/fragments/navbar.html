@@ -106,12 +106,17 @@
 
 				</th:block>
 
-				<!-- 기업회원 -->
+				<!-- 기업관리자 -->
 				<th:block sec:authorize="hasRole('CADMIN')">
 
 					<li class="nav-item">
 						<a class="nav-link" th:href="@{/company/list}">
 							기업관리
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{/management/project}">
+							프로젝트관리
 						</a>
 					</li>
 
