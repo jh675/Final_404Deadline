@@ -38,7 +38,7 @@
 						</div>
 						<div class="mb-3">
 							<label class="form-label">날짜</label>
-							<input type="date" class="form-control" name="entryDate" required />
+							<input type="datetime-local" class="form-control" name="entryDate" step="60" required />
 						</div>
 						<small class="text-danger d-none" data-tl-err></small>
 					</form>
@@ -59,6 +59,50 @@
 			var errEl = modalEl.querySelector("[data-tl-err]");
 			var saveBtn = modalEl.querySelector("[data-tl-save]");
 			var selectEl = form.querySelector('[name="milestoneIssueId"]');
+			var entryDateEl = form.querySelector('[name="entryDate"]');
+
+			function toDatetimeLocalValue(d) {
+				d = d || new Date();
+				var pad = function (n) { return String(n).padStart(2, "0"); };
+				return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate())
+					+ "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+			}
+
+			function setDefaultEntryDate() {
+				if (entryDateEl) entryDateEl.value = toDatetimeLocalValue(new Date());
+			}
+
+			/** datetime-local → 서버(Asia/Seoul) wall-clock 문자열 */
+			function normalizeEntryDate(raw) {
+				var s = (raw || "").toString().trim();
+				if (!s) return "";
+				var m = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+				if (!m) return s;
+				return m[1] + "-" + m[2] + "-" + m[3] + "T" + m[4] + ":" + m[5] + ":00";
+			}
+
+			function getCsrfHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getCsrfHeaders) {
+					return window.MilestoneTimeline.getCsrfHeaders();
+				}
+				var headers = {};
+				var tokenMeta = document.querySelector('meta[name="_csrf"]');
+				var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+				if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
+					headers[headerMeta.content] = tokenMeta.content;
+				}
+				return headers;
+			}
+
+			function getApiJsonHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getApiJsonHeaders) {
+					return window.MilestoneTimeline.getApiJsonHeaders();
+				}
+				return Object.assign(
+					{ "Content-Type": "application/json", Accept: "application/json" },
+					getCsrfHeaders()
+				);
+			}
 
 			function setErr(msg) {
 				if (!errEl) return;
@@ -80,8 +124,7 @@
 						list.forEach(function (it) {
 							var opt = document.createElement("option");
 							opt.value = it.id;
-							opt.textContent = (it.issueSubject || ("이슈 #" + it.issueId))
-								+ (it.issueId ? " (#" + it.issueId + ")" : "");
+							opt.textContent = (it.name || "이슈") + (it.issueId != null ? " #" + it.issueId : "");
 							selectEl.appendChild(opt);
 						});
 						if (!list.length) {
@@ -96,6 +139,7 @@
 			modalEl.addEventListener("show.bs.modal", function () {
 				setErr("");
 				form.reset();
+				setDefaultEntryDate();
 				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
 					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
 				if (!msId) {
@@ -112,7 +156,7 @@
 					typeCd: (fd.get("typeCd") || "").toString(),
 					milestoneIssueId: fd.get("milestoneIssueId") ? Number(fd.get("milestoneIssueId")) : null,
 					contents: (fd.get("contents") || "").toString().trim(),
-					entryDate: (fd.get("entryDate") || "").toString(),
+					entryDate: normalizeEntryDate(fd.get("entryDate")),
 				};
 				if (!payload.milestoneIssueId) { setErr("이슈를 선택하세요."); return; }
 				if (!payload.entryDate)       { setErr("날짜를 입력하세요."); return; }
@@ -121,7 +165,7 @@
 				saveBtn.disabled = true;
 				fetch("/api/milestone/timeline", {
 					method: "POST",
-					headers: { "Content-Type": "application/json", "Accept": "application/json" },
+					headers: getApiJsonHeaders(),
 					body: JSON.stringify(payload),
 				})
 					.then(function (res) {

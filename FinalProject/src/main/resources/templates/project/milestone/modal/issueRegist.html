@@ -38,37 +38,62 @@
 			var saveBtn = modalEl.querySelector("[data-ir-save]");
 			var selectEl = form.querySelector('[name="issueId"]');
 
+			function getCsrfHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getCsrfHeaders) {
+					return window.MilestoneTimeline.getCsrfHeaders();
+				}
+				var headers = {};
+				var tokenMeta = document.querySelector('meta[name="_csrf"]');
+				var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+				if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
+					headers[headerMeta.content] = tokenMeta.content;
+				}
+				return headers;
+			}
+
+			function getApiJsonHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getApiJsonHeaders) {
+					return window.MilestoneTimeline.getApiJsonHeaders();
+				}
+				return Object.assign(
+					{ "Content-Type": "application/json", Accept: "application/json" },
+					getCsrfHeaders()
+				);
+			}
+
 			function setErr(msg) {
 				if (!errEl) return;
 				if (msg) { errEl.textContent = msg; errEl.classList.remove("d-none"); }
 				else     { errEl.textContent = ""; errEl.classList.add("d-none"); }
 			}
 
-			function loadAvailableIssues(milestoneId) {
+			function getPrjId() {
+				if (window.MilestoneTimeline && typeof window.MilestoneTimeline.getPrjId === "function") {
+					return window.MilestoneTimeline.getPrjId();
+				}
+				if (typeof window.prjId !== "undefined" && window.prjId !== "" && window.prjId != null) {
+					return Number(window.prjId);
+				}
+				return null;
+			}
+
+			function loadAvailableIssues(prjId) {
 				selectEl.innerHTML = '<option value="">불러오는 중…</option>';
-				return fetch("/api/milestone/" + encodeURIComponent(milestoneId) + "/not-registered-issues", {
+				return fetch("/api/milestone/notinissue/" + encodeURIComponent(prjId), {
 					headers: { Accept: "application/json" },
 				})
-					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (r) { return r.ok ? r.json() : []; })
 					.then(function (data) {
+						var list = Array.isArray(data) ? data : [];
 						selectEl.innerHTML = '<option value="">이슈를 선택하세요</option>';
-						if (!data) return;
-						if (Array.isArray(data)) {
-							data.forEach(function (it) {
-								var opt = document.createElement("option");
-								opt.value = it.id != null ? it.id : it.issueId;
-								opt.textContent = it.subject || it.issueSubject || ("이슈 #" + (it.id || it.issueId));
-								selectEl.appendChild(opt);
-							});
-						} else if (typeof data === "object") {
-							Object.keys(data).forEach(function (k) {
-								var opt = document.createElement("option");
-								opt.value = k;
-								opt.textContent = data[k];
-								selectEl.appendChild(opt);
-							});
-						}
-						if (selectEl.options.length <= 1) {
+						list.forEach(function (it) {
+							var opt = document.createElement("option");
+							opt.value = it.id;
+							opt.textContent = (it.subject || ("이슈 #" + it.id))
+								+ (it.id ? " (#" + it.id + ")" : "");
+							selectEl.appendChild(opt);
+						});
+						if (!list.length) {
 							selectEl.innerHTML = '<option value="">등록 가능한 이슈가 없습니다</option>';
 						}
 					})
@@ -82,11 +107,16 @@
 				form.reset();
 				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
 					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
+				var prjId = getPrjId();
 				if (!msId) {
 					selectEl.innerHTML = '<option value="">마일스톤을 먼저 선택하세요</option>';
 					return;
 				}
-				loadAvailableIssues(msId);
+				if (!prjId) {
+					selectEl.innerHTML = '<option value="">프로젝트 정보를 찾을 수 없습니다</option>';
+					return;
+				}
+				loadAvailableIssues(prjId);
 			});
 
 			saveBtn.addEventListener("click", function () {
@@ -101,10 +131,11 @@
 					milestoneId: Number(msId),
 					issueId: Number(issueId),
 				};
+				
 				saveBtn.disabled = true;
-				fetch("/api/milestone/" + encodeURIComponent(msId) + "/issues", {
+				fetch("/api/milestone/issue", {
 					method: "POST",
-					headers: { "Content-Type": "application/json", "Accept": "application/json" },
+					headers: getApiJsonHeaders(),
 					body: JSON.stringify(payload),
 				})
 					.then(function (res) {

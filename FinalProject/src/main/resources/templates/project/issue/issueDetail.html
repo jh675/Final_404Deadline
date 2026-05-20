@@ -512,12 +512,22 @@ table.data-table tbody td {
 		<div class="meta-item">
 			<label>시작 예정일</label>
 			<input type="text" readonly
-				th:attr="data-server-date=${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd''T''HH:mm:ss') : ''}" />
+				th:attr="data-server-date=${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
 		</div>
 		<div class="meta-item">
 			<label>종료 예정일</label>
 			<input type="text" readonly
-				th:attr="data-server-date=${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd''T''HH:mm:ss') : ''}" />
+				th:attr="data-server-date=${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
+		</div>
+		<div class="meta-item">
+			<label>시작일</label>
+			<input type="text" readonly
+				th:attr="data-server-date=${issue.startDate != null ? #dates.format(issue.startDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
+		</div>
+		<div class="meta-item">
+			<label>종료일</label>
+			<input type="text" readonly
+				th:attr="data-server-date=${issue.closedDate != null ? #dates.format(issue.closedDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
 		</div>
 		<div class="meta-item">
 			<label>우선순위</label>
@@ -581,7 +591,7 @@ table.data-table tbody td {
 						<div class="meta">
 							<span class="comment-num" th:text="|${cStat.count}번 댓글|">1번 댓글</span>
 							<strong th:text="${c.memId != null and !#strings.isEmpty(c.memId)} ? ${c.memId} : '—'">작성자</strong>
-							<span th:attr="data-server-date=${c.writeDate != null ? #dates.format(c.writeDate, 'yyyy-MM-dd''T''HH:mm:ss') : ''}">날짜</span>
+							<span th:attr="data-server-date=${c.writeDate != null ? #dates.format(c.writeDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}">날짜</span>
 						</div>
 						<div th:text="${c.content != null ? c.content : ''}">댓글내용</div>
 						<div class="comment-actions" th:if="${c.id != null}">

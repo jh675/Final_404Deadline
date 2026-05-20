@@ -236,15 +236,13 @@
 	<!-- ===================================================== -->
 	<update id="updateIssueStartDate" parameterType="long">
 		UPDATE ISSUE
-		SET START_DATE = SYSDATE,
-			UPDATED_ON = SYSDATE
+		SET (START_DATE, UPDATED_ON) = (SELECT SYSDATE, SYSDATE FROM DUAL)
 		WHERE ID = #{id}
 	</update>
 
 	<update id="updateIssueClosedDate" parameterType="long">
 		UPDATE ISSUE
-		SET CLOSED_DATE = SYSDATE,
-			UPDATED_ON = SYSDATE
+		SET (CLOSED_DATE, UPDATED_ON) = (SELECT SYSDATE, SYSDATE FROM DUAL)
 		WHERE ID = #{id}
 	</update>
 

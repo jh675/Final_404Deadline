@@ -71,7 +71,7 @@
             th:if="${#authentication.principal.adminNm == '시스템관리자' or pro.bizNo == #authentication.principal.bizNo and pro.prjHide =='N'}"
             th:data-status="${pro.closedDate == null ? 'progress' : 'complete'}">
           <td class="row-index"></td>
-          <td th:text="${pro.prjName}"></td>
+          <td ><a th:text="${pro.prjName}" th:href="@{/project/main/{id}(id=${pro.id})}"></a></td>
           <td th:text="${pro.prjIdentifier}"></td>
           <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
 			    <th:block th:each="c : ${companyList}">

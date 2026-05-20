@@ -71,6 +71,24 @@ public class ProjectServiceImpl implements ProjectService {
 	    if(rVo != null) {
 	    	rVo.setPrjId(Long.valueOf(vo.getId()));
 	    	projectMapper.roleInsert(rVo);
+	    	
+	    	Long roleCd = rVo.getRoleCd();
+	    	
+	    	rVo.setRoleCd(roleCd);
+	    	rVo.setRoleId("ROLE_ISSUE_ALL");
+	    	projectMapper.rolemenuInsert(rVo);
+	    	
+	    	rVo.setRoleId("ROLE_MEMBER_ALL");
+	    	projectMapper.rolemenuInsert(rVo);
+	    	
+	    	rVo.setRoleId("ROLE_GROUP_ALL");
+	    	projectMapper.rolemenuInsert(rVo);
+	    	
+	    	rVo.setRoleId("ROLE_HISTORY_VIEW");
+	    	projectMapper.rolemenuInsert(rVo);
+	    	
+	    	rVo.setGrpId(gVo.getGrpId());
+	    	projectMapper.grproleInsert(rVo);
 	    }
 	}
 	
@@ -86,8 +104,7 @@ public class ProjectServiceImpl implements ProjectService {
 	
 	@Override
     public boolean hasChildProject(int id) {
-		System.out.println("삭제 id = " + id);
-		System.out.println("자식 개수 = " + projectMapper.countChildProject(id));
+		
         return projectMapper.countChildProject(id) > 0;
     }
 

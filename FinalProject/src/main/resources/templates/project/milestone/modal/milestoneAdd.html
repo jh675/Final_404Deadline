@@ -25,11 +25,13 @@
 						</div>
 						<div class="mb-3">
 							<label class="form-label">시작일</label>
-							<input type="date" class="form-control" name="startDate" required />
+							<input type="datetime-local" class="form-control" name="startDate" step="3600" required />
 						</div>
 						<div class="mb-3">
 							<label class="form-label">마감일</label>
-							<input type="date" class="form-control" name="endDate" required />
+							<input type="datetime-local" class="form-control" name="endDate" step="60" required />
+							
+							
 						</div>
 						<small class="text-danger d-none" data-ms-err></small>
 					</form>
@@ -54,8 +56,46 @@
 			var selectEl = selectWrap ? selectWrap.querySelector("select") : null;
 			var deleteBtn = modalEl.querySelector("[data-ms-delete]");
 			var saveBtn = modalEl.querySelector("[data-ms-save]");
+			var startDateEl = form.querySelector('[name="startDate"]');
+			var endDateEl = form.querySelector('[name="endDate"]');
+
+			function toDatetimeLocalValue(d) {
+				d = d || new Date();
+				var pad = function (n) { return String(n).padStart(2, "0"); };
+				return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate())
+					+ "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+			}
+
+			function toDatetimeLocalFromApi(value, roundToHour) {
+				if (value == null || value === "") return "";
+				var d = value instanceof Date ? value : new Date(value);
+				if (!isNaN(d.getTime())) {
+					if (roundToHour) d.setMinutes(0, 0, 0);
+					return toDatetimeLocalValue(d);
+				}
+				var s = String(value);
+				if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) {
+					return roundToHour ? s.slice(0, 13) + ":00" : s.slice(0, 16);
+				}
+				if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+					return s.slice(0, 10) + "T00:00";
+				}
+				return "";
+			}
+
+			function setDefaultMilestoneDates() {
+				var start = new Date();
+				start.setMinutes(0, 0, 0);
+				var end = new Date(start);
+				end.setMonth(end.getMonth() + 1);
+				if (startDateEl) startDateEl.value = toDatetimeLocalValue(start);
+				if (endDateEl) endDateEl.value = toDatetimeLocalValue(end);
+			}
 
 			function getCsrfHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getCsrfHeaders) {
+					return window.MilestoneTimeline.getCsrfHeaders();
+				}
 				var headers = {};
 				var tokenMeta = document.querySelector('meta[name="_csrf"]');
 				var headerMeta = document.querySelector('meta[name="_csrf_header"]');
@@ -63,6 +103,16 @@
 					headers[headerMeta.content] = tokenMeta.content;
 				}
 				return headers;
+			}
+
+			function getApiJsonHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getApiJsonHeaders) {
+					return window.MilestoneTimeline.getApiJsonHeaders();
+				}
+				return Object.assign(
+					{ "Content-Type": "application/json", Accept: "application/json" },
+					getCsrfHeaders()
+				);
 			}
 
 			function setErr(msg) {
@@ -97,12 +147,13 @@
 					form.reset();
 					form.querySelector('[name="id"]').value = "";
 					syncPrjId(null);
+					setDefaultMilestoneDates();
 					return;
 				}
 				form.querySelector('[name="id"]').value = ms.id  != null ? ms.id : "";
 				form.querySelector('[name="name"]').value = ms.name || "";
-				form.querySelector('[name="startDate"]').value = (ms.startDate || "").toString().slice(0, 10);
-				form.querySelector('[name="endDate"]').value = (ms.endDate || "").toString().slice(0, 10);
+				if (startDateEl) startDateEl.value = toDatetimeLocalFromApi(ms.startDate, true);
+				if (endDateEl) endDateEl.value = toDatetimeLocalFromApi(ms.endDate, false);
 				syncPrjId(ms);
 			}
 
@@ -179,10 +230,7 @@
 				saveBtn.disabled = true;
 				fetch(url, {
 					method: method,
-					headers: Object.assign(
-						{ "Content-Type": "application/json", "Accept": "application/json" },
-						getCsrfHeaders()
-					),
+					headers: getApiJsonHeaders(),
 					body: JSON.stringify(payload),
 				})
 					.then(function (res) {
@@ -213,7 +261,7 @@
 					if (!idVal) { setErr("삭제할 마일스톤을 선택하세요."); return; }
 					if (!window.confirm("이 마일스톤을 삭제할까요?")) return;
 					deleteBtn.disabled = true;
-					fetch("/api/milestone/" + idVal, {
+					fetch("/api/milestone/milestone/" + encodeURIComponent(idVal), {
 						method: "DELETE",
 						headers: getCsrfHeaders()
 					})

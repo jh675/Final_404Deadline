@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,7 +21,14 @@ import com.example.demo.company.service.CompanyVO;
 import com.example.demo.login.service.UserVO;
 import com.example.demo.management.service.ProjectService;
 import com.example.demo.management.service.ProjectVO;
+import com.example.demo.project.calender.service.CalenderService;
+import com.example.demo.project.calender.service.CalenderVO;
 import com.example.demo.project.group.service.GroupDetailVO;
+import com.example.demo.project.issue.service.IssueInputVO;
+import com.example.demo.project.issue.service.IssueOutputVO;
+import com.example.demo.project.issue.service.IssueService;
+import com.example.demo.project.main.service.IssueCountVO;
+import com.example.demo.project.main.service.MainService;
 import com.example.demo.project.member.service.MemberDetailVO;
 import com.example.demo.project.option.service.RoleVO;
 import com.example.demo.project.wiki.service.WikiVO;
@@ -34,7 +42,13 @@ public class ProjectController {
 	@Autowired
 	ProjectService projectservice;
 	@Autowired
-     CompanyService companyService;
+    CompanyService companyService;
+	@Autowired
+	IssueService issueService;
+	@Autowired
+	MainService mainService;
+	@Autowired
+	CalenderService calenderService;
 
 	@GetMapping("management/project")
 	public String listProject(ProjectVO vo, Model model, CompanyVO cvo) {
@@ -117,6 +131,25 @@ public class ProjectController {
 	    projectservice.projectDelete(vo);
 	    rttr.addFlashAttribute("msg", "프로젝트가 삭제되었습니다.");
 	    return "redirect:/management/project";
+	}
+	
+	@GetMapping("/project/main/{id}")
+	public String goMain(@PathVariable("id") int id, ProjectVO vo , Model model, IssueInputVO ivo, IssueCountVO cvo,CalenderVO Cvo,HttpSession session) {
+		vo.setId(id);
+		cvo.setPrjId(id);
+		List<IssueOutputVO> issuelist = issueService.selectIssueList(ivo);
+		IssueCountVO count = mainService.issueCount(cvo);
+		List<CalenderVO> Clist = calenderService.selectAll(Cvo);
+		session.setAttribute("currentProjectId", id);
+		if (count == null) {
+	        count = new IssueCountVO();
+	    }
+		
+		model.addAttribute("project", vo);
+		model.addAttribute("issuelist",issuelist);
+		model.addAttribute("count",count);
+		model.addAttribute("calender",Clist);
+		return "project/main/main";
 	}
 
 }
