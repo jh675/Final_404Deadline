@@ -122,4 +122,17 @@
     WHERE prj_par_id = #{id}
 </select>
  
+ <select id="listModules" resultType="ModulesVO">
+ 	select ena_name_cd,  
+      get_sub_code_name(e.ena_name_cd) ena_name_nm 
+      from enabled_modules e
+ 	where prj_id = #{prjId}
+ </select>
+ 
+ <select id="getprojectid" resultType="ProjectVO">
+ 	select *
+ 	from project
+ 	where id = #{id}
+ </select>
+ 
  </mapper>

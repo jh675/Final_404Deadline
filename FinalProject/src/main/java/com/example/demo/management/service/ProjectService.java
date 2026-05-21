@@ -15,5 +15,7 @@ public interface ProjectService {
 	void insertProjectWithModules(ProjectVO vo, List<String> moduleList,GroupDetailVO gVo,MemberDetailVO mVo,WikiVO wVo, RoleVO rVo);
 	int projectHide(ProjectVO vo);
 	int projectDelete(ProjectVO vo);
-	boolean hasChildProject(int id);
+	boolean hasChildProject(Long id);
+	ProjectVO getprojectid(Long id);
+	List<ModulesVO> listModules(Long projectId);
 }

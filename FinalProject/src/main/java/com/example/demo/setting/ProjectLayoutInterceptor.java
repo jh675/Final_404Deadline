@@ -23,6 +23,7 @@ public class ProjectLayoutInterceptor implements HandlerInterceptor {
         // 1. 세션에서 프로젝트 ID를 꺼내옵니다.
         HttpSession session = request.getSession();
         Long projectId = (Long) session.getAttribute("currentProjectId");
+     
 
         // 2. 세션에 ID가 있다면? (즉, 프로젝트 내부 화면이라면)
         if (projectId != null) {
@@ -33,9 +34,8 @@ public class ProjectLayoutInterceptor implements HandlerInterceptor {
             
             // 4. 모델(ModelAndView)에 슬쩍 끼워 넣습니다.
             // 팀원이 컨트롤러에서 안 넣었어도, 여기서 강제로 넣어주니까 레이아웃 HTML이 정상 작동합니다!
-            
-            // modelAndView.addObject("project", project);
-            // modelAndView.addObject("moduleList", moduleList);
+            // modelAndView.addObject("project",  session.getAttribute("project"));
+            // modelAndView.addObject("moduleList",  session.getAttribute("moduleList"));
         }
     }
 }
