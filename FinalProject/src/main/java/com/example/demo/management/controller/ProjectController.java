@@ -121,7 +121,7 @@ public class ProjectController {
 	
 	@PostMapping("/management/delete")
 	public String projectDelete(ProjectVO vo,RedirectAttributes rttr) {
-		int id = vo.getId();
+		Long id = vo.getId();
 		
 		if (projectservice.hasChildProject(id)) {
 	        rttr.addFlashAttribute("msg", "하위 프로젝트가 있어 삭제할 수 없습니다.");
@@ -133,23 +133,41 @@ public class ProjectController {
 	    return "redirect:/management/project";
 	}
 	
-	@GetMapping("/project/main/{id}")
-	public String goMain(@PathVariable("id") int id, ProjectVO vo , Model model, IssueInputVO ivo, IssueCountVO cvo,CalenderVO Cvo,HttpSession session) {
-		vo.setId(id);
-		cvo.setPrjId(id);
+	//대시보
+	@GetMapping("/project/main")
+	public String goMain( ProjectVO vo , Model model, 
+			             IssueInputVO ivo, 
+			             IssueCountVO cvo,
+			             CalenderVO Cvo,
+			             HttpSession session) {
+		Long projectid = (Long) session.getAttribute("currentProjectId");
+		vo.setId(projectid);
+		cvo.setPrjId(projectid);
 		List<IssueOutputVO> issuelist = issueService.selectIssueList(ivo);
 		IssueCountVO count = mainService.issueCount(cvo);
 		List<CalenderVO> Clist = calenderService.selectAll(Cvo);
-		session.setAttribute("currentProjectId", id);
 		if (count == null) {
 	        count = new IssueCountVO();
 	    }
-		
+		model.addAttribute("currentMenu", "dashboard");
 		model.addAttribute("project", vo);
 		model.addAttribute("issuelist",issuelist);
 		model.addAttribute("count",count);
 		model.addAttribute("calender",Clist);
+		model.addAttribute("moduleList",projectservice.listModules(projectid));
 		return "project/main/main";
 	}
+	
+	@GetMapping("/project/{id}") 
+    public String enterProject(@PathVariable("id") Long id, HttpSession session) {
+        
+		session.setAttribute("currentMenu", "dashboard");
+        // 클릭한 프로젝트의 ID를 세션에 "currentProjectId"라는 이름으로 저장
+        session.setAttribute("currentProjectId", id); //대소문자 주의
+        session.setAttribute("moduleList",projectservice.listModules(id));
+        session.setAttribute("project",projectservice.getprojectid(id));
+        // 세션에 저장했으니, 해당 프로젝트의 개요화면으로 이동시킵니다.
+        return "redirect:/project/main"; //(예시 url)
+    }
 
 }
