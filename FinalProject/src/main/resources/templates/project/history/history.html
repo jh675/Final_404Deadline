@@ -119,16 +119,10 @@
           border: 0;
         }
       </style>
-
-      <script th:inline="javascript">
-        /*<![CDATA[*/
-        const historyRows = /*[[${rows}]]*/ [];
-        /*]]>*/
-      </script>
     </th:block>
   </head>
   <body>
-    <div layout:fragment="project-content">
+    <div layout:fragment="content">
       <main class="history-page">
         <h1 class="history-page__title">작업내역</h1>
 
@@ -211,6 +205,11 @@
         </section>
       </main>
 
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        const historyRows = /*[[${rows}]]*/ [];
+        /*]]>*/
+      </script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           (function historySearchDates() {
