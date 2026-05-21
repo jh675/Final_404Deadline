@@ -128,6 +128,12 @@ public class AttachServiceImpl implements AttachService {
 		return attachmentList;
 	}
 
+	/**
+	 * @param  containerId 번호
+	 * @param  attachments 첨부파일(배열) 
+	 * @param tableName 모듈 공통코드
+	 * @param containerType 컨테이너 타입(issue,user,notice,board 등등)
+	 */
 	// 첨부파일 저장 및 등록
 	@Override
 	public void saveAndInsertAttachments(Long containerId, MultipartFile[] attachments, String tableName,
@@ -171,5 +177,17 @@ public class AttachServiceImpl implements AttachService {
 		return false;
 	}
 
+	@Override
+	public boolean hasAttachmentFiles(MultipartFile[] attachments) {
+		if (attachments == null) {
+			return false;
+		}
+		for (MultipartFile f : attachments) {
+			if (f != null && !f.isEmpty()) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 }

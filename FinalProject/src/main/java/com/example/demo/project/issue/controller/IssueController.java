@@ -124,7 +124,7 @@ public class IssueController {
 	public String issueInsert(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
 
-		boolean hasFiles = hasAttachmentFiles(attachments);
+		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
 		}
@@ -142,7 +142,7 @@ public class IssueController {
 		if (issueVO.getId() == null) {
 			return "redirect:/issue/list";
 		}
-		boolean hasFiles = hasAttachmentFiles(attachments);
+		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
 			attachService.saveAndInsertAttachments(issueVO.getId(), attachments, "04MODULE", "ISSUE");
@@ -179,16 +179,5 @@ public class IssueController {
 		return ResponseEntity.ok(body);
 	}
 
-	private boolean hasAttachmentFiles(MultipartFile[] attachments) {
-		if (attachments == null) {
-			return false;
-		}
-		for (MultipartFile f : attachments) {
-			if (f != null && !f.isEmpty()) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 }

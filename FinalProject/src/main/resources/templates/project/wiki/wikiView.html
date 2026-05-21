@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultLayout}">
+<head>
+    <meta charset="UTF-8">
+    <title>위키</title>
+    <th:block layout:fragment="head-content">
+        <style>
+            .wiki-page {
+                font-family: "Malgun Gothic", "맑은 고딕", -apple-system, sans-serif;
+                color: #333;
+            }
+
+            .wiki-layout {
+                display: flex;
+                gap: 24px;
+                align-items: flex-start;
+            }
+
+            .wiki-main {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .wiki-sidebar {
+                width: 220px;
+                flex-shrink: 0;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                background: #fafafa;
+                padding: 16px 18px;
+            }
+
+            .wiki-sidebar h3 {
+                font-size: 14px;
+                font-weight: 700;
+                margin: 0 0 12px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .wiki-sidebar .index-title {
+                font-size: 12px;
+                font-weight: 600;
+                color: #666;
+                margin-bottom: 8px;
+            }
+
+            .wiki-sidebar ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .wiki-sidebar li + li {
+                margin-top: 6px;
+            }
+
+            .wiki-sidebar a {
+                font-size: 13px;
+                color: #2e7d32;
+                text-decoration: none;
+            }
+
+            .wiki-sidebar a:hover {
+                text-decoration: underline;
+            }
+
+            /* breadcrumb */
+            .wiki-breadcrumb {
+                font-size: 13px;
+                color: #666;
+                margin-bottom: 12px;
+            }
+
+            .wiki-breadcrumb a {
+                color: #2e7d32;
+                text-decoration: none;
+            }
+
+            .wiki-breadcrumb a:hover {
+                text-decoration: underline;
+            }
+
+            .wiki-breadcrumb .sep {
+                margin: 0 6px;
+                color: #aaa;
+            }
+
+            /* header row */
+            .wiki-header-row {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+
+            .wiki-title {
+                font-size: 24px;
+                font-weight: 700;
+                margin: 0;
+                line-height: 1.35;
+            }
+
+            .wiki-actions {
+                display: flex;
+                gap: 8px;
+                flex-shrink: 0;
+            }
+
+            .wiki-btn {
+                display: inline-block;
+                padding: 8px 20px;
+                border-radius: 50px;
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+                cursor: pointer;
+                border: 1px solid transparent;
+                background: #fff;
+            }
+
+            .wiki-btn-create,
+            .wiki-btn-edit {
+                border-color: #66bb6a;
+                color: #2e7d32;
+            }
+
+            .wiki-btn-create:hover,
+            .wiki-btn-edit:hover {
+                background: #f1f8e9;
+                color: #1b5e20;
+            }
+
+            .wiki-btn-delete {
+                border-color: #dc3545;
+                color: #dc3545;
+            }
+
+            .wiki-btn-delete:hover:not(:disabled) {
+                background: #fff5f5;
+            }
+
+            .wiki-btn-delete:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+            }
+
+            /* content body */
+            .wiki-body {
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                background: #fff;
+                padding: 24px 28px;
+                min-height: 320px;
+                line-height: 1.7;
+                font-size: 14px;
+            }
+
+            .wiki-body p {
+                margin: 0 0 14px;
+            }
+
+            .wiki-body strong {
+                font-weight: 700;
+            }
+
+            .wiki-body code {
+                font-family: Consolas, "Courier New", monospace;
+                background: #f5f5f5;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-size: 13px;
+            }
+
+            .wiki-body a.wiki-link {
+                color: #2e7d32;
+                text-decoration: none;
+            }
+
+            .wiki-body a.wiki-link:hover {
+                text-decoration: underline;
+            }
+
+            .wiki-body a.external-link {
+                color: #1565c0;
+            }
+
+            .wiki-attachments {
+                margin-top: 24px;
+                padding-top: 16px;
+                border-top: 1px solid #eee;
+            }
+
+            .wiki-attachments h4 {
+                font-size: 13px;
+                font-weight: 600;
+                margin: 0 0 10px;
+                color: #555;
+            }
+
+            .wiki-attachments img {
+                max-width: 100%;
+                height: auto;
+                border: 1px solid #eee;
+                border-radius: 4px;
+            }
+
+            @media (max-width: 768px) {
+                .wiki-layout {
+                    flex-direction: column;
+                }
+
+                .wiki-sidebar {
+                    width: 100%;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content" class="wiki-page py-2">
+
+    <div class="wiki-layout">
+        <!-- 메인 영역 -->
+        <div class="wiki-main">
+            <!-- 1. breadcrumb -->
+            <nav class="wiki-breadcrumb" aria-label="위키 경로">
+                <th:block th:if="${breadcrumb != null and !breadcrumb.isEmpty()}">
+                    <th:block th:each="crumb, stat : ${breadcrumb}">
+                        <a th:if="${!stat.last}"
+                           th:href="@{/wiki/view(id=${crumb.id})}"
+                           th:text="${crumb.title}">상위위키명</a>
+                        <span th:if="${!stat.last}" class="sep">&gt;</span>
+                        <span th:if="${stat.last}" th:text="${crumb.title}">지금위키명</span>
+                    </th:block>
+                </th:block>
+                <th:block th:if="${breadcrumb == null or breadcrumb.isEmpty()}">
+                    <a th:href="@{/wiki/view(id=1)}">Top-level Wiki</a>
+                    <span class="sep">&gt;</span>
+                    <span>지금위키명</span>
+                </th:block>
+            </nav>
+
+            <div class="wiki-header-row">
+                <h1 class="wiki-title" th:text="${page != null ? page.title : '지금위키명'}">지금위키명</h1>
+                <div class="wiki-actions">
+                    <a class="wiki-btn wiki-btn-create" th:href="@{/wiki/write}">작성</a>
+                    <a class="wiki-btn wiki-btn-edit"
+                       th:href="@{/wiki/write(id=${page != null ? page.id : 0})}">편집</a>
+                    <button type="button" class="wiki-btn wiki-btn-delete"
+                            th:disabled="${hasChildren == true}"
+                            th:attr="data-wiki-id=${page != null ? page.id : 0}"
+                            onclick="confirmDelete(this)">삭제</button>
+                </div>
+            </div>
+
+            <!-- 5. 본문 (마크다운 렌더 결과) -->
+            <article class="wiki-body" th:if="${contentHtml != null}" th:utext="${contentHtml}"></article>
+            <!-- th:inline="none": [[위키명]] 은 Thymeleaf 인라인 표현식([[...]])과 충돌하므로 리터럴로 처리 -->
+            <article class="wiki-body" th:unless="${contentHtml != null}" th:inline="none">
+                <p>일반 텍스트 문단입니다. 위키 본문은 마크다운 규칙에 따라 표시됩니다.</p>
+                <p><strong>굵은 글씨</strong>는 <code>**텍스트**</code>로 감쌉니다.</p>
+                <p>인라인 코드는 <code>`코드`</code> 형태로 표시됩니다.</p>
+                <p>내부 위키 링크: <a class="wiki-link" href="#">[[다른 위키 페이지]]</a></p>
+                <p>외부 링크: <a class="external-link" href="https://www.redmine.org" target="_blank" rel="noopener">https://www.redmine.org</a></p>
+            </article>
+
+            <!-- 첨부 이미지 -->
+            <div class="wiki-attachments" th:if="${attachments != null and !attachments.isEmpty()}">
+                <h4>첨부파일</h4>
+                <ul class="list-unstyled mb-0">
+                    <li th:each="file : ${attachments}" class="mb-2">
+                        <a th:href="@{/wiki/download(fileId=${file.id})}" th:text="${file.name}">파일명.jpg</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="wiki-attachments" th:if="${attachments == null or attachments.isEmpty()}">
+                <h4>첨부 이미지</h4>
+                <img th:src="@{/img/sample-wiki.png}"
+                     src="https://www.redmine.org/attachments/download/9/redmine_logo.png"
+                     alt="첨부 이미지" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <!-- 사이드바 -->
+        <aside class="wiki-sidebar">
+            <h3>사이드바</h3>
+            <div class="index-title">색인</div>
+            <ul>
+                <li><a th:href="@{/wiki/view(start=true)}">첫페이지</a></li>
+                <li><a th:href="@{/wiki/index(type='title')}">제목별</a></li>
+                <li><a th:href="@{/wiki/index(type='date')}">날짜별</a></li>
+            </ul>
+        </aside>
+    </div>
+
+    <script th:inline="javascript">
+        function confirmDelete(btn) {
+            if (btn.disabled) return;
+            var id = btn.getAttribute('data-wiki-id');
+            if (!confirm('이 위키 페이지를 삭제하시겠습니까?\n하위 위키가 있으면 삭제할 수 없습니다.')) return;
+            /* TODO: 삭제 API 연동 */
+            alert('삭제 기능은 컨트롤러 연동 후 동작합니다. (pageId: ' + id + ')');
+        }
+    </script>
+</div>
+</body>
+</html>
