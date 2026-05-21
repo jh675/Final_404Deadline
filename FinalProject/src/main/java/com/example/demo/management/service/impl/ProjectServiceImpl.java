@@ -29,7 +29,12 @@ public class ProjectServiceImpl implements ProjectService {
 	public List<ProjectVO> listProject(ProjectVO vo) {
 		return projectMapper.listProject(vo);
 	}
-
+	
+	@Override
+	public List<ProjectVO> userProjectList(ProjectVO vo){
+		return projectMapper.userProjectList(vo);
+	}
+	
 	@Override
 	public int projectInsert(ProjectVO vo) {
 		return projectMapper.projectInsert(vo);
@@ -117,4 +122,16 @@ public class ProjectServiceImpl implements ProjectService {
 	public List<ModulesVO> listModules(Long projectId){
 		return projectMapper.listModules(projectId);
 	}
+	
+	@Override
+	public List<GroupDetailVO> listGroup(GroupDetailVO gvo){
+		return projectMapper.listGroup(gvo);
+	}
+	
+	@Override
+	public List<MemberDetailVO> listMember(MemberDetailVO mvo){
+		return projectMapper.listMember(mvo);
+	}
+	
+	
 }

@@ -24,6 +24,7 @@ import com.example.demo.management.service.ProjectVO;
 import com.example.demo.project.calender.service.CalenderService;
 import com.example.demo.project.calender.service.CalenderVO;
 import com.example.demo.project.group.service.GroupDetailVO;
+import com.example.demo.project.group.service.GroupService;
 import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
@@ -49,11 +50,30 @@ public class ProjectController {
 	MainService mainService;
 	@Autowired
 	CalenderService calenderService;
+	
 
 	@GetMapping("management/project")
-	public String listProject(ProjectVO vo, Model model, CompanyVO cvo) {
-	    
-		List<ProjectVO> list = projectservice.listProject(vo);
+	public String listProject(ProjectVO vo, Model model, CompanyVO cvo, GroupDetailVO gvo,
+			Authentication authentication) {
+
+		List<ProjectVO> list;
+		UserVO loginUser = null;
+		if (authentication != null && authentication.getPrincipal() instanceof UserVO u) {
+			loginUser = u;
+		}
+
+		boolean isEmployee = loginUser != null
+				&& ("03ROLE".equals(loginUser.getAdminCd())
+						|| "사원".equals(loginUser.getAdminNm())
+						|| (loginUser.getRole() != null && loginUser.getRole().contains("ROLE_USER")));
+
+		if (isEmployee) {
+			vo.setUserId(loginUser.getId());
+			list = projectservice.userProjectList(vo);
+		} else {
+			list = projectservice.listProject(vo);
+		}
+		
 	    List<CompanyVO> companyList = companyService.selectAll(cvo);
 	    
 	    model.addAttribute("projectinfo", Map.of("list", list != null ? list : List.of()));
