@@ -1,10 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <meta charset="UTF-8">
+    <title>메시지 목록</title>
 </head>
 <body>
+
+    <h2>게시판 메시지 목록 (게시판 번호: <span th:text="${boardId}">0</span>)</h2>
+    
+    <div>
+        <button type="button" onclick="location.href='/boards/list'">뒤로가기</button>
+        <button type="button" th:onclick="|location.href='/messages/register?boardId=' + ${boardId}|">메시지 등록</button>
+    </div>
+    
+    <br>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성일</th>
+                <th>관리</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="msg : ${list}">
+                <td th:text="${msg.id}">1</td>
+                <td>
+                    <a th:href="@{/messages/detail(id=${msg.id})}" th:text="${msg.title}">메시지 제목 위치</a>
+                </td>
+                <td>2026-05-19</td>
+                <td>
+                    <button type="button" th:onclick="|location.href='@{/messages/modify(id=${msg.id})}'|">수정</button>
+                    <button type="button" th:onclick="|if(confirm('정말 삭제하시겠습니까?')) { location.href='/messages/delete?id=' + ${msg.id} + '&boardId=' + ${boardId} }|">삭제</button>
+                </td>
+            </tr>
+            
+            <tr th:if="${#lists.isEmpty(list)}">
+                <td colspan="4">등록된 메시지가 없습니다. 첫 메시지를 작성해보세요!</td>
+            </tr>
+        </tbody>
+    </table>
 
 </body>
 </html>
