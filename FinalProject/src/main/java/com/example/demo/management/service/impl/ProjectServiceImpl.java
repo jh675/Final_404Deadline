@@ -11,6 +11,10 @@ import com.example.demo.management.mapper.ProjectMapper;
 import com.example.demo.management.service.ModulesVO;
 import com.example.demo.management.service.ProjectService;
 import com.example.demo.management.service.ProjectVO;
+import com.example.demo.project.group.service.GroupDetailVO;
+import com.example.demo.project.member.service.MemberDetailVO;
+import com.example.demo.project.option.service.RoleVO;
+import com.example.demo.project.wiki.service.WikiVO;
 
 import jakarta.transaction.Transactional;
 
@@ -37,7 +41,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 	
 	@Transactional
-	public void insertProjectWithModules(ProjectVO vo, List<String> moduleList) {
+	public void insertProjectWithModules(ProjectVO vo, List<String> moduleList, GroupDetailVO gVo, MemberDetailVO mvo,WikiVO wVo,RoleVO rVo) {
 	    // 1. 프로젝트 삽입 (XML의 selectKey 덕분에 실행 후 vo.getId()에 값이 담깁니다)
 	    projectMapper.projectInsert(vo);
 
@@ -50,6 +54,42 @@ public class ProjectServiceImpl implements ProjectService {
 	            projectMapper.moduleInsert(mVo); // 이 부분 매퍼 인터페이스와 XML에 추가 필요!
 	        }
 	    }
+	    if(gVo != null) {
+	    	gVo.setPrjId(Long.valueOf(vo.getId()));
+	    	projectMapper.groupInsert(gVo);
+	    	Long groupId = gVo.getGrpId();
+	    	if(mvo != null) {
+	    		mvo.setGrpId(groupId);
+	    		mvo.setUserId(vo.getUserId());
+	    		projectMapper.memberInsert(mvo);
+	    	}
+	    }
+	    if(wVo != null) {
+	    	wVo.setPrjId(Long.valueOf(vo.getId()));
+	    	projectMapper.wikiInsert(wVo);
+	    }
+	    if(rVo != null) {
+	    	rVo.setPrjId(Long.valueOf(vo.getId()));
+	    	projectMapper.roleInsert(rVo);
+	    	
+	    	Long roleCd = rVo.getRoleCd();
+	    	
+	    	rVo.setRoleCd(roleCd);
+	    	rVo.setRoleId("ROLE_ISSUE_ALL");
+	    	projectMapper.rolemenuInsert(rVo);
+	    	
+	    	rVo.setRoleId("ROLE_MEMBER_ALL");
+	    	projectMapper.rolemenuInsert(rVo);
+	    	
+	    	rVo.setRoleId("ROLE_GROUP_ALL");
+	    	projectMapper.rolemenuInsert(rVo);
+	    	
+	    	rVo.setRoleId("ROLE_HISTORY_VIEW");
+	    	projectMapper.rolemenuInsert(rVo);
+	    	
+	    	rVo.setGrpId(gVo.getGrpId());
+	    	projectMapper.grproleInsert(rVo);
+	    }
 	}
 	
 	@Override
@@ -58,7 +98,23 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 	
 	@Override
-	public int projectDelete(int id) {
-		return projectMapper.projectDelete(id);
+	public int projectDelete(ProjectVO vo) {
+		return projectMapper.projectDelete(vo);
+	}
+	
+	@Override
+    public boolean hasChildProject(Long id) {
+		
+        return projectMapper.countChildProject(id) > 0;
+    }
+	
+	@Override
+	public ProjectVO getprojectid(Long id) {
+		return projectMapper.getprojectid(id);
+	}
+	
+	@Override
+	public List<ModulesVO> listModules(Long projectId){
+		return projectMapper.listModules(projectId);
 	}
 }

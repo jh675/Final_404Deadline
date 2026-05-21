@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import com.example.demo.project.group.mapper.GroupMapper;
 import com.example.demo.project.group.service.GroupDetailVO;
 import com.example.demo.project.group.service.GroupInsertProcParam;
+import com.example.demo.project.group.service.GroupUpdateProcParam;
 import com.example.demo.project.group.service.GroupListCriteria;
 import com.example.demo.project.group.service.GroupMemberDetailRowVO;
+import com.example.demo.project.group.service.GroupMemberPickRowVO;
 import com.example.demo.project.group.service.GroupRoleDetailRowVO;
 import com.example.demo.project.group.service.GroupService;
 import com.example.demo.project.group.service.ProjectGroupRowVO;
@@ -63,11 +65,27 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    public List<GroupMemberPickRowVO> selectGroupMemberPickList(Long prjId) {
+        if (prjId == null) {
+            return List.of();
+        }
+        return groupMapper.selectGroupMemberPickList(prjId);
+    }
+
+    @Override
     public List<GroupRoleDetailRowVO> selectGroupRoles(Long prjId, Long grpId) {
         if (prjId == null || grpId == null) {
             return List.of();
         }
         return groupMapper.selectGroupRoles(prjId, grpId);
+    }
+
+    @Override
+    public boolean isRoleAssignedToGroup(Long prjId, Long grpId, Long roleCd) {
+        if (prjId == null || grpId == null || roleCd == null) {
+            return false;
+        }
+        return groupMapper.countGrpRoleAssignment(prjId, grpId, roleCd) > 0;
     }
 
     @Override
@@ -83,22 +101,10 @@ public class GroupServiceImpl implements GroupService {
             throw new IllegalArgumentException("동일한 그룹이 존재합니다");
         }
 
-        String memIds = null;
-        if (userIds != null && !userIds.isEmpty()) {
-            String joined = userIds.stream()
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(","));
-            if (!joined.isEmpty()) {
-                memIds = joined;
-            }
-        }
-
         GroupInsertProcParam param = new GroupInsertProcParam();
         param.setPrjId(prjId);
         param.setGrpName(name);
-        param.setMemIds(memIds);
+        param.setMemIds(joinUserIds(userIds));
         groupMapper.callProcGrpInsert(param);
 
         String msg = param.getResultMsg();
@@ -108,6 +114,45 @@ public class GroupServiceImpl implements GroupService {
         if (!"OK".equalsIgnoreCase(msg.trim())) {
             throw new IllegalArgumentException(msg);
         }
+    }
+
+    @Override
+    public void updateGroup(Long prjId, Long grpId, List<Long> userIds) {
+        if (prjId == null) {
+            throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
+        }
+        if (grpId == null) {
+            throw new IllegalArgumentException("그룹 ID가 필요합니다.");
+        }
+        if (groupMapper.selectGroupDetail(prjId, grpId) == null) {
+            throw new IllegalArgumentException("프로젝트에 존재하지 않는 그룹입니다.");
+        }
+
+        GroupUpdateProcParam param = new GroupUpdateProcParam();
+        param.setPrjId(prjId);
+        param.setGrpId(grpId);
+        param.setMemIds(joinUserIds(userIds));
+        groupMapper.callProcGrpUpdate(param);
+
+        String msg = param.getResultMsg();
+        if (msg == null) {
+            throw new IllegalStateException("그룹 수정 결과를 받지 못했습니다.");
+        }
+        if (!"OK".equalsIgnoreCase(msg.trim())) {
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
+    private static String joinUserIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return null;
+        }
+        String joined = userIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        return joined.isEmpty() ? null : joined;
     }
 
     /** 프로젝트 소속 확인 후 그룹마다 PROC_GRP_DELETE 호출 */

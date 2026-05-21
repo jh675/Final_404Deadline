@@ -24,15 +24,24 @@
 			  ,MCP_CD
 			  ,get_sub_code_name(MCP_CD) "MCP_NM"
 	  	FROM   users
-	 	WHERE  login = #{loginId}
+	 	WHERE  biz_no = #{bizNo}
+     	AND    login = #{login}
 	</select>
 
 	<update id="updatePassword">
-
 		UPDATE users
 		SET password = #{password}
 		WHERE biz_no = #{bizNo}
 		AND login = #{login}
-	
 	</update>
+	
+
+	<select id="searchActiveCompanies">
+	    SELECT BIZ_NO
+	          ,COMPANY_NAME
+	    FROM   COMPANY
+	    WHERE  IS_ACTIVE_CD = '01ACTIVE'
+	    AND    COMPANY_NAME LIKE '%' || #{keyword} || '%'
+	    ORDER BY COMPANY_NAME ASC
+	</select>
 </mapper>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/defaultLayout}">
+<head>
+    <meta charset="UTF-8">
+    <title>위키 작성</title>
+    <th:block layout:fragment="head-content">
+        <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor.min.css" />
+        <style>
+            .wiki-write-page {
+                font-family: "Malgun Gothic", "맑은 고딕", -apple-system, sans-serif;
+                color: #333;
+            }
+
+            .wiki-write-layout {
+                display: flex;
+                gap: 24px;
+                align-items: flex-start;
+            }
+
+            .wiki-write-main {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .wiki-write-sidebar {
+                width: 220px;
+                flex-shrink: 0;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                background: #fafafa;
+                padding: 16px 18px;
+            }
+
+            .wiki-write-sidebar h3 {
+                font-size: 14px;
+                font-weight: 700;
+                margin: 0 0 12px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .wiki-write-sidebar .index-title {
+                font-size: 12px;
+                font-weight: 600;
+                color: #666;
+                margin-bottom: 8px;
+            }
+
+            .wiki-write-sidebar ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .wiki-write-sidebar li + li {
+                margin-top: 6px;
+            }
+
+            .wiki-write-sidebar a {
+                font-size: 13px;
+                color: #2e7d32;
+                text-decoration: none;
+            }
+
+            .wiki-write-sidebar a:hover {
+                text-decoration: underline;
+            }
+
+            .wiki-form-card {
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                background: #fff;
+                padding: 24px 28px 28px;
+            }
+
+            .wiki-form-group {
+                margin-bottom: 20px;
+            }
+
+            .wiki-form-group label {
+                display: block;
+                font-size: 13px;
+                font-weight: 600;
+                color: #495057;
+                margin-bottom: 6px;
+            }
+
+            .wiki-form-group label .required {
+                color: #dc3545;
+            }
+
+            .wiki-form-group input[type="text"],
+            .wiki-form-group select {
+                width: 100%;
+                max-width: 480px;
+                padding: 8px 12px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+            .wiki-form-group input[type="text"]:focus,
+            .wiki-form-group select:focus {
+                outline: none;
+                border-color: #66bb6a;
+                box-shadow: 0 0 0 2px rgba(102, 187, 106, 0.2);
+            }
+
+            /* TOAST UI Editor */
+            #wikiEditor {
+                min-height: 420px;
+            }
+
+            .toastui-editor-defaultUI {
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+
+            /* 첨부파일 */
+            .attachment-list {
+                list-style: none;
+                margin: 0 0 10px;
+                padding: 0;
+            }
+
+            .attachment-list li {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 8px 12px;
+                background: #f8f9fa;
+                border: 1px solid #eee;
+                border-radius: 4px;
+                margin-bottom: 6px;
+                font-size: 13px;
+            }
+
+            .attachment-list .btn-remove {
+                padding: 4px 12px;
+                font-size: 12px;
+                border: 1px solid #dc3545;
+                color: #dc3545;
+                background: #fff;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .attachment-list .btn-remove:hover {
+                background: #fff5f5;
+            }
+
+            .btn-add-file {
+                padding: 6px 16px;
+                font-size: 13px;
+                border: 1px solid #66bb6a;
+                color: #2e7d32;
+                background: #fff;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .btn-add-file:hover {
+                background: #f1f8e9;
+            }
+
+            .attachment-hint {
+                font-size: 12px;
+                color: #888;
+                margin-top: 6px;
+            }
+
+            .wiki-form-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 24px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+            }
+
+            .wiki-form-actions .btn-submit {
+                padding: 10px 28px;
+                background: #66bb6a;
+                color: #fff;
+                border: none;
+                border-radius: 50px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .wiki-form-actions .btn-submit:hover {
+                background: #43a047;
+            }
+
+            .wiki-form-actions .btn-cancel {
+                padding: 10px 24px;
+                background: #fff;
+                color: #555;
+                border: 1px solid #ccc;
+                border-radius: 50px;
+                font-size: 14px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                line-height: 1.4;
+            }
+
+            .wiki-form-actions .btn-cancel:hover {
+                background: #f5f5f5;
+            }
+
+            @media (max-width: 768px) {
+                .wiki-write-layout {
+                    flex-direction: column;
+                }
+
+                .wiki-write-sidebar {
+                    width: 100%;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content" class="wiki-write-page py-2">
+
+    <div class="wiki-write-layout">
+        <div class="wiki-write-main">
+            <h4 class="fw-bold text-success mb-3" style="color:#2e7d32 !important;"
+                th:if="${page != null and page.id != null}">위키 수정</h4>
+            <h4 class="fw-bold text-success mb-3" style="color:#2e7d32 !important;"
+                th:unless="${page != null and page.id != null}">위키 작성</h4>
+
+            <form id="wikiForm" class="wiki-form-card" method="post" enctype="multipart/form-data"
+                  th:action="@{/wiki/save}">
+                <input type="hidden" name="id" th:value="${page != null ? page.id : ''}">
+                <input type="hidden" name="content" id="wikiContentHidden">
+
+                <!-- 1. 제목 -->
+                <div class="wiki-form-group">
+                    <label for="wikiTitle">제목 <span class="required">*</span></label>
+                    <input type="text" id="wikiTitle" name="title" required
+                           placeholder="제목 입력"
+                           th:value="${page != null ? page.title : ''}">
+                </div>
+
+                <!-- 2·3. 마크다운 에디터 (TOAST UI Editor) -->
+                <div class="wiki-form-group">
+                    <label>내용</label>
+                    <p class="text-muted small mb-2">마크다운으로 내용을 작성하세요.</p>
+                    <div id="wikiEditor"></div>
+                </div>
+
+                <!-- 4. 상위 위키 -->
+                <div class="wiki-form-group">
+                    <label for="parentWiki">상위 위키</label>
+                    <select id="parentWiki" name="parentId">
+                        <option value="">없음</option>
+                        <option value="1">이슈1</option>
+                        <option value="2">이슈2</option>
+                        <option value="3">이슈3</option>
+                        <th:block th:if="${parentList != null}">
+                            <option th:each="p : ${parentList}"
+                                    th:value="${p.id}"
+                                    th:text="${p.title}"
+                                    th:selected="${selectedParentId != null and selectedParentId == p.id}">
+                            </option>
+                        </th:block>
+                    </select>
+                </div>
+
+                <!-- 5. 설명 -->
+                <div class="wiki-form-group">
+                    <label for="wikiDescribe">설명</label>
+                    <input type="text" id="wikiDescribe" name="describe" placeholder="변경 요약 또는 페이지 설명"
+                           th:value="${content != null ? content.describe : ''}">
+                </div>
+
+                <!-- 6. 첨부파일 -->
+                <div class="wiki-form-group">
+                    <label>첨부파일</label>
+                    <ul class="attachment-list" id="attachmentList">
+                        <li th:each="file : ${existingFiles}" th:if="${existingFiles != null}">
+                            <span th:text="${file.name}">파일명.jpg</span>
+                            <button type="button" class="btn-remove" th:attr="data-file-id=${file.id}">첨부삭제</button>
+                        </li>
+                        <li th:if="${existingFiles == null or existingFiles.isEmpty()}">
+                            <span>파일명.jpg</span>
+                            <button type="button" class="btn-remove" onclick="this.closest('li').remove()">첨부삭제</button>
+                        </li>
+                    </ul>
+                    <input type="file" id="fileInput" name="files" multiple accept="*/*" style="display:none">
+                    <button type="button" class="btn-add-file" onclick="document.getElementById('fileInput').click()">파일추가</button>
+                    <p class="attachment-hint">최대 5개, 총 50MB까지 업로드 가능합니다.</p>
+                </div>
+
+                <!-- 7·8. 작성 / 취소 -->
+                <div class="wiki-form-actions">
+                    <a class="btn-cancel" th:if="${page != null and page.id != null}" th:href="@{/wiki/view(id=${page.id})}">취소</a>
+                    <a class="btn-cancel" th:unless="${page != null and page.id != null}" th:href="@{/wiki/view}">취소</a>
+                    <button type="submit" class="btn-submit">작성</button>
+                </div>
+            </form>
+        </div>
+
+        <aside class="wiki-write-sidebar">
+            <h3>사이드바</h3>
+            <div class="index-title">색인</div>
+            <ul>
+                <li><a th:href="@{/wiki/view(start=true)}">첫페이지</a></li>
+                <li><a th:href="@{/wiki/index(type='title')}">제목별</a></li>
+                <li><a th:href="@{/wiki/index(type='date')}">날짜별</a></li>
+            </ul>
+        </aside>
+    </div>
+
+    <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"></script>
+    <script th:inline="javascript">
+        var wikiEditorInstance = null;
+
+        function initWikiEditor() {
+            if (wikiEditorInstance) return;
+            if (!window.toastui || !window.toastui.Editor) return;
+
+            var el = document.querySelector('#wikiEditor');
+            if (!el) return;
+
+            var initialContent = /*[[${content != null ? content.content : ''}]]*/ '';
+
+            /* placeholder + previewStyle:'vertical' 조합은 미리보기에 로딩 스피너가 무한 표시되는 버그 (#2669) */
+            wikiEditorInstance = new toastui.Editor({
+                el: el,
+                height: '420px',
+                initialEditType: 'markdown',
+                previewStyle: 'vertical',
+                previewHighlight: false,
+                usageStatistics: false,
+                plugins: []
+            });
+
+            if (initialContent) {
+                wikiEditorInstance.setMarkdown(initialContent);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initWikiEditor);
+        } else {
+            initWikiEditor();
+        }
+
+        (function () {
+            var MAX_FILES = 5;
+            var MAX_TOTAL_BYTES = 50 * 1024 * 1024;
+            var selectedFiles = [];
+
+            document.getElementById('fileInput').addEventListener('change', function (e) {
+                var incoming = Array.from(e.target.files || []);
+                var totalSize = selectedFiles.reduce(function (s, f) { return s + f.size; }, 0);
+
+                for (var i = 0; i < incoming.length; i++) {
+                    if (selectedFiles.length >= MAX_FILES) {
+                        alert('첨부파일은 최대 ' + MAX_FILES + '개까지 등록할 수 있습니다.');
+                        break;
+                    }
+                    if (totalSize + incoming[i].size > MAX_TOTAL_BYTES) {
+                        alert('첨부파일 총 용량은 50MB를 초과할 수 없습니다.');
+                        break;
+                    }
+                    selectedFiles.push(incoming[i]);
+                    totalSize += incoming[i].size;
+                    appendFileRow(incoming[i]);
+                }
+                e.target.value = '';
+                syncFileInput();
+            });
+
+            function appendFileRow(file) {
+                var li = document.createElement('li');
+                var name = document.createElement('span');
+                name.textContent = file.name;
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-remove';
+                btn.textContent = '첨부삭제';
+                btn.addEventListener('click', function () {
+                    var idx = selectedFiles.indexOf(file);
+                    if (idx > -1) selectedFiles.splice(idx, 1);
+                    li.remove();
+                    syncFileInput();
+                });
+                li.appendChild(name);
+                li.appendChild(btn);
+                document.getElementById('attachmentList').appendChild(li);
+            }
+
+            function syncFileInput() {
+                var dt = new DataTransfer();
+                selectedFiles.forEach(function (f) { dt.items.add(f); });
+                document.getElementById('fileInput').files = dt.files;
+            }
+
+            document.getElementById('wikiForm').addEventListener('submit', function (e) {
+                var title = document.getElementById('wikiTitle').value.trim();
+                if (!title) {
+                    e.preventDefault();
+                    alert('제목을 입력해 주세요.');
+                    return;
+                }
+                if (!wikiEditorInstance) {
+                    e.preventDefault();
+                    alert('에디터가 아직 로드되지 않았습니다.');
+                    return;
+                }
+                document.getElementById('wikiContentHidden').value = wikiEditorInstance.getMarkdown();
+                /* TODO: 제목 중복 검사 API 연동 후 submit */
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>

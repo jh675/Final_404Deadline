@@ -1,5 +1,8 @@
 <!doctype html>
-<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/defaultLayout}">
   <head>
     <meta charset="UTF-8" />
     <title>Insert title here</title>
@@ -9,6 +12,7 @@
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
       crossorigin="anonymous"
     />
+    
     <style>
    	/* 테이블 바디의 번호를 초기화 */
 	.numbered-table tbody {
@@ -36,8 +40,9 @@
     </style>
   </head>
   <body>
+  <div layout:fragment="content">
     <h2>프로젝트</h2>
-    <a th:if="${#authentication.principal.adminCd == '기업관리자'}"
+    <a th:if="${#authentication.principal.adminNm == '기업관리자'}"
        href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
     
     <!-- 1. id와 onchange 이벤트 추가 -->
@@ -53,22 +58,22 @@
           <th>No</th>
           <th>프로젝트명</th>
           <th>식별자</th>
-          <th th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminCd == '시스템관리자'}">회사명</th>
+          <th th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">회사명</th>
           <th>설명</th>
           <th>생성일</th>
           <th>종료일</th>
-          <th class="text-center" th:if="${#authentication.principal.adminCd == '시스템관리자' or #authentication.principal.adminCd == '기업관리자'}">설정</th>
+          <th class="text-center" th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">설정</th>
         </tr>
       </thead>
       <tbody>
         <!-- 2. data-status 속성을 추가하여 closedDate 여부에 따라 progress 또는 complete 값을 가짐 -->
         <tr th:each="pro : ${projectinfo.list}"
-            th:if="${#authentication.principal.adminCd == '시스템관리자' or pro.bizNo == #authentication.principal.bizNo}"
+            th:if="${#authentication.principal.adminNm == '시스템관리자' or pro.bizNo == #authentication.principal.bizNo and pro.prjHide =='N'}"
             th:data-status="${pro.closedDate == null ? 'progress' : 'complete'}">
           <td class="row-index"></td>
-          <td th:text="${pro.prjName}"></td>
+          <td ><a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a></td>
           <td th:text="${pro.prjIdentifier}"></td>
-          <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminCd == '시스템관리자'}">
+          <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
 			    <th:block th:each="c : ${companyList}">
 			        <span th:if="${pro.bizNo == c.bizNo}" th:text="${c.companyName}"></span>
 			    </th:block>
@@ -80,7 +85,7 @@
             th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"
           ></td>
           <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
-          <td class="text-center" th:if="${#authentication.principal.adminCd == '시스템관리자' or #authentication.principal.adminCd == '기업관리자'}">
+          <td class="text-center" th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">
            <div class="btn-group dropend">
               <button
 				  type="button"
@@ -95,15 +100,18 @@
                 <li><a class="dropdown-item" href="#">설정</a></li>
                 <li><hr class="dropdown-divider" /></li>
                 <li><button type="button" class="dropdown-item text-danger"
-                	href="#" data-bs-toggle="modal" data-bs-target="#deleteproject"
-                	th:data-id="${pro.id}" onclick="openDeleteModal(this)"></button></li>
+					          data-bs-toggle="modal" 
+					          data-bs-target="#deleteproject"
+					          th:data-id="${pro.id}" 
+					          onclick="openDeleteModal(this)"
+							>삭제</button></li>	
               </ul>
             </div>
-            <div th:replace="~{management/modal/deleteprojectmodal :: deleteproject}"></div>
           </td>
         </tr>
       </tbody>
     </table>
+            <div th:replace="~{management/modal/deleteprojectmodal :: deleteproject}"></div>
 	</div>
 	
     <script
@@ -145,5 +153,20 @@
     	    }
     	}
     </script>
+    <script th:inline="javascript">
+      // 1. 페이지 로드 시 실행될 기존 필터 함수
+      window.addEventListener("DOMContentLoaded", filterProjects);
+      
+      // 2. [추가] 컨트롤러에서 보낸 msg가 존재할 때만 alert 띄우기
+      /*<![CDATA[*/
+      const serverMessage = /*[[${msg}]]*/ null;
+      
+      if (serverMessage) {
+          alert(serverMessage);
+      }
+      /*]]>*/
+      
+    </script>
+    </div>
   </body>
 </html>

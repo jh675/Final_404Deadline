@@ -30,6 +30,8 @@ public class UserVO implements UserDetails{
 	private String name;
 	private String tel;
 	private String email;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date hireDate;
 	private String genderCd;
 	private String genderNm;
@@ -62,7 +64,10 @@ public class UserVO implements UserDetails{
 	
 	@Override
 	public String getUsername() {
-		return login;
+	    // 쿠키에 "123-45-67890_cadmin" 형태로 저장되도록 복합 문자열을 리턴(자동로그인 기능을 위함)
+	    return this.bizNo + "_" + this.login;
 	}
+	
+	
 	
 }

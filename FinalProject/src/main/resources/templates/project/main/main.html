@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/projectLayout}">
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
@@ -9,6 +12,11 @@
 	  crossorigin="anonymous">
 </head>
 <body>
+<div layout:fragment="content">
+
+            
+	
+
 	<table>
 		<thead>
 			<tr>
@@ -20,25 +28,43 @@
 		<tbody>
 			<tr>
 				<th>버그</th>
-				<td></td>
-				<td></td>
+				<td th:text="${count.bGoCount}"></td>
+				<td th:text="${count.bEndCount}"></td>
 			</tr>
 			<tr>
 				<th>기능</th>
-				<td></td>
-				<td></td>
+				<td th:text="${count.fGoCount}"></td>
+				<td th:text="${count.fEndCount}"> </td>
 			</tr>
 			<tr>
 				<th>작업</th>
-				<td></td>
-				<td></td>
+				<td th:text="${count.wGoCount}"></td>
+				<td th:text="${count.wEndCount}"></td>
 			</tr>
 			<tr>
 				<th>개선</th>
-				<td></td>
-				<td></td>
+				<td th:text="${count.iGoCount}"></td>
+				<td th:text="${count.iEndCount}"></td>
 			</tr>
 		</tbody>
 	</table>
+	<table>
+		<thead>
+			<tr>
+				<th></th>			
+				<th>오늘의 일정</th>
+				<th>시간</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr >
+				<th></th>
+				<td ></td>
+				<td ></td>
+			</tr>
+			
+		</tbody>
+	</table>
+	</div>
 </body>
 </html>

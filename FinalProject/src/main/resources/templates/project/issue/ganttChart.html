@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/defaultLayout}">
+<head>
+<meta charset="UTF-8">
+<title>간트차트</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+ <link rel="stylesheet" href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
+ <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
+<style>
+#gantt_here {
+	width: 100%;
+	height: 600px;
+}
+
+.gantt_cell {
+	text-align: center !important;
+}
+
+.gantt_grid_head_cell {
+	text-align: center !important;
+}
+/* 신규 - 파랑 */
+.status-new .gantt_task_progress, .status-new.gantt_task_line {
+	background-color: #3498db;
+	border-color: #2980b9;
+}
+
+/* 진행중 - 주황 */
+.status-progress .gantt_task_progress, .status-progress.gantt_task_line
+	{
+	background-color: #e67e22;
+	border-color: #d35400;
+}
+
+/* 검토 - 보라 */
+.status-review .gantt_task_progress, .status-review.gantt_task_line {
+	background-color: #9b59b6;
+	border-color: #8e44ad;
+}
+
+/* 완료 - 초록 */
+.status-done .gantt_task_progress, .status-done.gantt_task_line {
+	background-color: #27ae60;
+	border-color: #1e8449;
+}
+
+/* 상태없음(null) - 회색 */
+.status-none .gantt_task_progress, .status-none.gantt_task_line {
+	background-color: #bdc3c7;
+	border-color: #95a5a6;
+}
+</style>
+
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+	<div layout:fragment="content">
+
+		<div
+			style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 1px solid #dee2e6;">
+
+			<!-- 색깔 표시 테그부분 -->
+			<div
+				style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
+				<span style="font-weight: bold;">이슈상태 :</span> <span><span
+					style="display: inline-block; width: 12px; height: 12px; background: #3498db; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>신규</span>
+				<span><span
+					style="display: inline-block; width: 12px; height: 12px; background: #e67e22; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>진행중</span>
+				<span><span
+					style="display: inline-block; width: 12px; height: 12px; background: #9b59b6; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>검토</span>
+				<span><span
+					style="display: inline-block; width: 12px; height: 12px; background: #27ae60; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>완료</span>
+				<span><span
+					style="display: inline-block; width: 12px; height: 12px; background: #bdc3c7; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>상태없음</span>
+			</div>
+
+			<!-- 간트차트 검색창 -->
+			<div class="d-flex align-items-center gap-2">
+				<select class="form-select form-select-sm" id="typeCd"
+					style="width: 100px;">
+					<option value="">전체</option>
+					<option value="text">이슈명</option>
+					<option value="status_cd">이슈상태</option>
+					<option value="assignee">담당자</option>
+				</select> <input type="text" class="form-control form-control-sm"
+					id="searchInput" placeholder="검색어를 입력해주세요." style="width: 180px;"
+					onkeydown="if(event.key==='Enter') searchEvents()">
+				<button type="button" class="btn btn-primary btn-sm"
+					onclick="searchEvents()">검색</button>
+			</div>
+
+		</div>
+	
+		<!-- 검색 결과 모달 -->
+		<div class="modal fade" id="searchModal" tabindex="-1">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">검색 결과</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="table-responsive">
+							<table
+								class="table table-bordered table-hover text-center align-middle"
+								style="font-size: 13px; white-space: nowrap;">
+								<thead class="table-dark">
+									<tr>
+										<th style="min-width: 150px;">이슈명</th>
+										<th style="min-width: 80px;">이슈상태</th>
+										<th style="min-width: 80px;">우선순위</th>
+										<th style="min-width: 80px;">담당자</th>
+										<th style="min-width: 110px;">시작예정일</th>
+										<th style="min-width: 110px;">이슈마감일</th>
+										<th style="min-width: 110px;">시작일</th>
+										<th style="min-width: 110px;">완료일</th>
+										<th style="min-width: 70px;">진척도</th>
+									</tr>
+								</thead>
+								<tbody id="searchResultBody">
+								</tbody>
+							</table>
+						</div>
+						<div id="noResultMsg"
+							style="display: none; text-align: center; padding: 20px; color: #888;">
+							검색 결과가 없습니다.</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">닫기</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="gantt_here"></div>
+
+		<script>
+		
+		// ===================================
+		// 1. 서버에서 이슈목록 가져오기 
+		// ===================================
+		let allTasks = []; // 데이터 저장용 
+		
+			fetch("/ganttchart/listget")
+			 .then(res => res.json())
+			 .then(data => {
+					allTasks = data
+					.filter(issue => {
+						const startVal = issue.startDate || issue.estStartDate;
+						if(!startVal || !issue.dueDate) return false;
+						const start = new Date(startVal);
+						const end = new Date(issue.dueDate);
+						
+						if(isNaN(start.getTime())|| isNaN(end.getTime())) return false;
+						if(start.getFullYear() === 1970) return false; 
+						if(end <= start) return false;
+						return true;
+					
+					})
+					.map(issue => ({
+					    text:           issue.subject, // 이슈명 
+					    status_cd:      issue.statusCd, // 이슈상태 
+					    priority_cd:    issue.priorityCd, // 우선순위 
+					    assignee:       issue.memName, // 담당자 
+					    est_start_date: formatDate(issue.estStartDate), // 시작예정일(template용)
+					    due_date:       formatDate(issue.dueDate), // 이슈 마감일 
+					    start_date:     formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
+					    start_date_str: formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
+					    end_date:       formatDate(issue.dueDate), //실제 완료일 
+					    end_date_str:   formatDate(issue.dueDate), //실제 완료일 
+					    progress:       (issue.doneRatio ?? 0) / 100, // 진척도 (막대 그래프용)
+					    progress_text:  (issue.doneRatio ?? 0) + "%" // 진척도 (막대 그래프용)
+					}));	
+					gantt.parse({data: allTasks});
+				
+			 	});
+
+			// ===================================
+			// 2. 컬럼 설정부분 
+			// ===================================
+			
+			 gantt.config.columns = [
+		        { name: "text",     label: "이슈명",   width: 245, tree: true },    
+		        { name: "status_cd", label: "이슈상태", width: 100 },
+		        { name: "priority_cd", label: "우선순위", width: 100 },
+		        { name: "assignee", label: "담당자",   width: 100 },
+		        { name: "est_start_date", label: "시작예정일", width: 140 },
+		        { name: "due_date", label: "이슈마감일", width: 140 },
+		        { name: "start_date", label: "시작일", width: 140, template: task => task.start_date_str},
+		        { name: "end_date", label: "완료일", width: 140, template: task => task.end_date_str},
+		        { name: "progress", label: "진척도", width: 60, template: task => task.progress_text },
+		    ];
+		
+			// 1) 간트차트 막대 너비 조절 
+			
+			gantt.config.row_height  = 30;  // 행 높이
+			gantt.config.bar_height  = 18;  // 막대 높이
+			gantt.config.min_column_width = 30; // 날짜 칸 너비 (좁게)
+			gantt.config.grid_width = 750; 
+		
+			
+			// 2) 진척도의 날짜헤더 (년+월/ 일)
+			
+			gantt.config.scales = [
+			    { unit: "month", step: 1, format: "%Y-%m" }, // 위: 2026-05
+			    { unit: "day",   step: 1, format: "%d" }      // 아래: 일
+			];
+	
+			// 3) 막대별 색상 구분 
+			
+			gantt.templates.task_class = function(start, end, task) {
+		
+				// 우선순위에 따라 구분
+		    switch(task.status_cd) {
+				    case "신규":   return "status-new";
+				    case "진행중": return "status-progress";
+				    case "검토":   return "status-review";
+				    case "완료":   return "status-done";
+				    default:       return "status-none";
+		    	}
+			};
+			
+			// 4) 초기화 
+			gantt.init("gantt_here");
+			
+			
+			 // ===================================
+			 //  3. 날짜 포맷 변환 
+			 // ===================================
+				
+				 function formatDate(dateStr) {
+					const day = new Date(dateStr);
+					  const dd = String(day.getDate()).padStart(2, '0'); 
+					const month = String (day.getMonth() +1) .padStart(2, '0');
+					const years = day.getFullYear();
+					return `${years}-${month}-${dd}`;			
+				  } 
+			 
+			 // ===================================
+			 //  4. 검색창 부분 
+			 // ===================================
+				 
+				 function searchEvents() {
+					
+				  const type =    document.getElementById('typeCd').value.trim();
+				  const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+				  
+				  if(!keyword) { 
+					gantt.clearAll();
+					gantt.parse ({ data: allTasks }); 
+					return; 
+				  }
+				  
+				  const filtered = allTasks.filter(task => {
+					if(!type) {
+						
+						// 간트차트 전체 검색 
+						// includes: 특정단어가 들어가 있는지 여부 확인 
+						return task.text.toLowerCase().includes(keyword) || 
+							   (task.status_cd && task.status_cd.includes(keyword)) || 
+							   (task.assignee && task.assignee.includes(keyword));
+					}
+					
+						// 선택한 항목만 검색 
+						const val = task[type] ? task[type].toString().toLowerCase() : "";
+						return val.includes(keyword);		  
+				  });
+
+						// 결과표시 창 
+					  const result = document.getElementById("searchResultBody");
+					  const msg = document.getElementById("noResultMsg");
+					  result.innerHTML = "";
+				  
+				  // 검색 결과 출력 여부 
+				  
+				  // 1) 검색결과가 없을때
+				  if (filtered.length == 0) {
+					msg.style.display = "block"; // 보여주기 
+					result.style.display = "none"; // 숨기기 
+				  } else {		
+					// 2) 검색결과가 있는 경우 			 
+					  msg.style.display = "none"; // 숨기기
+					  result.style.display = "";  // 보여주기 
+
+					  filtered.forEach(task => {
+						const tr = document.createElement("tr");
+						tr.innerHTML = `
+							 <td>${task.text       || "-"}</td>
+			                <td>${task.status_cd   || "-"}</td>
+			                <td>${task.priority_cd || "-"}</td>
+			                <td>${task.assignee    || "-"}</td>
+			                <td>${task.est_start_date || "-"}</td>
+			                <td>${task.due_date    || "-"}</td>
+			                <td>${task.start_date_str || "-"}</td>
+			                <td>${task.end_date_str   || "-"}</td>
+			                <td>${task.progress_text  || "0%"}</td>
+						`;
+						result.appendChild(tr);			  
+					  });
+				  }
+					const modal = new bootstrap.Modal(document.getElementById("searchModal"));
+					modal.show();
+			 	}
+
+		</script>
+	</div>
+</body>
+
+</html>

@@ -17,8 +17,6 @@ import com.example.demo.login.service.UserVO;
 import com.example.demo.project.calender.service.CalenderService;
 import com.example.demo.project.calender.service.CalenderVO;
 
-
-
 @Controller
 public class Calendercontroller {
 	
@@ -27,8 +25,7 @@ public class Calendercontroller {
  
 	// 캘린더 페이지접속 
 	@GetMapping({"/calender/list"})
-	 public String callenderlist() {
-	  
+	 public String callenderlist() {	  
 	  return "project/calender/calender";
 	}
 	
@@ -46,21 +43,23 @@ public class Calendercontroller {
 	@PostMapping("calender/insert")
 	@ResponseBody
 	 public int post(CalenderVO vo) {
-			/*
-			 * Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			 * Object principal = auth.getPrincipal(); if (principal instanceof UserVO user)
-			 * { vo.setMemId(user.getId().intValue()); }
-			 */
 	    vo.setMemId(2); 
-		
 		return calenderService.insert(vo);
 	}
 	// 일정 수정
 	@PutMapping("/calender/update")
 	@ResponseBody
 	 public int update(CalenderVO vo) {
-		return calenderService.updete(vo);
+		return calenderService.update(vo);
 	}
+	
+	// 일정 수정에서 가져온 데이터 단건 조회 API 
+	@GetMapping("/calender/detail")
+	@ResponseBody
+	public CalenderVO getEventDetail(@RequestParam("id") int id) {
+	    return calenderService.selectOne(id); 
+	}
+	
 	// 일정 삭제 
 	@DeleteMapping("/calender/delete")
 	@ResponseBody
@@ -72,14 +71,8 @@ public class Calendercontroller {
 	@GetMapping("calender/search")
 	@ResponseBody
 	 public List<CalenderVO>search(CalenderVO vo) {
-		 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	        Object principal = auth.getPrincipal();
-	    if (principal instanceof UserVO user) {
-	    	vo.setMemId(user.getId().intValue()); 
-	    }
+		vo.setMemId(2);
 		return calenderService.selectAll(vo);
 	}
-	
-	
-	
+
 }

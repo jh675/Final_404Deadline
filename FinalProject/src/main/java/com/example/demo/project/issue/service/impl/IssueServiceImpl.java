@@ -2,7 +2,6 @@ package com.example.demo.project.issue.service.impl;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import com.example.demo.project.issue.service.CommentOutputVO;
 import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
+import com.example.demo.project.issue.service.IssueSummaryVO;
 
 @Service
 public class IssueServiceImpl implements IssueService {
@@ -90,8 +90,10 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
-	public Map<Long, String> getParentIssue(Long id) {
-		// TODO Auto-generated method stub
+	public IssueSummaryVO getParentIssue(Long id) {
+		if (id == null) {
+			return null;
+		}
 		return mapper.getParentIssue(id);
 	}
 	
@@ -110,9 +112,9 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
-	public List<Map<Long, String>> getIssueIds() {
-		// TODO Auto-generated method stub
-		return mapper.getIssueIds();
+	public List<IssueSummaryVO> getIssueIds() {
+		List<IssueSummaryVO> list = mapper.getIssueIds();
+		return list != null ? list : Collections.emptyList();
 	}
 
 }

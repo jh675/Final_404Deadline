@@ -44,7 +44,7 @@ public class AttachController {
 		return root;
 	}
 	@GetMapping("/download/{id}")
-	public ResponseEntity<Resource> downloadFile(@PathVariable Long id) throws MalformedURLException {
+	public ResponseEntity<Resource> downloadFile(@PathVariable("id") Long id) throws MalformedURLException {
 		// 키값을 통해 아이디 받아옴
 		AttachVO attachVO = service.selectAttach(id);
 		//업로드 경로에 저장된이름을 더한다
@@ -68,11 +68,11 @@ public class AttachController {
 				.header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString()).body(resource);
 	}
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<Void> deleteFile(@PathVariable Long id) {
+	public ResponseEntity<Void> deleteFile(@PathVariable("id") Long id) {
 		try {
 			//정보 가져오기기
 			AttachVO attachVO = service.selectAttach(id);
-			//db에서 정보 삭제제
+			//db에서 정보 삭제
 			service.deleteAttach(id);
 			//파일경로를 지정하여서
 			service.removeAttach(attachVO);
@@ -83,8 +83,5 @@ public class AttachController {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
-		
-		
-
 	}
 }

@@ -1,6 +1,7 @@
 package com.example.demo.project.issue.controller;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +124,7 @@ public class IssueController {
 	public String issueInsert(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
 
-		boolean hasFiles = hasAttachmentFiles(attachments);
+		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
 		}
@@ -141,7 +142,7 @@ public class IssueController {
 		if (issueVO.getId() == null) {
 			return "redirect:/issue/list";
 		}
-		boolean hasFiles = hasAttachmentFiles(attachments);
+		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
 			attachService.saveAndInsertAttachments(issueVO.getId(), attachments, "04MODULE", "ISSUE");
@@ -160,6 +161,7 @@ public class IssueController {
 		Map<String, Object> body = new LinkedHashMap<>();
 		body.put("ok", true);
 		body.put("id", id);
+		body.put("registeredAt", new Date());
 		return ResponseEntity.ok(body);
 	}
 
@@ -173,19 +175,9 @@ public class IssueController {
 		Map<String, Object> body = new LinkedHashMap<>();
 		body.put("ok", true);
 		body.put("id", id);
+		body.put("registeredAt", new Date());
 		return ResponseEntity.ok(body);
 	}
 
-	private boolean hasAttachmentFiles(MultipartFile[] attachments) {
-		if (attachments == null) {
-			return false;
-		}
-		for (MultipartFile f : attachments) {
-			if (f != null && !f.isEmpty()) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 }

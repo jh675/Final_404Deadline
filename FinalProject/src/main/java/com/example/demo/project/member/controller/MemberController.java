@@ -15,11 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.example.demo.project.member.service.MemberDetailVO;
-import com.example.demo.project.member.service.MemberIssueRowVO;
-import com.example.demo.project.member.service.MemberListCriteria;
-import com.example.demo.project.member.service.MemberService;
-import com.example.demo.project.member.service.ProjectMemberRowVO;
+import com.example.demo.project.member.service.*;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -53,7 +49,7 @@ public class MemberController {
      * 구성원 상세·수정·등록 — {@code memberManagementInfo.html}
      * <ul>
      *   <li>userId·grpId 없음 → 등록</li>
-     *   <li>{@code edit=true} → 수정(계정·패스워드 포함)</li>
+     *   <li>{@code edit=true} → 수정(투입 종료일·소속 그룹)</li>
      *   <li>그 외 → 상세 조회</li>
      * </ul>
      */
@@ -71,6 +67,8 @@ public class MemberController {
             model.addAttribute("registerMode", true);
             model.addAttribute("editMode", false);
             model.addAttribute("viewMode", false);
+            model.addAttribute("userId", null);
+            model.addAttribute("grpId", null);
             model.addAttribute("memberNotFound", false);
             model.addAttribute("detail", MemberDetailVO.builder()
                     .prjId(prjId)
@@ -89,6 +87,8 @@ public class MemberController {
             model.addAttribute("memberNotFound", true);
             model.addAttribute("editMode", false);
             model.addAttribute("viewMode", false);
+            model.addAttribute("userId", userId);
+            model.addAttribute("grpId", grpId);
             model.addAttribute("issues", List.<MemberIssueRowVO>of());
             return "project/member/memberManagementInfo";
         }
@@ -106,6 +106,32 @@ public class MemberController {
                         ? List.<MemberIssueRowVO>of()
                         : memberService.selectMemberIssues(prjId, userId, grpId));
         return "project/member/memberManagementInfo";
+    }
+
+    /** 구성원 등록 모달 — 프로젝트 내 활성 그룹 목록 */
+    @GetMapping("/projectGroups")
+    @ResponseBody
+    public Map<String, Object> projectGroups(@RequestParam("prjId") Long prjId) {
+        List<MemberGroupPickRowVO> rows = memberService.selectProjectGroupsByPrjId(prjId);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", rows);
+        body.put("prjId", prjId);
+        return body;
+    }
+
+    /** 프로젝트 수행 기업 활성 사용자 목록 — 구성원 등록 모달( excludeRegistered 시 MEMBER 미등록만) */
+    @GetMapping("/companyMembers")
+    @ResponseBody
+    public Map<String, Object> companyMembers(
+            @RequestParam("prjId") Long prjId,
+            @RequestParam(value = "excludeRegistered", defaultValue = "false")
+                    boolean excludeRegistered) {
+        List<CompanyMemberRowVO> rows =
+                memberService.selectCompanyMembersByPrjId(prjId, excludeRegistered);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", rows);
+        body.put("prjId", prjId);
+        return body;
     }
 
     /** 구성원 목록 JSON (AJAX 검색용, 현재 HTML에서는 미사용) */
@@ -131,6 +157,67 @@ public class MemberController {
         body.put("content", rows);
         body.put("prjId", prjId);
         return body;
+    }
+
+    /** 구성원 수정 — 투입 종료일·소속 그룹 */
+    @PostMapping("/updateMember")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateMember(
+            @RequestBody(required = false) MemberUpdateRequest body) {
+        try {
+            if (body == null) {
+                return badRequest("요청이 올바르지 않습니다.");
+            }
+            memberService.updateMember(
+                    body.prjId(),
+                    body.userId(),
+                    body.oldGrpId(),
+                    body.grpId(),
+                    body.prjEndDate());
+            Map<String, Object> ok = new LinkedHashMap<>();
+            ok.put("ok", true);
+            ok.put("prjId", body.prjId());
+            ok.put("userId", body.userId());
+            ok.put("grpId", body.grpId());
+            return ResponseEntity.ok(ok);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("ok", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "구성원 수정 중 오류가 발생했습니다."));
+        }
+    }
+
+    /** 구성원 등록 — MEMBER INSERT (mem_seq) */
+    @PostMapping("/registerMember")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> registerMember(
+            @RequestBody(required = false) MemberRegisterRequest body) {
+        try {
+            if (body == null) {
+                return badRequest("요청이 올바르지 않습니다.");
+            }
+            Long memberId = memberService.registerMember(
+                    body.prjId(),
+                    body.userId(),
+                    body.grpId(),
+                    body.prjStartDate(),
+                    body.prjEndDate());
+            Map<String, Object> ok = new LinkedHashMap<>();
+            ok.put("ok", true);
+            ok.put("memberId", memberId);
+            ok.put("userId", body.userId());
+            ok.put("grpId", body.grpId());
+            ok.put("prjId", body.prjId());
+            return ResponseEntity.ok(ok);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("ok", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "구성원 등록 중 오류가 발생했습니다."));
+        }
     }
 
     /** Grid에서 선택한 구성원을 프로젝트에서 제거 (MEMBER 행 삭제) */
@@ -166,6 +253,22 @@ public class MemberController {
     private static ResponseEntity<Map<String, Object>> badRequest(String message) {
         return ResponseEntity.badRequest().body(Map.of("ok", false, "message", message));
     }
+
+    /** updateMember 요청 JSON */
+    public record MemberUpdateRequest(
+            Long prjId,
+            Long userId,
+            Long oldGrpId,
+            Long grpId,
+            String prjEndDate) {}
+
+    /** registerMember 요청 JSON */
+    public record MemberRegisterRequest(
+            Long prjId,
+            Long userId,
+            Long grpId,
+            String prjStartDate,
+            String prjEndDate) {}
 
     /** deleteMembers 요청 JSON */
     public record MemberDeleteRequest(Long prjId, List<MemberKey> members) {}

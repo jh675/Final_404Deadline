@@ -9,13 +9,14 @@ import lombok.Setter;
 @Data
 @Getter
 @Setter
-
 public class CompanyVO {
 	
 	private String bizNo;
 	private String companyName;
 	private String tel;
 	private String address;
+	private String login;
+	private String email;
 	private String isActiveCd;
 	private Date createdOn;
 	private String searchType;

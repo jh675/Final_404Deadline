@@ -8,9 +8,13 @@
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<h3>해당 프로젝트를 삭제하겠습니까?</h3>
-					<form  method="post" layout:fragment="content">
+					<form  method="post" onsubmit="console.log('폼 전송됨')">
+					  <input type="hidden"
+					           th:name="${_csrf.parameterName}"
+					           th:value="${_csrf.token}" />
 						<input type="hidden" id="projectHide" name="id" value="" />
-						<div th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminCd == '시스템관리자'}">
+						
+						<div th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
 							<button type="submit" formaction="/management/delete">완전삭제</button>
 						</div>
 						<div>

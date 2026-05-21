@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" 
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/userLayout}">
+      layout:decorate="~{layout/defaultLayout}">
 
 <div layout:fragment="content">
     <h2>프로젝트 리스트</h2>

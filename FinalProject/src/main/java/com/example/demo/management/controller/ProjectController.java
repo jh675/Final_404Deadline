@@ -10,28 +10,45 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.company.service.CompanyService;
 import com.example.demo.company.service.CompanyVO;
 import com.example.demo.login.service.UserVO;
 import com.example.demo.management.service.ProjectService;
 import com.example.demo.management.service.ProjectVO;
-import com.github.pagehelper.PageInfo;
+import com.example.demo.project.calender.service.CalenderService;
+import com.example.demo.project.calender.service.CalenderVO;
+import com.example.demo.project.group.service.GroupDetailVO;
+import com.example.demo.project.issue.service.IssueInputVO;
+import com.example.demo.project.issue.service.IssueOutputVO;
+import com.example.demo.project.issue.service.IssueService;
+import com.example.demo.project.main.service.IssueCountVO;
+import com.example.demo.project.main.service.MainService;
+import com.example.demo.project.member.service.MemberDetailVO;
+import com.example.demo.project.option.service.RoleVO;
+import com.example.demo.project.wiki.service.WikiVO;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-
 public class ProjectController {
 
 
 	@Autowired
 	ProjectService projectservice;
 	@Autowired
-     CompanyService companyService;
+    CompanyService companyService;
+	@Autowired
+	IssueService issueService;
+	@Autowired
+	MainService mainService;
+	@Autowired
+	CalenderService calenderService;
 
 	@GetMapping("management/project")
 	public String listProject(ProjectVO vo, Model model, CompanyVO cvo) {
@@ -79,7 +96,7 @@ public class ProjectController {
 	@PostMapping("/management/projectcreate")
 	public String projectInsert(ProjectVO vo, 
 	                             @RequestParam(value="moduleList", required=false) List<String> moduleList, 
-	                             Authentication authentication) {
+	                             Authentication authentication,GroupDetailVO gVo, MemberDetailVO mvo,WikiVO wVo,RoleVO rVo) {
 	    
 	    // 1. 인증 객체에서 로그인 유저 정보 가져오기 (가장 확실한 방법)
 	    if (authentication != null && authentication.getPrincipal() instanceof UserVO loginUser) {
@@ -90,23 +107,67 @@ public class ProjectController {
 
 	    // 2. 서비스 호출 (프로젝트 정보와 모듈 리스트를 함께 넘김)
 	    // 기존의 projectservice.projectInsert(vo) 대신 새로운 메서드를 호출합니다.
-	    projectservice.insertProjectWithModules(vo, moduleList);
+	    projectservice.insertProjectWithModules(vo, moduleList, gVo, mvo, wVo, rVo);
 	    
 	    return "redirect:/management/project";
 	}
 	
 	@PostMapping("/management/hide")
-	public String projectHide(ProjectVO vo) {
+	public String projectHide(ProjectVO vo ,RedirectAttributes rttr) {
 		projectservice.projectHide(vo);
-		System.out.println("숨김완료");
-		System.out.println(vo.getId());
+		rttr.addFlashAttribute("msg", "프로젝트가 성공적으로 삭제되었습니다.");
 		return "redirect:/management/project";
 	}
 	
 	@PostMapping("/management/delete")
-	public String projectDelete(int id) {
-		projectservice.projectDelete(id);
-		return "redirect:/management/project";
+	public String projectDelete(ProjectVO vo,RedirectAttributes rttr) {
+		Long id = vo.getId();
+		
+		if (projectservice.hasChildProject(id)) {
+	        rttr.addFlashAttribute("msg", "하위 프로젝트가 있어 삭제할 수 없습니다.");
+	        return "redirect:/management/project";
+	    }
+
+	    projectservice.projectDelete(vo);
+	    rttr.addFlashAttribute("msg", "프로젝트가 삭제되었습니다.");
+	    return "redirect:/management/project";
 	}
+	
+	//대시보
+	@GetMapping("/project/main")
+	public String goMain( ProjectVO vo , Model model, 
+			             IssueInputVO ivo, 
+			             IssueCountVO cvo,
+			             CalenderVO Cvo,
+			             HttpSession session) {
+		Long projectid = (Long) session.getAttribute("currentProjectId");
+		vo.setId(projectid);
+		cvo.setPrjId(projectid);
+		List<IssueOutputVO> issuelist = issueService.selectIssueList(ivo);
+		IssueCountVO count = mainService.issueCount(cvo);
+		List<CalenderVO> Clist = calenderService.selectAll(Cvo);
+		if (count == null) {
+	        count = new IssueCountVO();
+	    }
+		model.addAttribute("currentMenu", "dashboard");
+		model.addAttribute("project", vo);
+		model.addAttribute("issuelist",issuelist);
+		model.addAttribute("count",count);
+		model.addAttribute("calender",Clist);
+		model.addAttribute("moduleList",projectservice.listModules(projectid));
+		return "project/main/main";
+	}
+	
+	@GetMapping("/project/{id}") 
+    public String enterProject(@PathVariable("id") Long id, HttpSession session) {
+        
+		session.setAttribute("currentMenu", "dashboard");
+        // 클릭한 프로젝트의 ID를 세션에 "currentProjectId"라는 이름으로 저장
+        session.setAttribute("currentProjectId", id); //대소문자 주의
+        session.setAttribute("moduleList",projectservice.listModules(id));
+        session.setAttribute("project",projectservice.getprojectid(id));
+        // 세션에 저장했으니, 해당 프로젝트의 개요화면으로 이동시킵니다.
+        return "redirect:/project/main"; //(예시 url)
+    }
 
 }
