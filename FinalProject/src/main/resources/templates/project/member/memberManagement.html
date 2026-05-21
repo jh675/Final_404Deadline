@@ -8,20 +8,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
-    <meta
-      th:if="${_csrf != null}"
-      name="_csrf_header"
-      th:content="${_csrf.headerName}"
-    />
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>프로젝트 멤버 관리</title>
-    <link
-      rel="stylesheet"
-      href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css"
-    />
+    <link rel="stylesheet"
+      href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css"/>
+    <link rel="stylesheet"
+      href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css"/>
     <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
     <script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.js"></script>
 
@@ -207,57 +199,24 @@
           <hr class="menu-role-page__rule" />
         </header>
 
-        <section
-          class="menu-role-page__search"
-          aria-labelledby="member-search-heading"
-        >
+        <section class="menu-role-page__search" aria-labelledby="member-search-heading">
           <h2 id="member-search-heading" class="visually-hidden">멤버 검색</h2>
-          <form
-            class="role-search"
-            id="memberSearchForm"
-            th:action="@{/project/member/memberManagement}"
-            method="get"
-          >
+          <form class="role-search" id="memberSearchForm" method="get" th:action="@{/project/member/memberManagement}">
             <input type="hidden" name="prjId" th:value="${prjId}" />
             <div class="role-search__bar">
               <div class="role-search__inline">
                 <label for="memberName">이름</label>
-                <input
-                  type="text"
-                  id="memberName"
-                  name="memberName"
-                  th:value="${memberName}"
-                  placeholder="이름"
-                  autocomplete="off"
-                />
+                <input type="text" id="memberName" name="memberName" th:value="${memberName}" placeholder="이름" autocomplete="off"/>
               </div>
               <div class="role-search__inline">
                 <label for="grpName">소속</label>
-                <input
-                  type="text"
-                  id="grpName"
-                  name="grpName"
-                  th:value="${grpName}"
-                  placeholder="소속 그룹명"
-                  autocomplete="off"
-                />
+                <input type="text" id="grpName" name="grpName" th:value="${grpName}" placeholder="소속 그룹명" autocomplete="off"/>
               </div>
               <div class="role-search__inline role-search__inline--date-range">
                 <label for="prjStartFrom">프로젝트 투입일</label>
-                <input
-                  type="date"
-                  id="prjStartFrom"
-                  name="prjStartFrom"
-                  th:value="${prjStartFrom}"
-                />
+                <input type="date" id="prjStartFrom" name="prjStartFrom" th:value="${prjStartFrom}"/>
                 <span class="role-search__tilde">~</span>
-                <input
-                  type="date"
-                  id="prjStartTo"
-                  name="prjStartTo"
-                  th:value="${prjStartTo}"
-                  aria-label="프로젝트 투입일 종료"
-                />
+                <input type="date" id="prjStartTo" name="prjStartTo" th:value="${prjStartTo}" aria-label="프로젝트 투입일 종료"/>
               </div>
               <div class="role-search__actions">
                 <button type="submit">검색</button>
@@ -272,12 +231,7 @@
             프로젝트 멤버 목록
           </h2>
           <div class="menu-role-page__grid-wrap">
-            <div
-              id="memberGrid"
-              class="menu-role-page__grid-host"
-              role="region"
-              aria-label="프로젝트 멤버 그리드"
-            ></div>
+            <div id="memberGrid" class="menu-role-page__grid-host" role="region" aria-label="프로젝트 멤버 그리드"></div>
           </div>
         </section>
       </main>
@@ -296,13 +250,7 @@
             const pad = (n) => String(n).padStart(2, "0");
             const todayStr = () => {
               const d = new Date();
-              return (
-                d.getFullYear() +
-                "-" +
-                pad(d.getMonth() + 1) +
-                "-" +
-                pad(d.getDate())
-              );
+              return ( d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) );
             };
 
             const compare = (a, b) => {
@@ -376,26 +324,17 @@
               const ev = end.value;
               if (sv && compare(sv, today) > 0) {
                 e.preventDefault();
-                await window.RoleQuestionModal.alert(
-                  "시작일은 오늘 이후로 지정할 수 없습니다.",
-                  "알림",
-                );
+                await window.RoleQuestionModal.alert( "시작일은 오늘 이후로 지정할 수 없습니다.", "알림" );
                 return;
               }
               if (ev && compare(ev, today) > 0) {
                 e.preventDefault();
-                await window.RoleQuestionModal.alert(
-                  "종료일은 오늘 이후로 지정할 수 없습니다.",
-                  "알림",
-                );
+                await window.RoleQuestionModal.alert( "종료일은 오늘 이후로 지정할 수 없습니다.", "알림" );
                 return;
               }
               if (sv && ev && compare(sv, ev) > 0) {
                 e.preventDefault();
-                await window.RoleQuestionModal.alert(
-                  "시작일은 종료일보다 늦을 수 없습니다.",
-                  "알림",
-                );
+                await window.RoleQuestionModal.alert( "시작일은 종료일보다 늦을 수 없습니다.", "알림" );
                 return;
               }
             });
@@ -403,22 +342,11 @@
 
           function formatDate(value) {
             if (value == null || value === "") return "";
-            if (
-              typeof value === "string" &&
-              /^\d{4}-\d{2}-\d{2}$/.test(value)
-            ) {
-              return value;
-            }
+            if ( typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ) return value;
             const d = new Date(value);
             if (isNaN(d.getTime())) return String(value);
             const pad = (n) => String(n).padStart(2, "0");
-            return (
-              d.getFullYear() +
-              "-" +
-              pad(d.getMonth() + 1) +
-              "-" +
-              pad(d.getDate())
-            );
+            return ( d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) );
           }
 
           function buildCsrfHeaders() {
@@ -427,12 +355,7 @@
             var headerMeta = document.querySelector(
               'meta[name="_csrf_header"]',
             );
-            if (
-              tokenMeta &&
-              headerMeta &&
-              tokenMeta.content &&
-              headerMeta.content
-            ) {
+            if ( tokenMeta && headerMeta && tokenMeta.content && headerMeta.content ) {
               headers[headerMeta.content] = tokenMeta.content;
             }
             return headers;
@@ -458,8 +381,7 @@
           let gridData = Array.isArray(projectMemberRows)
             ? projectMemberRows.map(function (r) {
                 return typeof r === "object" && r !== null
-                  ? Object.assign({}, r)
-                  : r;
+                  ? Object.assign({}, r) : r;
               })
             : [];
           let deleteMode = false;
@@ -546,11 +468,9 @@
               const rows = grid ? getCheckedRowsForRemove() : [];
               const n = rows.length;
               if (n === 0) {
-                html +=
-                  '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--cancel-delete" id="memberBtnDeleteCancel">삭제 취소</button>';
+                html += '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--cancel-delete" id="memberBtnDeleteCancel">삭제 취소</button>';
               } else {
-                html +=
-                  '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--remove" id="memberBtnRemove">제거</button>';
+                html += '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--remove" id="memberBtnRemove">제거</button>';
               }
             }
             mount.innerHTML = html;
@@ -594,16 +514,11 @@
             }
             const names = rows.map(function (r) {
               return r.userName != null && r.userName !== ""
-                ? String(r.userName)
-                : "(이름 없음)";
+                ? String(r.userName) : "(이름 없음)";
             });
-            const msg =
-              "선택한 멤버를 프로젝트에서 제거하시겠습니까?\n\n" +
-              names.join("\n");
+            const msg = "선택한 멤버를 프로젝트에서 제거하시겠습니까?\n\n" + names.join("\n");
             var confirmed = await window.RoleQuestionModal.confirm(
-              msg,
-              "멤버 제거",
-            );
+              msg, "멤버 제거" );
             if (!confirmed) {
               return;
             }
@@ -613,18 +528,12 @@
               })
               .filter(Boolean);
             if (!members.length) {
-              await window.RoleQuestionModal.alert(
-                "사용자·그룹 정보를 확인할 수 없습니다.",
-                "알림",
-              );
+              await window.RoleQuestionModal.alert( "사용자·그룹 정보를 확인할 수 없습니다.", "알림" );
               return;
             }
             var pid = Number(prjId);
             if (isNaN(pid)) {
-              await window.RoleQuestionModal.alert(
-                "프로젝트 ID가 올바르지 않습니다.",
-                "알림",
-              );
+              await window.RoleQuestionModal.alert( "프로젝트 ID가 올바르지 않습니다.", "알림" );
               return;
             }
             try {
@@ -648,10 +557,7 @@
                 return;
               }
             } catch (e) {
-              await window.RoleQuestionModal.alert(
-                "제거 중 오류가 발생하였습니다.",
-                "오류",
-              );
+              await window.RoleQuestionModal.alert( "제거 중 오류가 발생하였습니다.", "오류" );
               return;
             }
             const labelPart =
@@ -719,20 +625,8 @@
                         : null;
                     const text = value == null ? "" : value;
                     if (uid == null || gid == null) return text;
-                    const q =
-                      "prjId=" +
-                      encodeURIComponent(prjId) +
-                      "&userId=" +
-                      encodeURIComponent(String(uid)) +
-                      "&grpId=" +
-                      encodeURIComponent(String(gid));
-                    return (
-                      '<a href="/project/member/memberManagementInfo?' +
-                      q +
-                      '">' +
-                      text +
-                      "</a>"
-                    );
+                    const q = "prjId=" + encodeURIComponent(prjId) + "&userId=" + encodeURIComponent(String(uid)) + "&grpId=" + encodeURIComponent(String(gid));
+                    return '<a href="/project/member/memberManagementInfo?' + q + '">' + text + "</a>";
                   },
                 },
                 {
@@ -797,13 +691,7 @@
                   ? row.grpId
                   : null;
               if (uid != null && gid != null) {
-                location.href =
-                  "/project/member/memberManagementInfo?prjId=" +
-                  encodeURIComponent(prjId) +
-                  "&userId=" +
-                  encodeURIComponent(String(uid)) +
-                  "&grpId=" +
-                  encodeURIComponent(String(gid));
+                location.href = "/project/member/memberManagementInfo?prjId=" + encodeURIComponent(prjId) + "&userId=" + encodeURIComponent(String(uid)) + "&grpId=" + encodeURIComponent(String(gid));
               }
             });
 

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.project.history.mapper.HistoryMapper">
+
+  <sql id="historyListWhere">
+    <where>
+      <if test="prjId != null">
+        AND (
+          (H.TABLE_NAME = 'ISSUE' AND EXISTS (
+            SELECT 1 FROM ISSUE I
+            WHERE I.ID = H.CONTAINER_ID AND I.PRJ_ID = #{prjId}
+          ))
+          OR (H.TABLE_NAME = 'PROJECT' AND H.CONTAINER_ID = #{prjId})
+        )
+      </if>
+      <if test="updatedFrom != null and updatedFrom != ''">
+        AND TRUNC(H.UPDATED_ON) &gt;= TO_DATE(#{updatedFrom}, 'YYYY-MM-DD')
+      </if>
+      <if test="updatedTo != null and updatedTo != ''">
+        AND TRUNC(H.UPDATED_ON) &lt;= TO_DATE(#{updatedTo}, 'YYYY-MM-DD')
+      </if>
+      <if test="modifierName != null and modifierName != ''">
+        AND U.NAME LIKE '%' || #{modifierName} || '%'
+      </if>
+      <if test="tableName != null and tableName != ''">
+        AND H.TABLE_NAME = #{tableName}
+      </if>
+      <if test="detail != null and detail != ''">
+        AND H.DETAIL LIKE '%' || #{detail} || '%'
+      </if>
+    </where>
+  </sql>
+
+  <select id="selectHistoryList"
+    parameterType="com.example.demo.project.history.service.HistoryListCriteria"
+    resultType="com.example.demo.project.history.service.HistoryVO">
+    SELECT
+      H.ID AS id,
+      H.TABLE_NAME AS tableName,
+      H.CONTAINER_ID AS containerId,
+      H.MEM_ID AS userId,
+      H.UPDATED_ON AS updatedOn,
+      H.DETAIL AS detail,
+      U.NAME AS modifierName
+    FROM HISTORY H
+    LEFT JOIN USERS U ON U.ID = H.MEM_ID
+    <include refid="historyListWhere"/>
+    ORDER BY H.UPDATED_ON DESC, H.ID DESC
+  </select>
+</mapper>
