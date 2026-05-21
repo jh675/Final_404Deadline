@@ -10,9 +10,9 @@
         AND (
           (H.TABLE_NAME = 'ISSUE' AND EXISTS (
             SELECT 1 FROM ISSUE I
-            WHERE I.ID = H.CONTAINER_ID AND I.PRJ_ID = #{prjId}
+            WHERE I.ID = H.TABLE_ID AND I.PRJ_ID = #{prjId}
           ))
-          OR (H.TABLE_NAME = 'PROJECT' AND H.CONTAINER_ID = #{prjId})
+          OR (H.TABLE_NAME = 'PROJECT' AND H.TABLE_ID = #{prjId})
         )
       </if>
       <if test="updatedFrom != null and updatedFrom != ''">
@@ -39,7 +39,7 @@
     SELECT
       H.ID AS id,
       H.TABLE_NAME AS tableName,
-      H.CONTAINER_ID AS containerId,
+      H.TABLE_ID AS tableId,
       H.MEM_ID AS userId,
       H.UPDATED_ON AS updatedOn,
       H.DETAIL AS detail,
@@ -48,5 +48,13 @@
     LEFT JOIN USERS U ON U.ID = H.MEM_ID
     <include refid="historyListWhere"/>
     ORDER BY H.UPDATED_ON DESC, H.ID DESC
+  </select>
+  <select id="selectHistoryDetailList" resultType="com.example.demo.project.history.service.HistoryDetailVO">
+    SELECT
+      HD.FIELD_NAME AS fieldName,
+      HD.OLD_VALUES AS oldValues,
+      HD.NEW_VALUES AS newValues
+    FROM HISTORY_DETAIL HD
+    WHERE H.ID = #{historyId}
   </select>
 </mapper>

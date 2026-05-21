@@ -68,7 +68,7 @@
       <tbody>
         <!-- 2. data-status 속성을 추가하여 closedDate 여부에 따라 progress 또는 complete 값을 가짐 -->
         <tr th:each="pro : ${projectinfo.list}"
-            th:if="${#authentication.principal.adminNm == '시스템관리자' or pro.bizNo == #authentication.principal.bizNo and pro.prjHide =='N'}"
+            th:if="${#authentication.principal.adminNm == '시스템관리자' or (pro.bizNo == #authentication.principal.bizNo and pro.prjHide =='N')}"
             th:data-status="${pro.closedDate == null ? 'progress' : 'complete'}">
           <td class="row-index"></td>
           <td ><a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a></td>

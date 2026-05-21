@@ -10,7 +10,7 @@ import java.util.List;
 
 /** 히스토리 VO. 
  * <ul>
- *   <li>목록({@code selectHistoryList}): {@link #id}, {@link #tableName}, {@link #containerId}, {@link #userId}, {@link #updatedOn}, {@link #detail}</li>
+ *   <li>목록({@code selectHistoryList}): {@link #id}, {@link #tableName}, {@link #tableId}, {@link #userId}, {@link #updatedOn}, {@link #detail}</li>
  * </ul>
 */
 
@@ -24,9 +24,9 @@ public class HistoryVO {
   private Long id;
   /** 테이블 이름({@code HISTORY.TABLE_NAME}) */
   private String tableName;
-  /** 컨테이너 ID({@code HISTORY.CONTAINER_ID}) */
-  private Long containerId;
-  /** 사용자 ID({@code HISTORY.USER_ID}) */
+  /** 대상 PK — 이슈 ID 또는 프로젝트 ID({@code HISTORY.TABLE_ID}) */
+  private Long tableId;
+  /** 수정자({@code HISTORY.MEM_ID}) */
   private Long userId;
   /** 히스토리 기록 일시({@code HISTORY.UPDATED_ON}) */
   private LocalDateTime updatedOn;

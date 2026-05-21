@@ -4,7 +4,7 @@ import lombok.Data;
 @Data
 public class BoardsVO {
 	private Integer id;
-	private Integer prjId;
+	private Long prjId;
 	private String name;
 	private String description;
 	private Integer topicsCount;

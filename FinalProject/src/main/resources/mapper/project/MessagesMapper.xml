@@ -8,6 +8,7 @@
 			id,
 			board_id AS boardId,
 			Fieldparent_id AS fieldparentId,
+			title,
 			content,
 			user_id AS userId,
 			replies_count AS repliesCount,
@@ -20,18 +21,24 @@
 	</select>
 
 	<insert id="insert">
+	<selectKey keyProperty="id" resultType="int" order="BEFORE">
+        SELECT msg_seq.nextval FROM DUAL
+    </selectKey>
 		INSERT INTO messages (
 			id, 
 			board_id, 
 			Fieldparent_id, 
+			title,
 			content, 
 			user_id, 
 			replies_count, 
 			last_reply_id, 
 			created_on
 		) VALUES (
-			msg_seq.nextval, #{boardId}, 
+			#{id}, 
+			#{boardId}, 
 			#{fieldparentId}, 
+			#{title},
 			#{content}, 
 			#{userId},
 			0,
@@ -44,6 +51,7 @@
 			id,
 			board_id AS boardId,
 			Fieldparent_id AS fieldparentId,
+			title,
 			content,
 			user_id AS userId,
 			replies_count AS repliesCount,
@@ -58,6 +66,7 @@
 		UPDATE messages
 		SET 
 			Fieldparent_id = #{fieldparentId}, 
+			title = #{title},
 			content = #{content}, 
 			user_id = #{userId},
 			updated_on = SYSDATE WHERE id = #{id}

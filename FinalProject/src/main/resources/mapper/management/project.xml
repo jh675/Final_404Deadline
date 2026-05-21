@@ -12,16 +12,39 @@
 
 <select id="searchUsersByBizNo" resultType="com.example.demo.login.service.UserVO">
     SELECT 
-        id          AS "id", 
+        id     AS "id", 
         name   AS "name"  <!-- VO 필드명이 name이면 반드시 "name"으로 별칭 -->
     FROM users 
     WHERE biz_no = #{bizNo}
       AND name LIKE '%' || #{term} || '%'
 </select>
  
+ <select id="userProjectList" resultType="ProjectVO">
+ 	SELECT 
+	    p.id AS project_id,
+	    p.prj_name,
+        p.PRJ_IDENTIFIER,
+        p.prj_desc,
+        p.created_on,
+        p.closed_date,
+	    g.id 		AS group_id,
+	    g.name 		AS group_name,
+	    m.id 		AS member_id,
+	    u.id 		AS user_id,
+	    u.name 		AS user_name,
+    	p.biz_no
+	FROM project p, grp g, member m, users u
+ 	WHERE p.id = g.prj_id       
+  		AND g.id = m.grp_id       
+  		AND u.id = m.user_id      
+  		AND p.biz_no = u.biz_no
+  		AND u.id = #{userId}
+ 
+ </select>
+ 
  
 <insert id="projectInsert" parameterType="ProjectVO">
-    <selectKey keyProperty="id" resultType="int" order="BEFORE">
+    <selectKey keyProperty="id" resultType="Long" order="BEFORE">
         select pj_seq.nextval from dual
     </selectKey>
     
@@ -66,7 +89,7 @@
 <!-- 별도로 분리한 모듈 삽입 쿼리 -->
 <insert id="moduleInsert" parameterType="com.example.demo.management.service.ModulesVO">
     INSERT INTO enabled_modules (ena_id, prj_id, ena_name_cd)
-    VALUES (en_mod_seq.nextval, #{prjId}, #{enaNameCd})
+    VALUES (en_mod_seq.nextval, #{prjId}, (SELECT s_code FROM sub_code WHERE note = #{enaNameCd}))
 </insert>
 
 <insert id="groupInsert" parameterType="com.example.demo.project.group.service.GroupDetailVO" useGeneratedKeys="true"

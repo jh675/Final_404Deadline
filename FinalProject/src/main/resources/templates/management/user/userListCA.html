@@ -85,6 +85,7 @@
 
 		<script th:inline="javascript">
 			const userData = /*[[${userList}]]*/[];
+		    const currentCaBizNo = /*[[${#authentication.principal.bizNo}]]*/ '';
 		</script>
 
 		<!-- pagination JS가 grid JS보다 먼저 -->

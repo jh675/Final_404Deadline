@@ -8,6 +8,7 @@ public class MessagesVO {
 	private	Integer id;
 	private Integer boardId;
 	private Integer fieldparentId;
+	private String title;
 	private String content;
 	private Integer userId;
 	private Integer repliesCount;

@@ -6,4 +6,5 @@ import com.example.demo.company.service.CompanyVO;
 
 public interface LoginService {
 	List<CompanyVO> searchActiveCompanies(String keyword);
+	void updateMcpCd(UserVO vo);
 }
