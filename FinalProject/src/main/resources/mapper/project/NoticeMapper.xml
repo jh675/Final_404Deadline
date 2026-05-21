@@ -8,11 +8,14 @@
  select *
  FROM notice
  where prj_id = #{prjId}
- ORDER BY is_fixed DESC, id ASC
+ ORDER BY is_fixed DESC, id desc
 
 </select>
 
 <insert id="insert">
+<selectKey keyProperty="id" resultType="int" order="BEFORE">
+        SELECT news_seq.nextval FROM DUAL
+    </selectKey>
 insert into notice(
 		id, 
 		prj_id, 
@@ -22,7 +25,7 @@ insert into notice(
 		is_fixed
 		)
 values(
-		news_seq.nextval, 
+		#{id}, 
 		#{prjId}, 
 		#{memId}, 
 		#{title}, 
