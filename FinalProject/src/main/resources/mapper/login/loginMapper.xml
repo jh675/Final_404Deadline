@@ -30,7 +30,9 @@
 
 	<update id="updatePassword">
 		UPDATE users
-		SET password = #{password}
+		SET password = #{password},
+			pw_updated_on = SYSDATE,
+			mcp_cd = '02ACTIVE'
 		WHERE biz_no = #{bizNo}
 		AND login = #{login}
 	</update>
@@ -44,4 +46,10 @@
 	    AND    COMPANY_NAME LIKE '%' || #{keyword} || '%'
 	    ORDER BY COMPANY_NAME ASC
 	</select>
+	
+	<update id="updateMcpCd">
+	    UPDATE users
+	    SET mcp_cd = #{mcpCd}
+	    WHERE id = #{id}
+	</update>
 </mapper>

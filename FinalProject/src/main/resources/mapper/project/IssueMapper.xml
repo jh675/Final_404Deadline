@@ -172,7 +172,8 @@
 			MEM_ID,
 			LFT,
 			RGT,
-			DONE_RATIO
+			DONE_RATIO,
+			writer
 			<if test="isAttachCd != null">
 			,
 			IS_ATTACH_CD
@@ -195,7 +196,8 @@
 			#{memId},
 			#{lft},
 			#{rgt},
-			#{doneRatio}
+			#{doneRatio},
+			#{writer}
 			<if test="isAttachCd != null">
 			,#{isAttachCd}
 			</if>
@@ -226,7 +228,8 @@
 			<if test="rgt != null">RGT = #{rgt},</if>
 			<if test="doneRatio != null">DONE_RATIO = #{doneRatio},</if>
 			<if test="isAttachCd != null">IS_ATTACH_CD = #{isAttachCd},</if>
-			UPDATED_ON = SYSDATE
+			UPDATED_ON = SYSDATE,
+			last_updater = #{lastUpdater}
 		</set>
 		WHERE ID = #{id}
 	</update>
