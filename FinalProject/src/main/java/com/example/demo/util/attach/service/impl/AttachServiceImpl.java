@@ -177,17 +177,6 @@ public class AttachServiceImpl implements AttachService {
 		return false;
 	}
 
-	@Override
-	public boolean hasAttachmentFiles(MultipartFile[] attachments) {
-		if (attachments == null) {
-			return false;
-		}
-		for (MultipartFile f : attachments) {
-			if (f != null && !f.isEmpty()) {
-				return true;
-			}
-		}
-		return false;
-	}
+
 
 }
