@@ -16,6 +16,7 @@ import com.example.demo.project.wiki.service.WikiVO;
 @Mapper
 public interface ProjectMapper {
 	List<ProjectVO> listProject(ProjectVO vo );
+	List<ProjectVO> userProjectList(ProjectVO vo);
 	int projectInsert(ProjectVO vo);
 	List<UserVO> searchUsersByBizNo(@Param("bizNo") String bizNo, @Param("term") String term);
 	void moduleInsert(ModulesVO mVo);
@@ -31,4 +32,7 @@ public interface ProjectMapper {
 	ProjectVO gomain(ProjectVO vo);
 	ProjectVO getprojectid(Long id);
 	List<ModulesVO> listModules(Long projectId);
+	List<GroupDetailVO> listGroup(GroupDetailVO gvo);
+	List<MemberDetailVO> listMember(MemberDetailVO mvo);
+	
 } 

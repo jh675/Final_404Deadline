@@ -52,7 +52,7 @@
                 </li>
 
                 <!-- DB에서 가져온 활성화 모듈을 반복하면서 메뉴 그리기 -->
-                  <li class="nav-item" th:each="mod1 : ${moduleList}">
+                  <li class="nav-item" th:each="mod1 : ${session.moduleList}">
 
                     <!-- ENA_NAME_CD가 'NOTICE'면 공지사항 탭 생성 -->
                     <a th:if="${mod1.enaNameCd == '01MODULE'}" 

@@ -10,6 +10,7 @@ import com.example.demo.project.wiki.service.WikiVO;
 
 public interface ProjectService {
 	List<ProjectVO> listProject(ProjectVO vo);
+	List<ProjectVO> userProjectList(ProjectVO vo);
 	int projectInsert(ProjectVO vo );
 	List<UserVO> searchUsersByBizNo(String bizNo, String term);
 	void insertProjectWithModules(ProjectVO vo, List<String> moduleList,GroupDetailVO gVo,MemberDetailVO mVo,WikiVO wVo, RoleVO rVo);
@@ -18,4 +19,7 @@ public interface ProjectService {
 	boolean hasChildProject(Long id);
 	ProjectVO getprojectid(Long id);
 	List<ModulesVO> listModules(Long projectId);
+	List<GroupDetailVO> listGroup(GroupDetailVO gvo);
+	List<MemberDetailVO> listMember(MemberDetailVO mvo);
+	
 }
