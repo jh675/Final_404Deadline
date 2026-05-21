@@ -17,6 +17,7 @@ public class CalenderVO {
 	private String stateCd;
 	private String colorTagCd;
 	private String keyword;
+	private String calType;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date calStart;
