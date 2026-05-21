@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.example.demo.management.userManage.mapper.CAUserManageMapper">
+
+	<select id="selectAll">
+		SELECT 	 ID
+				,BIZ_NO
+				,get_bizno_to_compname(BIZ_NO) "COMP_NM"
+				,LOGIN
+				,NAME
+				,TEL
+				,EMAIL
+				,HIRE_DATE
+				,GENDER_CD
+				,get_sub_code_name(GENDER_CD)"GENDER_NM"
+				,ADMIN_CD
+				,get_sub_code_name(ADMIN_CD) as "ADMIN_NM"
+				,STATUS_CD
+				,get_sub_code_name(STATUS_CD) "STATUS_NM"
+				,CREATED_ON
+				,PW_UPDATED_ON
+				,PRJ_MANAGER_CD
+				,get_sub_code_name(PRJ_MANAGER_CD) "PRJ_MANAGER_NM"
+				,MCP_CD
+				,get_sub_code_name(MCP_CD) "MCP_NM"
+		FROM 	 users
+		<where>
+		    BIZ_NO = #{bizNo}
+		    
+		    <if test="prjManagerCd != null and prjManagerCd != ''">
+		        AND PRJ_MANAGER_CD = #{prjManagerCd}
+		    </if>
+		    
+		    <if test="keyword != null and keyword != ''">
+		        <if test="searchType == 'login'">
+		            AND LOGIN LIKE '%' || #{keyword} || '%'
+		        </if>
+		        <if test="searchType == 'name'">
+		            AND NAME LIKE '%' || #{keyword} || '%'
+		        </if>
+		        <if test="searchType == 'email'">
+		            AND EMAIL LIKE '%' || #{keyword} || '%'
+		        </if>
+		    </if>
+		</where>
+		ORDER BY ID DESC
+	</select>
+	
+	<insert id="insertUser" statementType="CALLABLE">
+	    { CALL PROC_USER_INSERT(
+	        #{bizNo},
+	        #{login},
+	        #{password},
+	        #{name},
+	        #{tel},
+	        #{email},
+	        #{adminCd},
+	        #{statusCd},
+	        #{prjManagerCd},
+			#{hireDate, jdbcType=DATE},
+        	#{genderCd},
+	        #{result, mode=OUT, jdbcType=VARCHAR},
+	        #{id, mode=OUT, jdbcType=NUMERIC, javaType=java.lang.Long}
+	    ) }
+	</insert>
+
+	<update id="updateUser">
+	    UPDATE USERS
+	    SET
+	        BIZ_NO = #{bizNo},
+	        NAME = #{name},
+	        TEL = #{tel},
+	        EMAIL = #{email},
+	        ADMIN_CD = #{adminCd},
+	        STATUS_CD = #{statusCd},
+	        PRJ_MANAGER_CD = #{prjManagerCd}
+	    WHERE ID = #{id}
+	</update>
+	
+	</mapper>
