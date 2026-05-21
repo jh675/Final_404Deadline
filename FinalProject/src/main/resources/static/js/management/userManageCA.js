@@ -5,7 +5,7 @@ let isProfileDeleted = false;
 // (선택 사항) 만약 HTML이나 레이아웃에서 현재 접속한 CA의 기업번호를 넘겨준다면 이 변수에 담아 사용합니다.
 // 예: const currentCaBizNo = "[[${myBizNo}]]"; 
 // 백엔드가 아직 없으므로 일단 빈 값으로 처리하거나, 로그인한 유저 데이터를 활용할 수 있습니다.
-const currentCaBizNo = "";
+const currentCaBizNo = "[[${bizNo}]]";
 
 document.addEventListener('DOMContentLoaded', async function() {
     // Grid 생성
@@ -18,13 +18,60 @@ document.addEventListener('DOMContentLoaded', async function() {
         rowHeight: 40,
         minBodyHeight: 200,
         columns: [
-            { header: 'No', name: 'id', width: 80, align: 'center', sortable: true },
-            { header: '아이디', name: 'login', width: 150, align: 'center' },
-            { header: '역할', name: 'prjManagerNm', width: 120, align: 'center', sortable: true }, // CD대신 NM으로 변경 (글자 표시)
-            { header: '이름', name: 'name', width: 120, align: 'center' },
-            { header: '전화번호', name: 'tel', width: 150, align: 'center' }, // 순서 변경
-            { header: '이메일', width: 260, name: 'email', align: 'center' },
-            { header: '활성여부', name: 'statusNm', width: 120, align: 'center', sortable: true },
+            {
+                header: 'No',
+                name: 'id',
+                width: 80,
+                align: 'center',
+                sortable: true
+            },
+            { 
+				header: '아이디', 
+				name: 'login', 
+				width: 150, 
+				align: 'center' 
+			},
+            { 
+				header: '역할',
+				name: 'prjManagerNm', 
+				width: 120, 
+				align: 'center', 
+				sortable: true,
+				
+				formatter: ({ value }) => {
+				    const roleMap = {
+				        '활성': '프로젝트매니저',
+				        '비활성': '사원'
+				    };
+
+				    return roleMap[value] || value;
+				}
+			},
+            { 
+				header: '이름', 
+				name: 'name', 
+				width: 120, 
+				align: 'center' 
+			},
+            { 
+				header: '전화번호', 
+				name: 'tel', 
+				width: 150, 
+				align: 'center' 
+			}, 
+            { 
+				header: '이메일', 
+				width: 260, 
+				name: 'email', 
+				align: 'center' 
+			},
+            { 
+				header: '활성여부', 
+				name: 'statusNm', 
+				width: 120, 
+				align: 'center', 
+				sortable: true 
+			},
             {
                 header: '수정',
                 name: 'edit',

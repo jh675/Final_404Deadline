@@ -44,7 +44,7 @@
 		        </if>
 		    </if>
 		</where>
-		ORDER BY ID DESC
+		ORDER BY ID
 	</select>
 	
 	<insert id="insertUser" statementType="CALLABLE">
