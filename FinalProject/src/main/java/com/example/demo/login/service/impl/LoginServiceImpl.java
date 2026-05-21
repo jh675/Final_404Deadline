@@ -90,4 +90,9 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 	public List<CompanyVO> searchActiveCompanies(String keyword) {
 		return loginMapper.searchActiveCompanies(keyword);
 	}
+	
+	@Override
+	public void updateMcpCd(UserVO vo) {
+	    loginMapper.updateMcpCd(vo);
+	}
 }

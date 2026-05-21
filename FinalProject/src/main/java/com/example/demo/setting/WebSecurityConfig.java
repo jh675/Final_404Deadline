@@ -9,19 +9,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 class WebSecurityConfig {
 
 	private final CustomAuthenticationDetailsSource detailsSource;
 	private final UserDetailsService userDetailsService;
-
-	public WebSecurityConfig(CustomAuthenticationDetailsSource detailsSource, UserDetailsService userDetailsService) {
-		this.detailsSource = detailsSource;
-		this.userDetailsService = userDetailsService;
-	}
+	private final CustomLoginSuccessHandler customLoginSuccessHandler;
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,7 +35,7 @@ class WebSecurityConfig {
 			.formLogin((form) -> form
 				.loginPage("/login")
 				.authenticationDetailsSource(detailsSource)
-				.successHandler(successHandler())
+				.successHandler(customLoginSuccessHandler)
 				.permitAll()
 			)
 			.logout(LogoutConfigurer::permitAll)
@@ -60,9 +58,5 @@ class WebSecurityConfig {
 		return new BCryptPasswordEncoder(10);
 	}
 
-	@Bean
-	AuthenticationSuccessHandler successHandler() {
-		return new CustomLoginSuccessHandler();
-	}
 
 }
