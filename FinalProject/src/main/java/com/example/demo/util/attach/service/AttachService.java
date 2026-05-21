@@ -21,5 +21,5 @@ public interface AttachService {
     
     void removeAttach(AttachVO attachVO) throws IOException;
     
-    boolean hasAttachmentFiles(MultipartFile[] attachments);
+    public boolean hasAttachmentFiles(MultipartFile[] attachments);
 }

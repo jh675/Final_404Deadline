@@ -27,6 +27,8 @@ public interface ProjectMapper {
 	void grproleInsert(RoleVO rVo);
 	int projectHide(ProjectVO vo);
 	int projectDelete(ProjectVO vo);
-	int countChildProject(int id);
+	int countChildProject(Long id);
 	ProjectVO gomain(ProjectVO vo);
+	ProjectVO getprojectid(Long id);
+	List<ModulesVO> listModules(Long projectId);
 } 

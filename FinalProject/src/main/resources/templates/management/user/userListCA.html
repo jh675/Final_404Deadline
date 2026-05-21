@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/defaultLayout}">
+<head>
+<title>회원관리(sysadmin)</title>
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">
+</head>
+<body>
+	<div layout:fragment="content">
+	<div id="wrapper">
+		<h3 class="mb-3">회원 목록</h3>
+		<div>
+			<form id="searchForm"
+			      th:action="@{/cadmin/userList}"
+			      method="get"
+			      th:object="${filter01}"
+			      class="d-flex align-items-end gap-3 mb-3 flex-wrap">
+
+			    <!-- 권한 -->
+			    <div>
+			        <label for="categoryCd" class="form-label">계정 권한</label>
+			
+			        <select id="categoryCd"
+			                th:field="*{prjManagerCd}"
+			                class="form-select">
+			            <option value="">전체</option>
+			            <option value="01ACTIVE">프로젝트 매니저</option>
+			            <option value="02ACTIVE">팀원</option>
+			        </select>
+			    </div>
+			
+			    <!-- 검색 종류 -->
+			    <div>
+			        <label for="searchType" class="form-label">검색 조건</label>
+			        <select id="searchType"
+			                th:field="*{searchType}"
+			                class="form-select">
+			            <option value="">선택</option>
+			            <option value="login">아이디</option>
+			            <option value="name">이름</option>
+			            <option value="email">이메일</option>
+			        </select>
+			    </div>
+			    <!-- 검색어 -->
+			    <div>
+			        <label for="keyword" class="form-label">검색어</label>
+			        <input type="text"
+			               id="keyword"
+			               th:field="*{keyword}"
+			               class="form-control"
+			               placeholder="검색어 입력">
+			    </div>
+				<div id="searchWarning"
+				     class="text-danger small mt-1 d-none">
+					검색 조건을 선택해주세요.
+				</div>
+			    <!-- 버튼 -->
+			    <div class="d-flex gap-2">
+				    <button type="submit"
+				            class="btn btn-primary">
+				        검색
+				    </button>
+				    <a th:href="@{/admin/userList}"
+				       class="btn btn-outline-secondary">
+				        초기화
+				    </a>
+				
+				</div>
+			</form>
+		</div>
+		
+		<div id="grid"></div>
+		<div class="d-flex justify-content-end mb-3">
+			<button type="button" class="btn btn-primary" onclick="openInsertModal()">회원 등록</button>
+		</div>
+
+		</div>
+		<div th:replace="~{management/modal/userInsertCA :: userInsert}"></div>
+
+		<script th:inline="javascript">
+			const userData = /*[[${userList}]]*/[];
+		</script>
+
+		<!-- pagination JS가 grid JS보다 먼저 -->
+		<script
+			src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+		<script th:src="@{/js/management/userManageCA.js}"></script>
+	</div>
+</body>
+</html>

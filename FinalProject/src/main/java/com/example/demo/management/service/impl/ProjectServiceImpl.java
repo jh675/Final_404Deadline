@@ -103,10 +103,18 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 	
 	@Override
-    public boolean hasChildProject(int id) {
+    public boolean hasChildProject(Long id) {
 		
         return projectMapper.countChildProject(id) > 0;
     }
-
 	
+	@Override
+	public ProjectVO getprojectid(Long id) {
+		return projectMapper.getprojectid(id);
+	}
+	
+	@Override
+	public List<ModulesVO> listModules(Long projectId){
+		return projectMapper.listModules(projectId);
+	}
 }

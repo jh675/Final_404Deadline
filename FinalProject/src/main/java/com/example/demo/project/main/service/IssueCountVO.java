@@ -12,5 +12,5 @@ public class IssueCountVO {
     private int wEndCount;
     private int iGoCount;
     private int iEndCount;
-    private int prjId;
+    private Long prjId;
 }

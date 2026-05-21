@@ -32,6 +32,8 @@
                             TYPE_CD, 
                             SHARING_CD, 
                             STATE_CD, 
+                            COLOR_TAG_CD,
+                            CAL_TYPE,
                             CAL_START, 
                             CAL_END)
      values (
@@ -42,6 +44,8 @@
             #{typeCd},
             #{sharingCd},
             '01STATE',
+            #{colorTagCd},
+            #{calType},
             #{calStart},
             #{calEnd})
    </insert>
@@ -49,11 +53,12 @@
    <update id="update">
 	update calender
 	set  PLACE = #{place},
-        CAL_TEXT = #{calText},
-        SHARING_CD = #{sharingCd},
-        TYPE_CD = #{typeCd},
-       CAL_START = #{calStart},
-        CAL_END = #{calEnd}
+         CAL_TEXT = #{calText},
+         SHARING_CD = #{sharingCd},
+         TYPE_CD = #{typeCd},
+         CAL_TYPE = #{calType},
+         CAL_START = #{calStart},
+         CAL_END = #{calEnd}
 	where id = #{id}
    </update>
    
