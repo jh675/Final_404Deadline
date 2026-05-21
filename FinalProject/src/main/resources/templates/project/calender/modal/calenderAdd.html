@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <div th:fragment="calenderAddModal">
 
+		<!-- 일정 변경 모달창 입력부분 1 -->
 	<div class="modal fade" id="updateModalOverlay" tabindex="-1"
 		aria-labelledby="updateModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -25,7 +26,8 @@
 								type="date" id="upd_endDate" class="form-control">
 						</div>
 					</div>
-
+					
+						<!-- 일정 변경 시작시간 선택 부분 -->
 					<div class="row mb-3">
 						<div class="col">
 							<label for="upd_calStart" class="form-label">시작 시간</label> <select
@@ -68,7 +70,8 @@
 							</select>
 						</div>
 					</div>
-
+					
+						<!-- 일정 변경 모달창 입력부분 2 -->
 					<div class="mb-3">
 						<label for="upd_place" class="form-label">일정 장소</label> <input
 							type="text" class="form-control" id="upd_place"
@@ -86,8 +89,21 @@
 							class="form-select" id="upd_typeCd">
 							<option value="">선택</option>
 							<option value="01CALTYPE">개인일정</option>
-							<option value="O2CALTYPE">그룹일정</option>
+							<option value="02CALTYPE">그룹일정</option>
 							<option value="03CALTYPE">회사일정</option>
+						</select>
+					</div>
+
+					<!-- 일정 유형 드롭박스 부분 -->
+					<div class="mb-3">
+						<label for="upd_calType" class="form-label">일정 유형</label> <select
+							class="form-select" id="upd_calType">
+							<option value="">선택</option>
+							<option value="MEETING">회의</option>
+							<option value="EVENT">행사</option>
+							<option value="VACATION">휴가/휴일</option>
+							<option value="EDUCATION">교육</option>
+							<option value="ETC">기타</option>
 						</select>
 					</div>
 
@@ -101,7 +117,7 @@
 							</div>
 							<div class="form-check">
 								<input class="form-check-input" type="radio" name="sharingCd"
-									id="upd_sharingAll" value="O2CALSHARE"> <label
+									id="upd_sharingAll" value="02CALSHARE"> <label
 									class="form-check-label" for="upd_sharingAll">전체 공유</label>
 							</div>
 						</div>
@@ -118,6 +134,8 @@
 			</div>
 		</div>
 	</div>
+	
+	  <!-- 일정 변경 안내매세지 -->
 	<div class="modal fade" id="alertModalOverlay" tabindex="-1"
 		aria-labelledby="alertModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
@@ -139,6 +157,8 @@
 			</div>
 		</div>
 	</div>
+
+		<!-- 일정 삭제 안내매세지 -->
 	<div class="modal fade" id="deleteConfirmOverlay" tabindex="-1"
 		aria-labelledby="deleteConfirmLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
@@ -160,6 +180,8 @@
 			</div>
 		</div>
 	</div>
+	  
+	  <!-- 일정 검색결과 모달창 -->
 	<div class="modal fade" id="resultModalOverlay" tabindex="-1"
 		aria-hidden="true">
 		<div class="modal-dialog">
