@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.project.boards.mapper.BoardsMapper;
 import com.example.demo.project.messages.mapper.MessagesMapper;
 import com.example.demo.project.messages.service.MessagesService;
 import com.example.demo.project.messages.service.MessagesVO;
@@ -14,6 +15,9 @@ public class MessagesServiceImpl implements MessagesService {
 
 	@Autowired
 	private MessagesMapper messagesMapper;
+	
+	@Autowired
+	private BoardsMapper boardsMapper;
 
 	@Override
 	public List<MessagesVO> selectAll(MessagesVO messages) {
@@ -37,6 +41,11 @@ public class MessagesServiceImpl implements MessagesService {
 
 	@Override
 	public int insert(MessagesVO messages) {
+		
+		//토픽수 증가
+		boardsMapper.updateTopics(messages.getBoardId());
+		
+		//메세지 등록
 		return messagesMapper.insert(messages);
 	}
 }

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.project.boards.service.BoardsService;
 import com.example.demo.project.boards.service.BoardsVO;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class BoardsController {
 	
@@ -32,8 +34,9 @@ public class BoardsController {
     
 	// 목록 페이지
 	@GetMapping("/boards/list")
-	public String boardsList(Model model, BoardsVO boards) {
-		boards.setPrjId(4);
+	public String boardsList(Model model, BoardsVO boards, HttpSession session) {
+		Long projectid = (Long) session.getAttribute("currentProjectId");
+		boards.setPrjId(projectid);
 		model.addAttribute("list", boardsService.selectAll(boards));
 		return "project/boards/boardsList";
 	}

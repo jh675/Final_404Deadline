@@ -13,5 +13,6 @@ public interface BoardsMapper {
 	BoardsVO selectOne(int id);
 	int delete(int id);
 	int update(BoardsVO boards);
+	int updateTopics(int id);
 	int insert(BoardsVO boards);
 }
