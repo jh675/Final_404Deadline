@@ -20,4 +20,6 @@ public interface AttachService {
     AttachVO selectAttach(Long id);
     
     void removeAttach(AttachVO attachVO) throws IOException;
+    
+    public boolean hasAttachmentFiles(MultipartFile[] attachments);
 }
