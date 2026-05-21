@@ -2,11 +2,6 @@
 let pendingProfileFile = null;
 let isProfileDeleted = false;
 
-// (선택 사항) 만약 HTML이나 레이아웃에서 현재 접속한 CA의 기업번호를 넘겨준다면 이 변수에 담아 사용합니다.
-// 예: const currentCaBizNo = "[[${myBizNo}]]"; 
-// 백엔드가 아직 없으므로 일단 빈 값으로 처리하거나, 로그인한 유저 데이터를 활용할 수 있습니다.
-const currentCaBizNo = "[[${bizNo}]]";
-
 document.addEventListener('DOMContentLoaded', async function() {
     // Grid 생성
     const grid = new tui.Grid({
@@ -30,6 +25,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 				name: 'login', 
 				width: 150, 
 				align: 'center' 
+			},
+			{ 
+				header: '계정권한',
+				name: 'adminNm', 
+				width: 120, 
+				align: 'center', 
+				sortable: true,
 			},
             { 
 				header: '역할',
@@ -96,7 +98,45 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('saveBtn').addEventListener('click', async function() {
         const mode = this.dataset.mode;
 
-        // 🚨 adminCd(권한)와 bizNo(기업번호)는 백엔드에서 강제로 세팅하므로 제외합니다.
+		// 이전 에러 상태 초기화 (아이디 중복 메시지도 기본 메시지로 원상복구)
+        const inputs = ['login', 'name', 'hireDate'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('is-invalid');
+        });
+        const loginError = document.getElementById('loginError');
+        if (loginError) loginError.textContent = '아이디를 입력해주세요.';
+
+        // 필수 항목 유효성 검사 (빈칸 체크)
+        let isValid = true;
+		
+        // 필수 항목 유효성 검사 (빈칸 체크)
+        const loginInput = document.getElementById('login');
+        const nameInput = document.getElementById('name');
+        const hireDateInput = document.getElementById('hireDate');
+
+        // 아이디 검사
+        if (!loginInput.value.trim()) {
+			loginInput.classList.add('is-invalid');
+			isValid = false;
+        }
+
+        // 이름 검사
+        if (!nameInput.value.trim()) {
+			nameInput.classList.add('is-invalid');
+            isValid = false;
+        }
+
+        // 고용일자 검사
+        if (!hireDateInput.value) {
+			hireDateInput.classList.add('is-invalid');
+            isValid = false;
+        }
+		
+		// 하나라도 비어있다면 폼 제출 중단
+        if (!isValid) return;
+		
+        // adminCd(권한)와 bizNo(기업번호)는 백엔드에서 강제로 세팅하므로 제외
         const body = {
             id: document.getElementById('userId').value,
             login: document.getElementById('login').value,
@@ -106,7 +146,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             statusCd: document.querySelector('input[name="statusCd"]:checked').value,
             prjManagerCd: document.querySelector('input[name="prjManagerCd"]:checked').value,
             hireDate: document.getElementById('hireDate').value,
-            genderCd: document.querySelector('input[name="genderCd"]:checked').value
+            genderCd: document.querySelector('input[name="genderCd"]:checked').value,
+			mcpCd: document.querySelector('input[name="mcpCd"]:checked').value
         };
 
         const url = mode === 'insert' ? '/cadmin/userInsert' : '/cadmin/userUpdate';
@@ -119,17 +160,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
 
         const result = await response.json();
+		
         let isSuccess = false;
         let finalUserId = document.getElementById('userId').value;
 
-        if (mode === 'insert') {
-            if (result && result.id) {
-                isSuccess = true;
-                finalUserId = result.id;
-            }
-        } else {
-            if (result.result === 'SUCCESS') isSuccess = true;
-        }
+		if (mode === 'insert') {
+		    
+		    if (result.result === 'DUPLICATE') {
+				loginInput.classList.add('is-invalid');
+                if (loginError) loginError.textContent = '해당 기업에 이미 사용 중인 아이디입니다.';
+                loginInput.focus();
+		        return; 
+		    }
+		    
+			if (result.result === 'SUCCESS' && result.id) { 
+		    	isSuccess = true;
+		        finalUserId = result.id; 
+			}
+			
+		} else { // mode === 'update' 인 경우
+		    if (result.result === 'SUCCESS') {
+		        isSuccess = true;
+			}
+		}
 
         if (isSuccess) {
             try {
@@ -153,6 +206,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
+	// 입력창에 값을 입력하면 빨간 경고 테두리와 메시지를 지워줌
+    ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+            });
+            el.addEventListener('change', function() {
+                this.classList.remove('is-invalid');
+            });
+        }
+    });
 }); // DOMContentLoaded 닫기
 
 // 프로필 이미지 로드
@@ -235,6 +300,12 @@ window.openInsertModal = function() {
     isProfileDeleted = false;
     resetProfileImageUI();
 
+	// 모든 에러 상태(빨간 테두리) 지우기
+    ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+    });
+	
     document.getElementById('modalTitle').textContent = '회원 정보 등록';
     document.getElementById('userForm').reset();
     document.getElementById('userId').value = '';
@@ -245,6 +316,7 @@ window.openInsertModal = function() {
     document.getElementById('login').readOnly = false;
     document.getElementById('saveBtn').dataset.mode = 'insert';
     document.getElementById('saveBtn').textContent = '등록';
+	document.getElementById('mcpActive').checked = true;
 
     const modal = new bootstrap.Modal(document.getElementById('userInsert'));
     modal.show();
@@ -262,6 +334,12 @@ window.openUpdateModal = function(id) {
     isProfileDeleted = false;
     resetProfileImageUI();
 
+	// 모든 에러 상태(빨간 테두리) 지우기
+    ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+    });
+	
     document.getElementById('modalTitle').textContent = '회원 정보 수정';
     document.getElementById('userId').value = row.id ?? '';
     document.getElementById('login').value = row.login ?? '';
@@ -288,6 +366,12 @@ window.openUpdateModal = function(id) {
     } else {
         document.getElementById('statusActive').checked = true;
     }
+	
+	if (row.mcpCd === '02ACTIVE') {
+	    document.getElementById('mcpInactive').checked = true;
+	} else {
+	    document.getElementById('mcpActive').checked = true;
+	}
 
     document.getElementById('login').readOnly = true;
     document.getElementById('saveBtn').dataset.mode = 'update';

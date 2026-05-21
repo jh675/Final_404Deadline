@@ -19,6 +19,7 @@
 										<label class="col-sm-3 col-form-label"> 아이디 </label>
 										<div class="col-sm-9">
 											<input type="text" id="login" class="form-control">
+											<div class="invalid-feedback" id="loginError"></div>
 										</div>
 									</div>
 
@@ -33,6 +34,7 @@
 										<label class="col-sm-3 col-form-label"> 이름 </label>
 										<div class="col-sm-9">
 											<input type="text" id="name" class="form-control">
+											<div class="invalid-feedback">이름을 입력해주세요.</div>
 										</div>
 									</div>
 
@@ -54,6 +56,7 @@
 									    <label class="col-sm-3 col-form-label"> 고용일자 </label>
 									    <div class="col-sm-9">
 									        <input type="date" id="hireDate" class="form-control">
+									        <div class="invalid-feedback">고용일자를 선택해주세요.</div>
 									    </div>
 									</div>
 									
@@ -103,6 +106,28 @@
 												</div>
 											</div>
 										</div>
+									</div>
+									
+									<div class="row mb-3 align-items-center">
+									    <label class="col-sm-3 col-form-label"> 비밀번호 초기화 </label>
+									    <div class="col-sm-9">
+									        <div class="d-flex gap-4">
+									            <div class="form-check">
+									                <input class="form-check-input" type="radio"
+									                    name="mcpCd" id="mcpActive" value="01ACTIVE" checked>
+									                <label class="form-check-label" for="mcpActive">
+									                    필요
+									                </label>
+									            </div>
+									            <div class="form-check">
+									                <input class="form-check-input" type="radio"
+									                    name="mcpCd" id="mcpInactive" value="02ACTIVE">
+									                <label class="form-check-label" for="mcpInactive">
+									                    불필요
+									                </label>
+									            </div>
+									        </div>
+									    </div>
 									</div>
 								</div>
 
