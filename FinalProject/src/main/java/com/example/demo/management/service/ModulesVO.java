@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class ModulesVO {
 	private Integer enaId;
-	private Integer prjId;
+	private Long prjId;
 	private String enaNameCd;
+	private String enaNameNm;
 }

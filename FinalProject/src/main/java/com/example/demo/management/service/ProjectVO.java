@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 public class ProjectVO {
-	private Integer id;
+	private Long id;
 	private String bizNo;
 	private Integer prjParId;
 	private Integer prjRootId;
