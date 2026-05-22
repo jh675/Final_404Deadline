@@ -18,4 +18,25 @@ public class GroupListCriteria {
     private String grpName;
     private String createdFrom;
     private String createdTo;
+
+    /** MyBatis 동적 SQL용 — null 을 빈 문자열로 통일 */
+    public GroupListCriteria normalized() {
+        grpName = nullToEmpty(grpName);
+        createdFrom = nullToEmpty(createdFrom);
+        createdTo = nullToEmpty(createdTo);
+        return this;
+    }
+
+    public static GroupListCriteria forPrjId(Long prjId) {
+        return GroupListCriteria.builder()
+                .prjId(prjId)
+                .grpName("")
+                .createdFrom("")
+                .createdTo("")
+                .build();
+    }
+
+    private static String nullToEmpty(String s) {
+        return s == null ? "" : s;
+    }
 }

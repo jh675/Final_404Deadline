@@ -3,7 +3,7 @@
   lang="ko"
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/defaultLayout}"
+  layout:decorate="~{layout/projectLayout}"
 >
   <head>
     <meta charset="UTF-8" />
@@ -204,8 +204,7 @@
           aria-labelledby="group-search-heading" >
           <h2 id="group-search-heading" class="visually-hidden">그룹 검색</h2>
           <form class="role-search" id="groupSearchForm"
-            th:action="@{/project/group/groupManagement}" method="get" >
-            <input type="hidden" name="prjId" th:value="${prjId}" />
+            th:action="@{/project/group/list}" method="get" >
             <div class="role-search__bar">
               <div class="role-search__inline">
                 <label for="grpName">그룹명</label>
@@ -523,8 +522,7 @@
                   return;
                 }
                 location.href =
-                  "/project/group/groupManagementInfo?prjId=" +
-                  encodeURIComponent(prjId);
+                  "/project/group/info";
                 return;
               }
               if (btn.id === "groupBtnDelete") {
@@ -587,7 +585,7 @@
                 method: "POST",
                 headers: buildCsrfHeaders(),
                 credentials: "same-origin",
-                body: JSON.stringify({ prjId: pid, grpIds: grpIds }),
+                body: JSON.stringify({ grpIds: grpIds }),
               });
               var data = {};
               try {
@@ -671,12 +669,10 @@
                     const text = value == null ? "" : value;
                     if (gid == null) return text;
                     const q =
-                      "prjId=" +
-                      encodeURIComponent(prjId) +
-                      "&grpId=" +
+                      "grpId=" +
                       encodeURIComponent(String(gid));
                     return (
-                      '<a href="/project/group/groupManagementInfo?' +
+                      '<a href="/project/group/info?' +
                       q +
                       '">' +
                       text +
@@ -729,9 +725,7 @@
                 row && row.id != null && row.id !== "" ? row.id : null;
               if (gid != null) {
                 location.href =
-                  "/project/group/groupManagementInfo?prjId=" +
-                  encodeURIComponent(prjId) +
-                  "&grpId=" +
+                  "/project/group/info?grpId=" +
                   encodeURIComponent(String(gid));
               }
             });

@@ -107,6 +107,14 @@
         .history-grid-host {
           min-height: 120px;
         }
+        .history-detail-link {
+          color: #1976d2;
+          text-decoration: underline;
+          cursor: pointer;
+        }
+        .history-detail-link:hover {
+          color: #1565c0;
+        }
         .visually-hidden {
           position: absolute;
           width: 1px;
@@ -204,6 +212,9 @@
           ></div>
         </section>
       </main>
+
+      <th:block th:replace="~{project/history/modal/historyDetail :: historyDetailModal}"></th:block>
+      <th:block th:replace="~{project/history/modal/historyDetail :: historyDetailModalScript}"></th:block>
 
       <script th:inline="javascript">
         /*<![CDATA[*/
@@ -327,9 +338,23 @@
           const gridEl = document.getElementById("historyGrid");
           if (!gridEl || typeof tui === "undefined" || !tui.Grid) return;
 
-          const gridData = Array.isArray(historyRows) ? historyRows : [];
+          /** 목록 PK — 그리드·모달에서 historyId로 통일 (row.id 유실 방지) */
+          function resolveHistoryId(row) {
+            if (!row) return null;
+            const raw = row.historyId != null ? row.historyId : row.id;
+            if (raw == null || raw === "") return null;
+            const n = Number(raw);
+            return Number.isFinite(n) ? n : null;
+          }
 
-          new tui.Grid({
+          const gridData = (Array.isArray(historyRows) ? historyRows : []).map(
+            function (row) {
+              const historyId = resolveHistoryId(row);
+              return Object.assign({}, row, { historyId: historyId });
+            }
+          );
+
+          const historyGrid = new tui.Grid({
             el: gridEl,
             data: gridData,
             scrollX: true,
@@ -338,6 +363,11 @@
             rowHeight: 36,
             minBodyHeight: 100,
             columns: [
+              {
+                header: "ID",
+                name: "historyId",
+                hidden: true,
+              },
               {
                 header: "일시",
                 name: "updatedOn",
@@ -366,12 +396,70 @@
                 name: "detail",
                 minWidth: 280,
                 sortable: true,
+                formatter: ({ row, value }) => {
+                  const text = value == null ? "" : String(value);
+                  const historyId = resolveHistoryId(row);
+                  if (!text || historyId == null) return text;
+                  return (
+                    '<span class="history-detail-link" role="button" tabindex="0" data-history-id="' +
+                    historyId +
+                    '">' +
+                    text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +
+                    "</span>"
+                  );
+                },
               },
             ],
             pageOptions: {
               useClient: true,
               perPage: 15,
             },
+          });
+
+          function openHistoryDetailModal(historyId, row) {
+            if (historyId == null) {
+              console.warn("[history] historyId 없음", row);
+              return;
+            }
+            const itemLabel = tableNameLabel(row && row.tableName);
+            const summaryParts = [];
+            if (row && row.updatedOn) summaryParts.push(formatDate(row.updatedOn));
+            if (row && row.modifierName) summaryParts.push(row.modifierName);
+            if (itemLabel) summaryParts.push(itemLabel);
+            if (row && row.detail) summaryParts.push(row.detail);
+            if (
+              window.HistoryDetailModal &&
+              typeof window.HistoryDetailModal.open === "function"
+            ) {
+              window.HistoryDetailModal.open({
+                historyId: historyId,
+                summary: summaryParts.join(" · "),
+              });
+            }
+          }
+
+          historyGrid.on("click", function (ev) {
+            if (ev.rowKey == null) return;
+            const row = historyGrid.getRow(ev.rowKey);
+            const nativeTarget =
+              ev.nativeEvent && ev.nativeEvent.target
+                ? ev.nativeEvent.target
+                : null;
+            const linkEl =
+              nativeTarget && nativeTarget.closest
+                ? nativeTarget.closest("[data-history-id]")
+                : null;
+            const fromAttr = linkEl
+              ? Number(linkEl.getAttribute("data-history-id"))
+              : null;
+            const isDetailColumn = ev.columnName === "detail";
+            if (!isDetailColumn && !linkEl) return;
+
+            const historyId =
+              Number.isFinite(fromAttr) && fromAttr > 0
+                ? fromAttr
+                : resolveHistoryId(row);
+            openHistoryDetailModal(historyId, row);
           });
         });
       </script>

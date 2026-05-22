@@ -1,6 +1,7 @@
 package com.example.demo.project.group.service;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +20,8 @@ public class GroupDetailVO {
     private Long grpId;
     private String prjName;
     private String grpName;
-    private LocalDateTime createdOn;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date createdOn;
     
     //프로젝트메인에 그룹별 인원 카운트용
     private Long count;
