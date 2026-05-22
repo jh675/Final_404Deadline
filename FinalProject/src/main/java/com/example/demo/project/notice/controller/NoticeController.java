@@ -59,14 +59,14 @@ public class NoticeController {
     //목록페이지
     @GetMapping("/notice/list")
     public String noticeList(Model model,NoticeVO notice) {
-    	notice.setPrjId(4);
+    	notice.setPrjId(4L);
         model.addAttribute("list", noticeService.selectAll(notice));
         return "project/notice/noticeList";
     }
     
  // 수정페이지 이동
  	@GetMapping("/notice/modify")
- 	public String modifyForm(Model model, @RequestParam("id") Integer id) {
+ 	public String modifyForm(Model model, @RequestParam("id") Long id) {
  		model.addAttribute("notice", noticeService.selectOne(id));
  		return "project/notice/noticeRegister"; 
  	}
@@ -80,7 +80,7 @@ public class NoticeController {
 
  	// 삭제처리
  	@GetMapping("/notice/delete")
- 	public String delete(@RequestParam("id") Integer id) {
+ 	public String delete(@RequestParam("id") Long id) {
  		noticeService.delete(id);
  		return "redirect:/notice/list";
  	}

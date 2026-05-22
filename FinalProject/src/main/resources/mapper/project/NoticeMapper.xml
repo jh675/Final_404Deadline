@@ -13,7 +13,7 @@
 </select>
 
 <insert id="insert">
-<selectKey keyProperty="id" resultType="int" order="BEFORE">
+<selectKey keyProperty="id" resultType="long" order="BEFORE">
         SELECT news_seq.nextval FROM DUAL
     </selectKey>
 insert into notice(

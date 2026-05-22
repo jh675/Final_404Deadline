@@ -22,4 +22,7 @@ public class GroupDetailVO {
     private String grpName;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date createdOn;
+    
+    //프로젝트메인에 그룹별 인원 카운트용
+    private Long count;
 }

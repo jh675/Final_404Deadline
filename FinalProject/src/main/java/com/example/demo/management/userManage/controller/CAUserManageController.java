@@ -26,12 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/cadmin")
 public class CAUserManageController {
-	
-	// 🚨 시스템관리자용 서비스가 아닌 CA 전용 서비스 주입
+
 	private final CAUserManageService caUserManageService;
 	private final AttachService attachService;
 	
-	// 🔐 로그인한 사용자 정보 가져오는 공통 메서드
+
 	private UserVO getCurrentAdmin() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		return (UserVO) auth.getPrincipal();
@@ -39,7 +38,7 @@ public class CAUserManageController {
 	
 	@GetMapping("/userList")
 	public String userList(Model model, @ModelAttribute("filter01") UserManageVO userManage) {
-		// 🚨 내 기업의 직원만 보도록 bizNo 강제 세팅
+		// 내 기업의 직원만 보도록 bizNo 강제 세팅
 		String myBizNo = getCurrentAdmin().getBizNo();
 		userManage.setBizNo(myBizNo); 
 		
@@ -49,17 +48,16 @@ public class CAUserManageController {
 		// 모달창에서 보여줄 내 기업 번호 전달
 		model.addAttribute("myBizNo", myBizNo); 
 		
-		return "management/user/userListCA"; // 🚨 리턴하는 뷰 이름도 분리한 HTML명에 맞게 확인하세요!
+		return "management/user/userListCA";
 	}
 	
-	// (기존에 있던 /companyList 엔드포인트는 기업관리자에게 필요 없으므로 삭제)
 	
 	@PostMapping("/userInsert")
 	@ResponseBody
 	public UserManageVO userInsert(@RequestBody UserManageVO vo) {
-		// 🚨 보안 처리: 프론트에서 넘어온 값을 무시하고 서버에서 강제 세팅
-		vo.setBizNo(getCurrentAdmin().getBizNo()); // 내 기업 소속으로 강제
-		vo.setAdminCd("03ROLE");                   // 사원 권한으로 강제
+		
+		vo.setBizNo(getCurrentAdmin().getBizNo()); 
+		vo.setAdminCd("03ROLE");                   
 		
 		caUserManageService.insertUser(vo);
 	    return vo;
@@ -68,10 +66,8 @@ public class CAUserManageController {
 	@PutMapping("/userUpdate")
 	@ResponseBody
 	public Map<String, String> userUpdate(@RequestBody UserManageVO vo) {
-		// 🚨 보안 처리
-		vo.setBizNo(getCurrentAdmin().getBizNo());
-		vo.setAdminCd("03ROLE");
 		
+
 	    int updateCnt = caUserManageService.updateUser(vo);
 	    Map<String, String> result = new HashMap<>();
 	    if(updateCnt > 0) {
@@ -82,7 +78,6 @@ public class CAUserManageController {
 	    return result;
 	}
 
-	// 이하 프로필 이미지 관련 메서드 (동일)
 	@GetMapping("/user/profile/{userId}")
 	@ResponseBody
 	public ResponseEntity<AttachVO> getProfileImage(@PathVariable("userId") Long userId) {

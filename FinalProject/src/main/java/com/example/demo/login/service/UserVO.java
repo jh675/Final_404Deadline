@@ -49,6 +49,7 @@ public class UserVO implements UserDetails{
 	private String mcpNm;
 	private String prjManagerCd;
 	private String prjManagerNm;
+	private Date lastLogOn;
 	
 	private List<String> role;
 	

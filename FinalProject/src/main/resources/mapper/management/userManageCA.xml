@@ -70,11 +70,9 @@
 	<update id="updateUser">
 	    UPDATE USERS
 	    SET
-	        BIZ_NO = #{bizNo},
 	        NAME = #{name},
 	        TEL = #{tel},
 	        EMAIL = #{email},
-	        ADMIN_CD = #{adminCd},
 	        STATUS_CD = #{statusCd},
 	        PRJ_MANAGER_CD = #{prjManagerCd},
 	        MCP_CD = #{mcpCd}

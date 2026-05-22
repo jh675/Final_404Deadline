@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>위키</title>
     <th:block layout:fragment="head-content">
+        <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.css" />
         <style>
             .wiki-page {
                 font-family: "Malgun Gothic", "맑은 고딕", -apple-system, sans-serif;
@@ -189,6 +190,20 @@
                 color: #1565c0;
             }
 
+            #wikiViewer .toastui-editor-contents {
+                font-size: 14px;
+                line-height: 1.7;
+            }
+
+            #wikiViewer .toastui-editor-defaultUI {
+                border: none;
+            }
+
+            .wiki-body-empty {
+                color: #888;
+                margin: 0;
+            }
+
             .wiki-attachments {
                 margin-top: 24px;
                 padding-top: 16px;
@@ -248,9 +263,9 @@
             <div class="wiki-header-row">
                 <h1 class="wiki-title" th:text="${page != null ? page.title : '지금위키명'}">지금위키명</h1>
                 <div class="wiki-actions">
-                    <a class="wiki-btn wiki-btn-create" th:href="@{/wiki/write}">작성</a>
+                    <a class="wiki-btn wiki-btn-create" th:href="@{/wiki/register}">작성</a>
                     <a class="wiki-btn wiki-btn-edit"
-                       th:href="@{/wiki/write(id=${page != null ? page.id : 0})}">편집</a>
+                       th:href="@{/wiki/register(id=${page.id != null ? page.id : 0})}">편집</a>
                     <button type="button" class="wiki-btn wiki-btn-delete"
                             th:disabled="${hasChildren == true}"
                             th:attr="data-wiki-id=${page != null ? page.id : 0}"
@@ -258,15 +273,13 @@
                 </div>
             </div>
 
-            <!-- 5. 본문 (마크다운 렌더 결과) -->
-            <article class="wiki-body" th:if="${contentHtml != null}" th:utext="${contentHtml}"></article>
-            <!-- th:inline="none": [[위키명]] 은 Thymeleaf 인라인 표현식([[...]])과 충돌하므로 리터럴로 처리 -->
-            <article class="wiki-body" th:unless="${contentHtml != null}" th:inline="none">
-                <p>일반 텍스트 문단입니다. 위키 본문은 마크다운 규칙에 따라 표시됩니다.</p>
-                <p><strong>굵은 글씨</strong>는 <code>**텍스트**</code>로 감쌉니다.</p>
-                <p>인라인 코드는 <code>`코드`</code> 형태로 표시됩니다.</p>
-                <p>내부 위키 링크: <a class="wiki-link" href="#">[[다른 위키 페이지]]</a></p>
-                <p>외부 링크: <a class="external-link" href="https://www.redmine.org" target="_blank" rel="noopener">https://www.redmine.org</a></p>
+            <!-- 5. 본문 (마크다운 → TOAST UI Viewer 렌더) -->
+            <article class="wiki-body">
+                <div id="wikiViewer"></div>
+                <p class="wiki-body-empty"
+                   th:if="${page == null or page.content == null or #strings.isEmpty(page.content)}">
+                    내용이 없습니다.
+                </p>
             </article>
 
             <!-- 첨부 이미지 -->
@@ -274,7 +287,7 @@
                 <h4>첨부파일</h4>
                 <ul class="list-unstyled mb-0">
                     <li th:each="file : ${attachments}" class="mb-2">
-                        <a th:href="@{/wiki/download(fileId=${file.id})}" th:text="${file.name}">파일명.jpg</a>
+                        <a th:href="@{/download/{id}(id=${file.id})}" th:text="${file.fileName}">파일명.jpg</a>
                     </li>
                 </ul>
             </div>
@@ -298,7 +311,29 @@
         </aside>
     </div>
 
+    <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.js"></script>
     <script th:inline="javascript">
+        function initWikiViewer() {
+            var markdown = /*[[${page != null && page.content != null ? page.content : ''}]]*/ '';
+            if (!markdown || !window.toastui || !window.toastui.Editor) return;
+
+            var el = document.querySelector('#wikiViewer');
+            if (!el) return;
+
+            new toastui.Editor({
+                el: el,
+                viewer: true,
+                height: 'auto',
+                initialValue: markdown
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initWikiViewer);
+        } else {
+            initWikiViewer();
+        }
+
         function confirmDelete(btn) {
             if (btn.disabled) return;
             var id = btn.getAttribute('data-wiki-id');

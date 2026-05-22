@@ -25,27 +25,27 @@ public class MessagesServiceImpl implements MessagesService {
 	}
 
 	@Override
-	public MessagesVO selectOne(int id) {
+	public MessagesVO selectOne(Long id) {
 		return messagesMapper.selectOne(id);
 	}
 
 	@Override
-	public int delete(int id) {
+	public Long delete(Long id) {
 		return messagesMapper.delete(id);
 	}
 
 	@Override
-	public int update(MessagesVO messages) {
+	public Long update(MessagesVO messages) {
 		return messagesMapper.update(messages);
 	}
 
 	@Override
-	public int insert(MessagesVO messages) {
+	public Long insert(MessagesVO messages) {
 		
 		//토픽수 증가
 		boardsMapper.updateTopics(messages.getBoardId());
 		
-		//메세지 등록
+		//메시지 등록
 		return messagesMapper.insert(messages);
 	}
 }

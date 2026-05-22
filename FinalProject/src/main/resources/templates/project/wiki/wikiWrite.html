@@ -108,6 +108,69 @@
                 box-shadow: 0 0 0 2px rgba(102, 187, 106, 0.2);
             }
 
+            .wiki-title-row {
+                display: flex;
+                gap: 8px;
+                align-items: stretch;
+                max-width: 480px;
+            }
+
+            .wiki-title-row input[type="text"] {
+                flex: 1;
+                min-width: 0;
+                max-width: none;
+            }
+
+            .btn-title-check {
+                flex-shrink: 0;
+                padding: 8px 16px;
+                font-size: 13px;
+                font-weight: 600;
+                border: 1px solid #66bb6a;
+                color: #2e7d32;
+                background: #fff;
+                border-radius: 4px;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+
+            .btn-title-check:hover:not(:disabled) {
+                background: #f1f8e9;
+            }
+
+            .btn-title-check:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .wiki-title-msg {
+                font-size: 12px;
+                margin: 6px 0 0;
+            }
+
+            .wiki-title-msg.is-success {
+                color: #2e7d32;
+            }
+
+            .wiki-title-msg.is-error {
+                color: #dc3545;
+            }
+
+            .btn-title-reset {
+                margin-top: 6px;
+                padding: 0;
+                border: none;
+                background: none;
+                font-size: 12px;
+                color: #666;
+                text-decoration: underline;
+                cursor: pointer;
+            }
+
+            .btn-title-reset:hover {
+                color: #333;
+            }
+
             /* TOAST UI Editor */
             #wikiEditor {
                 min-height: 420px;
@@ -138,7 +201,9 @@
                 font-size: 13px;
             }
 
-            .attachment-list .btn-remove {
+            .attachment-list .btn-remove,
+            .attachment-list .btn-remove-existing,
+            .attachment-list .btn-remove-new {
                 padding: 4px 12px;
                 font-size: 12px;
                 border: 1px solid #dc3545;
@@ -148,7 +213,9 @@
                 cursor: pointer;
             }
 
-            .attachment-list .btn-remove:hover {
+            .attachment-list .btn-remove:hover,
+            .attachment-list .btn-remove-existing:hover,
+            .attachment-list .btn-remove-new:hover {
                 background: #fff5f5;
             }
 
@@ -170,6 +237,29 @@
                 font-size: 12px;
                 color: #888;
                 margin-top: 6px;
+            }
+
+            .attach-subsection {
+                margin-bottom: 16px;
+                padding-bottom: 16px;
+                border-bottom: 1px dashed #e8e8e8;
+            }
+
+            .attach-subsection:last-of-type {
+                border-bottom: none;
+                padding-bottom: 0;
+                margin-bottom: 0;
+            }
+
+            .attach-subsection > label {
+                font-size: 12px;
+                color: #666;
+            }
+
+            .attachment-empty {
+                font-size: 13px;
+                color: #888;
+                margin: 0 0 8px;
             }
 
             .wiki-form-actions {
@@ -236,16 +326,26 @@
                 th:unless="${page != null and page.id != null}">위키 작성</h4>
 
             <form id="wikiForm" class="wiki-form-card" method="post" enctype="multipart/form-data"
-                  th:action="@{/wiki/save}">
+                  th:action="${page != null and page.id != null} ? @{/wiki/update} : @{/wiki/save}">
                 <input type="hidden" name="id" th:value="${page != null ? page.id : ''}">
+                <input type="hidden" name="pageId" th:if="${page != null and page.pageId != null}"
+                       th:value="${page.pageId}">
                 <input type="hidden" name="content" id="wikiContentHidden">
 
-                <!-- 1. 제목 -->
+                <!-- 1. 제목 (작성 시 중복 확인 후 readonly) -->
                 <div class="wiki-form-group">
                     <label for="wikiTitle">제목 <span class="required">*</span></label>
-                    <input type="text" id="wikiTitle" name="title" required
-                           placeholder="제목 입력"
-                           th:value="${page != null ? page.title : ''}">
+                    <div class="wiki-title-row">
+                        <input type="text" id="wikiTitle" name="title" required
+                               placeholder="제목 입력"
+                               th:value="${page != null ? page.title : ''}"
+                               th:readonly="${page != null and page.id != null}">
+                        <button type="button" class="btn-title-check" id="btnTitleCheck"
+                                th:if="${page == null or page.id == null}">중복 확인</button>
+                    </div>
+                    <p class="wiki-title-msg" id="wikiTitleMsg" aria-live="polite"></p>
+                    <button type="button" class="btn-title-reset" id="btnTitleReset"
+                            th:if="${page == null or page.id == null}" hidden>제목 변경</button>
                 </div>
 
                 <!-- 2·3. 마크다운 에디터 (TOAST UI Editor) -->
@@ -277,32 +377,55 @@
                 <div class="wiki-form-group">
                     <label for="wikiDescribe">설명</label>
                     <input type="text" id="wikiDescribe" name="describe" placeholder="변경 요약 또는 페이지 설명"
-                           th:value="${content != null ? content.describe : ''}">
+                           th:value="${page != null ? page.describe : ''}">
                 </div>
 
-                <!-- 6. 첨부파일 -->
-                <div class="wiki-form-group">
+                <!-- 6. 첨부파일 (작성) -->
+                <div class="wiki-form-group" th:unless="${page != null and page.id != null}">
                     <label>첨부파일</label>
-                    <ul class="attachment-list" id="attachmentList">
-                        <li th:each="file : ${existingFiles}" th:if="${existingFiles != null}">
-                            <span th:text="${file.name}">파일명.jpg</span>
-                            <button type="button" class="btn-remove" th:attr="data-file-id=${file.id}">첨부삭제</button>
-                        </li>
-                        <li th:if="${existingFiles == null or existingFiles.isEmpty()}">
-                            <span>파일명.jpg</span>
-                            <button type="button" class="btn-remove" onclick="this.closest('li').remove()">첨부삭제</button>
-                        </li>
-                    </ul>
+                    <ul class="attachment-list" id="newAttachmentList"></ul>
                     <input type="file" id="fileInput" name="files" multiple accept="*/*" style="display:none">
-                    <button type="button" class="btn-add-file" onclick="document.getElementById('fileInput').click()">파일추가</button>
+                    <button type="button" class="btn-add-file" id="btnAddFile">파일추가</button>
                     <p class="attachment-hint">최대 5개, 총 50MB까지 업로드 가능합니다.</p>
+                </div>
+
+                <!-- 6. 첨부파일 (수정: 등록된 첨부 / 추가할 파일 분리) -->
+                <div class="wiki-form-group" th:if="${page != null and page.id != null}">
+                    <label>첨부파일</label>
+
+                    <div class="attach-subsection">
+                        <label>등록된 첨부</label>
+                        <p class="attachment-empty"
+                           th:if="${existingFiles == null or existingFiles.isEmpty()}">
+                            등록된 첨부파일이 없습니다.
+                        </p>
+                        <ul class="attachment-list" id="existingAttachmentList"
+                            th:if="${existingFiles != null and !existingFiles.isEmpty()}">
+                            <li th:each="file : ${existingFiles}"
+                                class="attach-row-existing"
+                                th:attr="data-attach-id=${file.id}, data-file-size=${file.fileSize != null ? file.fileSize : 0}">
+                                <span th:text="${file.fileName != null ? file.fileName : file.diskFileName}">파일명</span>
+                                <button type="button" class="btn-remove-existing">첨부삭제</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="attach-subsection">
+                        <label>추가할 파일</label>
+                        <ul class="attachment-list" id="newAttachmentListEdit"></ul>
+                        <input type="file" id="fileInputEdit" name="files" multiple accept="*/*" style="display:none">
+                        <button type="button" class="btn-add-file" id="btnAddFileEdit">파일추가</button>
+                    </div>
+
+                    <p class="attachment-hint">등록된 첨부와 추가할 파일 합산 최대 5개, 총 50MB까지 가능합니다.</p>
                 </div>
 
                 <!-- 7·8. 작성 / 취소 -->
                 <div class="wiki-form-actions">
                     <a class="btn-cancel" th:if="${page != null and page.id != null}" th:href="@{/wiki/view(id=${page.id})}">취소</a>
                     <a class="btn-cancel" th:unless="${page != null and page.id != null}" th:href="@{/wiki/view}">취소</a>
-                    <button type="submit" class="btn-submit">작성</button>
+                    <button type="submit" class="btn-submit"
+                            th:text="${page != null and page.id != null} ? '수정' : '작성'">작성</button>
                 </div>
             </form>
         </div>
@@ -322,6 +445,13 @@
     <script th:inline="javascript">
         var wikiEditorInstance = null;
 
+        function syncWikiContent() {
+            var hidden = document.getElementById('wikiContentHidden');
+            if (hidden && wikiEditorInstance) {
+                hidden.value = wikiEditorInstance.getMarkdown();
+            }
+        }
+
         function initWikiEditor() {
             if (wikiEditorInstance) return;
             if (!window.toastui || !window.toastui.Editor) return;
@@ -329,7 +459,7 @@
             var el = document.querySelector('#wikiEditor');
             if (!el) return;
 
-            var initialContent = /*[[${content != null ? content.content : ''}]]*/ '';
+            var initialContent = /*[[${page != null ? page.content : ''}]]*/ '';
 
             /* placeholder + previewStyle:'vertical' 조합은 미리보기에 로딩 스피너가 무한 표시되는 버그 (#2669) */
             wikiEditorInstance = new toastui.Editor({
@@ -342,8 +472,11 @@
                 plugins: []
             });
 
+            wikiEditorInstance.on('change', syncWikiContent);
+
             if (initialContent) {
                 wikiEditorInstance.setMarkdown(initialContent);
+                syncWikiContent();
             }
         }
 
@@ -356,36 +489,140 @@
         (function () {
             var MAX_FILES = 5;
             var MAX_TOTAL_BYTES = 50 * 1024 * 1024;
+            var isEditMode = /*[[${page != null and page.id != null}]]*/ false;
+            var titleInput = document.getElementById('wikiTitle');
+            var btnTitleCheck = document.getElementById('btnTitleCheck');
+            var btnTitleReset = document.getElementById('btnTitleReset');
+            var titleMsgEl = document.getElementById('wikiTitleMsg');
+            var titleChecked = isEditMode;
+            var checkedTitle = isEditMode && titleInput ? titleInput.value.trim() : '';
             var selectedFiles = [];
 
-            document.getElementById('fileInput').addEventListener('change', function (e) {
-                var incoming = Array.from(e.target.files || []);
-                var totalSize = selectedFiles.reduce(function (s, f) { return s + f.size; }, 0);
+            function setTitleMsg(text, type) {
+                if (!titleMsgEl) return;
+                titleMsgEl.textContent = text || '';
+                titleMsgEl.className = 'wiki-title-msg'
+                    + (type === 'success' ? ' is-success' : '')
+                    + (type === 'error' ? ' is-error' : '');
+            }
 
-                for (var i = 0; i < incoming.length; i++) {
-                    if (selectedFiles.length >= MAX_FILES) {
-                        alert('첨부파일은 최대 ' + MAX_FILES + '개까지 등록할 수 있습니다.');
-                        break;
-                    }
-                    if (totalSize + incoming[i].size > MAX_TOTAL_BYTES) {
-                        alert('첨부파일 총 용량은 50MB를 초과할 수 없습니다.');
-                        break;
-                    }
-                    selectedFiles.push(incoming[i]);
-                    totalSize += incoming[i].size;
-                    appendFileRow(incoming[i]);
-                }
-                e.target.value = '';
-                syncFileInput();
-            });
+            function resetTitleCheck() {
+                titleChecked = false;
+                checkedTitle = '';
+                if (titleInput) titleInput.readOnly = false;
+                if (btnTitleCheck) btnTitleCheck.disabled = false;
+                if (btnTitleReset) btnTitleReset.hidden = true;
+                setTitleMsg('', null);
+            }
 
-            function appendFileRow(file) {
+            if (btnTitleCheck && titleInput) {
+                btnTitleCheck.addEventListener('click', function () {
+                    var title = titleInput.value.trim();
+                    if (!title) {
+                        alert('제목을 입력해 주세요.');
+                        titleInput.focus();
+                        return;
+                    }
+                    btnTitleCheck.disabled = true;
+                    setTitleMsg('확인 중...', null);
+
+                    fetch('/wiki/check?name=' + encodeURIComponent(title))
+                        .then(function (res) {
+                            if (res.ok) {
+                                titleChecked = true;
+                                checkedTitle = title;
+                                titleInput.readOnly = true;
+                                btnTitleCheck.disabled = true;
+                                if (btnTitleReset) btnTitleReset.hidden = false;
+                                setTitleMsg('사용 가능한 제목입니다.', 'success');
+                            } else {
+                                resetTitleCheck();
+                                setTitleMsg('이미 사용 중인 제목입니다. 다른 제목을 입력해 주세요.', 'error');
+                                titleInput.focus();
+                            }
+                        })
+                        .catch(function () {
+                            resetTitleCheck();
+                            setTitleMsg('중복 확인에 실패했습니다. 잠시 후 다시 시도해 주세요.', 'error');
+                        });
+                });
+
+            }
+
+            if (btnTitleReset) {
+                btnTitleReset.addEventListener('click', function () {
+                    resetTitleCheck();
+                    if (titleInput) titleInput.focus();
+                });
+            }
+
+            var fileInput = document.getElementById(isEditMode ? 'fileInputEdit' : 'fileInput');
+            var newListEl = document.getElementById(isEditMode ? 'newAttachmentListEdit' : 'newAttachmentList');
+            var btnAddFile = document.getElementById(isEditMode ? 'btnAddFileEdit' : 'btnAddFile');
+            var existingListEl = document.getElementById('existingAttachmentList');
+
+            function countExisting() {
+                if (!existingListEl) return 0;
+                return existingListEl.querySelectorAll('.attach-row-existing').length;
+            }
+
+            function sumExistingBytes() {
+                if (!existingListEl) return 0;
+                var sum = 0;
+                existingListEl.querySelectorAll('.attach-row-existing').forEach(function (li) {
+                    var size = parseInt(li.getAttribute('data-file-size'), 10);
+                    if (!isNaN(size)) sum += size;
+                });
+                return sum;
+            }
+
+            function countTotal() {
+                return countExisting() + selectedFiles.length;
+            }
+
+            function sumNewBytes() {
+                return selectedFiles.reduce(function (s, f) { return s + f.size; }, 0);
+            }
+
+            function sumTotalBytes() {
+                return sumExistingBytes() + sumNewBytes();
+            }
+
+            if (btnAddFile && fileInput) {
+                btnAddFile.addEventListener('click', function () {
+                    fileInput.click();
+                });
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function (e) {
+                    var incoming = Array.from(e.target.files || []);
+
+                    for (var i = 0; i < incoming.length; i++) {
+                        if (countTotal() >= MAX_FILES) {
+                            alert('첨부파일은 최대 ' + MAX_FILES + '개까지 등록할 수 있습니다.');
+                            break;
+                        }
+                        if (sumTotalBytes() + incoming[i].size > MAX_TOTAL_BYTES) {
+                            alert('첨부파일 총 용량은 50MB를 초과할 수 없습니다.');
+                            break;
+                        }
+                        selectedFiles.push(incoming[i]);
+                        appendNewFileRow(incoming[i]);
+                    }
+                    e.target.value = '';
+                    syncFileInput();
+                });
+            }
+
+            function appendNewFileRow(file) {
                 var li = document.createElement('li');
+                li.className = 'attach-row-new';
                 var name = document.createElement('span');
                 name.textContent = file.name;
                 var btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'btn-remove';
+                btn.className = 'btn-remove-new';
                 btn.textContent = '첨부삭제';
                 btn.addEventListener('click', function () {
                     var idx = selectedFiles.indexOf(file);
@@ -395,30 +632,82 @@
                 });
                 li.appendChild(name);
                 li.appendChild(btn);
-                document.getElementById('attachmentList').appendChild(li);
+                if (newListEl) newListEl.appendChild(li);
             }
 
             function syncFileInput() {
+                if (!fileInput) return;
                 var dt = new DataTransfer();
                 selectedFiles.forEach(function (f) { dt.items.add(f); });
-                document.getElementById('fileInput').files = dt.files;
+                fileInput.files = dt.files;
             }
 
-            document.getElementById('wikiForm').addEventListener('submit', function (e) {
-                var title = document.getElementById('wikiTitle').value.trim();
-                if (!title) {
+            if (existingListEl) {
+                existingListEl.addEventListener('click', function (e) {
+                    var btn = e.target.closest('.btn-remove-existing');
+                    if (!btn) return;
+
+                    var li = btn.closest('.attach-row-existing');
+                    var id = li && li.getAttribute('data-attach-id');
+                    if (!id) return;
+                    if (!confirm('이 첨부파일을 삭제하시겠습니까?')) return;
+
+                    var tokenMeta = document.querySelector('meta[name="_csrf"]');
+                    var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+                    var headers = {};
+                    if (tokenMeta && headerMeta) {
+                        headers[headerMeta.content] = tokenMeta.content;
+                    }
+
+                    fetch('/delete/' + encodeURIComponent(id), { method: 'DELETE', headers: headers })
+                        .then(function (res) {
+                            if (!res.ok) throw new Error('delete failed');
+                            li.remove();
+                            if (countExisting() === 0) {
+                                var subsection = existingListEl.closest('.attach-subsection');
+                                if (subsection && !subsection.querySelector('.attachment-empty')) {
+                                    var emptyMsg = document.createElement('p');
+                                    emptyMsg.className = 'attachment-empty';
+                                    emptyMsg.textContent = '등록된 첨부파일이 없습니다.';
+                                    subsection.appendChild(emptyMsg);
+                                }
+                            }
+                        })
+                        .catch(function () {
+                            alert('첨부파일 삭제에 실패했습니다.');
+                        });
+                });
+            }
+
+            var wikiForm = document.getElementById('wikiForm');
+            if (wikiForm) {
+                wikiForm.addEventListener('submit', function (e) {
                     e.preventDefault();
-                    alert('제목을 입력해 주세요.');
-                    return;
-                }
-                if (!wikiEditorInstance) {
-                    e.preventDefault();
-                    alert('에디터가 아직 로드되지 않았습니다.');
-                    return;
-                }
-                document.getElementById('wikiContentHidden').value = wikiEditorInstance.getMarkdown();
-                /* TODO: 제목 중복 검사 API 연동 후 submit */
-            });
+
+                    var title = titleInput ? titleInput.value.trim() : '';
+                    if (!title) {
+                        alert('제목을 입력해 주세요.');
+                        return;
+                    }
+                    if (!isEditMode && !titleChecked) {
+                        alert('제목 중복 확인을 해 주세요.');
+                        if (btnTitleCheck) btnTitleCheck.focus();
+                        return;
+                    }
+                    if (!isEditMode && title !== checkedTitle) {
+                        alert('제목이 변경되었습니다. 중복 확인을 다시 해 주세요.');
+                        resetTitleCheck();
+                        return;
+                    }
+                    if (!wikiEditorInstance) {
+                        alert('에디터가 아직 로드되지 않았습니다.');
+                        return;
+                    }
+
+                    syncWikiContent();
+                    wikiForm.submit();
+                });
+            }
         })();
     </script>
 </div>

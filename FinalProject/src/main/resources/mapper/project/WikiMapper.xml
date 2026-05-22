@@ -3,8 +3,56 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.project.wiki.mapper.WikiMapper">
 	
-	<select id="selectWikiContentLastVer">
-		select * from wikiContent 
+	<select id="selectWikiContentLastVerByTitle" resultType="wikiContentVO">
+		SELECT p.id as id,p.title AS title, c.content as content,c.page_id as page_id
+		FROM wiki_page p
+		JOIN wiki_content c ON p.last_ver = c.version AND p.id = c.page_id
+		JOIN wiki w ON w.prj_id = #{id} AND p.wiki_id = w.id
+		<if test="title != null and title != ''">
+			WHERE p.title = #{title}
+		</if>
+		<if test="title == null or title == ''">
+			AND p.title = w.start_page
+		</if>
 	</select>
+	<select id="nameCheck" resultType="long">
+	select count(*)
+		from wiki_page p
+        join wiki w
+        on w.id = p.wiki_id
+		where w.prj_id = #{id}
+		and title=#{name}
+	</select>
+	<select id="selectWikiContentLastVerById" resultType="wikiContentVO">
+		select p.id, p.title, c.content, c.describe, c.page_id, c.updated_on
+		from wiki_page p
+		join wiki_content c
+		on p.last_ver = c.version
+		and p.id = c.page_id
+		where p.id = #{id}
+	</select>
+	
+	<insert id="insertWikiPage" parameterType="wikiPageVO">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			select w_page_seq.nextval from dual
+		</selectKey>
+		insert into wiki_page (id, title, wiki_id)
+		values (#{id}, #{title}, (select id from wiki where prj_id = #{prjId}))
+	</insert>
+	<insert id="insertWikiContent" parameterType="wikiContentVO">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			select w_content_seq.nextval from dual
+		</selectKey>
+		insert into wiki_content (id,version, page_id, content,describe,mem_Id)
+		values (#{id}, 1,#{pageId}, #{content}, #{describe}, #{memId})
+	</insert>
+	
+	<insert id="updatetWikiContent" parameterType="wikiContentVO">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			select w_content_seq.nextval from dual
+		</selectKey>
+		insert into wiki_content (id,version, page_id, content,describe,mem_Id)
+		values (#{id}, (select max(version)+1 from wiki_content where page_id =#{pageId}),#{pageId}, #{content}, #{describe}, #{memId})
+	</insert>
 	
 </mapper>

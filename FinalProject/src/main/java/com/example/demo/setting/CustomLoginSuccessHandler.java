@@ -62,6 +62,8 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler{
 			response.sendRedirect("/login/password-reset"); 
 		} else {
 			// 정상 로그인인 경우 루트 경로로 이동하여 LoginController의 "/"에서 권한별 처리
+			loginService.updateLastLogOn(vo);
+			vo.setLastLogOn(new java.util.Date());
 			response.sendRedirect("/");
 		}
 	}

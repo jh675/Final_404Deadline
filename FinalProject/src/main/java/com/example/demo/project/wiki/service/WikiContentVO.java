@@ -11,6 +11,7 @@ public class WikiContentVO {
 	private Long version;
 	private String describe;
 	private String content;
+	private String title;
 	private Date updatedOn;
 	private Long memId;
 }

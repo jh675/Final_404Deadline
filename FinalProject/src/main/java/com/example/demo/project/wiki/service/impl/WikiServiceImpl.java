@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.project.wiki.mapper.WikiMapper;
 import com.example.demo.project.wiki.service.WikiContentVO;
@@ -18,27 +17,27 @@ public class WikiServiceImpl implements WikiService {
 	WikiMapper mapper;
 	
 	@Override
-	public WikiContentVO selectWikiContentLastVer(Long id) {
+	public WikiContentVO selectWikiContentLastVerByTitle(Long id,String title) {
 		// TODO Auto-generated method stub
-		return mapper.selectWikiContent(id);
+		return mapper.selectWikiContentLastVerByTitle(id,title);
 	}
 
 	@Override
 	public Long insertWikiContent(WikiContentVO wikiContentVO) {
-		// TODO Auto-generated method stub
-		return insertWikiContent(wikiContentVO);
+		mapper.insertWikiContent(wikiContentVO);
+		return wikiContentVO.getId();
 	}
 
 	@Override
 	public Long updateWikiContent(WikiContentVO wikiContentVO) {
 		// TODO Auto-generated method stub
-		return updateWikiContent(wikiContentVO);
+		return mapper.updateWikiContent(wikiContentVO);
 	}
 
 	@Override
 	public Long deleteWikiContent(Long id) {
 		// TODO Auto-generated method stub
-		return deleteWikiContent(id);
+		return mapper.deleteWikiContent(id);
 	}
 
 	@Override
@@ -50,11 +49,29 @@ public class WikiServiceImpl implements WikiService {
 	@Override
 	public List<WikiPageVO> selectWikiPageListGroupParent(Long id) {
 		// TODO Auto-generated method stub
-		return selectWikiPageListGroupParent(id);
+		return mapper.selectWikiPageListGroupParent(id);
 	}
 
+	@Override
+	public Long nameCheck(Long id,String name) {
+		// TODO Auto-generated method stub
+		return mapper.nameCheck(id,name);
+	}
 
+	@Override
+	public Long insertWikiPage(String title, long prjId) {
+		WikiPageVO page = new WikiPageVO();
+		page.setTitle(title);
+		page.setPrjId(prjId);
+		mapper.insertWikiPage(page);
+		return page.getId();
+	}
 
-	
+	@Override
+	public WikiContentVO selectWikiContentLastVerById(Long id) {
+		// TODO Auto-generated method stub
+		return mapper.selectWikiContentLastVerById(id);
+	}
+
 	
 }

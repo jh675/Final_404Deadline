@@ -22,6 +22,12 @@ public class Calendercontroller {
 	
 	@Autowired
 	CalenderService calenderService;
+	
+	// 로그인한 유저 정보 가져오기 
+	private UserVO getLoginUser() {
+		   Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	        return (UserVO) auth.getPrincipal();		
+	}
  
 	// 캘린더 페이지접속 
 	@GetMapping({"/calender/list"})
@@ -35,7 +41,7 @@ public class Calendercontroller {
 	public List<CalenderVO> calenderListJson(@RequestParam(name = "typeCd", defaultValue = "") String typeCd) {
 		CalenderVO vo = new CalenderVO();
 		vo.setTypeCd(typeCd);
-		vo.setMemId(2);
+		vo.setMemId(getLoginUser().getId().intValue());
 		return calenderService.getList(vo);
 	}
 	
@@ -43,7 +49,7 @@ public class Calendercontroller {
 	@PostMapping("calender/insert")
 	@ResponseBody
 	 public int post(CalenderVO vo) {
-	    vo.setMemId(2); 
+		vo.setMemId(getLoginUser().getId().intValue());
 		return calenderService.insert(vo);
 	}
 	// 일정 수정
@@ -71,7 +77,7 @@ public class Calendercontroller {
 	@GetMapping("calender/search")
 	@ResponseBody
 	 public List<CalenderVO>search(CalenderVO vo) {
-		vo.setMemId(2);
+		vo.setMemId(getLoginUser().getId().intValue());
 		return calenderService.selectAll(vo);
 	}
 

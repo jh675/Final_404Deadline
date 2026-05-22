@@ -9,12 +9,10 @@ layout:decorate="~{layout/projectLayout}">
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; color: #333; }
         .btn { padding: 8px 16px; border: 1px solid #ccc; background-color: #fff; border-radius: 4px; cursor: pointer; }
         
-        /* 목록 테이블 */
         .list-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         .list-table th, .list-table td { border: 1px solid #eee; padding: 12px; text-align: center; }
         .list-table th { background-color: #f9f9f9; }
         
-        /* 상세 보기 및 댓글 스타일 */
         .detail-container { max-width: 750px; margin-top: 40px; }
         .info-header { display: flex; gap: 40px; font-size: 14px; color: #666; margin: 15px 0 20px 0; }
         .content-box { border: 1px solid #ddd; border-radius: 12px; padding: 20px; min-height: 140px; background-color: #fff; margin-bottom: 20px; }
@@ -54,7 +52,7 @@ layout:decorate="~{layout/projectLayout}">
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(list)}">
-                <td colspan="4" style="color: #888; padding: 30px;">등록된 메시지가 없습니다. 첫 메시지를 작성해보세요!</td>
+                <td colspan="4" style="color: #888; padding: 30px;">등록된 메시지가 없습니다. </td>
             </tr>
         </tbody>
     </table>
