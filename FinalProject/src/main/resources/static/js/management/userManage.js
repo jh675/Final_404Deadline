@@ -18,13 +18,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         columns: [
 
-            {
-                header: 'No',
-                name: 'id',
-                width: 80,
-                align: 'center',
-                sortable: true
-            },
 
             {
                 header: '아이디',
@@ -96,6 +89,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         ],
+		rowHeaders: ['rowNum'],
 
         // 페이징
         pageOptions: {
@@ -145,7 +139,54 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('saveBtn').addEventListener('click', async function() {
 		// 등록, 수정 판별
         const mode = this.dataset.mode;
+		
+		// 이전 에러 상태 초기화 (아이디 중복 메시지도 기본 메시지로 원상복구)
+        const inputs = ['login', 'name', 'hireDate', 'adminCd', 'bizNo'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('is-invalid');
+        });
+        const loginError = document.getElementById('loginError');
+        if (loginError) loginError.textContent = '아이디를 입력해주세요.';
 
+        // 필수 항목 유효성 검사 (빈칸 체크)
+        let isValid = true;
+        
+        const loginInput = document.getElementById('login');
+        const nameInput = document.getElementById('name');
+        const hireDateInput = document.getElementById('hireDate');
+        const adminCdSelect = document.getElementById('adminCd'); 
+        const bizNoSelect = document.getElementById('bizNo'); 
+
+        // 아이디 검사
+        if (!loginInput.value.trim()) {
+            loginInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        // 회원 권한 검사 (존재할 경우)
+        if (adminCdSelect && !adminCdSelect.value) {
+            adminCdSelect.classList.add('is-invalid');
+            isValid = false;
+        }
+        // 소속기업 검사 (select 태그로 존재할 경우)
+        if (bizNoSelect && bizNoSelect.tagName === 'SELECT' && !bizNoSelect.value) {
+            bizNoSelect.classList.add('is-invalid');
+            isValid = false;
+        }
+        // 이름 검사
+        if (!nameInput.value.trim()) {
+            nameInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        // 고용일자 검사
+        if (!hireDateInput.value) {
+            hireDateInput.classList.add('is-invalid');
+            isValid = false;
+        }
+
+        // 하나라도 비어있다면 폼 제출 중단
+        if (!isValid) return;
+		
         const body = {
 			id: document.getElementById('userId').value,
 		    bizNo: document.getElementById('bizNo').value,
@@ -157,7 +198,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 		    statusCd: document.querySelector('input[name="statusCd"]:checked').value,
 		    prjManagerCd: document.querySelector('input[name="prjManagerCd"]:checked').value,
 			hireDate: document.getElementById('hireDate').value,
-			genderCd: document.querySelector('input[name="genderCd"]:checked').value
+			genderCd: document.querySelector('input[name="genderCd"]:checked').value,
+			mcpCd: document.querySelector('input[name="mcpCd"]:checked').value
         };
 
         let url = '';
@@ -184,48 +226,65 @@ document.addEventListener('DOMContentLoaded', async function() {
 		let isSuccess = false;
 		let finalUserId = document.getElementById('userId').value;
 
-		// 백엔드 반환값 검증 및 PK 확보
 		if (mode === 'insert') {
-			if (result && result.id) { // 방금 생성된 회원의 PK(id)가 반환되어야 함
+            if (result.result === 'DUPLICATE') {
+                loginInput.classList.add('is-invalid');
+                if (loginError) loginError.textContent = '해당 기업에 이미 사용 중인 아이디입니다.';
+                loginInput.focus();
+                return; 
+            }
+			if (result.result === 'SUCCESS' && result.id) { 
 		    	isSuccess = true;
 		        finalUserId = result.id; 
-				}
-		    } else {
-		        if (result.result === 'SUCCESS') {
-		            isSuccess = true;
-				}
+			}
+		} else { // mode === 'update' 인 경우
+		    if (result.result === 'SUCCESS') {
+		        isSuccess = true;
+			}
 		}
 
 		if (isSuccess) {
-		        // 프로필 이미지 동기화
-		        try {
-		            if (isProfileDeleted && finalUserId) {
-		                // 삭제 대기 중이면 기존 이미지 지우기
-		                await csrfFetch(`/admin/user/profile/${finalUserId}`, { method: "DELETE" });
-		                
-		            } else if (pendingProfileFile && finalUserId) {
-		                // 업로드 대기 중인 새 파일이 있으면 업로드하기
-		                const formData = new FormData();
-		                formData.append("userId", finalUserId);
-		                formData.append("file", pendingProfileFile);
-		                await csrfFetch("/admin/user/profile", { method: "POST", body: formData });
-		            }
-		            
-		            // 모든 작업 완료
-		            alert(mode === 'insert' ? '회원 등록이 완료되었습니다.' : '회원 수정이 완료되었습니다.');
-		            location.reload();
-		            
-		        } catch (error) {
-		            console.error(error);
-		            alert("회원 정보는 저장되었으나, 프로필 이미지 처리에 실패했습니다.");
-		            location.reload(); // 일단 정보는 저장되었으므로 리로드
-		        }
-
-		    } else {
-		        alert('처리 중 오류가 발생했습니다.');
-		    }
+	        // 프로필 이미지 동기화
+	        try {
+	            if (isProfileDeleted && finalUserId) {
+	                // 삭제 대기 중이면 기존 이미지 지우기
+	                await csrfFetch(`/admin/user/profile/${finalUserId}`, { method: "DELETE" });
+	                
+	            } else if (pendingProfileFile && finalUserId) {
+	                // 업로드 대기 중인 새 파일이 있으면 업로드하기
+	                const formData = new FormData();
+	                formData.append("userId", finalUserId);
+	                formData.append("file", pendingProfileFile);
+	                await csrfFetch("/admin/user/profile", { method: "POST", body: formData });
+	            }
+	            
+	            // 모든 작업 완료
+	            alert(mode === 'insert' ? '회원 등록이 완료되었습니다.' : '회원 수정이 완료되었습니다.');
+	            location.reload();
+	            
+	        } catch (error) {
+	            console.error(error);
+	            alert("회원 정보는 저장되었으나, 프로필 이미지 처리에 실패했습니다.");
+	            location.reload(); // 일단 정보는 저장되었으므로 리로드
+	        }
+	
+	    } else {
+	        alert('처리 중 오류가 발생했습니다.');
+	    }
 	});
 
+	// 입력창에 값을 입력하면 빨간 경고 테두리와 메시지를 지워줌
+    ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+            });
+            el.addEventListener('change', function() {
+                this.classList.remove('is-invalid');
+            });
+        }
+    });
 }); // grid와 페이징 생성
 
 // 특정 유저의 프로필 이미지 불러오기
@@ -328,6 +387,13 @@ window.openInsertModal = function() {
 	pendingProfileFile = null;
 	isProfileDeleted = false;
 	resetProfileImageUI();
+	document.getElementById('profileImage').value = '';
+	
+	// 모든 에러 상태(빨간 테두리) 지우기
+    ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+    });
 		
     document.getElementById('modalTitle').textContent = '회원 정보 등록';
     document.getElementById('userForm').reset();
@@ -337,6 +403,7 @@ window.openInsertModal = function() {
     document.getElementById('saveBtn').dataset.mode = 'insert';
     document.getElementById('saveBtn').textContent = '등록';
     changeRoleArea(document.getElementById('adminCd').value);
+	document.getElementById('mcpActive').checked = true;
     
     // 신규 등록 시 프로필 이미지 초기화 (초기화면 유지)
     resetProfileImageUI();
@@ -358,9 +425,15 @@ window.openUpdateModal = function(id) {
 	// 신규 등록 시 이미지 상태 초기화
 	pendingProfileFile = null;
 	isProfileDeleted = false;
-	resetProfileImageUI();
+	document.getElementById('profileImage').value = '';
 	
-    // 제목 변경
+	// 모든 에러 상태(빨간 테두리) 지우기
+	['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
+	    const el = document.getElementById(id);
+	    if (el) el.classList.remove('is-invalid');
+	});	
+    
+	// 제목 변경
     document.getElementById('modalTitle').textContent = '회원 정보 수정';
 
     // hidden id
@@ -417,6 +490,13 @@ window.openUpdateModal = function(id) {
     } else {
         document.getElementById('statusActive').checked = true;
     }
+	
+	// 비밀번호 초기화 (mcpCd) 라디오
+	if (row.mcpCd === '02ACTIVE') {
+	    document.getElementById('mcpInactive').checked = true;
+	} else {
+	    document.getElementById('mcpActive').checked = true;
+	}
 
     // 수정 모드에서는 readonly
     document.getElementById('login').readOnly = true;

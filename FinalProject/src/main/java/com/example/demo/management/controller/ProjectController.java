@@ -30,6 +30,8 @@ import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.main.service.IssueCountVO;
 import com.example.demo.project.main.service.MainService;
 import com.example.demo.project.member.service.MemberDetailVO;
+import com.example.demo.project.notice.service.NoticeService;
+import com.example.demo.project.notice.service.NoticeVO;
 import com.example.demo.project.option.service.RoleVO;
 import com.example.demo.project.wiki.service.WikiVO;
 
@@ -49,11 +51,32 @@ public class ProjectController {
 	MainService mainService;
 	@Autowired
 	CalenderService calenderService;
+	@Autowired
+	NoticeService noticeService;
+	
 
 	@GetMapping("management/project")
-	public String listProject(ProjectVO vo, Model model, CompanyVO cvo) {
-	    
-		List<ProjectVO> list = projectservice.listProject(vo);
+	public String listProject(ProjectVO vo, Model model, CompanyVO cvo, GroupDetailVO gvo,
+			Authentication authentication) {
+
+		List<ProjectVO> list;
+		UserVO loginUser = null;
+		if (authentication != null && authentication.getPrincipal() instanceof UserVO u) {
+			loginUser = u;
+		}
+
+		boolean isEmployee = loginUser != null
+				&& ("03ROLE".equals(loginUser.getAdminCd())
+						|| "사원".equals(loginUser.getAdminNm())
+						|| (loginUser.getRole() != null && loginUser.getRole().contains("ROLE_USER")));
+
+		if (isEmployee) {
+			vo.setUserId(loginUser.getId());
+			list = projectservice.userProjectList(vo);
+		} else {
+			list = projectservice.listProject(vo);
+		}
+		
 	    List<CompanyVO> companyList = companyService.selectAll(cvo);
 	    
 	    model.addAttribute("projectinfo", Map.of("list", list != null ? list : List.of()));
@@ -137,15 +160,21 @@ public class ProjectController {
 	@GetMapping("/project/main")
 	public String goMain( ProjectVO vo , Model model, 
 			             IssueInputVO ivo, 
-			             IssueCountVO cvo,
+			             IssueCountVO icvo,
 			             CalenderVO Cvo,
+			             NoticeVO nvo,
+			             GroupDetailVO gmvo,
 			             HttpSession session) {
 		Long projectid = (Long) session.getAttribute("currentProjectId");
 		vo.setId(projectid);
-		cvo.setPrjId(projectid);
+		icvo.setPrjId(projectid);
+		nvo.setPrjId(projectid);
+		gmvo.setPrjId(projectid);
 		List<IssueOutputVO> issuelist = issueService.selectIssueList(ivo);
-		IssueCountVO count = mainService.issueCount(cvo);
-		List<CalenderVO> Clist = calenderService.selectAll(Cvo);
+		IssueCountVO count = mainService.issueCount(icvo);
+		List<CalenderVO> Clist = mainService.selectCalender(vo);
+		List<NoticeVO> Nlist = mainService.selectNotice(nvo);
+		List<GroupDetailVO> Glist = mainService.selectGroupMemberCount(gmvo);
 		if (count == null) {
 	        count = new IssueCountVO();
 	    }
@@ -154,6 +183,8 @@ public class ProjectController {
 		model.addAttribute("issuelist",issuelist);
 		model.addAttribute("count",count);
 		model.addAttribute("calender",Clist);
+		model.addAttribute("notice",Nlist);
+		model.addAttribute("selectgroup",Glist);
 		model.addAttribute("moduleList",projectservice.listModules(projectid));
 		return "project/main/main";
 	}

@@ -5,11 +5,11 @@ import java.util.Date;
 import lombok.Data;
 @Data
 public class NoticeVO {
-	private Integer id;
-	private Integer prjId;
+	private Long id;
+	private Long prjId;
 	private String title;
 	private String description;
-	private Integer memId;
+	private Long memId;
 	private Date createdOn;
 	private String isFixed;
 	

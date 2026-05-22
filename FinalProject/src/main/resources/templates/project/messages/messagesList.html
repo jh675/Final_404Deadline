@@ -1,47 +1,105 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout/projectLayout}">
 <head>
     <meta charset="UTF-8">
-    <title>메시지 목록</title>
+    <title>메시지 목록 및 상세</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; color: #333; }
+        .btn { padding: 8px 16px; border: 1px solid #ccc; background-color: #fff; border-radius: 4px; cursor: pointer; }
+        
+        .list-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .list-table th, .list-table td { border: 1px solid #eee; padding: 12px; text-align: center; }
+        .list-table th { background-color: #f9f9f9; }
+        
+        .detail-container { max-width: 750px; margin-top: 40px; }
+        .info-header { display: flex; gap: 40px; font-size: 14px; color: #666; margin: 15px 0 20px 0; }
+        .content-box { border: 1px solid #ddd; border-radius: 12px; padding: 20px; min-height: 140px; background-color: #fff; margin-bottom: 20px; }
+        .reply-item { border: 1px solid #e2e8f0; border-radius: 25px; padding: 12px 25px; margin-bottom: 12px; background-color: #fff; font-size: 14px; }
+        .reply-input-field { width: 100%; border: 1px solid #cbd5e1; border-radius: 25px; padding: 14px 25px; box-sizing: border-box; font-size: 14px; outline: none; }
+        .reply-submit-btn { width: 100%; background-color: #7cb1cd; color: white; border: none; border-radius: 8px; padding: 14px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 12px; }
+    </style>
 </head>
 <body>
-
-    <h2>게시판 메시지 목록 (게시판 번호: <span th:text="${boardId}">0</span>)</h2>
-    
+<div layout:fragment="content">
+    <h2> <span th:text="${board.name}">0</span> </h2>
+    <div th:text="${board.description}"></div>
     <div>
-        <button type="button" onclick="location.href='/boards/list'">뒤로가기</button>
-        <button type="button" th:onclick="|location.href='/messages/register?boardId=' + ${boardId}|">메시지 등록</button>
+        <button type="button" class="btn" onclick="location.href='/boards/list'">뒤로가기</button>
+        <button type="button" class="btn" th:onclick="|location.href='/messages/register?boardId=' + ${boardId}|">메시지 등록</button>
     </div>
-    
-    <br>
 
-    <table border="1">
+    <table class="list-table">
         <thead>
             <tr>
-                <th>번호</th>
+                <th style="width: 80px;">번호</th>
                 <th>제목</th>
-                <th>작성일</th>
-                <th>관리</th>
+                <th style="width: 150px;">작성일</th>
+                <th style="width: 150px;">관리</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="msg : ${list}">
                 <td th:text="${msg.id}">1</td>
-                <td>
-                    <a th:href="@{/messages/detail(id=${msg.id})}" th:text="${msg.title}">메시지 제목 위치</a>
+                <td style="text-align: left; padding-left: 20px;">
+                    <a th:href="@{/messages/list(boardId=${boardId}, id=${msg.id})}" th:text="${msg.title}">등록된 제목</a>
                 </td>
-                <td>2026-05-19</td>
+                <td th:text="${#dates.format(msg.createdOn, 'yyyy-MM-dd')}">2026-05-19</td>
                 <td>
-                    <button type="button" th:onclick="|location.href='@{/messages/modify(id=${msg.id})}'|">수정</button>
-                    <button type="button" th:onclick="|if(confirm('정말 삭제하시겠습니까?')) { location.href='/messages/delete?id=' + ${msg.id} + '&boardId=' + ${boardId} }|">삭제</button>
+                    <button type="button" class="btn" style="padding: 4px 10px; font-size: 12px;" th:onclick="|location.href='@{/messages/modify(id=${msg.id})}'|">수정</button>
+                    <button type="button" class="btn" style="padding: 4px 10px; font-size: 12px;" th:onclick="|if(confirm('정말 삭제하시겠습니까?')) { location.href='/messages/delete?id=' + ${msg.id} + '&boardId=' + ${boardId} }|">삭제</button>
                 </td>
             </tr>
-            
             <tr th:if="${#lists.isEmpty(list)}">
-                <td colspan="4">등록된 메시지가 없습니다. 첫 메시지를 작성해보세요!</td>
+                <td colspan="4" style="color: #888; padding: 30px;">등록된 메시지가 없습니다. </td>
             </tr>
         </tbody>
     </table>
 
+
+    <div th:if="${message != null}" class="detail-container">
+        <hr style="border: 0; height: 1px; background: #eee; margin-bottom: 20px;">
+        
+        <h1 style="margin: 0; font-size: 24px; font-weight: normal; color: #111;">
+            제목&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span th:text="${message.title}">등록된 진짜 제목</span>
+        </h1>
+        
+        <div class="info-header">
+            <div>작성자: <span th:text="${message.userId != null ? message.userId : '익명'}">user</span></div>
+            <div>작성일: <span th:text="${#temporals.format(message.createdOn, 'yyyy-MM-dd')}">2026-05-21</span></div>
+            <div>조회수: <span th:text="${message.views ?: 0}">0</span>회</div>
+        </div>
+
+        <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">내용</div>
+        <div class="content-box" th:text="${message.content}">
+            등록된 진짜 내용이 여기에 나옵니다.
+        </div>
+
+        <div style="font-size: 14px; margin-bottom: 30px;">
+            <span style="font-weight: bold; margin-right: 5px;">첨부파일</span> 📄 <span style="color: #555; text-decoration: underline; cursor: pointer;">첨부파일이 없습니다.</span>
+        </div>
+
+        <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">댓글</div>
+        <div th:each="reply : ${replyList}" class="reply-item">
+            <span th:text="${reply.userId}" style="font-weight: bold; color: #444;">작성자</span> : 
+            <span th:text="${reply.content}" style="color: #333; margin-left: 5px;">댓글 내용</span>
+        </div>
+        <div th:if="${#lists.isEmpty(replyList)}" class="reply-item" style="text-align: center; color: #aaa;">
+            등록된 댓글이 없습니다. 첫 댓글을 남겨보세요!
+        </div>
+
+        <form action="/replies/register" method="post" style="margin-top: 30px;">
+            <input type="hidden" name="messageId" th:value="${message.id}" />
+            <input type="hidden" name="boardId" th:value="${boardId}" />
+            
+            <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">댓글입력</div>
+            <div>
+                <input type="text" name="content" class="reply-input-field" placeholder="댓글을 입력하세요." required />
+            </div>
+            <button type="submit" class="reply-submit-btn">댓글등록</button>
+        </form>
+    </div>
+</div>
 </body>
 </html>

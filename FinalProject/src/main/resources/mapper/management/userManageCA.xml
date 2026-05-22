@@ -57,9 +57,11 @@
 	        #{email},
 	        #{adminCd},
 	        #{statusCd},
+	        #{mcpCd},
 	        #{prjManagerCd},
 			#{hireDate, jdbcType=DATE},
         	#{genderCd},
+        	
 	        #{result, mode=OUT, jdbcType=VARCHAR},
 	        #{id, mode=OUT, jdbcType=NUMERIC, javaType=java.lang.Long}
 	    ) }
@@ -68,13 +70,12 @@
 	<update id="updateUser">
 	    UPDATE USERS
 	    SET
-	        BIZ_NO = #{bizNo},
 	        NAME = #{name},
 	        TEL = #{tel},
 	        EMAIL = #{email},
-	        ADMIN_CD = #{adminCd},
 	        STATUS_CD = #{statusCd},
-	        PRJ_MANAGER_CD = #{prjManagerCd}
+	        PRJ_MANAGER_CD = #{prjManagerCd},
+	        MCP_CD = #{mcpCd}
 	    WHERE ID = #{id}
 	</update>
 	

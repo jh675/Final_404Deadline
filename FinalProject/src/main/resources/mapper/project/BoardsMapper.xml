@@ -42,6 +42,20 @@ set
 where id = #{id}
 </update>
 
+<update id="updateTopics">
+update boards
+set 
+    topics_count = nvl(topics_count,0) + 1
+where id = #{id}
+</update>
+
+<update id="reduceTopics">
+update boards
+set 
+    topics_count = case when nvl(topics_count,0) > 0 then topics_count - 1 else 0 end
+where id = #{id}
+</update>
+
 <delete id="delete">
 delete from boards
 where id = #{id}

@@ -21,22 +21,22 @@ public class BoardsServiceImpl implements BoardsService {
 	}
 
 	@Override
-	public BoardsVO selectOne(int id) {
+	public BoardsVO selectOne(Long id) {
 		return boardsMapper.selectOne(id);
 	}
 
 	@Override
-	public int delete(int id) {
+	public Long delete(Long id) {
 		return boardsMapper.delete(id);
 	}
 
 	@Override
-	public int update(BoardsVO boards) {
+	public Long update(BoardsVO boards) {
 		return boardsMapper.update(boards);
 	}
 
 	@Override
-	public int insert(BoardsVO boards) {
+	public Long insert(BoardsVO boards) {
 		return boardsMapper.insert(boards);
 	}
 }

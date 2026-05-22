@@ -5,13 +5,14 @@ import java.util.Date;
 import lombok.Data;
 @Data
 public class MessagesVO {
-	private	Integer id;
-	private Integer boardId;
-	private Integer fieldparentId;
+	private	Long id;
+	private Long boardId;
+	private Long fieldparentId;
+	private String title;
 	private String content;
-	private Integer userId;
-	private Integer repliesCount;
-	private Integer lastReplyId;
+	private Long userId;
+	private Long repliesCount;
+	private Long lastReplyId;
 	private Date createdOn;
 	private Date updatedOn;
 }

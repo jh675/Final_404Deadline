@@ -12,4 +12,6 @@ public interface LoginMapper {
 	UserVO selectOne(UserVO vo);
 	int updatePassword(UserVO user);
 	List<CompanyVO> searchActiveCompanies(String keyword);
+	int updateMcpCd(UserVO vo);
+	int updateLastLogOn(UserVO vo);
 }

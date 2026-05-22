@@ -29,7 +29,12 @@ public class ProjectServiceImpl implements ProjectService {
 	public List<ProjectVO> listProject(ProjectVO vo) {
 		return projectMapper.listProject(vo);
 	}
-
+	
+	@Override
+	public List<ProjectVO> userProjectList(ProjectVO vo){
+		return projectMapper.userProjectList(vo);
+	}
+	
 	@Override
 	public int projectInsert(ProjectVO vo) {
 		return projectMapper.projectInsert(vo);
@@ -42,18 +47,23 @@ public class ProjectServiceImpl implements ProjectService {
 	
 	@Transactional
 	public void insertProjectWithModules(ProjectVO vo, List<String> moduleList, GroupDetailVO gVo, MemberDetailVO mvo,WikiVO wVo,RoleVO rVo) {
-	    // 1. 프로젝트 삽입 (XML의 selectKey 덕분에 실행 후 vo.getId()에 값이 담깁니다)
+	    if (moduleList != null && !moduleList.isEmpty()) {
+	        vo.setEnaId(String.join(",", moduleList));
+	    }
+
 	    projectMapper.projectInsert(vo);
 
-	    // 2. 모듈 리스트가 있다면 반복문으로 ModulesVO를 만들어 삽입
-	    if (moduleList != null) {
-	        for (String moduleName : moduleList) {
-	            ModulesVO mVo = new ModulesVO();
-	            mVo.setPrjId(vo.getId());       // 방금 들어간 프로젝트 PK
-	            mVo.setEnaNameCd(moduleName);   // 모듈 코드 (GANTT, CALENDAR 등)
-	            projectMapper.moduleInsert(mVo); // 이 부분 매퍼 인터페이스와 XML에 추가 필요!
-	        }
+	    if (vo.getResultStatus() != null && !"OK".equalsIgnoreCase(vo.getResultStatus().trim())) {
+	        throw new IllegalStateException(
+	            vo.getResultMsg() != null ? vo.getResultMsg() : "프로젝트 생성에 실패했습니다.");
 	    }
+
+	    Long projectId = projectMapper.findIdByIdentifier(vo);
+	    if (projectId == null) {
+	        throw new IllegalStateException("생성된 프로젝트 ID를 조회할 수 없습니다.");
+	    }
+	    vo.setId(projectId);
+
 	    if(gVo != null) {
 	    	gVo.setPrjId(Long.valueOf(vo.getId()));
 	    	projectMapper.groupInsert(gVo);
@@ -117,4 +127,16 @@ public class ProjectServiceImpl implements ProjectService {
 	public List<ModulesVO> listModules(Long projectId){
 		return projectMapper.listModules(projectId);
 	}
+	
+	@Override
+	public List<GroupDetailVO> listGroup(GroupDetailVO gvo){
+		return projectMapper.listGroup(gvo);
+	}
+	
+	@Override
+	public List<MemberDetailVO> listMember(MemberDetailVO mvo){
+		return projectMapper.listMember(mvo);
+	}
+	
+	
 }

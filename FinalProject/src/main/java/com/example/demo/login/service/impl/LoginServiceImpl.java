@@ -1,9 +1,12 @@
 package com.example.demo.login.service.impl;
 
 import java.util.List;
+
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -21,7 +24,8 @@ import lombok.RequiredArgsConstructor;
 public class LoginServiceImpl implements LoginService, UserDetailsService {
 
 	private final LoginMapper loginMapper;
-
+	private final PasswordEncoder passwordEncoder;
+	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		
@@ -74,6 +78,10 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 		if (vo == null) {
 			throw new UsernameNotFoundException("해당 기업에 등록된 회원 정보를 찾을 수 없습니다.");
 		}
+		
+		if ("02ACTIVE".equals(vo.getStatusCd())) {
+	        throw new DisabledException("비활성화된 계정입니다. 관리자에게 문의하세요.");
+	    }
 
 		// DB 권한을 Security 권한 규격으로 변환
 		String role = switch (vo.getAdminNm()) {
@@ -89,5 +97,27 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 	@Override
 	public List<CompanyVO> searchActiveCompanies(String keyword) {
 		return loginMapper.searchActiveCompanies(keyword);
+	}
+	
+	@Override
+	public void updateMcpCd(UserVO vo) {
+	    loginMapper.updateMcpCd(vo);
+	}
+	
+	@Override
+	public void updatePassword(UserVO vo, String newPassword) {
+		// 1. 평문 비밀번호를 BCrypt로 암호화
+		String encodedPassword = passwordEncoder.encode(newPassword);
+		
+		// 2. 암호화된 비밀번호를 vo에 셋팅
+		vo.setPassword(encodedPassword);
+		
+		// 3. MyBatis Mapper 호출 (앞서 수정하신 updatePassword 쿼리 실행)
+		loginMapper.updatePassword(vo);
+	}
+	
+	@Override
+	public void updateLastLogOn(UserVO vo) {
+		loginMapper.updateLastLogOn(vo);
 	}
 }

@@ -123,7 +123,7 @@ public class IssueController {
 	@PostMapping(value = "/issue/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String issueInsert(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
-
+		issueVO.setWriter((long)3);
 		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
@@ -142,6 +142,7 @@ public class IssueController {
 		if (issueVO.getId() == null) {
 			return "redirect:/issue/list";
 		}
+		issueVO.setLastUpdater((long)3);
 		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");

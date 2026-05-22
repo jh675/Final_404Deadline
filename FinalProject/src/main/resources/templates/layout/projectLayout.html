@@ -46,13 +46,13 @@
                 <li class="nav-item">
                     <a class="nav-link" 
                        th:classappend="${currentMenu == 'history' ? 'active fw-bold' : ''}" 
-                       th:href="@{#}">
+                       th:href="@{/project/history/list}">
                         작업내역
                     </a>
                 </li>
 
                 <!-- DB에서 가져온 활성화 모듈을 반복하면서 메뉴 그리기 -->
-                  <li class="nav-item" th:each="mod1 : ${moduleList}">
+                  <li class="nav-item" th:each="mod1 : ${session.moduleList}">
 
                     <!-- ENA_NAME_CD가 'NOTICE'면 공지사항 탭 생성 -->
                     <a th:if="${mod1.enaNameCd == '01MODULE'}" 
@@ -83,7 +83,7 @@
                     <a th:if="${mod1.enaNameCd == '02MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
-                       th:href="@{#}">간트차트</a>
+                       th:href="@{#/ganttchart/list}">간트차트</a>
 
                     <a th:if="${mod1.enaNameCd == '03MODULE'}" 
                        class="nav-link" 

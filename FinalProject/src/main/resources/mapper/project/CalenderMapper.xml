@@ -13,7 +13,10 @@
      and type_cd = #{typeCd}
     </if>
      <if test="keyword != null and keyword !=''">
-       and place like '%' || #{keyword} || '%'
+        AND (
+                PLACE LIKE '%' || #{keyword} || '%'
+                OR CAL_TEXT LIKE '%' || #{keyword} || '%'
+            )
      </if>
   </where>
   

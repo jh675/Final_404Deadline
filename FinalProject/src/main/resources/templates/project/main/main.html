@@ -11,13 +11,14 @@
 	  integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" 
 	  crossorigin="anonymous">
 </head>
+
 <body>
 <div layout:fragment="content">
 
             
 	
 
-	<table>
+	<table>	
 		<thead>
 			<tr>
 				<th></th>			
@@ -57,12 +58,41 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr >
-				<th></th>
-				<td ></td>
-				<td ></td>
+			<tr th:each= "ca : ${calender}">
+				<th th:text="${ca.calType}"></th>
+				<td th:text="${ca.place}"></td>
+				<td th:text="${#dates.format(ca.calStart,'HH:mm')}"></td>
 			</tr>
-			
+		</tbody>
+	</table>
+	<table>
+		<thead>
+			<tr>
+				<th>No</th>			
+				<th>공지사항</th>
+				<th>날짜</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each=" nt, stat : ${notice}" th:if="${stat.index < 3}">
+				<th th:text="${stat.count}"></th>
+				<td th:text="${nt.title}"></td>
+				<td th:text="${#dates.format(nt.createdOn,'yyyy-MM-dd')}"></td>
+			</tr>
+		</tbody>
+	</table>
+	<table>
+		<thead>
+			<tr>
+				<th>그룹명</th>			
+				<th>인원</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each=" g : ${selectgroup}">
+				<th th:text="${g.grpName}"></th>
+				<td th:text="${g.count}"></td>
+			</tr>
 		</tbody>
 	</table>
 	</div>

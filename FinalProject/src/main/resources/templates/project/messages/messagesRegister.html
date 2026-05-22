@@ -1,10 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout/projectLayout}">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <meta charset="UTF-8">
+    <title>프로젝트 게시판 관리</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; color: #333; background-color: #f9f9f9; }
+        .modify-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border: 1px solid #e1e1e1; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h2 { margin-bottom: 25px; font-size: 22px; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: bold; color: #2e7d32; margin-bottom: 8px; font-size: 15px; }
+        .form-group label .required { color: #d32f2f; margin-left: 4px; }
+        
+        .form-control { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .form-control:focus { border-color: #2e7d32; outline: none; }
+        
+        .btn-group { text-align: right; margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; }
+        .btn { padding: 10px 24px; border: 1px solid #ccc; background-color: #fff; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+        .btn-submit { background-color: #1b5e20; color: white; border: none; font-weight: bold; }
+        .btn-submit:hover { background-color: #2e7d32; }
+    </style>
 </head>
 <body>
-
+<div layout:fragment="content" class="modify-container">
+    <h2 th:text="${message?.id != null} ? '프로젝트 게시판 수정' : '프로젝트 게시판 등록'">게시판 관리</h2>
+    
+    <form th:action="${message?.id != null} ? @{/messages/update} : @{/messages/insert}" 
+           method="post" 
+           enctype="multipart/form-data">
+           
+        <input type="hidden" name="id" th:value="${message?.id}" />
+        <input type="hidden" name="boardId" th:value="${boardId}" />
+        
+        <div class="form-group">
+            <label for="title">게시글 제목 <span class="required">*</span></label>
+            <input type="text" id="title" name="title" class="form-control" th:value="${message?.title}" placeholder="게시판 이름을 입력하세요." required />
+        </div>
+        
+        <div class="form-group">
+            <label for="content">설명</label>
+            <textarea id="content" name="content" class="form-control" rows="8" placeholder="설명을 입력하세요." required th:text="${message?.content}"></textarea>
+        </div>
+        
+        <div class="form-group" th:if="${message?.id == null}">
+            <label for="attachments">첨부파일</label>
+            <input type="file" id="attachments" name="attachments" class="form-control" multiple="multiple">
+        </div>
+        
+        <div class="btn-group">
+            <button type="button" class="btn" th:onclick="|location.href='/messages/list?boardId=' + ${boardId}|">취소</button>
+            <button type="submit" class="btn btn-submit" th:text="${message?.id != null} ? '수정' : '등록'">확인</button>
+        </div>
+    </form>
+</div>
 </body>
 </html>

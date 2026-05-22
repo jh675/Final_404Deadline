@@ -9,8 +9,8 @@ import com.example.demo.project.notice.service.NoticeVO;
 public interface NoticeMapper {
 	
 	List<NoticeVO> selectAll(NoticeVO notice);
-    NoticeVO selectOne(int id);
-    int delete(int id);
-    int update(NoticeVO notice);
-    int insert(NoticeVO notice);
+    NoticeVO selectOne(Long id);
+    Long delete(Long id);
+    Long update(NoticeVO notice);
+    Long insert(NoticeVO notice);
 }

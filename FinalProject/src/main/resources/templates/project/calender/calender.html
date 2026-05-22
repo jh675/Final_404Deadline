@@ -11,7 +11,6 @@
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
 	rel="stylesheet">
-
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
 
@@ -114,8 +113,51 @@
 .search-btn:hover {
 	background: #0C447C;
 }
-</style>
 
+.form-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	flex-wrap: wrap;
+}
+
+.toastui-calendar-daygrid-cell.holiday .toastui-calendar-date {
+	color: #ff4d4d !important;
+}
+
+.toastui-calendar-more-events {
+	font-size: 0 !important;
+}
+
+.toastui-calendar-weekday-grid-more-events {
+	font-size: 0 !important;
+	display: block;
+	text-align: left; /* ✅ 왼쪽 정렬 */
+}
+
+.toastui-calendar-weekday-grid-more-events::before {
+	content: '+일정 더보기';
+	font-size: 11px;
+	color: #333;
+	display: block;
+	text-align: left;
+}
+
+.toastui-calendar-weekday-grid-more-events {
+	font-size: 0 !important;
+	display: block;
+	text-align: left; 
+}
+
+.toastui-calendar-weekday-grid-more-events::before {
+	content: '+일정 더보기';
+	font-size: 11px;
+	color: #333;
+	display: block;
+	text-align: left;
+}
+</style>
 
 <script
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -124,11 +166,8 @@
 	<div layout:fragment="content">
 
 		<div class="calendar-wrapper">
-			<!-- 일정 표시버튼 (월간, 주간, 일간) -->
 			<div
 				class="d-flex align-items-center gap-2 p-3 border rounded-3 mb-3 bg-white">
-
-				<!-- 월간/주간/일일 -->
 				<div class="btn-group" role="group">
 					<button type="button"
 						class="btn btn-outline-primary view-btn active"
@@ -138,8 +177,6 @@
 					<button type="button" class="btn btn-outline-primary view-btn"
 						onclick="changeView('day')">일일</button>
 				</div>
-
-				<!-- 이전/날짜/다음 -->
 				<div class="d-flex align-items-center gap-1">
 					<button type="button" class="btn btn-outline-secondary btn-sm"
 						onclick="calendar.prev(); updateDateLabel()">&lt;</button>
@@ -148,8 +185,6 @@
 					<button type="button" class="btn btn-outline-secondary btn-sm"
 						onclick="calendar.next(); updateDateLabel()">&gt;</button>
 				</div>
-
-				<!-- 검색 (오른쪽 정렬) -->
 				<div class="d-flex align-items-center gap-2 ms-auto">
 					<select class="form-select form-select-sm" id="typeCd"
 						onchange="filterEvents()" style="width: 100px;">
@@ -162,145 +197,134 @@
 					<button type="button" class="btn btn-primary btn-sm"
 						onclick="searchEvents()">검색</button>
 				</div>
-
 			</div>
-			<!-- 캘린더 -->
 			<div id="calendar" style="height: 500px"></div>
 		</div>
+		<!-- calendar-wrapper 끝 -->
 
-		<!-- ===== 일정 등록 모달 입력창 ===== -->
-
+		<!-- ===== 일정 등록 모달 ===== -->
 		<div class="modal fade" id="insertModalOverlay" tabindex="-1"
 			aria-hidden="true">
-			<div class="modal-dialog">
+			<div class="modal-dialog modal-dialog-scrollable">
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title">일정 등록</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 					</div>
 					<div class="modal-body">
-						<!-- <input id="test01"/> -->
 						<div class="row mb-3">
 							<div class="col">
 								<label class="form-label">시작 날짜</label> <input type="date"
 									id="ins_startDate" class="form-control bg-light" readonly>
 								<div class="form-text">시작일은 선택한 날짜로 고정됩니다.</div>
 							</div>
-
 							<div class="col">
 								<label class="form-label">종료 날짜</label> <input type="date"
 									id="ins_endDate" class="form-control" min="">
 							</div>
 						</div>
-						<div class="form-row">
-							<label class="form-label">일정장소 <span></span></label> <input
-								type="text" class="form-input" id="ins_place"
-								placeholder="텍스트를 입력해 주세요." />
-						</div>
-
-						<div class="form-row">
-							<label class="form-label">일정 내용</label> <input type="text"
-								class="form-input" id="ins_calText" placeholder="텍스트를 입력해 주세요." />
-						</div>
 						
-						 <!-- 공유 유형 드롭박스 부분 -->
+							<!-- 시간 선택 -->
 						<div class="form-row">
-							<div class="checkbox-row">
-								<label class="form-label" style="margin: 0;">공유 유형</label> <select
-									name="typeCd" class="form-select" id="ins_typeCd"
-									style="width: auto;">
-									<option value="">선택</option>
-									<option value="01CALTYPE">개인일정</option>
-									<option value="02CALTYPE">그룹일정</option>
-									<option value="03CALTYPE">회사일정</option>
-								</select> <label class="form-label" style="margin: 0;">공유여부</label> <label
-									class="checkbox-label"> <input type="radio"
-									name="sharingCd" value="02CALSHARE" id="ins_sharingMe" checked />
-									나만보기
-								</label> <label class="checkbox-label"> <input type="radio"
-									name="sharingCd" value="01CALSHARE" id="ins_sharingAll" /> 전체
-									공유
-								</label>
-							</div>
-						</div>
-						
-						<!-- 일정유형 추가 부분 -->
-						
-						<!-- 일정 유형 추가 -->
-						<div class="form-row">
-							<label class="form-label" style="margin: 0;">일정 유형</label> <select
-								name="calType" class="form-select" id="ins_calType"
-								style="width: auto;">
+							<label class="form-label mb-0">시작시간</label> <select
+								class="form-select" id="ins_calStart" style="width: auto;">
 								<option value="">선택</option>
-								<option value="MEETING">회의</option>
-								<option value="EVENT">행사</option>
-								<option value="VACATION">휴가/휴일</option>
-								<option value="EDUCATION">교육</option>
-								<option value="ETC">기타</option>
+								<option value="09:00:00">오전 09:00</option>
+								<option value="09:15:00">오전 09:15</option>
+								<option value="09:30:00">오전 09:30</option>
+								<option value="10:00:00">오전 10:00</option>
+								<option value="10:15:00">오전 10:15</option>
+								<option value="10:30:00">오전 10:30</option>
+								<option value="11:00:00">오전 11:00</option>
+								<option value="12:00:00">오후 12:00</option>
+								<option value="13:00:00">오후 01:00</option>
+								<option value="14:00:00">오후 02:00</option>
+								<option value="15:00:00">오후 03:00</option>
+								<option value="16:00:00">오후 04:00</option>
+								<option value="17:00:00">오후 05:00</option>
+								<option value="18:00:00">오후 06:00</option>
+							</select> <label class="form-label mb-0 ms-2">종료시간</label> <select
+								class="form-select" id="ins_calEnd" style="width: auto;">
+								<option value="">선택</option>
+								<option value="09:00:00">오전 09:00</option>
+								<option value="09:15:00">오전 09:15</option>
+								<option value="09:30:00">오전 09:30</option>
+								<option value="10:00:00">오전 10:00</option>
+								<option value="10:15:00">오전 10:15</option>
+								<option value="10:30:00">오전 10:30</option>
+								<option value="11:00:00">오전 11:00</option>
+								<option value="12:00:00">오후 12:00</option>
+								<option value="13:00:00">오후 01:00</option>
+								<option value="14:00:00">오후 02:00</option>
+								<option value="15:00:00">오후 03:00</option>
+								<option value="16:00:00">오후 04:00</option>
+								<option value="17:00:00">오후 05:00</option>
+								<option value="18:00:00">오후 06:00</option>
 							</select>
 						</div>
 
-						<!-- 일정 등록 시 시간선택 드롭박스 부분 -->
+						<div class="form-row">
+							<label class="form-label mb-0">일정장소</label> <input type="text"
+								class="form-control" id="ins_place" placeholder="텍스트를 입력해 주세요." />
+						</div>
+
+						<div class="form-row">
+							<label class="form-label mb-0">일정 내용</label> <input type="text"
+								class="form-control" id="ins_calText"
+								placeholder="텍스트를 입력해 주세요." />
+						</div>
+
+						<!-- 공유 유형 + 공유여부 한 줄 -->
+						<div class="form-row">
+							<label class="form-label mb-0">공유 유형</label> <select
+								name="typeCd" class="form-select" id="ins_typeCd"
+								style="width: auto;">
+								<option value="">선택</option>
+								<option value="01CALTYPE">개인일정</option>
+								<option value="02CALTYPE">그룹일정</option>
+								<option value="03CALTYPE">회사일정</option>
+							</select> <label class="form-label mb-0 ms-2">공유여부</label>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="sharingCd"
+									value="02CALSHARE" id="ins_sharingMe" checked /> <label
+									class="form-check-label" for="ins_sharingMe">나만보기</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sharingCd"
+									value="01CALSHARE" id="ins_sharingAll" /><label
+									class="form-check-label" for="ins_sharingAll">전체 공유</label>
+							</div>
+						</div>
+
+						<!-- 일정 유형 -->
+						<div class="form-row">
+							<label class="form-label mb-0">일정 유형</label> <select
+								name="calType" class="form-select" id="ins_calType"
+								style="width: auto;">
+								<option value="">선택</option>
+								<option value="01CALDETAIL">회의</option>
+								<option value="02CALDETAIL">행사</option>
+								<option value="03CALDETAIL">휴가/휴일</option>
+								<option value="04CALDETAIL">교육</option>
+								<option value="05CALDETAIL">기타</option>
+							</select>
+						</div>
 
 						<input type="hidden" id="ins_selectedStartDate"> <input
 							type="hidden" id="ins_selectedEndDate">
 
-						<div class="form-row">
-							<div class="time-row">
-								<span class="time-label">시작시간</span> <select class="form-select"
-									id="ins_calStart">
-									<option value="">선택</option>
-									<option value="09:00:00">오전 09:00</option>
-									<option value="09:15:00">오전 09:15</option>
-									<option value="09:30:00">오전 09:30</option>
-									<option value="10:00:00">오전 10:00</option>
-									<option value="10:00:00">오전 10:15</option>
-									<option value="10:00:00">오전 10:30</option>
-									<option value="11:00:00">오전 11:00</option>
-									<option value="12:00:00">오후 12:00</option>
-									<option value="13:00:00">오후 01:00</option>
-									<option value="13:00:00">오후 02:00</option>
-									<option value="13:00:00">오후 03:00</option>
-									<option value="13:00:00">오후 04:00</option>
-									<option value="13:00:00">오후 05:00</option>
-									<option value="13:00:00">오후 06:00</option>
-
-								</select> <span class="time-label">종료시간</span> <select
-									class="form-select" id="ins_calEnd">
-									<option value="">선택</option>
-									<option value="09:00:00">오전 09:00</option>
-									<option value="09:15:00">오전 09:15</option>
-									<option value="09:30:00">오전 09:30</option>
-									<option value="10:00:00">오전 10:00</option>
-									<option value="10:00:00">오전 10:15</option>
-									<option value="10:00:00">오전 10:30</option>
-									<option value="11:00:00">오전 11:00</option>
-									<option value="12:00:00">오후 12:00</option>
-									<option value="13:00:00">오후 01:00</option>
-									<option value="13:00:00">오후 02:00</option>
-									<option value="13:00:00">오후 03:00</option>
-									<option value="13:00:00">오후 04:00</option>
-									<option value="13:00:00">오후 05:00</option>
-									<option value="13:00:00">오후 06:00</option>
-
-								</select>
-							</div>
-						</div>
-
+					
 					</div>
-
+					<!-- modal-body 끝 -->
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary"
-							data-bs-dismiss="modal">취소</button>
+							data-bs-dismiss="modal"
+							onclick="calendar.clearGridSelections()">취소</button>
 						<button class="btn btn-primary" onclick="insertEvent()">확인</button>
 					</div>
 				</div>
+				<!-- modal-content 끝 -->
 			</div>
-
-
-
+			<!-- modal-dialog 끝 -->
 		</div>
-
+		<!-- modal fade 끝 -->
 
 		<div th:replace="~{project/calender/modal/calenderAdd}"></div>
 
@@ -325,7 +349,7 @@
         },
         month: {
 		  dayNames: ['일', '월', '화', '수', '목', '금', '토'],
-		  visibleEventCount: 3,
+		  visibleEventCount: 5,
         },
         calendars: [
         	{ id: 'holiday', name: '공휴일', color: '#fff', backgroundColor: '#ff4d4d', borderColor: '#ff4d4d' },
@@ -336,12 +360,10 @@
         template: {
             time(event) {
                 return `<span>${event.title}</span>`;
-            }
+            }     
         }
     });
 
-
-  
 	//=========================================================================================
 	// 2. 서버에서 일정 불러오기
 	//=========================================================================================   
@@ -351,7 +373,7 @@
         })
         .then(res => res.json())
         .then(data => {
-            calendar.clear();
+            calendar.clear(); // 캘린더 초기화 
             
             const events = data.map(item => ({
                 id: String(item.id),
@@ -374,6 +396,9 @@
                 } 
             }));
             calendar.createEvents(events);
+            
+            // 캘린더에 공휴일 일정 불러오기 
+            return loadHoliday(calendar.getDate().getFullYear());
         });
     }
     
@@ -450,6 +475,11 @@
 		}
 
 	});    
+    
+	// 등록 모달 닫힐 때 캘린더 선택 영역 초기화
+	document.getElementById('insertModalOverlay').addEventListener('hidden.bs.modal', function() {
+	    calendar.clearGridSelections();
+	});
 
     
     // 3) 일정 등록
@@ -475,7 +505,7 @@
 
 			'01CALTYPE': '01COLOR',  // 개인 → 핑크
 			'02CALTYPE': '02COLOR',  // 그룹 → 초록
-			'03CALTYPE': '03COLOR'   // 회사 → 노랑
+			'03CALTYPE': '03COLOR'   // 회사 → 파랑
         } 
         
         const colorTagCd = colortag[typeCd] || '';
@@ -517,6 +547,9 @@
 	
     // 1) 일정 클릭 시 수정 모달 띄우기
     calendar.on('clickEvent', ({event}) => {
+
+    	if(event.calendarId == 'holiday') return;
+    	
         if (event && event.id) {
             // 브라우저 캐시 데이터를 쪼개지 않고, 완벽하게 만들어 둔 DB 단건 조회 함수를 호출
             getEventDetail(event.id);
@@ -605,7 +638,7 @@
 		    const startTime = document.getElementById('upd_calStart').value; 
 		    const endTime = document.getElementById('upd_calEnd').value;     
 		    
-		    // 2. [★ 해결] 라디오 버튼 체크값 안전하게 선언하기 (ReferenceError 방지)
+		    // 2.오디오 버튼 체크값 안전하게 선언하기 (ReferenceError 방지)
 		    const checkedRadio = document.querySelector('input[name="sharingCd"]:checked');
 		    const sharingCd = checkedRadio ? checkedRadio.value : ''; // 변수를 확실하게 스코프에 등록
 		    
@@ -615,8 +648,7 @@
 		        return;
 		    }
 		
-		    // 4. [★ 해결] 시간 포맷 깨끗하게 처리하기 (초 단위 보정)
-		    // '09:30' 형태로 올 경우 ':00'을 붙이고, 이미 '09:30:00' 형태면 그대로 유지
+		    // 4. 시간 포맷 깨끗하게 처리하기 (초 단위 보정)
 		    const finalStart = startTime.split(':').length === 2 ? `${startTime}:00` : startTime;
 		    const finalEnd = endTime.split(':').length === 2 ? `${endTime}:00` : endTime;
 		
@@ -726,20 +758,28 @@
                   const end = item.calEnd ? item.calEnd.split('T')[0] : '';
 
                   const card = `
-                      <div class="card mb-2">
-                          <div class="card-body">
-                              <h6 class="card-title fw-bold">${item.place || '제목없음'}</h6>
-                              <p class="card-text mb-1">
-                                  <small class="text-muted">날짜: ${start} ~ ${end}</small>
-                              </p>
-                              <p class="card-text mb-1">내용: ${item.calText || '-'}</p>
-                              <p class="card-text mb-0">
-                                  <span class="badge bg-primary">${item.typeCd || ''}</span>
-                                  <span class="badge bg-secondary">${item.sharingCd || ''}</span>
-                              </p>
-                          </div>
-                      </div>
-                  `;
+                	    <div class="card mb-2">
+                	        <div class="card-body">
+                	            <h6 class="card-title fw-bold">${item.calText || '제목없음'}</h6>
+                	            <p class="card-text mb-1">
+                	                <small class="text-muted">날짜: ${start} ~ ${end}</small>
+                	            </p>
+                	            <p class="card-text mb-1">일정 장소: ${item.place || '장소없음'}</p>
+                	            <p class="card-text mb-1">일정 내용: ${item.calText || '-'}</p>
+                	            <p class="card-text mb-0">
+                	                <span class="badge bg-primary">${
+                	                    item.typeCd === '01CALTYPE' ? '개인일정' :
+                	                    item.typeCd === '02CALTYPE' ? '그룹일정' :
+                	                    item.typeCd === '03CALTYPE' ? '회사일정' : item.typeCd
+                	                }</span>
+                	                <span class="badge bg-secondary">${
+                	                    item.sharingCd === '01CALSHARE' ? '전체공유' :
+                	                    item.sharingCd === '02CALSHARE' ? '나만보기' : item.sharingCd
+                	                }</span>
+                	            </p>
+                	        </div>
+                	    </div>
+                	`;
                   list.innerHTML += card;
               });
              
@@ -823,10 +863,41 @@
         openModal('deleteConfirmOverlay');
     });
 }
+    
+    
+    //=========================================================================================
+    // 8. 공휴일 불러오기
+	//=========================================================================================	
 
+	  function loadHoliday(year) {
+		
+    	csrfFetch(`/holiday/list?year=${year}`, {
+    		 headers: { 'X-Requested-With': 'XMLHttpRequest' }   	
+    	})
+    	.then(res => res.json())
+    	.then(data => {
+		  const holiday = data.map(h => ({
+				id: 'holiday_' + h.id,
+				calendarId: 'holiday',
+				title: h.holidayName,
+				start: `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}`,
+	            end:   `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}`,
+	            isAllday:true,
+	            category: 'allday',
+	            isReadOnly: true,
+	            color: '#ff4d4d',            
+	            backgroundColor: 'transparent', 
+	            borderColor: 'transparent'   
+		  }));
+    		calendar.createEvents(holiday);
+    	});
+    	
+      }
+		
+		
 	
 	//=========================================================================================
-	//8. 기타 함수 
+	//9. 기타 함수 
 	//=========================================================================================	
 	
     // 날짜 표시 업데이트
@@ -857,7 +928,7 @@
 	
 	
 	//=========================================================================================
-	// 9. 초기화
+	// 10. 초기화
 	//=========================================================================================	    
     loadEvents();        // 데이터 로드
     updateDateLabel();
@@ -865,5 +936,6 @@
            
      </script>
 	</div>
+	<!-- layout:fragment="content" 끝 -->
 </body>
 </html>
