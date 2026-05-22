@@ -40,4 +40,7 @@ public interface GroupService {
      * {@code userIds}가 null이거나 비어 있으면 프로시저에 memIds를 넘기지 않음(null).
      */
     void updateGroup(Long prjId, Long grpId, List<Long> userIds);
+
+    /** 그룹 보유 권한(GRP_ROLE) 동기화 — 추가는 PROC_ROLE_UPDATE, 제거는 PROC_GRP_ROLE_DELETE */
+    void updateGroupRoles(Long prjId, Long grpId, List<Long> roleCds);
 }

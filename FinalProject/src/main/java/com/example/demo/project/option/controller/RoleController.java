@@ -1,7 +1,7 @@
 package com.example.demo.project.option.controller;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.demo.project.group.service.GroupListCriteria;
+import jakarta.servlet.http.HttpSession;
 import com.example.demo.project.group.service.GroupService;
-import com.example.demo.project.group.service.ProjectGroupRowVO;
-import com.example.demo.project.option.service.RoleGroupRowVO;
+import com.example.demo.project.option.service.RoleGroupsCriteria;
+import com.example.demo.project.option.service.RoleInfoCriteria;
+import com.example.demo.project.option.service.RoleListCriteria;
 import com.example.demo.project.option.service.RoleRevokeResultVO;
 import com.example.demo.project.option.service.RoleMenuSectionVO;
 import com.example.demo.project.option.service.RoleMenuSectionVO.CrudSlot;
@@ -36,39 +37,28 @@ import lombok.RequiredArgsConstructor;
  * 권한 관리 — {@code project/role/roleManagement.html} (TOAST UI Grid, {@code ROLE} 목록).
  */
 @Controller
-@RequestMapping("/project/option/role")
+@RequestMapping("/project/role")
 @RequiredArgsConstructor
 public class RoleController {
 
     private final RoleService roleService;
     private final GroupService groupService;
 
-    /** 권한(역할) 목록 화면 — 검색 조건 반영 후 Thymeleaf에 rows 전달 */
-    @GetMapping("/roleManagement")
-    public String roleManagementPage(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam(required = false) String permissionKey,
-            @RequestParam(required = false) String permissionName,
-            @RequestParam(required = false) String createdFrom,
-            @RequestParam(required = false) String createdTo,
-            Model model) {
-
-        RoleVO search = RoleVO.builder()
-                .prjId(prjId)
-                .permissionKey(nullToEmpty(permissionKey))
-                .permissionName(nullToEmpty(permissionName))
-                .createdFrom(nullToEmpty(createdFrom))
-                .createdTo(nullToEmpty(createdTo))
-                .build();
-
-        List<RoleVO> rows = roleService.selectRoleList(search);
-
-        model.addAttribute("rows", rows);
+    @GetMapping("/list")
+    public String roleList(RoleListCriteria criteria, HttpSession session, Model model) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return "redirect:/management/project";
+        }
+        criteria.setPrjId(prjId);
+        RoleVO search = criteria.toSearchVo();
+        model.addAttribute("rows", roleService.selectRoleList(search));
         model.addAttribute("prjId", prjId);
         model.addAttribute("permissionKey", search.getPermissionKey());
         model.addAttribute("permissionName", search.getPermissionName());
         model.addAttribute("createdFrom", search.getCreatedFrom());
         model.addAttribute("createdTo", search.getCreatedTo());
+        model.addAttribute("currentMenu", "role");
         return "project/role/roleManagement";
     }
 
@@ -76,13 +66,15 @@ public class RoleController {
      * 역할 상세 — {@code project/role/roleManagementInfo.html}
      * (프로젝트 {@code ROLE} + {@code ROLE_MENU}으로 연결된 {@code MENU} 권한 체크 표시)
      */
-    @GetMapping("/roleManagementInfo")
-    public String roleManagementInfoPage(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam(value = "roleCd", required = false) Long roleCd,
-            Model model) {
-
+    @GetMapping("/info")
+    public String roleInfo(RoleInfoCriteria criteria, HttpSession session, Model model) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return "redirect:/management/project";
+        }
+        Long roleCd = criteria.getRoleCd();
         model.addAttribute("prjId", prjId);
+        model.addAttribute("currentMenu", "role");
         List<RoleVO> allMenus = roleService.selectAllMenus();
 
         if (roleCd == null) {
@@ -115,31 +107,6 @@ public class RoleController {
         return "project/role/roleManagementInfo";
     }
 
-    /** 권한 목록 JSON (AJAX 검색용, 현재 HTML에서는 미사용) */
-    @GetMapping("/roleManagementList")
-    @ResponseBody
-    public Map<String, Object> roleManagementList(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam(required = false) String permissionKey,
-            @RequestParam(required = false) String permissionName,
-            @RequestParam(required = false) String createdFrom,
-            @RequestParam(required = false) String createdTo) {
-
-        RoleVO search = RoleVO.builder()
-                .prjId(prjId)
-                .permissionKey(nullToEmpty(permissionKey))
-                .permissionName(nullToEmpty(permissionName))
-                .createdFrom(nullToEmpty(createdFrom))
-                .createdTo(nullToEmpty(createdTo))
-                .build();
-
-        List<RoleVO> rows = roleService.selectRoleList(search);
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("content", rows);
-        body.put("prjId", prjId);
-        return body;
-    }
 
     /**
      * 역할 목록에서 선택 후 「제거」 — DB {@code PROC_ROLE_DELETE} 호출.
@@ -147,14 +114,18 @@ public class RoleController {
     @PostMapping("/deleteRoles")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteRoles(
-            @RequestBody(required = false) RoleDeleteRequest body) {
+            @RequestBody(required = false) RoleDeleteRequest body, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
+        }
         Map<String, Object> ok = new LinkedHashMap<>();
         ok.put("ok", true);
         try {
             if (body == null) {
                 return badRequest("요청 본문이 비어 있습니다.");
             }
-            roleService.deleteRolesForProject(body.prjId(), body.roleCds());
+            roleService.deleteRolesForProject(prjId, body.roleCds());
             return ResponseEntity.ok(ok);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
@@ -174,18 +145,16 @@ public class RoleController {
     /** 역할 상세 — 이 {@code ROLE_CD}를 보유한 그룹 목록(TOAST Grid 데이터). */
     @GetMapping("/roleGroups")
     @ResponseBody
-    public Map<String, Object> roleGroups(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam(value = "roleCd", required = false) Long roleCd) {
-
-        List<RoleGroupRowVO> list =
-                roleCd == null ? List.of() : roleService.selectRoleGroupsList(prjId, roleCd);
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("content", list);
-        body.put("prjId", prjId);
-        body.put(
-                "grpRoleCount",
-                roleCd == null ? 0 : roleService.countGroupsWithRole(roleCd));
+    public Map<String, Object> roleGroups(RoleGroupsCriteria criteria, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        Long roleCd = criteria.getRoleCd();
+        if (prjId == null) {
+            return Map.of("ok", false, "message", "프로젝트를 선택한 뒤 이용해 주세요.");
+        }
+        Map<String, Object> body = listBody(
+                prjId,
+                roleCd == null ? List.of() : roleService.selectRoleGroupsList(prjId, roleCd));
+        body.put("grpRoleCount", roleCd == null ? 0 : roleService.countGroupsWithRole(roleCd));
         return body;
     }
 
@@ -193,10 +162,14 @@ public class RoleController {
     @PostMapping("/registerRole")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> registerRole(
-            @RequestBody(required = false) RoleCreateRequest body) {
+            @RequestBody(required = false) RoleCreateRequest body, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
+        }
         Map<String, Object> resp = new LinkedHashMap<>();
         try {
-            if (body == null || body.prjId() == null) {
+            if (body == null) {
                 return badRequest("요청이 올바르지 않습니다.");
             }
             String roleName = body.roleName() == null ? "" : body.roleName().trim();
@@ -205,7 +178,7 @@ public class RoleController {
             }
             RoleRevokeResultVO result =
                     roleService.createRole(
-                            body.prjId(), roleName, body.menuRoleIds(), body.grpIds());
+                            prjId, roleName, body.menuRoleIds(), body.grpIds());
             resp.put("resultStatus", result.getResultStatus());
             resp.put("resultMessage", result.getResultMsg());
             resp.put("ok", result.isOk());
@@ -225,34 +198,33 @@ public class RoleController {
     /** 역할 상세 그룹 관리 모달 — 프로젝트 그룹 선택 목록 */
     @GetMapping("/roleGroupPickList")
     @ResponseBody
-    public Map<String, Object> roleGroupPickList(@RequestParam("prjId") Long prjId) {
-        GroupListCriteria criteria =
-                GroupListCriteria.builder()
-                        .prjId(prjId)
-                        .grpName("")
-                        .createdFrom("")
-                        .createdTo("")
-                        .build();
-        List<ProjectGroupRowVO> rows = groupService.selectProjectGroupList(criteria);
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("content", rows);
-        body.put("prjId", prjId);
-        return body;
+    public Map<String, Object> roleGroupPickList(HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return Map.of("ok", false, "message", "프로젝트를 선택한 뒤 이용해 주세요.");
+        }
+        return listBody(
+                prjId,
+                groupService.selectProjectGroupList(GroupListCriteria.forPrjId(prjId)));
     }
 
     /** 역할 상세 — 메뉴 권한 수정 ({@code PROC_ROLE_UPDATE}) */
     @PostMapping("/updateRole")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> updateRole(
-            @RequestBody(required = false) RoleUpdateRequest body) {
+            @RequestBody(required = false) RoleUpdateRequest body, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
+        }
         Map<String, Object> resp = new LinkedHashMap<>();
         try {
-            if (body == null || body.prjId() == null || body.roleCd() == null) {
+            if (body == null || body.roleCd() == null) {
                 return badRequest("요청이 올바르지 않습니다.");
             }
             RoleRevokeResultVO result =
                     roleService.updateRole(
-                            body.prjId(),
+                            prjId,
                             body.roleCd(),
                             body.menuRoleIds(),
                             body.grpIds());
@@ -303,17 +275,19 @@ public class RoleController {
         }
     }
 
-    /** MyBatis 동적 SQL에서 null 대신 빈 문자열로 통일 */
-    private static String nullToEmpty(String s) {
-        return s == null ? "" : s;
+    private static Map<String, Object> listBody(Long prjId, List<?> content) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", content);
+        body.put("prjId", prjId);
+        return body;
     }
 
     /** ROLE.CREATED_ON → yyyy-MM-dd (상세 화면 표시용) */
-    private static String formatRoleDateYmd(LocalDateTime dt) {
+    private static String formatRoleDateYmd(Date dt) {
         if (dt == null) {
             return "";
         }
-        return dt.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        return new SimpleDateFormat("yyyy-MM-dd").format(dt);
     }
 
     /** MENU 전체 + ROLE_MENU 연결 여부 → 상세 화면 체크박스 섹션 DTO로 변환 */
@@ -455,15 +429,13 @@ public class RoleController {
     }
 
     /** {@link #deleteRoles} JSON 본문 */
-    public static record RoleDeleteRequest(Long prjId, List<Long> roleCds) {}
+    public static record RoleDeleteRequest(List<Long> roleCds) {}
 
-    /** {@link #registerRole} JSON 본문 — {@code grpIds} 없거나 빈 배열이면 {@code p_grp_ids} 미전달과 동일(null) */
     public static record RoleCreateRequest(
-            Long prjId, String roleName, List<String> menuRoleIds, List<Long> grpIds) {}
+            String roleName, List<String> menuRoleIds, List<Long> grpIds) {}
 
-    /** {@link #updateRole} JSON 본문 — {@code grpIds} 없거나 빈 배열이면 {@code p_grp_ids} 미전달과 동일(null) */
     public static record RoleUpdateRequest(
-            Long prjId, Long roleCd, List<String> menuRoleIds, List<Long> grpIds) {}
+            Long roleCd, List<String> menuRoleIds, List<Long> grpIds) {}
 
     /** {@link #revokeRoleFromGroup} JSON 본문 */
     public static record RoleRevokeRequest(

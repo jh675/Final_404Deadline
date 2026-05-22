@@ -8,4 +8,5 @@ public class WikiPageVO {
 	private Long wikiId;
 	private String title;
 	private Long lastVer;
+	private Long prjId;
 }
