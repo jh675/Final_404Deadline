@@ -8,4 +8,5 @@ public interface LoginService {
 	List<CompanyVO> searchActiveCompanies(String keyword);
 	void updateMcpCd(UserVO vo);
 	void updatePassword(UserVO vo, String newPassword);
+	void updateLastLogOn(UserVO vo);
 }

@@ -24,23 +24,19 @@ public class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHand
         
     	String errorMessage = "로그인에 실패했습니다. 관리자에게 문의하세요.";
 
-        // 1. 비밀번호가 틀렸거나, 아이디가 없을 때 (스프링이 예외를 숨겨서 이리로 옴)
+        // 비밀번호가 틀렸거나, 아이디가 없을 때 
         if (exception instanceof BadCredentialsException) {
             errorMessage = "아이디 또는 비밀번호가 일치하지 않습니다.";
         } 
-        // 2. 비활성화 계정 예외가 직접 넘어왔을 때
+        // 비활성화 계정 예외 처리
         else if (exception instanceof DisabledException) {
             errorMessage = exception.getMessage(); 
         } 
-        // 3. 스프링이 예외를 포장해서 던졌을 때 (LoginServiceImpl에서 던진 예외들이 보통 여기로 옴)
+        // 스프링이 예외를 포장해서 던졌을 때 (LoginServiceImpl에서 던진 예외들이 보통 여기로 옴)
         else if (exception instanceof InternalAuthenticationServiceException) {
             // 포장지 안에 있는 실제 예외 메시지를 꺼내서 사용
             errorMessage = exception.getMessage(); 
         } 
-        // 4. (참고용) 아이디 없음 예외가 그대로 넘어올 때
-        else if (exception instanceof UsernameNotFoundException) {
-            errorMessage = exception.getMessage();
-        }
 
         errorMessage = URLEncoder.encode(errorMessage, "UTF-8");
         

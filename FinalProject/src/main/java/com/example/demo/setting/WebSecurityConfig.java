@@ -43,10 +43,10 @@ class WebSecurityConfig {
 			
 			// 자동 로그인 설정 추가
 			.rememberMe((remember) -> remember
-							.key("my-secret-key") // 쿠키 암호화에 사용될 고유 키 
-							.rememberMeParameter("remember-me") // HTML의 체크박스 name 속성과 일치해야 함
-							.tokenValiditySeconds(86400 * 30) // 유지 시간 (초 단위, 예: 30일)
-							.userDetailsService(userDetailsService) // 사용자 조회를 위한 서비스 세팅
+						.key("my-secret-key") // 쿠키 암호화에 사용될 고유 키 
+						.rememberMeParameter("remember-me") // HTML의 체크박스 name 속성과 일치해야 함
+						.tokenValiditySeconds(86400 * 30) // 유지 시간 (초 단위, 예: 30일)
+						.userDetailsService(userDetailsService) // 사용자 조회를 위한 서비스 세팅
 			);
 		// @formatter:on
 

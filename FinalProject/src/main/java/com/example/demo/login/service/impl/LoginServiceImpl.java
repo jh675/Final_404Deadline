@@ -115,4 +115,9 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 		// 3. MyBatis Mapper 호출 (앞서 수정하신 updatePassword 쿼리 실행)
 		loginMapper.updatePassword(vo);
 	}
+	
+	@Override
+	public void updateLastLogOn(UserVO vo) {
+		loginMapper.updateLastLogOn(vo);
+	}
 }

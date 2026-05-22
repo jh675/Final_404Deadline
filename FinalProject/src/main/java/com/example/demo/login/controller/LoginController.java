@@ -42,17 +42,17 @@ public class LoginController {
 	        
 	        // 시스템 관리자
 	        if(roles.contains("ROLE_ADMIN")) {
-	            return "mainpage/test";
+	            return "redirect:/management/project";
 	        }
 
 	        // 기업 관리자
 	        if(roles.contains("ROLE_CADMIN")) {
-	            return "mainpage/test2";
+	            return "redirect:/management/project";
 	        }
 
 	        // 일반 사용자
 	        if(roles.contains("ROLE_USER")) {
-	            return "mainpage/test3";
+	            return "redirect:/management/project";
 	        }
 
 	        // 권한이 없는 경우

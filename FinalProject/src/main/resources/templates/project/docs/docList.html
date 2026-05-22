@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/projectLayout}">
+<head>
+<meta charset="UTF-8">
+<title>문서목록</title>
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script
+	src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+</head>
+<body>
+	<div layout:fragment="content">
+
+		<div id="grid"></div>
+
+		<script th:inline="javascript">
+		const docsData = /*[[${list}]]*/ [];
+		
+		const grid = new tui.Grid({
+			el: document.getElementById('grid'), 
+			autowidth: true,
+			scrollX: false,        // 가로 스크롤바 숨김
+			scrollY: false,        // 세로 스크롤바 숨김 (rowHeight × 행수 만큼 자동 확장)
+			bodyHeight: 'auto',    // 본문 높이를 데이터 양에 맞춰 자동 조절
+			rowHeight: 36,         // 한 행의 높이(px)
+			minBodyHeight: 100,    // 데이터 0건일 때 최소 높이(px)
+
+			data: docsData,
+			columns: [
+				    { header: '제목', name: 'title', width: 150, align:'center', sortable: true },
+				    { header: '작성자', name: 'memId', width: 150, align:'center', sortable: true },
+				    { header: '작성일', name: 'createdOn', width: 300, align:'left', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') },
+				    { header: '수정',
+				       name: 'edit',
+				       width: 100, align:'center', sortable: true, 
+				       formatter: function() {
+				            return '<button class="btn btn-secondary btn-sm">수정</button>';
+				        }
+	            }
+
+			],
+			rowHeaders: ['rowNum'],
+			
+			pageOptions: {
+				useClient: true,
+				perPage: 10
+			}
+
+		});
+	</script>
+	</div>
+</body>
+</html>

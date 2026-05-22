@@ -27,8 +27,8 @@ class MvcConfig implements WebMvcConfigurer {
 	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(passwordResetInterceptor)
-				.addPathPatterns("/**") // 모든 주소(URL)로 들어오는 요청에 대해 이 인터셉터를 실행하겠다!
+		registry.addInterceptor(passwordResetInterceptor) // 비밀번호 재설정이 필요한 경우
+				.addPathPatterns("/**") // 모든 주소(URL)로 들어오는 요청에 대해 이 인터셉터를 실행
 				.excludePathPatterns(
 					"/login/**",        // 로그인 및 비밀번호 재설정 관련 URL은 제외 
 					"/css/**",          // 화면 스타일 정적 리소스 제외
