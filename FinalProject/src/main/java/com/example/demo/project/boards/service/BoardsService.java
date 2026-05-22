@@ -5,11 +5,11 @@ import java.util.List;
 public interface BoardsService {
     List<BoardsVO> selectAll(BoardsVO boards);
 
-    BoardsVO selectOne(int id);
+    BoardsVO selectOne(Long id);
 
-    int delete(int id);
+    Long delete(Long id);
 
-    int update(BoardsVO boards);
+    Long update(BoardsVO boards);
 
-    int insert(BoardsVO boards);
+    Long insert(BoardsVO boards);
 }

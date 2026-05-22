@@ -39,7 +39,6 @@ layout:decorate="~{layout/projectLayout}">
 <body>
 <div layout:fragment="content">
 
-    
     <h5 class="fw-bold text-dark mb-3">프로젝트 게시판 목록</h5>
     
     <div class="d-flex justify-content-end mb-2">
@@ -76,13 +75,20 @@ layout:decorate="~{layout/projectLayout}">
                             
                             <td>관리자</td>
                             <td class="text-muted">2026-05-19</td>
-                            <td>
-                                <span class="badge bg-light text-success border border-success-subtle px-2 py-0.5" th:text="${board.topicsCount} + '건'">0회</span>
+                            <td th:with="
+                                searchVO=${new com.example.demo.project.messages.service.MessagesVO()},
+                                dummy=${searchVO.setBoardId(board.id)},
+                                msgList=${@messagesServiceImpl.selectAll(searchVO)},
+                                realCount=${msgList != null ? #lists.size(msgList) : 0}
+                            ">
+                                <span th:classappend="${realCount > 0} ? 'bg-light-green text-success border border-success-subtle' : 'bg-light text-muted border'"
+                                      class="badge px-2 py-0.5" 
+                                      th:text="${realCount} + '건'">0건</span>
                             </td>
                             <td>
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn-action-modify" th:onclick="|location.href='@{/boards/modify(id=${board.id})}'|">수정</button>
-                                    <button type="button" class="btn-action-delete" th:onclick="|if(confirm('정말 삭제하시겠습니까?')) { location.href='@{/boards/delete(id=${board.id})}' }|">삭제</button>
+                                    <button type="button" class="btn-action-delete" th:onclick="|if(confirm('이 게시판을 삭제하시겠습니까?')) { location.href='@{/boards/delete(id=${board.id})}' }|">삭제</button>
                                 </div>
                             </td>
                         </tr>

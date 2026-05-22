@@ -10,8 +10,8 @@ import com.example.demo.project.messages.service.MessagesVO;
 public interface MessagesMapper {
 	
 	List<MessagesVO> selectAll(MessagesVO messages);
-	MessagesVO selectOne(int id);
-	int delete(int id);
-	int update(MessagesVO messages);
-	int insert(MessagesVO messages);
+	MessagesVO selectOne(Long id);
+	Long delete(Long id);
+	Long update(MessagesVO messages);
+	Long insert(MessagesVO messages);
 }

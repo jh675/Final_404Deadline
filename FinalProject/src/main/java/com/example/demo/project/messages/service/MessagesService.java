@@ -5,11 +5,11 @@ import java.util.List;
 public interface MessagesService {
     List<MessagesVO> selectAll(MessagesVO messages);
 
-    MessagesVO selectOne(int id);
+    MessagesVO selectOne(Long id);
 
-    int delete(int id);
+    Long delete(Long id);
 
-    int update(MessagesVO messages);
+    Long update(MessagesVO messages);
 
-    int insert(MessagesVO messages);
+    Long insert(MessagesVO messages);
 }
