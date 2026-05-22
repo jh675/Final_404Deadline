@@ -10,9 +10,9 @@ import com.example.demo.project.boards.service.BoardsVO;
 public interface BoardsMapper {
 	
 	List<BoardsVO> selectAll(BoardsVO boards);
-	BoardsVO selectOne(int id);
-	int delete(int id);
-	int update(BoardsVO boards);
-	int updateTopics(int id);
-	int insert(BoardsVO boards);
+	BoardsVO selectOne(Long id);
+	Long delete(Long id);
+	Long update(BoardsVO boards);
+	Long updateTopics(Long id);
+	Long insert(BoardsVO boards);
 }
