@@ -121,6 +121,42 @@
 	margin-bottom: 12px;
 	flex-wrap: wrap;
 }
+
+.toastui-calendar-daygrid-cell.holiday .toastui-calendar-date {
+	color: #ff4d4d !important;
+}
+
+.toastui-calendar-more-events {
+	font-size: 0 !important;
+}
+
+.toastui-calendar-weekday-grid-more-events {
+	font-size: 0 !important;
+	display: block;
+	text-align: left; /* ✅ 왼쪽 정렬 */
+}
+
+.toastui-calendar-weekday-grid-more-events::before {
+	content: '+일정 더보기';
+	font-size: 11px;
+	color: #333;
+	display: block;
+	text-align: left;
+}
+
+.toastui-calendar-weekday-grid-more-events {
+	font-size: 0 !important;
+	display: block;
+	text-align: left; 
+}
+
+.toastui-calendar-weekday-grid-more-events::before {
+	content: '+일정 더보기';
+	font-size: 11px;
+	color: #333;
+	display: block;
+	text-align: left;
+}
 </style>
 
 <script
@@ -263,11 +299,11 @@
 								name="calType" class="form-select" id="ins_calType"
 								style="width: auto;">
 								<option value="">선택</option>
-								<option value="MEETING">회의</option>
-								<option value="EVENT">행사</option>
-								<option value="VACATION">휴가/휴일</option>
-								<option value="EDUCATION">교육</option>
-								<option value="ETC">기타</option>
+								<option value="01CALDETAIL">회의</option>
+								<option value="02CALDETAIL">행사</option>
+								<option value="03CALDETAIL">휴가/휴일</option>
+								<option value="04CALDETAIL">교육</option>
+								<option value="05CALDETAIL">기타</option>
 							</select>
 						</div>
 
@@ -292,10 +328,6 @@
 
 		<div th:replace="~{project/calender/modal/calenderAdd}"></div>
 
-
-
-		<div th:replace="~{project/calender/modal/calenderAdd}"></div>
-
 		<script
 			src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
 		<script>
@@ -317,7 +349,7 @@
         },
         month: {
 		  dayNames: ['일', '월', '화', '수', '목', '금', '토'],
-		  visibleEventCount: 3,
+		  visibleEventCount: 5,
         },
         calendars: [
         	{ id: 'holiday', name: '공휴일', color: '#fff', backgroundColor: '#ff4d4d', borderColor: '#ff4d4d' },
@@ -328,12 +360,10 @@
         template: {
             time(event) {
                 return `<span>${event.title}</span>`;
-            }
+            }     
         }
     });
 
-
-  
 	//=========================================================================================
 	// 2. 서버에서 일정 불러오기
 	//=========================================================================================   
@@ -343,7 +373,7 @@
         })
         .then(res => res.json())
         .then(data => {
-            calendar.clear();
+            calendar.clear(); // 캘린더 초기화 
             
             const events = data.map(item => ({
                 id: String(item.id),
@@ -366,6 +396,9 @@
                 } 
             }));
             calendar.createEvents(events);
+            
+            // 캘린더에 공휴일 일정 불러오기 
+            return loadHoliday(calendar.getDate().getFullYear());
         });
     }
     
@@ -514,6 +547,9 @@
 	
     // 1) 일정 클릭 시 수정 모달 띄우기
     calendar.on('clickEvent', ({event}) => {
+
+    	if(event.calendarId == 'holiday') return;
+    	
         if (event && event.id) {
             // 브라우저 캐시 데이터를 쪼개지 않고, 완벽하게 만들어 둔 DB 단건 조회 함수를 호출
             getEventDetail(event.id);
@@ -602,7 +638,7 @@
 		    const startTime = document.getElementById('upd_calStart').value; 
 		    const endTime = document.getElementById('upd_calEnd').value;     
 		    
-		    // 2. [★ 해결] 라디오 버튼 체크값 안전하게 선언하기 (ReferenceError 방지)
+		    // 2.오디오 버튼 체크값 안전하게 선언하기 (ReferenceError 방지)
 		    const checkedRadio = document.querySelector('input[name="sharingCd"]:checked');
 		    const sharingCd = checkedRadio ? checkedRadio.value : ''; // 변수를 확실하게 스코프에 등록
 		    
@@ -612,8 +648,7 @@
 		        return;
 		    }
 		
-		    // 4. [★ 해결] 시간 포맷 깨끗하게 처리하기 (초 단위 보정)
-		    // '09:30' 형태로 올 경우 ':00'을 붙이고, 이미 '09:30:00' 형태면 그대로 유지
+		    // 4. 시간 포맷 깨끗하게 처리하기 (초 단위 보정)
 		    const finalStart = startTime.split(':').length === 2 ? `${startTime}:00` : startTime;
 		    const finalEnd = endTime.split(':').length === 2 ? `${endTime}:00` : endTime;
 		
@@ -828,10 +863,41 @@
         openModal('deleteConfirmOverlay');
     });
 }
+    
+    
+    //=========================================================================================
+    // 8. 공휴일 불러오기
+	//=========================================================================================	
 
+	  function loadHoliday(year) {
+		
+    	csrfFetch(`/holiday/list?year=${year}`, {
+    		 headers: { 'X-Requested-With': 'XMLHttpRequest' }   	
+    	})
+    	.then(res => res.json())
+    	.then(data => {
+		  const holiday = data.map(h => ({
+				id: 'holiday_' + h.id,
+				calendarId: 'holiday',
+				title: h.holidayName,
+				start: `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}`,
+	            end:   `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}`,
+	            isAllday:true,
+	            category: 'allday',
+	            isReadOnly: true,
+	            color: '#ff4d4d',            
+	            backgroundColor: 'transparent', 
+	            borderColor: 'transparent'   
+		  }));
+    		calendar.createEvents(holiday);
+    	});
+    	
+      }
+		
+		
 	
 	//=========================================================================================
-	//8. 기타 함수 
+	//9. 기타 함수 
 	//=========================================================================================	
 	
     // 날짜 표시 업데이트
@@ -862,7 +928,7 @@
 	
 	
 	//=========================================================================================
-	// 9. 초기화
+	// 10. 초기화
 	//=========================================================================================	    
     loadEvents();        // 데이터 로드
     updateDateLabel();
