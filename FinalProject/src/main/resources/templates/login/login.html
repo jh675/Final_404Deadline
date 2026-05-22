@@ -14,12 +14,11 @@
 
 <div layout:fragment="content">
 <div id="wrapper">
-	<div th:if="${param.error}" class="alert alert-danger">
-		회원정보가 일치하지 않습니다.
-	</div>
-
 	<div th:if="${param.logout}" class="alert alert-success">
 		로그아웃 했습니다.
+	</div>
+	
+	<div th:if="${param.error}" class="alert alert-danger" th:text="${param.exception}">
 	</div>
 
 	<form th:action="@{/login}"

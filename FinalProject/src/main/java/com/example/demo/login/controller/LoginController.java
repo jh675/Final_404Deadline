@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -75,4 +76,30 @@ public class LoginController {
 	    return loginService.searchActiveCompanies(keyword);
 	}
 
+		@GetMapping("/login/password-reset")
+		public String showPasswordResetPage() {
+			return "login/pwReset"; 
+		}
+	
+	// 비밀번호 재설정 처리
+	@PostMapping("/login/password-reset")
+	@ResponseBody
+	public String processPasswordReset(@RequestParam("newPassword") String newPassword, 
+                                       Authentication authentication) {
+        
+		// 현재 로그인되어 있는 사용자 객체 가져오기
+		if (authentication != null && authentication.getPrincipal() instanceof UserVO) {
+			UserVO vo = (UserVO) authentication.getPrincipal();
+			loginService.updatePassword(vo, newPassword);
+			vo.setMcpCd("02ACTIVE");
+			return "success";
+		}
+		
+		return "fail";
+	}
+		
+	@GetMapping("/errorTest")
+	public String errorpgTest() {
+		return "error/403";
+	}
 }
