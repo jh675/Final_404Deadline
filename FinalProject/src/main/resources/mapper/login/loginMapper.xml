@@ -52,4 +52,10 @@
 	    SET mcp_cd = #{mcpCd}
 	    WHERE id = #{id}
 	</update>
+	
+	<update id="updateLastLogOn">
+		UPDATE users
+		SET    last_log_on = SYSDATE
+		WHERE  id = #{id}
+	</update>
 </mapper>

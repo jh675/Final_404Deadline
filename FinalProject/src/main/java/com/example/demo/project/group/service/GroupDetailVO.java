@@ -20,4 +20,7 @@ public class GroupDetailVO {
     private String prjName;
     private String grpName;
     private LocalDateTime createdOn;
+    
+    //프로젝트메인에 그룹별 인원 카운트용
+    private Long count;
 }

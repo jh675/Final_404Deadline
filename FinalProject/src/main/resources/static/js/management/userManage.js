@@ -18,13 +18,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         columns: [
 
-            {
-                header: 'No',
-                name: 'id',
-                width: 80,
-                align: 'center',
-                sortable: true
-            },
 
             {
                 header: '아이디',
@@ -96,6 +89,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         ],
+		rowHeaders: ['rowNum'],
 
         // 페이징
         pageOptions: {
@@ -393,6 +387,7 @@ window.openInsertModal = function() {
 	pendingProfileFile = null;
 	isProfileDeleted = false;
 	resetProfileImageUI();
+	document.getElementById('profileImage').value = '';
 	
 	// 모든 에러 상태(빨간 테두리) 지우기
     ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
@@ -430,7 +425,7 @@ window.openUpdateModal = function(id) {
 	// 신규 등록 시 이미지 상태 초기화
 	pendingProfileFile = null;
 	isProfileDeleted = false;
-	resetProfileImageUI();
+	document.getElementById('profileImage').value = '';
 	
 	// 모든 에러 상태(빨간 테두리) 지우기
 	['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {

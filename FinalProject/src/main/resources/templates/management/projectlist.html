@@ -37,6 +37,66 @@
 	    display: inline-flex;
 	    justify-content: center;
 	}
+
+	.project-search-bar {
+	    display: flex;
+	    flex-wrap: wrap;
+	    gap: 1rem;
+	    margin: 1rem 0;
+	    align-items: flex-end;
+	    overflow: visible;
+	    position: relative;
+	    z-index: 100;
+	}
+
+	.search-autocomplete {
+	    position: relative;
+	    min-width: 260px;
+	    flex: 1;
+	    max-width: 360px;
+	    overflow: visible;
+	}
+
+	.search-input-group {
+	    display: flex;
+	    gap: 0.35rem;
+	}
+
+	.search-input-group .form-control {
+	    flex: 1;
+	}
+
+	.search-autocomplete label {
+	    display: block;
+	    margin-bottom: 0.25rem;
+	    font-size: 0.875rem;
+	    font-weight: 500;
+	}
+
+	.search-dropdown {
+	    display: none;
+	    position: absolute;
+	    top: 100%;
+	    left: 0;
+	    width: 100%;
+	    background: white;
+	    border: 1px solid #ccc;
+	    z-index: 9999;
+	    max-height: 200px;
+	    overflow-y: auto;
+	    color: black;
+	    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.search-dropdown-item {
+	    padding: 8px 12px;
+	    cursor: pointer;
+	    border-bottom: 1px solid #eee;
+	}
+
+	.search-dropdown-item:hover {
+	    background-color: #f8f9fa;
+	}
     </style>
   </head>
   <body>
@@ -50,7 +110,35 @@
 	    <option value="progress">진행중인 프로젝트</option>
 	    <option value="complete">종료된 프로젝트</option>
 	</select>
-	
+
+	<!-- 검색용 데이터 (Thymeleaf → DOM, JS에서 읽음) -->
+	<div id="searchDataStore" class="d-none" aria-hidden="true">
+	    <span th:each="c : ${companyList}" class="search-company-data"
+	          th:attr="data-biz-no=${c.bizNo}, data-name=${c.companyName}"></span>
+	    <span th:each="p : ${projectinfo.list}" class="search-project-data"
+	          th:attr="data-prj-name=${p.prjName}, data-biz-no=${p.bizNo}"></span>
+	</div>
+
+	<div class="project-search-bar">
+	    <div class="search-autocomplete"
+	         th:if="${#authentication.principal.adminNm == '시스템관리자'}">
+	        <label for="companySearch">회사명</label>
+	        <input type="text" id="companySearch" class="form-control form-control-sm"
+	               placeholder="회사명 입력..." autocomplete="off">
+	        <input type="hidden" id="selectedBizNo">
+	        <div id="companyDropdown" class="search-dropdown"></div>
+	    </div>
+	    <div class="search-autocomplete">
+	        <label for="projectSearch">프로젝트명</label>
+	        <div class="search-input-group">
+	            <input type="text" id="projectSearch" class="form-control form-control-sm"
+	                   placeholder="프로젝트명 입력..." autocomplete="off">
+	            <button type="button" id="listSearchBtn" class="btn btn-sm btn-primary">검색</button>
+	        </div>
+	        <div id="projectDropdown" class="search-dropdown"></div>
+	    </div>
+	</div>
+
     <div style="width: 100%; overflow-x: auto; padding-right: 200px;">
     <table border="1" class="table numbered-table" style="width: calc(100% - 200px);">
       <thead>
@@ -68,8 +156,11 @@
       <tbody>
         <!-- 2. data-status 속성을 추가하여 closedDate 여부에 따라 progress 또는 complete 값을 가짐 -->
         <tr th:each="pro : ${projectinfo.list}"
-            th:if="${#authentication.principal.adminNm == '시스템관리자' or (pro.bizNo == #authentication.principal.bizNo and pro.prjHide =='N')}"
-            th:data-status="${pro.closedDate == null ? 'progress' : 'complete'}">
+            th:if="${#authentication.principal.adminNm == '시스템관리자'
+                or (#authentication.principal.adminNm == '사원' and pro.prjHide == 'N')
+                or (pro.bizNo == #authentication.principal.bizNo and pro.prjHide == 'N')}"
+            th:data-status="${pro.closedDate == null ? 'progress' : 'complete'}"
+            th:attr="data-prj-name=${pro.prjName}, data-biz-no=${pro.bizNo}">
           <td class="row-index"></td>
           <td ><a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a></td>
           <td th:text="${pro.prjIdentifier}"></td>
@@ -119,26 +210,136 @@
       crossorigin="anonymous"
     ></script>
     
-    <!-- 3. 필터링을 위한 자바스크립트 코드 추가 -->
-    <script>
-      function filterProjects() {
+    <!-- 3. 필터링 및 검색 자바스크립트 -->
+    <script th:inline="javascript">
+      let selectedBizNo = '';
+      let selectedPrjName = '';
+      let appliedBizNo = '';
+      let appliedPrjName = '';
+      let appliedCompanyTerm = '';
+      let appliedProjectTerm = '';
+      let companyData = [];
+      let projectData = [];
+
+      function loadSearchData() {
+        companyData = Array.from(document.querySelectorAll('.search-company-data')).map(el => ({
+          bizNo: el.getAttribute('data-biz-no') || '',
+          companyName: el.getAttribute('data-name') || ''
+        }));
+        projectData = Array.from(document.querySelectorAll('.search-project-data')).map(el => ({
+          prjName: el.getAttribute('data-prj-name') || '',
+          bizNo: el.getAttribute('data-biz-no') || ''
+        }));
+      }
+
+      function includesTerm(text, term) {
+        if (!text || !term) return false;
+        return text.toLowerCase().includes(term.toLowerCase());
+      }
+
+      function applyAllFilters() {
         const selectValue = document.getElementById("projectStatusSelect").value;
-        const rows = document.querySelectorAll(".numbered-table tbody tr");
+        const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-name]");
 
         rows.forEach(row => {
           const status = row.getAttribute("data-status");
-          if (status === selectValue) {
-            row.style.display = ""; // 보이기
-          } else {
-            row.style.display = "none"; // 숨기기
+          const bizNo = row.getAttribute("data-biz-no") || '';
+          const prjName = row.getAttribute("data-prj-name") || '';
+
+          let visible = status === selectValue;
+
+          if (appliedBizNo) {
+            visible = visible && bizNo === appliedBizNo;
+          } else if (appliedCompanyTerm) {
+            const matchedBizNos = companyData
+              .filter(c => includesTerm(c.companyName, appliedCompanyTerm))
+              .map(c => c.bizNo);
+            visible = visible && matchedBizNos.includes(bizNo);
+          }
+
+          if (appliedPrjName) {
+            visible = visible && prjName === appliedPrjName;
+          } else if (appliedProjectTerm) {
+            visible = visible && includesTerm(prjName, appliedProjectTerm);
+          }
+
+          row.style.display = visible ? "" : "none";
+        });
+      }
+
+      function filterProjects() {
+        applyAllFilters();
+      }
+
+      function executeListSearch() {
+        const companyInput = document.getElementById('companySearch');
+        const projectInput = document.getElementById('projectSearch');
+
+        appliedCompanyTerm = companyInput ? companyInput.value.trim() : '';
+        appliedProjectTerm = projectInput ? projectInput.value.trim() : '';
+        appliedBizNo = selectedBizNo;
+        appliedPrjName = selectedPrjName;
+
+        applyAllFilters();
+      }
+
+      function renderDropdown(dropdownEl, matches, inputEl, onSelect) {
+        dropdownEl.innerHTML = '';
+        if (!matches.length) {
+          const empty = document.createElement('div');
+          empty.className = 'search-dropdown-item text-muted';
+          empty.textContent = '검색 결과가 없습니다.';
+          dropdownEl.appendChild(empty);
+          dropdownEl.style.display = 'block';
+          return;
+        }
+        matches.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'search-dropdown-item';
+          div.textContent = item.label;
+          div.addEventListener('click', function() {
+            inputEl.value = item.label;
+            onSelect(item);
+            dropdownEl.style.display = 'none';
+          });
+          dropdownEl.appendChild(div);
+        });
+        dropdownEl.style.display = 'block';
+      }
+
+      function showAutocomplete(inputEl, dropdownEl, getItems, onSelect) {
+        if (!inputEl || !dropdownEl) return;
+
+        const term = inputEl.value.trim();
+        onSelect(null);
+
+        if (term.length < 1) {
+          dropdownEl.style.display = 'none';
+          return;
+        }
+
+        renderDropdown(dropdownEl, getItems(term), inputEl, onSelect);
+      }
+
+      function setupAutocomplete(inputEl, dropdownEl, getItems, onSelect) {
+        if (!inputEl || !dropdownEl) return;
+
+        inputEl.addEventListener('input', function() {
+          onSelect(null);
+          if (this.value.trim().length < 1) {
+            dropdownEl.style.display = 'none';
+            return;
+          }
+          showAutocomplete(inputEl, dropdownEl, getItems, onSelect);
+        });
+
+        document.addEventListener('click', function(e) {
+          if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
+            dropdownEl.style.display = 'none';
           }
         });
       }
 
-      // 페이지가 처음 로드될 때도 필터링을 한 번 실행해줍니다. (기본값: 진행중인 프로젝트)
-      window.addEventListener("DOMContentLoaded", filterProjects);
-      
-      
       function openDeleteModal(button) {
     	    // 1. 버튼에 저장된 프로젝트 ID(숫자)를 가져옵니다.
     	    const projectId = button.getAttribute("data-id");
@@ -152,20 +353,86 @@
     	        console.log("선택된 프로젝트 ID 주입 완료 : ", projectId);
     	    }
     	}
-    </script>
-    <script th:inline="javascript">
-      // 1. 페이지 로드 시 실행될 기존 필터 함수
-      window.addEventListener("DOMContentLoaded", filterProjects);
-      
-      // 2. [추가] 컨트롤러에서 보낸 msg가 존재할 때만 alert 띄우기
-      /*<![CDATA[*/
+      document.addEventListener('DOMContentLoaded', function() {
+        loadSearchData();
+
+        const companySearch = document.getElementById('companySearch');
+        const companyDropdown = document.getElementById('companyDropdown');
+        const selectedBizNoInput = document.getElementById('selectedBizNo');
+
+        if (companySearch && companyDropdown) {
+          setupAutocomplete(
+            companySearch,
+            companyDropdown,
+            function(term) {
+              const seen = new Set();
+              return companyData
+                .filter(c => includesTerm(c.companyName, term))
+                .filter(c => {
+                  if (seen.has(c.bizNo)) return false;
+                  seen.add(c.bizNo);
+                  return true;
+                })
+                .map(c => ({ label: c.companyName, bizNo: c.bizNo }));
+            },
+            function(item) {
+              if (item) {
+                selectedBizNo = item.bizNo;
+                if (selectedBizNoInput) selectedBizNoInput.value = item.bizNo;
+              } else {
+                selectedBizNo = '';
+                if (selectedBizNoInput) selectedBizNoInput.value = '';
+              }
+            }
+          );
+        }
+
+        const projectSearch = document.getElementById('projectSearch');
+        const projectDropdown = document.getElementById('projectDropdown');
+
+        if (projectSearch && projectDropdown) {
+          setupAutocomplete(
+            projectSearch,
+            projectDropdown,
+            function(term) {
+              const seen = new Set();
+              return projectData
+                .filter(p => includesTerm(p.prjName, term))
+                .filter(p => {
+                  if (seen.has(p.prjName)) return false;
+                  seen.add(p.prjName);
+                  return true;
+                })
+                .map(p => ({ label: p.prjName, prjName: p.prjName }));
+            },
+            function(item) {
+              selectedPrjName = item ? item.prjName : '';
+            }
+          );
+        }
+
+        const listSearchBtn = document.getElementById('listSearchBtn');
+        if (listSearchBtn) {
+          listSearchBtn.addEventListener('click', executeListSearch);
+        }
+
+        const searchInputs = [companySearch, projectSearch].filter(Boolean);
+        searchInputs.forEach(input => {
+          input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              executeListSearch();
+            }
+          });
+        });
+
+        applyAllFilters();
+      });
+
       const serverMessage = /*[[${msg}]]*/ null;
-      
       if (serverMessage) {
-          alert(serverMessage);
+        alert(serverMessage);
       }
-      /*]]>*/
-      
     </script>
     </div>
   </body>
