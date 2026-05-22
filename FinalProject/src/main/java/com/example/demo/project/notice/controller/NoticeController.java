@@ -59,7 +59,7 @@ public class NoticeController {
     //목록페이지
     @GetMapping("/notice/list")
     public String noticeList(Model model,NoticeVO notice) {
-    	notice.setPrjId(4);
+    	notice.setPrjId((long) 4);
         model.addAttribute("list", noticeService.selectAll(notice));
         return "project/notice/noticeList";
     }

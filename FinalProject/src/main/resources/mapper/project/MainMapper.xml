@@ -57,7 +57,46 @@
 	WHERE prj_id = #{prjId}
  </select>
  
+  <select id="selectCalender" resultType="com.example.demo.management.service.ProjectVO">
   
-
+  SELECT 
+	    c.id AS Cid,
+	    c.place AS place,
+	    c.cal_text AS calText,
+	    c.cal_start AS calStart,
+	    c.cal_end AS calEnd,
+	    cc.name AS calType, 
+	    m.user_id AS userId,
+	    g.name AS gname
+	FROM project p
+	INNER JOIN grp g       ON p.id = g.prj_id
+	INNER JOIN member m    ON g.id = m.grp_id
+	INNER JOIN calender c  ON m.id = c.mem_id
+	-- 💡 공통코드 테이블 조인 추가
+	LEFT OUTER JOIN sub_code cc ON c.cal_type = cc.s_code
+	                              AND cc.m_code = '00CALDETAIL'
+	WHERE p.id = #{id}
+	  AND TRUNC(SYSDATE) + 1 > c.cal_start 
+	  AND c.cal_end >= TRUNC(SYSDATE)       
+	ORDER BY c.cal_start ASC
+  </select>
+  <select id="selectNotice" resultType="com.example.demo.project.notice.service.NoticeVO">
+  	select prj_id,title,created_on
+  	from notice 
+  	where prj_id = #{prjId}
+  	order by created_on desc
+  </select>
+ 
+   <select id="selectgroup" resultType="com.example.demo.project.group.service.GroupDetailVO">
+   	SELECT 
+	    g.id,
+	    g.name  as grpName,
+	    COUNT(m.user_id) as count
+	FROM grp g
+	INNER JOIN member m ON g.id = m.grp_id
+	WHERE g.prj_id = #{prjId}
+	GROUP BY g.id, g.name
+	ORDER BY g.id ASC
+   </select>
  
  </mapper>

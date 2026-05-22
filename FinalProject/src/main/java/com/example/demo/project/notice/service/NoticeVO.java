@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class NoticeVO {
 	private Integer id;
-	private Integer prjId;
+	private Long prjId;
 	private String title;
 	private String description;
 	private Integer memId;
