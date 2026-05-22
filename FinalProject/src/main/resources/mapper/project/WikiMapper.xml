@@ -47,7 +47,7 @@
 		values (#{id}, 1,#{pageId}, #{content}, #{describe}, #{memId})
 	</insert>
 	
-	<insert id="updatetWikiContent" parameterType="wikiContentVO">
+	<insert id="updateWikiContent" parameterType="wikiContentVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
 			select w_content_seq.nextval from dual
 		</selectKey>
