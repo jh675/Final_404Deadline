@@ -30,7 +30,7 @@
 		<div class="mb-3 position-relative">
 	        <label for="companyNameInput" class="form-label">소속 기업명</label>
 	        <!-- 화면에 보여지는 기업명 입력창 -->
-	        <input type="text" id="companyNameInput" class="form-control" placeholder="기업명을 입력하세요" autocomplete="off">
+	        <input type="text" id="companyNameInput" class="form-control" placeholder="기업명을 입력하세요" autocomplete="off" value='미래소프트웨어'>
 	        
 	        <!-- 실제 서버로 전송되는 사업자번호 (hidden) -->
 	        <input type="hidden" id="bizNo" name="bizNo">
@@ -80,7 +80,7 @@
 		
 		<!-- 자동로그인 -->
 		<div class="mb-3 form-check">
-		   <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
+		   <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me" checked>
 		   <label class="form-check-label" for="rememberMe" style="cursor: pointer;">
 		        <span id="test">자동 로그인</span>
 		    </label>
