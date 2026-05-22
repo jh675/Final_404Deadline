@@ -22,6 +22,8 @@ import java.util.List;
 public class HistoryVO {
   /** 히스토리 ID({@code HISTORY.ID}) */
   private Long id;
+  /** 그리드·모달용 — {@code HISTORY.ID} 와 동일 */
+  private Long historyId;
   /** 테이블 이름({@code HISTORY.TABLE_NAME}) */
   private String tableName;
   /** 대상 PK — 이슈 ID 또는 프로젝트 ID({@code HISTORY.TABLE_ID}) */

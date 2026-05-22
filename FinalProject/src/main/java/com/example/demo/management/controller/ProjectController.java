@@ -24,13 +24,14 @@ import com.example.demo.management.service.ProjectVO;
 import com.example.demo.project.calender.service.CalenderService;
 import com.example.demo.project.calender.service.CalenderVO;
 import com.example.demo.project.group.service.GroupDetailVO;
-import com.example.demo.project.group.service.GroupService;
 import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.main.service.IssueCountVO;
 import com.example.demo.project.main.service.MainService;
 import com.example.demo.project.member.service.MemberDetailVO;
+import com.example.demo.project.notice.service.NoticeService;
+import com.example.demo.project.notice.service.NoticeVO;
 import com.example.demo.project.option.service.RoleVO;
 import com.example.demo.project.wiki.service.WikiVO;
 
@@ -50,6 +51,8 @@ public class ProjectController {
 	MainService mainService;
 	@Autowired
 	CalenderService calenderService;
+	@Autowired
+	NoticeService noticeService;
 	
 
 	@GetMapping("management/project")
@@ -157,15 +160,21 @@ public class ProjectController {
 	@GetMapping("/project/main")
 	public String goMain( ProjectVO vo , Model model, 
 			             IssueInputVO ivo, 
-			             IssueCountVO cvo,
+			             IssueCountVO icvo,
 			             CalenderVO Cvo,
+			             NoticeVO nvo,
+			             GroupDetailVO gmvo,
 			             HttpSession session) {
 		Long projectid = (Long) session.getAttribute("currentProjectId");
 		vo.setId(projectid);
-		cvo.setPrjId(projectid);
+		icvo.setPrjId(projectid);
+		nvo.setPrjId(projectid);
+		gmvo.setPrjId(projectid);
 		List<IssueOutputVO> issuelist = issueService.selectIssueList(ivo);
-		IssueCountVO count = mainService.issueCount(cvo);
-		List<CalenderVO> Clist = calenderService.selectAll(Cvo);
+		IssueCountVO count = mainService.issueCount(icvo);
+		List<CalenderVO> Clist = mainService.selectCalender(vo);
+		List<NoticeVO> Nlist = mainService.selectNotice(nvo);
+		List<GroupDetailVO> Glist = mainService.selectGroupMemberCount(gmvo);
 		if (count == null) {
 	        count = new IssueCountVO();
 	    }
@@ -174,6 +183,8 @@ public class ProjectController {
 		model.addAttribute("issuelist",issuelist);
 		model.addAttribute("count",count);
 		model.addAttribute("calender",Clist);
+		model.addAttribute("notice",Nlist);
+		model.addAttribute("selectgroup",Glist);
 		model.addAttribute("moduleList",projectservice.listModules(projectid));
 		return "project/main/main";
 	}

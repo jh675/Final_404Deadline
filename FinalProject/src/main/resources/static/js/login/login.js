@@ -16,7 +16,7 @@ companyNameInput.addEventListener('input', function(e) {
         return;
     }
 
-    // 서버 부하를 막기 위한 디바운스 (타이핑 후 0.3초 뒤에 검색)
+    // 서버 부하를 막기 위한 타이핑 후 0.3초 뒤에 검색
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         fetch(`/login/companies/search?keyword=${encodeURIComponent(keyword)}`)
@@ -56,7 +56,7 @@ document.addEventListener('click', function(e) {
 });
 // 폼 제출 시 검증 및 자동 매칭 로직
 document.getElementById('loginForm').addEventListener('submit', function(e) {
-    // 1. 우선 폼 기본 제출 동작을 막습니다. (비동기 처리를 위해)
+    // 폼 기본 제출 동작 막기
     e.preventDefault();
 
     const companyNameInput = document.getElementById('companyNameInput');
@@ -77,30 +77,36 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
         feedbackDiv.textContent = "기업명을 입력해주세요.";
         isValid = false;
     }
-    if (!username.value.trim()) { username.classList.add('is-invalid'); isValid = false; }
-    if (!password.value.trim()) { password.classList.add('is-invalid'); isValid = false; }
+    if (!username.value.trim()) { 
+		username.classList.add('is-invalid'); 
+		isValid = false; 
+	}
+    if (!password.value.trim()) { 
+		password.classList.add('is-invalid');
+		isValid = false;
+	}
 
     if (!isValid) return; // 빈칸이 있으면 여기서 중단
 
-    // 2. 사용자가 드롭다운에서 이미 '클릭'하여 bizNo가 채워져 있는 경우 -> 바로 폼 제출
+    // bizNo가 채워져 있는 경우 
     if (bizNoInput.value.trim()) {
         this.submit(); // this.submit()은 이벤트를 다시 발생시키지 않고 순수하게 폼만 제출합니다.
         return;
     }
 
-    // 3. 사용자가 마우스로 선택 안 하고, 이름만 치고 엔터/로그인 누른 경우 -> 자동 매칭 시도
+    // 기업이름을 선택 안 하고, 이름만 치고 엔터/로그인 누른 경우 -> 자동 매칭 시도
     const keyword = companyNameInput.value.trim();
     
     fetch(`/login/companies/search?keyword=${encodeURIComponent(keyword)}`)
         .then(response => response.json())
         .then(data => {
-            // 입력한 텍스트와 완전히 똑같은 이름의 기업 찾기
+            // 입력한 텍스트와 같은 이름의 기업 찾기
             const exactMatch = data.find(c => c.companyName === keyword);
 
             if (exactMatch) {
                 // 정확히 일치하는 기업이 있으면 자동 세팅 후 제출
                 bizNoInput.value = exactMatch.bizNo;
-                companyNameInput.value = exactMatch.companyName; // 정식 명칭으로 깔끔하게 정리
+                companyNameInput.value = exactMatch.companyName;
                 this.submit();
             } 
             else if (data.length === 1) {
@@ -126,4 +132,19 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
             console.error('Error:', error);
             alert("기업 정보를 확인하는 중 오류가 발생했습니다.");
         });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    // 주소창에 파라미터(?error=... 또는 ?logout)가 있는지 확인
+    if (window.location.search.includes('error') || window.location.search.includes('logout')) {
+        
+        // 브라우저가 History API를 지원하는 경우
+        if (window.history.replaceState) {
+            // 파라미터를 제외한 깨끗한 원본 URL만 추출 (/login)
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            
+            // 페이지 이동 없이 주소창의 URL만 깨끗한 URL로 덮어쓰기
+            window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        }
+    }
 });

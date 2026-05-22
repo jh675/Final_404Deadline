@@ -1,6 +1,7 @@
 package com.example.demo.project.option.service;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,5 +22,6 @@ public class RoleGroupRowVO {
     private Integer grpMemberCnt;
 
     /** {@code GRP.CREATED_ON} */
-    private LocalDateTime createdOn;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date createdOn;
 }

@@ -1,6 +1,7 @@
 package com.example.demo.project.option.service;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,7 +56,8 @@ public class RoleVO {
     private String roleMth;
 
     /** 목록: {@code ROLE.CREATED_ON} */
-    private LocalDateTime createdOn;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date createdOn;
 
     /** 목록: 이 역할을 보유한 {@code GRP} 수 */
     private int grpCnt;

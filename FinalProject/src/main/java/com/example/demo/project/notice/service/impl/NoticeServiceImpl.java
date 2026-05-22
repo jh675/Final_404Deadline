@@ -21,22 +21,22 @@ public class NoticeServiceImpl implements NoticeService {
 	}
 
 	@Override
-	public NoticeVO selectOne(int id) {
+	public NoticeVO selectOne(Long id) {
 		return noticeMapper.selectOne(id);
 	}
 
 	@Override
-	public int delete(int id) {
+	public Long delete(Long id) {
 		return noticeMapper.delete(id);
 	}
 
 	@Override
-	public int update(NoticeVO notice) {
+	public Long update(NoticeVO notice) {
 		return noticeMapper.update(notice);
 	}
 
 	@Override
-	public int insert(NoticeVO notice) {
+	public Long insert(NoticeVO notice) {
 		return noticeMapper.insert(notice);
 	}
 }

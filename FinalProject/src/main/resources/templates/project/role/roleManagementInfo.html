@@ -3,7 +3,7 @@
   lang="ko"
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/defaultLayout}"
+  layout:decorate="~{layout/projectLayout}"
 >
   <head>
     <meta charset="UTF-8" />
@@ -423,7 +423,7 @@
     <div layout:fragment="content">
       <a
         class="role-back-link"
-        th:href="@{/project/option/role/roleManagement(prjId=${prjId})}"
+        th:href="@{/project/role/list}"
         >← 역할 목록으로</a
       >
 
@@ -846,8 +846,7 @@
         document.addEventListener("DOMContentLoaded", function () {
           var prjId = /*[[${prjId}]]*/ 0;
           var listUrl =
-            "/project/option/role/roleManagement?prjId=" +
-            encodeURIComponent(String(prjId));
+            "/project/role/list";
 
           function confirmModal(message, title) {
             if (window.RoleQuestionModal && window.RoleQuestionModal.confirm) {
@@ -943,12 +942,11 @@
               var menuRoleIds = collectMenuRoleIds();
               saveBtn.disabled = true;
               try {
-                var res = await fetch("/project/option/role/registerRole", {
+                var res = await fetch("/project/role/registerRole", {
                   method: "POST",
                   headers: buildCsrfHeaders(),
                   credentials: "same-origin",
                 body: JSON.stringify({
-                  prjId: pid,
                   roleName: name,
                   menuRoleIds: menuRoleIds,
                   grpIds: collectRegisterGrpIds(),
@@ -1142,12 +1140,11 @@
               editBtn.disabled = true;
             }
             try {
-              var res = await fetch("/project/option/role/updateRole", {
+              var res = await fetch("/project/role/updateRole", {
                 method: "POST",
                 headers: buildCsrfHeaders(),
                 credentials: "same-origin",
                 body: JSON.stringify({
-                  prjId: pidNum,
                   roleCd: roleCdNum,
                   menuRoleIds: menuRoleIds,
                   grpIds: grpIds,
@@ -1371,10 +1368,7 @@
             }
             if (!pid || !rc) return Promise.resolve();
             var url =
-              "/project/option/role/roleGroups?prjId=" +
-              encodeURIComponent(pid) +
-              "&roleCd=" +
-              encodeURIComponent(rc);
+              "/project/role/roleGroups?roleCd=" + encodeURIComponent(rc);
             return fetch(url, { credentials: "same-origin" })
               .then(function (r) {
                 return r.json();
@@ -1604,11 +1598,9 @@
             pickOverlay.classList.add("is-open");
             pickOverlay.setAttribute("aria-hidden", "false");
             try {
-              var res = await fetch(
-                "/project/option/role/roleGroupPickList?prjId=" +
-                  encodeURIComponent(String(pidNum)),
-                { credentials: "same-origin" },
-              );
+              var res = await fetch("/project/role/roleGroupPickList", {
+                credentials: "same-origin",
+              });
               var data = await res.json().catch(function () {
                 return {};
               });
@@ -1720,7 +1712,7 @@
             }
 
             try {
-              var res = await fetch("/project/option/role/revokeRoleFromGroup", {
+              var res = await fetch("/project/role/revokeRoleFromGroup", {
                 method: "POST",
                 headers: buildCsrfHeaders(),
                 credentials: "same-origin",
@@ -1750,9 +1742,7 @@
 
               if (isOk) {
                 if (deleteRoleIfUnused && grpRoleCount <= 1) {
-                  window.location.href =
-                    "/project/option/role/roleManagement?prjId=" +
-                    encodeURIComponent(pid);
+                  window.location.href = "/project/role/list";
                   return;
                 }
                 await reloadRoleGroupsFromServer();

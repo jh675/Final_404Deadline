@@ -1,7 +1,10 @@
 package com.example.demo.project.group.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import com.example.demo.project.group.mapper.GroupMapper;
@@ -14,6 +17,9 @@ import com.example.demo.project.group.service.GroupMemberPickRowVO;
 import com.example.demo.project.group.service.GroupRoleDetailRowVO;
 import com.example.demo.project.group.service.GroupService;
 import com.example.demo.project.group.service.ProjectGroupRowVO;
+import com.example.demo.project.option.service.RoleGroupRowVO;
+import com.example.demo.project.option.service.RoleRevokeResultVO;
+import com.example.demo.project.option.service.RoleService;
 import lombok.RequiredArgsConstructor;
 
 /** 그룹 조회·등록·삭제 — DB 프로시저 호출 */
@@ -22,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class GroupServiceImpl implements GroupService {
 
     private final GroupMapper groupMapper;
+    private final RoleService roleService;
 
     @Override
     public List<ProjectGroupRowVO> selectProjectGroupList(GroupListCriteria criteria) {
@@ -140,6 +147,69 @@ public class GroupServiceImpl implements GroupService {
         }
         if (!"OK".equalsIgnoreCase(msg.trim())) {
             throw new IllegalArgumentException(msg);
+        }
+    }
+
+    @Override
+    public void updateGroupRoles(Long prjId, Long grpId, List<Long> roleCds) {
+        if (prjId == null) {
+            throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
+        }
+        if (grpId == null) {
+            throw new IllegalArgumentException("그룹 ID가 필요합니다.");
+        }
+        if (groupMapper.selectGroupDetail(prjId, grpId) == null) {
+            throw new IllegalArgumentException("프로젝트에 존재하지 않는 그룹입니다.");
+        }
+
+        Set<Long> desired = new HashSet<>();
+        if (roleCds != null) {
+            for (Long roleCd : roleCds) {
+                if (roleCd != null) {
+                    desired.add(roleCd);
+                }
+            }
+        }
+
+        Set<Long> current = new HashSet<>();
+        for (GroupRoleDetailRowVO row : selectGroupRoles(prjId, grpId)) {
+            if (row != null && row.getRoleCd() != null) {
+                current.add(row.getRoleCd());
+            }
+        }
+
+        for (Long roleCd : current) {
+            if (!desired.contains(roleCd)) {
+                RoleRevokeResultVO result =
+                        roleService.revokeRoleFromGroup(roleCd, grpId, false);
+                if (!result.isOk()) {
+                    throw new IllegalArgumentException(result.getResultMsg());
+                }
+            }
+        }
+
+        for (Long roleCd : desired) {
+            if (current.contains(roleCd)) {
+                continue;
+            }
+            if (roleService.selectRoleByPrjAndCd(prjId, roleCd) == null) {
+                throw new IllegalArgumentException("프로젝트에 존재하지 않는 역할입니다: " + roleCd);
+            }
+            List<Long> grpIds = new ArrayList<>();
+            for (RoleGroupRowVO g : roleService.selectRoleGroupsList(prjId, roleCd)) {
+                if (g != null && g.getId() != null) {
+                    grpIds.add(g.getId());
+                }
+            }
+            if (!grpIds.contains(grpId)) {
+                grpIds.add(grpId);
+            }
+            List<String> menuIds = roleService.selectMenuRoleIdsByRoleCd(roleCd);
+            RoleRevokeResultVO result =
+                    roleService.updateRole(prjId, roleCd, menuIds, grpIds);
+            if (!result.isOk()) {
+                throw new IllegalArgumentException(result.getResultMsg());
+            }
         }
     }
 

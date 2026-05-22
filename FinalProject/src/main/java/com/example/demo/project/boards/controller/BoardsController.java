@@ -43,7 +43,7 @@ public class BoardsController {
     
 	// 수정 페이지 이동
 	@GetMapping("/boards/modify")
-	public String modifyForm(Model model, @RequestParam("id") int id) {
+	public String modifyForm(Model model, @RequestParam("id") Long id) {
 		model.addAttribute("boards", boardsService.selectOne(id));
 		return "project/boards/boardsRegister"; 
 	}
@@ -57,7 +57,7 @@ public class BoardsController {
 
 	// 삭제 처리
 	@GetMapping("/boards/delete")
-	public String delete(@RequestParam("id") int id) {
+	public String delete(@RequestParam("id") Long id) {
 		boardsService.delete(id);
 		return "redirect:/boards/list";
 	}

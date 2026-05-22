@@ -13,13 +13,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         rowHeight: 40,
         minBodyHeight: 200,
         columns: [
-            {
-                header: 'No',
-                name: 'id',
-                width: 80,
-                align: 'center',
-                sortable: true
-            },
             { 
 				header: '아이디', 
 				name: 'login', 
@@ -84,6 +77,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         ],
+		rowHeaders: ['rowNum'],
         pageOptions: { useClient: true, perPage: 10 }
     });
 
@@ -136,7 +130,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 		// 하나라도 비어있다면 폼 제출 중단
         if (!isValid) return;
 		
-        // adminCd(권한)와 bizNo(기업번호)는 백엔드에서 강제로 세팅하므로 제외
         const body = {
             id: document.getElementById('userId').value,
             login: document.getElementById('login').value,
@@ -299,6 +292,7 @@ window.openInsertModal = function() {
     pendingProfileFile = null;
     isProfileDeleted = false;
     resetProfileImageUI();
+	document.getElementById('profileImage').value = '';
 
 	// 모든 에러 상태(빨간 테두리) 지우기
     ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
@@ -306,6 +300,8 @@ window.openInsertModal = function() {
         if (el) el.classList.remove('is-invalid');
     });
 	
+	document.getElementById('prjManagerArea').classList.remove('d-none');
+	document.getElementById('teamMember').checked = true;
     document.getElementById('modalTitle').textContent = '회원 정보 등록';
     document.getElementById('userForm').reset();
     document.getElementById('userId').value = '';
@@ -332,7 +328,7 @@ window.openUpdateModal = function(id) {
 
     pendingProfileFile = null;
     isProfileDeleted = false;
-    resetProfileImageUI();
+    document.getElementById('profileImage').value = '';
 
 	// 모든 에러 상태(빨간 테두리) 지우기
     ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
@@ -349,16 +345,30 @@ window.openUpdateModal = function(id) {
     document.getElementById('tel').value = row.tel ?? '';
     document.getElementById('hireDate').value = row.hireDate ?? '';
 
+	// 프로젝트 매니저 체크 제어
+	const prjManagerArea = document.getElementById('prjManagerArea');
+	
+	if (row.adminCd === '02ROLE' || row.adminNm === '기업관리자') {
+	    // 기업관리자일 경우 영역 숨기기
+	    prjManagerArea.classList.add('d-none');
+	    // 값은 '01ACTIVE'로 강제 고정 (폼 전송용)
+	    document.getElementById('projectManager').checked = true;
+	} else {
+	    // 일반 유저일 경우 영역 보이기
+	    prjManagerArea.classList.remove('d-none');
+	    
+	    // 기존 로직 유지
+	    if (row.prjManagerNm === '프로젝트 매니저' || row.prjManagerCd === '01ACTIVE') {
+	        document.getElementById('projectManager').checked = true;
+	    } else {
+	        document.getElementById('teamMember').checked = true;
+	    }
+	}
+		
     if (row.genderCd === '02GENDER') {
         document.getElementById('female').checked = true;
     } else {
         document.getElementById('male').checked = true;
-    }
-
-    if (row.prjManagerNm === '프로젝트 매니저') {
-        document.getElementById('projectManager').checked = true;
-    } else {
-        document.getElementById('teamMember').checked = true;
     }
 
     if (row.statusNm === '비활성') {

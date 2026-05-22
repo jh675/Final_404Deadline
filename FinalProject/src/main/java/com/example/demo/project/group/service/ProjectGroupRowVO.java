@@ -1,6 +1,7 @@
 package com.example.demo.project.group.service;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,5 +19,6 @@ public class ProjectGroupRowVO {
     private Long id;
     private String grpName;
     private Integer cntMem;
-    private LocalDateTime createdOn;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date createdOn;
 }

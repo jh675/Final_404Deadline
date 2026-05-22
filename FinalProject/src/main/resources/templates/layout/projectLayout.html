@@ -44,6 +44,27 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${currentMenu == 'member' ? 'active fw-bold' : ''}"
+                       th:href="@{/project/member/list}">
+                        구성원
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${currentMenu == 'group' ? 'active fw-bold' : ''}"
+                       th:href="@{/project/group/list}">
+                        그룹
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${currentMenu == 'role' ? 'active fw-bold' : ''}"
+                       th:href="@{/project/role/list}">
+                        권한
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" 
                        th:classappend="${currentMenu == 'history' ? 'active fw-bold' : ''}" 
                        th:href="@{/project/history/list}">
@@ -83,7 +104,7 @@
                     <a th:if="${mod1.enaNameCd == '02MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
-                       th:href="@{#}">간트차트</a>
+                       th:href="@{#/ganttchart/list}">간트차트</a>
 
                     <a th:if="${mod1.enaNameCd == '03MODULE'}" 
                        class="nav-link" 
