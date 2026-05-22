@@ -3,6 +3,7 @@ package com.example.demo.project.history.service.impl;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import com.example.demo.project.history.mapper.HistoryMapper;
+import com.example.demo.project.history.service.HistoryDetailVO;
 import com.example.demo.project.history.service.HistoryListCriteria;
 import com.example.demo.project.history.service.HistoryService;
 import com.example.demo.project.history.service.HistoryVO;
@@ -20,6 +21,15 @@ public class HistoryServiceImpl implements HistoryService {
             return List.of();
         }
         List<HistoryVO> list = historyMapper.selectHistoryList(criteria);
+        return list != null ? list : List.of();
+    }
+
+    @Override
+    public List<HistoryDetailVO> selectHistoryDetailList(Long historyId) {
+        if (historyId == null) {
+            return List.of();
+        }
+        List<HistoryDetailVO> list = historyMapper.selectHistoryDetailList(historyId);
         return list != null ? list : List.of();
     }
 }

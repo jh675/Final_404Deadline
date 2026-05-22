@@ -23,4 +23,16 @@ public class MemberListCriteria {
     private String prjStartFrom;
     /** 프로젝트 투입일 끝 (yyyy-MM-dd) */
     private String prjStartTo;
+
+    public MemberListCriteria normalized() {
+        memberName = nullToEmpty(memberName);
+        grpName = nullToEmpty(grpName);
+        prjStartFrom = nullToEmpty(prjStartFrom);
+        prjStartTo = nullToEmpty(prjStartTo);
+        return this;
+    }
+
+    private static String nullToEmpty(String s) {
+        return s == null ? "" : s;
+    }
 }

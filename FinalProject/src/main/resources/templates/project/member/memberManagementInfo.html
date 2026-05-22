@@ -3,7 +3,7 @@
   lang="ko"
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/defaultLayout}"
+  layout:decorate="~{layout/projectLayout}"
 >
   <head>
     <meta charset="UTF-8" />
@@ -400,7 +400,7 @@
   <body>
     <div layout:fragment="content">
       <a class="mem-info-page__back"
-        th:href="@{/project/member/memberManagement(prjId=${prjId})}">
+        th:href="@{/project/member/list}">
         ← 구성원 목록으로
       </a>
 
@@ -547,7 +547,7 @@
             <h2 class="mem-section__title" id="mem-project-heading">프로젝트 정보</h2>
             <div class="mem-section__head-actions" th:if="${viewMode}">
               <a class="mem-actions__btn"
-                th:href="@{/project/member/memberManagementInfo(prjId=${prjId}, userId=${userId}, grpId=${grpId}, edit=true)}">
+                th:href="@{/project/member/info(userId=${userId}, grpId=${grpId}, edit=true)}">
                 수정
               </a>
             </div>
@@ -556,7 +556,7 @@
                 저장
               </button>
               <a class="mem-actions__btn mem-actions__btn--secondary"
-                th:href="@{/project/member/memberManagementInfo(prjId=${prjId}, userId=${userId}, grpId=${grpId})}">
+                th:href="@{/project/member/info(userId=${userId}, grpId=${grpId})}">
                 취소
               </a>
             </div>
@@ -584,7 +584,7 @@
                     th:readonly="${viewMode or editMode}"
                     th:classappend="${registerMode} ? 'mem-input--editable' : ''"
                     placeholder="연도-월-일"
-                    th:value="${registerMode and (detail.prjStartDate == null or #strings.isEmpty(detail.prjStartDate)) ? #temporals.format(#temporals.createToday(), 'yyyy-MM-dd') : detail.prjStartDate}"
+                    th:value="${registerMode and (detail.prjStartDate == null or #strings.isEmpty(detail.prjStartDate)) ? #dates.format(#dates.createToday(), 'yyyy-MM-dd') : detail.prjStartDate}"
                   />
                   <span class="mem-period-tilde" aria-hidden="true">~</span>
                   <input
@@ -652,16 +652,16 @@
                       -
                     </td>
                     <td th:text="${issue.assigneeName} ?: '-'">-</td>
-                    <td th:text="${issue.estStartDate != null ? #temporals.format(issue.estStartDate, 'yyyy-MM-dd') : '-'}">
+                    <td th:text="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : '-'}">
                       -
                     </td>
-                    <td th:text="${issue.dueDate != null ? #temporals.format(issue.dueDate, 'yyyy-MM-dd') : '-'}">
+                    <td th:text="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : '-'}">
                       -
                     </td>
-                    <td th:text="${issue.startDate != null ? #temporals.format(issue.startDate, 'yyyy-MM-dd') : '-'}">
+                    <td th:text="${issue.startDate != null ? #dates.format(issue.startDate, 'yyyy-MM-dd') : '-'}">
                       -
                     </td>
-                    <td th:text="${issue.closedDate != null ? #temporals.format(issue.closedDate, 'yyyy-MM-dd') : '-'}">
+                    <td th:text="${issue.closedDate != null ? #dates.format(issue.closedDate, 'yyyy-MM-dd') : '-'}">
                       -
                     </td>
                     <td th:text="${issue.doneRatio != null ? issue.doneRatio : '-'}">
@@ -682,7 +682,7 @@
             등록
           </button>
           <a class="mem-actions__btn mem-actions__btn--secondary"
-            th:href="@{/project/member/memberManagement(prjId=${prjId})}">
+            th:href="@{/project/member/list}">
             취소
           </a>
         </div>
@@ -1021,11 +1021,9 @@
               pickOverlay.classList.add("is-open");
               pickOverlay.setAttribute("aria-hidden", "false");
               try {
-                let membersUrl =
-                  "/project/member/companyMembers?prjId=" +
-                  encodeURIComponent(String(pid));
+                let membersUrl = "/project/member/companyMembers";
                 if (registerMode) {
-                  membersUrl += "&excludeRegistered=true";
+                  membersUrl += "?excludeRegistered=true";
                 }
                 const res = await fetch(membersUrl, {
                   credentials: "same-origin",
@@ -1143,8 +1141,7 @@
               groupOverlay.setAttribute("aria-hidden", "false");
               try {
                 const res = await fetch(
-                  "/project/member/projectGroups?prjId=" +
-                    encodeURIComponent(String(pid)),
+                  "/project/member/projectGroups",
                   { credentials: "same-origin" },
                 );
                 const data = await res.json().catch(function () {
@@ -1311,7 +1308,6 @@
                 }
 
                 const payload = {
-                  prjId: pid,
                   userId: uid,
                   grpId: gid,
                   prjStartDate: start,
@@ -1339,9 +1335,7 @@
                     return;
                   }
                   await alertMsg("구성원이 등록되었습니다.", "알림");
-                  window.location.href =
-                    "/project/member/memberManagement?prjId=" +
-                    encodeURIComponent(String(pid));
+                  window.location.href = "/project/member/list";
                 } catch (e) {
                   await alertMsg("구성원 등록 중 오류가 발생했습니다.", "오류");
                 } finally {
@@ -1411,7 +1405,6 @@
                 }
 
                 const payload = {
-                  prjId: pid,
                   userId: uid,
                   oldGrpId: oldGid,
                   grpId: gid,
@@ -1440,9 +1433,7 @@
                   }
                   await alertMsg("구성원 정보가 수정되었습니다.", "알림");
                   window.location.href =
-                    "/project/member/memberManagementInfo?prjId=" +
-                    encodeURIComponent(String(pid)) +
-                    "&userId=" +
+                    "/project/member/info?userId=" +
                     encodeURIComponent(String(uid)) +
                     "&grpId=" +
                     encodeURIComponent(String(gid));

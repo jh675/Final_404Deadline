@@ -3,7 +3,7 @@
   lang="ko"
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/defaultLayout}"
+  layout:decorate="~{layout/projectLayout}"
 >
   <head>
     <meta charset="UTF-8" />
@@ -234,10 +234,9 @@
           <form
             class="role-search"
             id="roleSearchForm"
-            th:action="@{/project/option/role/roleManagement}"
+            th:action="@{/project/role/list}"
             method="get"
           >
-            <input type="hidden" name="prjId" th:value="${prjId}" />
             <div class="role-search__bar">
               <div class="role-search__inline">
                 <label for="permissionKey">역할 코드</label>
@@ -582,8 +581,7 @@
               if (!btn || !btn.id) return;
               if (btn.id === "roleBtnRegister") {
                 location.href =
-                  "/project/option/role/roleManagementInfo?prjId=" +
-                  encodeURIComponent(String(prjId));
+                  "/project/role/info";
                 return;
               }
               if (btn.id === "roleBtnDelete") {
@@ -645,12 +643,12 @@
             }
             try {
               var res = await fetch(
-                "/project/option/role/deleteRoles",
+                "/project/role/deleteRoles",
                 {
                   method: "POST",
                   headers: buildCsrfHeaders(),
                   credentials: "same-origin",
-                  body: JSON.stringify({ prjId: pid, roleCds: roleCds }),
+                  body: JSON.stringify({ roleCds: roleCds }),
                 }
               );
               var data = {};
@@ -743,12 +741,10 @@
                         : row.id;
                     const text = value == null ? "" : value;
                     const q =
-                      "prjId=" +
-                      encodeURIComponent(prjId) +
-                      "&roleCd=" +
+                      "roleCd=" +
                       encodeURIComponent(rc == null ? "" : String(rc));
                     return (
-                      '<a href="/project/option/role/roleManagementInfo?' +
+                      '<a href="/project/role/info?' +
                       q +
                       '">' +
                       text +
@@ -803,9 +799,7 @@
                   : row && row.id;
               if (rc != null && rc !== "") {
                 location.href =
-                  "/project/option/role/roleManagementInfo?prjId=" +
-                  encodeURIComponent(prjId) +
-                  "&roleCd=" +
+                  "/project/role/info?roleCd=" +
                   encodeURIComponent(String(rc));
               }
             });

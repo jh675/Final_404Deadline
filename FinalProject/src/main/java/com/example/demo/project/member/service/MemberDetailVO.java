@@ -1,6 +1,7 @@
 package com.example.demo.project.member.service;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,8 +28,10 @@ public class MemberDetailVO {
     private String tel;
 
     private String login;
-    private LocalDateTime lastLoginOn;
-    private LocalDateTime pwUpdatedOn;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date lastLoginOn;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date pwUpdatedOn;
 
     private String prjName;
     private String prjStartDate;

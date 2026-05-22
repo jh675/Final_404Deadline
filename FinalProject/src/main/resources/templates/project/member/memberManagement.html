@@ -3,7 +3,7 @@
   lang="ko"
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/defaultLayout}"
+  layout:decorate="~{layout/projectLayout}"
 >
   <head>
     <meta charset="UTF-8" />
@@ -201,8 +201,7 @@
 
         <section class="menu-role-page__search" aria-labelledby="member-search-heading">
           <h2 id="member-search-heading" class="visually-hidden">멤버 검색</h2>
-          <form class="role-search" id="memberSearchForm" method="get" th:action="@{/project/member/memberManagement}">
-            <input type="hidden" name="prjId" th:value="${prjId}" />
+          <form class="role-search" id="memberSearchForm" method="get" th:action="@{/project/member/list}">
             <div class="role-search__bar">
               <div class="role-search__inline">
                 <label for="memberName">이름</label>
@@ -484,11 +483,7 @@
               const btn = e.target.closest("button");
               if (!btn || !btn.id) return;
               if (btn.id === "memberBtnRegister") {
-                var pid = Number(prjId);
-                if (isNaN(pid)) return;
-                location.href =
-                  "/project/member/memberManagementInfo?prjId=" +
-                  encodeURIComponent(String(pid));
+                location.href = "/project/member/info";
                 return;
               }
               if (btn.id === "memberBtnDelete") {
@@ -541,7 +536,7 @@
                 method: "POST",
                 headers: buildCsrfHeaders(),
                 credentials: "same-origin",
-                body: JSON.stringify({ prjId: pid, members: members }),
+                body: JSON.stringify({ members: members }),
               });
               var data = {};
               try {
@@ -625,8 +620,8 @@
                         : null;
                     const text = value == null ? "" : value;
                     if (uid == null || gid == null) return text;
-                    const q = "prjId=" + encodeURIComponent(prjId) + "&userId=" + encodeURIComponent(String(uid)) + "&grpId=" + encodeURIComponent(String(gid));
-                    return '<a href="/project/member/memberManagementInfo?' + q + '">' + text + "</a>";
+                    const q = "userId=" + encodeURIComponent(String(uid)) + "&grpId=" + encodeURIComponent(String(gid));
+                    return '<a href="/project/member/info?' + q + '">' + text + "</a>";
                   },
                 },
                 {
@@ -691,7 +686,7 @@
                   ? row.grpId
                   : null;
               if (uid != null && gid != null) {
-                location.href = "/project/member/memberManagementInfo?prjId=" + encodeURIComponent(prjId) + "&userId=" + encodeURIComponent(String(uid)) + "&grpId=" + encodeURIComponent(String(gid));
+                location.href = "/project/member/info?userId=" + encodeURIComponent(String(uid)) + "&grpId=" + encodeURIComponent(String(gid));
               }
             });
 
