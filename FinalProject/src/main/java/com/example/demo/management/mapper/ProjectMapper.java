@@ -18,8 +18,8 @@ public interface ProjectMapper {
 	List<ProjectVO> listProject(ProjectVO vo );
 	List<ProjectVO> userProjectList(ProjectVO vo);
 	int projectInsert(ProjectVO vo);
+	Long findIdByIdentifier(ProjectVO vo);
 	List<UserVO> searchUsersByBizNo(@Param("bizNo") String bizNo, @Param("term") String term);
-	void moduleInsert(ModulesVO mVo);
 	void groupInsert(GroupDetailVO gVo);
 	void memberInsert(MemberDetailVO mvo);
 	void wikiInsert(WikiVO wVo);
