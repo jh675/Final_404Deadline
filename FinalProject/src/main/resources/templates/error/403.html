@@ -10,10 +10,6 @@
 <body>
 <div layout:fragment="content">
 <h1>권한이 없습니다 403 페이지</h1>
-	<form action="/logout" method="post">
-		<input name="_csrf" th:value="${_csrf.token}" type="hidden"> 
-		<input type="submit" value="Sign Out" />
-	</form>
 </div>
 </body>
 </html>
