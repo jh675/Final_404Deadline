@@ -1,15 +1,10 @@
 ﻿<!doctype html>
-<html
-  lang="ko"
-  xmlns:th="http://www.thymeleaf.org"
-  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/projectLayout}"
->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+      layout:decorate="~{layout/projectLayout}">
   <head>
     <meta charset="UTF-8" />
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
-    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"
-    />
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>프로젝트 그룹 관리</title>
     <link rel="stylesheet"
       href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
@@ -251,13 +246,7 @@
             const pad = (n) => String(n).padStart(2, "0");
             const todayStr = () => {
               const d = new Date();
-              return (
-                d.getFullYear() +
-                "-" +
-                pad(d.getMonth() + 1) +
-                "-" +
-                pad(d.getDate())
-              );
+              return ( d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) );
             };
 
             const compare = (a, b) => {
@@ -277,11 +266,7 @@
               const ev = end.value;
 
               end.max = today;
-              if (sv) {
-                end.min = sv;
-              } else {
-                end.removeAttribute("min");
-              }
+              if (sv) end.min = sv; else end.removeAttribute("min");
 
               start.max = ev ? minYmd(today, ev) : today;
             }
@@ -294,9 +279,7 @@
                 sv = today;
                 start.value = sv;
               }
-              if (sv && ev && compare(sv, ev) > 0) {
-                end.value = sv;
-              }
+              if (sv && ev && compare(sv, ev) > 0) end.value = sv;
               applyLimits();
             }
 
@@ -308,9 +291,7 @@
                 end.value = today;
                 ev = today;
               }
-              if (sv && ev && compare(ev, sv) < 0) {
-                start.value = ev;
-              }
+              if (sv && ev && compare(ev, sv) < 0) start.value = ev;
               applyLimits();
             }
 
@@ -331,26 +312,17 @@
               const ev = end.value;
               if (sv && compare(sv, today) > 0) {
                 e.preventDefault();
-                await window.RoleQuestionModal.alert(
-                  "시작일은 오늘 이후로 지정할 수 없습니다.",
-                  "알림",
-                );
+                await window.GroupQuestionModal.alert( "시작일은 오늘 이후로 지정할 수 없습니다.", "알림" );
                 return;
               }
               if (ev && compare(ev, today) > 0) {
                 e.preventDefault();
-                await window.RoleQuestionModal.alert(
-                  "종료일은 오늘 이후로 지정할 수 없습니다.",
-                  "알림",
-                );
+                await window.GroupQuestionModal.alert( "종료일은 오늘 이후로 지정할 수 없습니다.", "알림" );
                 return;
               }
               if (sv && ev && compare(sv, ev) > 0) {
                 e.preventDefault();
-                await window.RoleQuestionModal.alert(
-                  "시작일은 종료일보다 늦을 수 없습니다.",
-                  "알림",
-                );
+                await window.GroupQuestionModal.alert( "시작일은 종료일보다 늦을 수 없습니다.", "알림" );
                 return;
               }
             });
@@ -358,12 +330,7 @@
 
           function formatDate(value) {
             if (value == null || value === "") return "";
-            if (
-              typeof value === "string" &&
-              /^\d{4}-\d{2}-\d{2}$/.test(value)
-            ) {
-              return value;
-            }
+            if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
             const d = new Date(value);
             if (isNaN(d.getTime())) return String(value);
             const pad = (n) => String(n).padStart(2, "0");
@@ -406,9 +373,7 @@
 
           let gridData = Array.isArray(projectGroupRows)
             ? projectGroupRows.map(function (r) {
-                return typeof r === "object" && r !== null
-                  ? Object.assign({}, r)
-                  : r;
+                return (typeof r === "object" && r !== null) ? Object.assign({}, r) : r;
               })
             : [];
           let deleteMode = false;
@@ -468,13 +433,8 @@
             if (!grid) return [];
             if (typeof grid.getCheckedRowKeys === "function") {
               const keys = grid.getCheckedRowKeys();
-              if (
-                Array.isArray(keys) &&
-                keys.length &&
-                typeof grid.getRow === "function"
-              ) {
+              if (Array.isArray(keys) && keys.length && typeof grid.getRow === "function")
                 return keys.map((k) => grid.getRow(k)).filter(Boolean);
-              }
             }
             if (typeof grid.getCheckedRows === "function") {
               const arr = grid.getCheckedRows();
@@ -515,14 +475,10 @@
               if (btn.id === "groupBtnRegister") {
                 var pid = Number(prjId);
                 if (isNaN(pid)) {
-                  void window.RoleQuestionModal.alert(
-                    "프로젝트 ID가 올바르지 않습니다.",
-                    "알림",
-                  );
+                  void window.GroupQuestionModal.alert("프로젝트 ID가 올바르지 않습니다.", "알림");
                   return;
                 }
-                location.href =
-                  "/project/group/info";
+                location.href = "/project/group/info";
                 return;
               }
               if (btn.id === "groupBtnDelete") {
@@ -547,37 +503,24 @@
               return;
             }
             const names = rows.map(function (r) {
-              return r.grpName != null && r.grpName !== ""
-                ? String(r.grpName)
-                : "(그룹명 없음)";
+              return (r.grpName != null && r.grpName !== "") ? String(r.grpName) : "(그룹명 없음)";
             });
             const msg =
               "선택한 그룹을 삭제하시겠습니까?\n\n" + names.join("\n");
-            var confirmed = await window.RoleQuestionModal.confirm(
-              msg,
-              "그룹 삭제",
-            );
-            if (!confirmed) {
-              return;
-            }
+            var confirmed = await window.GroupQuestionModal.confirm(msg, "그룹 삭제");
+            if (!confirmed) return;
             const grpIds = rows
               .map(function (r) {
                 return collectGrpIdForApi(r);
               })
               .filter(Boolean);
             if (!grpIds.length) {
-              await window.RoleQuestionModal.alert(
-                "그룹 ID를 확인할 수 없습니다.",
-                "알림",
-              );
+              await window.GroupQuestionModal.alert( "그룹 ID를 확인할 수 없습니다.", "알림");
               return;
             }
             var pid = Number(prjId);
             if (isNaN(pid)) {
-              await window.RoleQuestionModal.alert(
-                "프로젝트 ID가 올바르지 않습니다.",
-                "알림",
-              );
+              await window.GroupQuestionModal.alert( "프로젝트 ID가 올바르지 않습니다.", "알림");
               return;
             }
             try {
@@ -597,14 +540,11 @@
                   (res.status === 403
                     ? "권한이 없거나 보안 토큰이 만료되었습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요."
                     : "삭제 중 오류가 발생하였습니다.");
-                await window.RoleQuestionModal.alert(errText, "오류");
+                await window.GroupQuestionModal.alert(errText, "오류");
                 return;
               }
             } catch (e) {
-              await window.RoleQuestionModal.alert(
-                "삭제 중 오류가 발생하였습니다.",
-                "오류",
-              );
+              await window.GroupQuestionModal.alert( "삭제 중 오류가 발생하였습니다.", "오류");
               return;
             }
             const labelPart =
@@ -615,7 +555,7 @@
               names.length === 1
                 ? labelPart + "이(가) 정상적으로 삭제되었습니다."
                 : labelPart + " 그룹이 정상적으로 삭제되었습니다.";
-            await window.RoleQuestionModal.alert(okMsg, "알림");
+            await window.GroupQuestionModal.alert(okMsg, "알림");
 
             const removeSet = {};
             rows.forEach(function (r) {

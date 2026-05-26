@@ -165,4 +165,29 @@
     FROM GRP_ROLE
     WHERE ROLE_CD = #{roleCd}
   </select>
+  
+  <!-- security에서 권한 체크, url, method 확인 용 sql -->
+  <select id="selectUserAllowedMenus" resultType="com.example.demo.project.option.service.RoleVO">
+    SELECT DISTINCT 
+           M.ROLE_URL AS roleUrl, 
+           M.ROLE_MTH AS roleMth
+    FROM MEMBER MEM
+    INNER JOIN GRP G ON MEM.GRP_ID = G.ID
+    INNER JOIN GRP_ROLE GR ON G.ID = GR.GRP_ID
+    INNER JOIN ROLE_MENU RM ON GR.ROLE_CD = RM.ROLE_CD
+    INNER JOIN MENU M ON RM.ROLE_ID = M.ROLE_ID
+    WHERE MEM.USER_ID = #{userId}
+      AND G.PRJ_ID = #{prjId}
+  </select>
+  <!-- security에서 권한 체크 thymeleaf 버튼 표시용 sql -->
+  <select id="selectUserProjectRoles" resultType="java.lang.String">
+    SELECT DISTINCT RM.ROLE_ID
+    FROM MEMBER MEM
+    INNER JOIN GRP G ON MEM.GRP_ID = G.ID
+    INNER JOIN GRP_ROLE GR ON G.ID = GR.GRP_ID
+    INNER JOIN ROLE_MENU RM ON GR.ROLE_CD = RM.ROLE_CD
+    WHERE MEM.USER_ID = #{userId}
+      AND G.PRJ_ID = #{prjId}
+  </select>
+  
 </mapper>

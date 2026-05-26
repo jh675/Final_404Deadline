@@ -39,7 +39,7 @@
                 <li class="nav-item">
                     <a class="nav-link" 
                        th:classappend="${currentMenu == 'dashboard' ? 'active fw-bold' : ''}" 
-                       th:href="@{#}">
+                       th:href="@{/project/main}">
                         개요
                     </a>
                 </li>
@@ -114,7 +114,7 @@
                     <a th:if="${mod1.enaNameCd == '07MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'docs' ? 'active fw-bold' : ''}" 
-                       th:href="@{#}">문서</a> 
+                       th:href="@{/docs/list}">문서</a> 
                 </li> 
             </ul> 
         </div>

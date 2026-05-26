@@ -16,6 +16,7 @@ import com.example.demo.company.service.CompanyVO;
 import com.example.demo.login.service.LoginService;
 import com.example.demo.login.service.UserVO;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -24,7 +25,13 @@ public class LoginController {
 	private final LoginService loginService;
 	
 	@GetMapping("/")
-	public String main(Model model) {
+	public String main(Model model, HttpSession session) {
+		// 프로젝트 밖으로 나왔으므로 프로젝트 관련 세션 정보만 깔끔하게 청소!
+        session.removeAttribute("currentProjectId");
+        session.removeAttribute("currentMenu");
+        session.removeAttribute("moduleList");
+        session.removeAttribute("project");
+		
 		// 시큐리티 컨텍스트 객체를 얻습니다.
 		SecurityContext context = SecurityContextHolder.getContext();
 

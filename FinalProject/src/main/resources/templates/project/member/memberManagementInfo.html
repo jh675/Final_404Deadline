@@ -8,16 +8,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
-    <meta
-      th:if="${_csrf != null}"
-      name="_csrf_header"
-      th:content="${_csrf.headerName}"
-    />
-    <title
-      th:text="${registerMode} ? '구성원 등록' : (${editMode} ? '구성원 수정' : '구성원 상세')"
-    >
-      구성원 상세
-    </title>
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title th:text="${registerMode} ? '구성원 등록' : (${editMode} ? '구성원 수정' : '구성원 상세')">구성원 상세</title>
     <style>
       .mem-detail-form {
         --mem-label-w: 9.75rem;
@@ -399,16 +391,10 @@
   </head>
   <body>
     <div layout:fragment="content">
-      <a class="mem-info-page__back"
-        th:href="@{/project/member/list}">
-        ← 구성원 목록으로
-      </a>
+      <a class="mem-info-page__back" th:href="@{/project/member/list}">← 구성원 목록으로</a>
 
       <header class="mem-info-page__head">
-        <h1 class="mem-info-page__title"
-          th:text="${registerMode} ? '구성원 등록' : (${editMode} ? '구성원 수정' : '구성원 상세')">
-          구성원 상세
-        </h1>
+        <h1 class="mem-info-page__title" th:text="${registerMode} ? '구성원 등록' : (${editMode} ? '구성원 수정' : '구성원 상세')">구성원 상세</h1>
         <hr class="mem-info-page__rule" />
       </header>
 
@@ -417,21 +403,15 @@
           <h2 class="mem-section__title" id="mem-basic-heading">기본정보</h2>
           <div class="mem-section__body">
             <div class="mem-basic-layout">
-              <div class="mem-profile-slot"
-                aria-hidden="true" title="프로필 이미지 영역">
-                이미지
-              </div>
+              <div class="mem-profile-slot" aria-hidden="true" title="프로필 이미지 영역">이미지</div>
               <div class="mem-basic-fields mem-detail-form">
-                <input
-                  type="hidden"
-                  id="detailSelectedUserId"
-                  th:if="${registerMode or editMode}"
-                  th:value="${detail.userId}"
-                />
+                <input type="hidden" id="detailSelectedUserId" th:if="${registerMode or editMode}" th:value="${detail.userId}" />
                 <div class="mem-field-row">
-                  <label for="detailUserName">이름 <span class="req">*</span>
-                  </label>
-                  <input type="text" id="detailUserName" th:readonly="${!registerMode}"
+                  <label for="detailUserName">이름 <span class="req">*</span></label>
+                  <input
+                    type="text"
+                    id="detailUserName"
+                    th:readonly="${!registerMode}"
                     th:classappend="${registerMode} ? 'mem-input--editable mem-input--picker' : ''"
                     th:attr="placeholder=${registerMode} ? '클릭하여 직원을 선택하세요.' : ''"
                     th:value="${detail.userName}"
@@ -439,8 +419,7 @@
                   />
                 </div>
                 <div class="mem-field-row">
-                  <label for="detailHireDate">입사일 <span class="req">*</span>
-                  </label>
+                  <label for="detailHireDate">입사일 <span class="req">*</span></label>
                   <input
                     type="text"
                     id="detailHireDate"
@@ -463,59 +442,31 @@
                       남
                     </label>
                     <label>
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="02GENDER"
-                        disabled
-                        th:checked="${#strings.equalsIgnoreCase(detail.genderCd, '02GENDER')}"
-                      />
+                      <input type="radio" name="gender" value="02GENDER" disabled th:checked="${#strings.equalsIgnoreCase(detail.genderCd, '02GENDER')}" />
                       여
                     </label>
                   </div>
                 </div>
                 <div class="mem-field-row">
-                  <label for="detailEmail">이메일 <span class="req">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="detailEmail"
-                    readonly
-                    placeholder="aaa@aaa.com"
-                    th:value="${detail.email}"
-                  />
+                  <label for="detailEmail">이메일 <span class="req">*</span></label>
+                  <input type="text" id="detailEmail" readonly placeholder="aaa@aaa.com" th:value="${detail.email}" />
                 </div>
                 <div class="mem-field-row">
-                  <label for="detailTel">연락처 <span class="req">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="detailTel"
-                    readonly
-                    placeholder="010-xxxx-xxxx"
-                    th:value="${detail.tel}"
-                  />
+                  <label for="detailTel">연락처 <span class="req">*</span></label>
+                  <input type="text" id="detailTel" readonly placeholder="010-xxxx-xxxx" th:value="${detail.tel}" />
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section
-          th:if="${viewMode or editMode}"
-          class="mem-section"
-          aria-labelledby="mem-account-heading">
+        <section th:if="${viewMode or editMode}" class="mem-section" aria-labelledby="mem-account-heading">
           <h2 class="mem-section__title" id="mem-account-heading">계정 정보</h2>
           <div class="mem-section__body">
             <div class="mem-account-inline mem-detail-form">
               <div class="mem-field-row">
                 <label for="detailLogin">아이디</label>
-                <input
-                  type="text"
-                  id="detailLogin"
-                  readonly
-                  th:value="${detail.login != null and !#strings.isEmpty(detail.login) ? detail.login : '-'}"
-                />
+                <input type="text" id="detailLogin" readonly th:value="${detail.login != null and !#strings.isEmpty(detail.login) ? detail.login : '-'}" />
               </div>
               <div class="mem-field-row">
                 <label for="detailLastLogin">마지막 접속일자</label>
@@ -546,26 +497,17 @@
           <div class="mem-section__head-row">
             <h2 class="mem-section__title" id="mem-project-heading">프로젝트 정보</h2>
             <div class="mem-section__head-actions" th:if="${viewMode}">
-              <a class="mem-actions__btn"
-                th:href="@{/project/member/info(userId=${userId}, grpId=${grpId}, edit=true)}">
-                수정
-              </a>
+              <a class="mem-actions__btn" th:href="@{/project/member/info(userId=${userId}, grpId=${grpId}, edit=true)}">수정</a>
             </div>
             <div class="mem-section__head-actions" th:if="${editMode}">
-              <button type="button" class="mem-actions__btn" id="btnMemberSave">
-                저장
-              </button>
-              <a class="mem-actions__btn mem-actions__btn--secondary"
-                th:href="@{/project/member/info(userId=${userId}, grpId=${grpId})}">
-                취소
-              </a>
+              <button type="button" class="mem-actions__btn" id="btnMemberSave">저장</button>
+              <a class="mem-actions__btn mem-actions__btn--secondary" th:href="@{/project/member/info(userId=${userId}, grpId=${grpId})}">취소</a>
             </div>
           </div>
           <div class="mem-section__body">
             <div class="mem-basic-fields mem-detail-form">
               <div class="mem-field-row">
-                <label for="detailPrjName">프로젝트명 <span class="req">*</span>
-                </label>
+                <label for="detailPrjName">프로젝트명 <span class="req">*</span></label>
                 <input
                   type="text"
                   id="detailPrjName"
@@ -575,8 +517,7 @@
                 />
               </div>
               <div class="mem-field-row">
-                <label for="detailPrjStart">프로젝트 투입기간 <span class="req">*</span>
-                </label>
+                <label for="detailPrjStart">프로젝트 투입기간 <span class="req">*</span></label>
                 <div class="mem-period-inputs">
                   <input
                     type="date"
@@ -598,31 +539,23 @@
                 </div>
               </div>
               <div class="mem-field-row">
-                <label for="detailGrpName">소속 그룹 <span class="req">*</span>
-                </label>
-                <input type="text" id="detailGrpName" th:readonly="${viewMode}"
+                <label for="detailGrpName">소속 그룹 <span class="req">*</span></label>
+                <input
+                  type="text"
+                  id="detailGrpName"
+                  th:readonly="${viewMode}"
                   th:classappend="${registerMode or editMode} ? 'mem-input--editable mem-input--picker' : ''"
                   th:attr="placeholder=${registerMode or editMode} ? '클릭하여 그룹을 선택하세요.' : ''"
                   th:value="${detail.grpName}"
                   autocomplete="off"
                 />
-                <input
-                type="hidden"
-                id="detailSelectedGrpId"
-                name="grpId"
-                th:if="${registerMode or editMode}"
-                th:value="${detail.grpId}"
-              />
+                <input type="hidden" id="detailSelectedGrpId" name="grpId" th:if="${registerMode or editMode}" th:value="${detail.grpId}" />
               </div>
             </div>
           </div>
         </section>
 
-        <section
-          th:if="${viewMode}"
-          class="mem-section"
-          aria-labelledby="mem-issues-heading"
-        >
+        <section th:if="${viewMode}" class="mem-section" aria-labelledby="mem-issues-heading">
           <h2 class="mem-section__title" id="mem-issues-heading">담당 이슈 정보</h2>
           <div class="mem-section__body">
             <div class="mem-data-table-wrap">
@@ -678,26 +611,24 @@
         </section>
 
         <div class="mem-actions" th:if="${registerMode}">
-          <button type="button" class="mem-actions__btn" id="btnMemberRegister">
-            등록
-          </button>
-          <a class="mem-actions__btn mem-actions__btn--secondary"
-            th:href="@{/project/member/list}">
-            취소
-          </a>
+          <button type="button" class="mem-actions__btn" id="btnMemberRegister">등록</button>
+          <a class="mem-actions__btn mem-actions__btn--secondary" th:href="@{/project/member/list}">취소</a>
         </div>
 
-        <th:block th:if="${registerMode}"
-          th:replace="~{project/member/modal/memberInfoModal :: memberInfoPickOverlay}"
-        />
-        <th:block th:if="${registerMode or editMode}"
-          th:replace="~{project/member/modal/memberGroupModal :: memberGroupPickOverlay}"
-        />
+        <th:block th:if="${registerMode}" th:replace="~{project/member/modal/memberInfoModal :: memberInfoPickOverlay}" />
+        <th:block th:if="${registerMode or editMode}" th:replace="~{project/member/modal/memberGroupModal :: memberGroupPickOverlay}" />
 
         <th:block th:if="${registerMode or editMode}">
           <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModal}"></th:block>
           <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModalScript}"></th:block>
         </th:block>
+
+        <div
+          th:if="${registerMode or editMode}"
+          id="memPageConfig"
+          style="display: none"
+          th:attr="data-prj-id=${prjId},data-register-mode=${registerMode},data-edit-mode=${editMode},data-user-id=${userId},data-old-grp-id=${grpId},data-initial-end=${detail != null ? detail.prjEndDate : ''},data-initial-grp-id=${detail != null ? detail.grpId : ''}"
+        ></div>
 
         <script th:if="${registerMode or editMode}">
           (function () {

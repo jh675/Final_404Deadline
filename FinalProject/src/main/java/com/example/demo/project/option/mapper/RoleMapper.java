@@ -43,4 +43,10 @@ public interface RoleMapper {
 
     /** {@code GRP_ROLE}에 역할을 부여한 그룹 수 */
     int countGrpByRoleCd(@Param("roleCd") Long roleCd);
+    
+    /** 시큐리티 URL 접근 제어용: 유저가 특정 프로젝트에서 허용된 메뉴(URL, Method) 목록 조회 */
+    List<RoleVO> selectUserAllowedMenus(@Param("userId") Long userId, @Param("prjId") Long prjId);
+    
+    /** Security 화면 버튼 제어용 (Thymeleaf @prjAuth.hasRole 에서 사용) */
+    List<String> selectUserProjectRoles(@Param("userId") Long userId, @Param("prjId") Long prjId);
 }

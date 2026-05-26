@@ -1,15 +1,26 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
-    <!-- 그룹 상세 — 권한별 메뉴 목록 오버레이 (스타일은 groupManagementInfo.html) -->
+    <!-- 그룹 상세 — 권한별 메뉴 매트릭스 오버레이 (스타일은 groupManagementInfo.html) -->
     <th:block th:fragment="groupRoleMenusOverlay">
       <div class="grp-role-menus-overlay" id="grpRoleMenusOverlay" aria-hidden="true">
         <div class="grp-role-menus-modal" role="dialog" aria-modal="true" aria-labelledby="grpRoleMenusTitle" tabindex="-1">
           <div class="grp-role-menus-modal__head">
-            <span id="grpRoleMenusTitle">메뉴 목록</span>
+            <span id="grpRoleMenusTitle">메뉴 권한</span>
           </div>
           <div class="grp-role-menus-modal__sub" id="grpRoleMenusRoleCaption" aria-live="polite"></div>
           <div class="grp-role-menus-modal__body">
-            <ul class="grp-role-menus-list" id="grpRoleMenusList"></ul>
+            <table class="grp-role-menus-table" id="grpRoleMenusTable" hidden>
+              <thead>
+                <tr>
+                  <th scope="col" class="grp-role-menus-table__menu-col">메뉴</th>
+                  <th scope="col">조회</th>
+                  <th scope="col">등록</th>
+                  <th scope="col">수정</th>
+                  <th scope="col">삭제</th>
+                </tr>
+              </thead>
+              <tbody id="grpRoleMenusTableBody"></tbody>
+            </table>
             <p class="grp-role-menus-empty" id="grpRoleMenusEmpty" hidden>
               연결된 메뉴가 없습니다.
             </p>
@@ -26,17 +37,8 @@
 
     <!-- 그룹 상세 — 프로젝트 권한(ROLE) 선택 오버레이 -->
     <th:block th:fragment="groupRolePickOverlay">
-      <div
-        class="grp-role-pick-overlay"
-        id="grpRolePickOverlay"
-        aria-hidden="true"
-      >
-        <div
-          class="grp-role-pick"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="grpRolePickTitle"
-        >
+      <div class="grp-role-pick-overlay" id="grpRolePickOverlay" aria-hidden="true">
+        <div class="grp-role-pick" role="dialog" aria-modal="true" aria-labelledby="grpRolePickTitle">
           <div class="grp-role-pick__head" id="grpRolePickTitle">권한 선택</div>
           <div class="grp-role-pick__search">
             <label class="visually-hidden" for="grpRoleSearchType">검색 항목</label>
@@ -45,19 +47,9 @@
               <option value="roleName" selected>권한명</option>
             </select>
             <label class="visually-hidden" for="grpRoleSearchKeyword">검색어</label>
-            <input
-              type="text"
-              autocomplete="off"
-              id="grpRoleSearchKeyword"
-              placeholder="검색어를 입력하세요"
-            />
+            <input type="text" autocomplete="off" id="grpRoleSearchKeyword" placeholder="검색어를 입력하세요" />
           </div>
-          <div
-            id="grpRolePickGrid"
-            class="grp-role-pick__grid-host"
-            role="region"
-            aria-label="권한 선택 목록"
-          ></div>
+          <div id="grpRolePickGrid" class="grp-role-pick__grid-host" role="region" aria-label="권한 선택 목록"></div>
           <div class="grp-role-pick__actions">
             <button type="button" id="btnRolePickCancel">취소</button>
             <button type="button" class="primary" id="btnRolePickOk">저장</button>

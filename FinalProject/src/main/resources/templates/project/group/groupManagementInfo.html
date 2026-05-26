@@ -8,21 +8,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
-    <meta
-      th:if="${_csrf != null}"
-      name="_csrf_header"
-      th:content="${_csrf.headerName}"
-    />
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
     <title th:text="${registerMode} ? '그룹 등록' : '그룹 상세'">그룹 상세</title>
     <th:block th:if="${!groupNotFound}">
-      <link
-        rel="stylesheet"
-        href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css"
-      />
-      <link
-        rel="stylesheet"
-        href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css"
-      />
+      <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+      <link rel="stylesheet" href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css" />
       <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
       <script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.js"></script>
     </th:block>
@@ -432,8 +422,8 @@
         display: flex;
       }
       .grp-role-menus-modal {
-        width: min(28rem, 92vw);
-        max-height: 78vh;
+        width: min(34rem, 94vw);
+        max-height: 80vh;
         background: #fff;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -455,14 +445,44 @@
       .grp-role-menus-modal__body {
         padding: 0.65rem 1rem 0.75rem;
         overflow: auto;
-        max-height: 48vh;
+        max-height: 56vh;
       }
-      .grp-role-menus-list {
-        margin: 0;
-        padding-left: 1.15rem;
+      .grp-role-menus-table {
+        width: 100%;
+        border-collapse: collapse;
         font-size: 0.8125rem;
         color: #333;
-        line-height: 1.55;
+        background: #fff;
+      }
+      .grp-role-menus-table th,
+      .grp-role-menus-table td {
+        border: 1px solid #d8d8d8;
+        padding: 0.45rem 0.55rem;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+      .grp-role-menus-table thead th {
+        background: #f0f0f0;
+        font-weight: 600;
+      }
+      .grp-role-menus-table tbody tr:nth-child(even) {
+        background: #fafafa;
+      }
+      .grp-role-menus-table__menu-col {
+        text-align: left;
+        width: 40%;
+      }
+      .grp-role-menus-table tbody td:first-child {
+        text-align: left;
+        font-weight: 500;
+      }
+      .grp-role-menus-table .grp-role-menus-cell--check {
+        color: #1976d2;
+        font-weight: 600;
+      }
+      .grp-role-menus-table .grp-role-menus-cell--dash {
+        color: #bbb;
       }
       .grp-role-menus-empty,
       .grp-role-menus-loading {
@@ -493,16 +513,10 @@
   </head>
   <body>
     <div layout:fragment="content">
-      <a class="grp-info-page__back"
-        th:href="@{/project/group/list}">
-        ← 그룹 목록으로
-      </a>
+      <a class="grp-info-page__back" th:href="@{/project/group/list}">← 그룹 목록으로</a>
 
       <header class="grp-info-page__head">
-        <h1 class="grp-info-page__title"
-          th:text="${registerMode} ? '그룹 등록' : '그룹 상세'">
-          그룹 상세
-        </h1>
+        <h1 class="grp-info-page__title" th:text="${registerMode} ? '그룹 등록' : '그룹 상세'">그룹 상세</h1>
         <hr class="grp-info-page__rule" />
       </header>
 
@@ -512,26 +526,21 @@
           <div class="grp-section__body">
             <div class="grp-basic-form grp-detail-form">
               <div class="grp-basic-form__row">
-                <label for="detailPrjName"> 프로젝트명 <span class="req">*</span>
-                </label>
+                <label for="detailPrjName"> 프로젝트명 <span class="req">*</span></label>
                 <div class="grp-basic-form__field">
-                  <input type="text" id="detailPrjName" readonly th:value="${detail.prjName}"/>
+                  <input type="text" id="detailPrjName" readonly th:value="${detail.prjName}" />
                 </div>
               </div>
               <div class="grp-basic-form__row">
-                <label for="detailGrpName">그룹명 <span class="req">*</span>
-                </label>
+                <label for="detailGrpName">그룹명 <span class="req">*</span></label>
                 <div class="grp-basic-form__field">
                   <input th:if="${registerMode}" type="text" id="detailGrpName" placeholder="그룹명을 입력해 주세요." class="grp-input--editable" th:value="${detail.grpName}" autocomplete="off" />
-                  <input th:unless="${registerMode}" type="text" id="detailGrpName" placeholder="텍스트를 입력해 주세요." readonly th:value="${detail.grpName}"/>
-                  <p class="grp-field-hint" th:if="${registerMode}">
-                    한 번 정해진 그룹명은 변경할 수 없습니다.
-                  </p>
+                  <input th:unless="${registerMode}" type="text" id="detailGrpName" placeholder="텍스트를 입력해 주세요." readonly th:value="${detail.grpName}" />
+                  <p class="grp-field-hint" th:if="${registerMode}">한 번 정해진 그룹명은 변경할 수 없습니다.</p>
                 </div>
               </div>
               <div class="grp-basic-form__row" th:if="${!registerMode}">
-                <label for="detailGrpCreatedOn">그룹생성일 <span class="req">*</span>
-                </label>
+                <label for="detailGrpCreatedOn">그룹생성일 <span class="req">*</span></label>
                 <div class="grp-basic-form__field">
                   <input type="text" id="detailGrpCreatedOn" readonly th:value="${detail.createdOn != null ? #dates.format(detail.createdOn, 'yyyy-MM-dd') : ''}" />
                 </div>
@@ -544,54 +553,34 @@
           <h2 class="grp-section__title" id="grp-members-heading">구성원 정보</h2>
           <div class="grp-section__body">
             <div class="grp-grid-panel">
-              <div id="grpMembersGrid" class="grp-grid-host" role="region" aria-label="구성원 목록">
-              </div>
-              <div id="grpMemberToolbar" class="grp-member-toolbar" 
-                   th:if="${registerMode or !groupNotFound}" th:classappend="${!registerMode} ? 'is-hidden' : ''">
-                <button type="button" class="grp-member-toolbar__btn" id="btnAddMember">
-                  구성원 관리
-                </button>
+              <div id="grpMembersGrid" class="grp-grid-host" role="region" aria-label="구성원 목록"></div>
+              <div id="grpMemberToolbar" class="grp-member-toolbar" th:if="${registerMode or !groupNotFound}" th:classappend="${!registerMode} ? 'is-hidden' : ''">
+                <button type="button" class="grp-member-toolbar__btn" id="btnAddMember">구성원 관리</button>
               </div>
             </div>
           </div>
         </section>
 
-        <section
-          th:if="${!registerMode}"
-          class="grp-section"
-          aria-labelledby="grp-roles-heading">
+        <section th:if="${!registerMode}" class="grp-section" aria-labelledby="grp-roles-heading">
           <h2 class="grp-section__title" id="grp-roles-heading">보유 권한</h2>
           <div class="grp-section__body">
             <div class="grp-grid-panel">
               <div id="grpRolesGrid" class="grp-grid-host" role="region" aria-label="보유 권한 목록"></div>
               <div id="grpRoleToolbar" class="grp-member-toolbar is-hidden">
-                <button type="button" id="btnManageRoles" class="grp-member-toolbar__btn">
-                  권한 관리
-                </button>
+                <button type="button" id="btnManageRoles" class="grp-member-toolbar__btn">권한 관리</button>
               </div>
             </div>
           </div>
         </section>
 
         <div class="grp-actions" th:if="${registerMode}">
-          <button type="button" class="grp-actions__btn" id="btnGroupSave">
-            등록
-          </button>
-          <a class="grp-actions__btn grp-actions__btn--secondary"
-            th:href="@{/project/group/list}">
-            취소
-          </a>
+          <button type="button" class="grp-actions__btn" id="btnGroupSave">등록</button>
+          <a class="grp-actions__btn grp-actions__btn--secondary" th:href="@{/project/group/list}">취소</a>
         </div>
         <div class="grp-actions" th:unless="${registerMode}">
-          <button type="button" class="grp-actions__btn" id="btnGroupEdit">
-            수정
-          </button>
-          <button type="button" id="btnGroupSave" class="grp-actions__btn is-hidden">
-            저장
-          </button>
-          <button type="button" id="btnGroupCancel" class="grp-actions__btn grp-actions__btn--secondary is-hidden">
-            취소
-          </button>
+          <button type="button" class="grp-actions__btn" id="btnGroupEdit">수정</button>
+          <button type="button" id="btnGroupSave" class="grp-actions__btn is-hidden">저장</button>
+          <button type="button" id="btnGroupCancel" class="grp-actions__btn grp-actions__btn--secondary is-hidden">취소</button>
         </div>
       </th:block>
 
@@ -633,7 +622,8 @@
           const pickOk = document.getElementById("btnMemberPickOk");
           const roleMenusOverlay = document.getElementById("grpRoleMenusOverlay");
           const btnGrpRoleMenusClose = document.getElementById("btnGrpRoleMenusClose");
-          const grpRoleMenusList = document.getElementById("grpRoleMenusList");
+          const grpRoleMenusTable = document.getElementById("grpRoleMenusTable");
+          const grpRoleMenusTableBody = document.getElementById("grpRoleMenusTableBody");
           const grpRoleMenusEmpty = document.getElementById("grpRoleMenusEmpty");
           const grpRoleMenusLoading = document.getElementById("grpRoleMenusLoading");
           const grpRoleMenusRoleCaption = document.getElementById("grpRoleMenusRoleCaption");
@@ -649,6 +639,16 @@
           const pendingRoles = [];
           let serverMemberIds = [];
           let serverRoleCds = [];
+
+          function escapeHtmlText(text) {
+            if (text == null) return "";
+            return String(text)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#39;");
+          }
 
           function setMemberToolbarVisible(visible) {
             if (!memberToolbar) return;
@@ -853,12 +853,64 @@
             roleMenusOverlay.classList.remove("is-open");
             roleMenusOverlay.setAttribute("aria-hidden", "true");
             if (grpRoleMenusLoading) grpRoleMenusLoading.hidden = true;
+            if (grpRoleMenusTable) grpRoleMenusTable.hidden = true;
+            if (grpRoleMenusTableBody) grpRoleMenusTableBody.innerHTML = "";
+          }
+
+          function renderGrpRoleMenusMatrix(sections) {
+            if (!grpRoleMenusTable || !grpRoleMenusTableBody) return false;
+            grpRoleMenusTableBody.innerHTML = "";
+            const safeSections = Array.isArray(sections) ? sections : [];
+            const rows = safeSections.filter(function (sec) {
+              if (!sec) return false;
+              const crud = Array.isArray(sec.crudSlots) ? sec.crudSlots : [];
+              const extras = Array.isArray(sec.extraSlots) ? sec.extraSlots : [];
+              const fulls = Array.isArray(sec.fullControlSlots) ? sec.fullControlSlots : [];
+              return (
+                crud.some(function (c) { return c && c.checked; }) ||
+                extras.some(function (e) { return e && e.checked; }) ||
+                fulls.some(function (f) { return f && f.checked; })
+              );
+            });
+            if (!rows.length) {
+              grpRoleMenusTable.hidden = true;
+              return false;
+            }
+            const labelToKey = { "조회": "view", "등록": "create", "수정": "update", "삭제": "delete" };
+            rows.forEach(function (sec) {
+              const tr = document.createElement("tr");
+              const tdName = document.createElement("td");
+              tdName.textContent = sec.sectionTitle || "-";
+              tr.appendChild(tdName);
+              const flags = { view: false, create: false, update: false, "delete": false };
+              const crud = Array.isArray(sec.crudSlots) ? sec.crudSlots : [];
+              crud.forEach(function (c) {
+                if (!c) return;
+                const k = labelToKey[c.label];
+                if (k) flags[k] = !!c.checked;
+              });
+              ["view", "create", "update", "delete"].forEach(function (key) {
+                const td = document.createElement("td");
+                if (flags[key]) {
+                  td.textContent = "✓";
+                  td.className = "grp-role-menus-cell--check";
+                } else {
+                  td.textContent = "-";
+                  td.className = "grp-role-menus-cell--dash";
+                }
+                tr.appendChild(td);
+              });
+              grpRoleMenusTableBody.appendChild(tr);
+            });
+            grpRoleMenusTable.hidden = false;
+            return true;
           }
 
           async function openGroupRoleMenusModal(fallbackRoleName, pid, gid, rc) {
             if (
               !roleMenusOverlay ||
-              !grpRoleMenusList ||
+              !grpRoleMenusTable ||
+              !grpRoleMenusTableBody ||
               !grpRoleMenusEmpty ||
               !grpRoleMenusLoading ||
               !grpRoleMenusRoleCaption
@@ -869,7 +921,8 @@
               fallbackRoleName && fallbackRoleName !== "-"
                 ? "권한: " + fallbackRoleName
                 : "권한 코드: " + rc;
-            grpRoleMenusList.innerHTML = "";
+            grpRoleMenusTable.hidden = true;
+            grpRoleMenusTableBody.innerHTML = "";
             grpRoleMenusEmpty.hidden = true;
             grpRoleMenusLoading.hidden = false;
             roleMenusOverlay.classList.add("is-open");
@@ -888,7 +941,7 @@
               if (!res.ok || !data || data.ok !== true) {
                 var msg =
                   (data && data.message) ||
-                  "메뉴 목록을 불러오지 못했습니다.";
+                  "메뉴 권한을 불러오지 못했습니다.";
                 await alertMsg(msg, "오류");
                 closeGroupRoleMenusModal();
                 return;
@@ -897,19 +950,13 @@
               if (name && name !== "-") {
                 grpRoleMenusRoleCaption.textContent = "권한: " + name;
               }
-              var menus = data.menus || [];
-              if (!menus.length) {
+              const rendered = renderGrpRoleMenusMatrix(data.menuSections);
+              if (!rendered) {
                 grpRoleMenusEmpty.hidden = false;
-                return;
               }
-              menus.forEach(function (label) {
-                var li = document.createElement("li");
-                li.textContent = label == null || label === "" ? "-" : String(label);
-                grpRoleMenusList.appendChild(li);
-              });
             } catch (err) {
               grpRoleMenusLoading.hidden = true;
-              await alertMsg( "메뉴 목록을 불러오지 못했습니다.", "오류" ); 
+              await alertMsg("메뉴 권한을 불러오지 못했습니다.", "오류");
               closeGroupRoleMenusModal();
             }
           }
@@ -1388,6 +1435,25 @@
             applyRolePickGridChecks();
           }
 
+          function captureRoleModalDraftFromGrid() {
+            if (!rolePickGrid || typeof rolePickGrid.getData !== "function") return;
+            const checkedKeys = new Set();
+            if (typeof rolePickGrid.getCheckedRowKeys === "function") {
+              rolePickGrid.getCheckedRowKeys().forEach(function (k) {
+                checkedKeys.add(k);
+              });
+            }
+            rolePickGrid.getData().forEach(function (row) {
+              const rc = Number(row.roleCd);
+              if (isNaN(rc)) return;
+              if (checkedKeys.has(row.rowKey)) {
+                modalCheckedRoleCds.add(rc);
+              } else {
+                modalCheckedRoleCds.delete(rc);
+              }
+            });
+          }
+
           function commitRoleModalSelection() {
             pendingRoles.length = 0;
             allPickRoles.forEach(function (row) {
@@ -1442,12 +1508,16 @@
 
           function closeRolePicker() {
             if (!rolePickOverlay) return;
-            if (rolePickGrid) {
-              rolePickGrid.destroy();
-              rolePickGrid = null;
-            }
             rolePickOverlay.classList.remove("is-open");
             rolePickOverlay.setAttribute("aria-hidden", "true");
+            if (rolePickGrid) {
+              try {
+                rolePickGrid.destroy();
+              } catch (e) {
+                /* ignore */
+              }
+              rolePickGrid = null;
+            }
           }
 
           async function openMemberPicker() {
@@ -1489,12 +1559,16 @@
 
           function closeMemberPicker() {
             if (!pickOverlay) return;
-            if (pickGrid) {
-              pickGrid.destroy();
-              pickGrid = null;
-            }
             pickOverlay.classList.remove("is-open");
             pickOverlay.setAttribute("aria-hidden", "true");
+            if (pickGrid) {
+              try {
+                pickGrid.destroy();
+              } catch (e) {
+                /* ignore */
+              }
+              pickGrid = null;
+            }
           }
 
           if (pickSearchType) {
@@ -1529,11 +1603,14 @@
           }
           if (pickOk) {
             pickOk.addEventListener("click", function () {
-              if (pickGrid) {
-                captureModalDraftFromGrid();
+              try {
+                if (pickGrid) {
+                  captureModalDraftFromGrid();
+                }
+                commitModalSelection();
+              } finally {
+                closeMemberPicker();
               }
-              commitModalSelection();
-              closeMemberPicker();
             });
           }
 
@@ -1569,8 +1646,14 @@
           }
           if (rolePickOk) {
             rolePickOk.addEventListener("click", function () {
-              commitRoleModalSelection();
-              closeRolePicker();
+              try {
+                if (rolePickGrid) {
+                  captureRoleModalDraftFromGrid();
+                }
+                commitRoleModalSelection();
+              } finally {
+                closeRolePicker();
+              }
             });
           }
           if (rolePickOverlay) {
