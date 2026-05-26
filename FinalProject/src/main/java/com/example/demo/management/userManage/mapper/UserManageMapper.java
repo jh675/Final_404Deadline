@@ -14,4 +14,5 @@ public interface UserManageMapper {
 	int updateUser(UserManageVO vo);
 	UserManageVO selectOne(Long id);
 	List<CompanyVO> selectCompanyList();
+	UserManageVO selectByLoginAndBizNo(UserManageVO vo);
 }

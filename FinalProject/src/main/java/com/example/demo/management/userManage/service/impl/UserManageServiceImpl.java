@@ -19,7 +19,6 @@ public class UserManageServiceImpl implements UserManageService{
 	
 	private final UserManageMapper userManageMapper;
 	private final PasswordEncoder passwordEncoder;
-	private final AttachService attachService;
 	
 	@Override
 	public List<UserManageVO> selectAll(UserManageVO userManage) {
