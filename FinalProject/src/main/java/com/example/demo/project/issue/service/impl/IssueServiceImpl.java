@@ -22,14 +22,12 @@ public class IssueServiceImpl implements IssueService {
 
 	@Override
 	public List<IssueOutputVO> selectIssueList(IssueInputVO issueVO) {
-		// TODO Auto-generated method stub
 
 		return mapper.selectIssueList(issueVO);
 	}
 
 	@Override
 	public IssueOutputVO selectIssue(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.selectIssue(id);
 	}
 
@@ -50,7 +48,6 @@ public class IssueServiceImpl implements IssueService {
 
 	@Override
 	public int updateIssue(IssueInputVO issueVO) {
-		// TODO Auto-generated method stub
 		return mapper.updateIssue(issueVO);
 	}
 
@@ -72,7 +69,6 @@ public class IssueServiceImpl implements IssueService {
 
 	@Override
 	public int deleteIssue(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.deleteIssue(id);
 	}
 

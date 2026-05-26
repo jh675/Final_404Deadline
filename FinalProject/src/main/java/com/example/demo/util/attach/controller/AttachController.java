@@ -79,7 +79,6 @@ public class AttachController {
 			
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
