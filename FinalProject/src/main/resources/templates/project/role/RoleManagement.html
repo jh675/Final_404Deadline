@@ -7,25 +7,11 @@
 >
   <head>
     <meta charset="UTF-8" />
-    <meta
-      th:if="${_csrf != null}"
-      name="_csrf"
-      th:content="${_csrf.token}"
-    />
-    <meta
-      th:if="${_csrf != null}"
-      name="_csrf_header"
-      th:content="${_csrf.headerName}"
-    />
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>프로젝트 역할 관리</title>
-    <link
-      rel="stylesheet"
-      href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://uicdn.toast.com/grid/latest/tui-grid.css"
-    />
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
     <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
     <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
@@ -224,58 +210,23 @@
           <hr class="menu-role-page__rule" />
         </header>
 
-        <section
-          class="menu-role-page__search"
-          aria-labelledby="menu-role-search-heading"
-        >
-          <h2 id="menu-role-search-heading" class="visually-hidden">
-            역할 검색
-          </h2>
-          <form
-            class="role-search"
-            id="roleSearchForm"
-            th:action="@{/project/role/list}"
-            method="get"
-          >
+        <section class="menu-role-page__search" aria-labelledby="menu-role-search-heading">
+          <h2 id="menu-role-search-heading" class="visually-hidden">역할 검색</h2>
+          <form class="role-search" id="roleSearchForm" th:action="@{/project/role/list}" method="get">
             <div class="role-search__bar">
               <div class="role-search__inline">
                 <label for="permissionKey">역할 코드</label>
-                <input
-                  type="text"
-                  id="permissionKey"
-                  name="permissionKey"
-                  th:value="${permissionKey}"
-                  placeholder="역할 코드"
-                  autocomplete="off"
-                />
+                <input type="text" id="permissionKey" name="permissionKey" th:value="${permissionKey}" placeholder="역할 코드" autocomplete="off" />
               </div>
               <div class="role-search__inline">
                 <label for="permissionName">역할명</label>
-                <input
-                  type="text"
-                  id="permissionName"
-                  name="permissionName"
-                  th:value="${permissionName}"
-                  placeholder="역할명"
-                  autocomplete="off"
-                />
+                <input type="text" id="permissionName" name="permissionName" th:value="${permissionName}" placeholder="역할명" autocomplete="off" />
               </div>
               <div class="role-search__inline role-search__inline--date-range">
                 <label for="createdFrom">역할 생성일</label>
-                <input
-                  type="date"
-                  id="createdFrom"
-                  name="createdFrom"
-                  th:value="${createdFrom}"
-                />
+                <input type="date" id="createdFrom" name="createdFrom" th:value="${createdFrom}" />
                 <span class="role-search__tilde">~</span>
-                <input
-                  type="date"
-                  id="createdTo"
-                  name="createdTo"
-                  th:value="${createdTo}"
-                  aria-label="권한 생성일 종료"
-                />
+                <input type="date" id="createdTo" name="createdTo" th:value="${createdTo}" aria-label="권한 생성일 종료" />
               </div>
               <div class="role-search__actions">
                 <button type="submit">검색</button>
@@ -284,20 +235,10 @@
           </form>
         </section>
 
-        <section
-          class="menu-role-page__list"
-          aria-labelledby="menu-role-list-heading"
-        >
-          <h2 class="menu-role-page__section-title" id="menu-role-list-heading">
-            프로젝트 역할 목록
-          </h2>
+        <section class="menu-role-page__list" aria-labelledby="menu-role-list-heading">
+          <h2 class="menu-role-page__section-title" id="menu-role-list-heading">프로젝트 역할 목록</h2>
           <div class="menu-role-page__grid-wrap">
-            <div
-              id="menuRoleGrid"
-              class="menu-role-page__grid-host"
-              role="region"
-              aria-label="프로젝트 역할 그리드"
-            ></div>
+            <div id="menuRoleGrid" class="menu-role-page__grid-host" role="region" aria-label="프로젝트 역할 그리드"></div>
           </div>
         </section>
       </main>

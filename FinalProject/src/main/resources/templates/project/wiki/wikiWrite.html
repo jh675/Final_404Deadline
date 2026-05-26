@@ -359,17 +359,11 @@
                 <div class="wiki-form-group">
                     <label for="parentWiki">상위 위키</label>
                     <select id="parentWiki" name="parentId">
-                        <option value="">없음</option>
-                        <option value="1">이슈1</option>
-                        <option value="2">이슈2</option>
-                        <option value="3">이슈3</option>
-                        <th:block th:if="${parentList != null}">
-                            <option th:each="p : ${parentList}"
-                                    th:value="${p.id}"
-                                    th:text="${p.title}"
-                                    th:selected="${selectedParentId != null and selectedParentId == p.id}">
-                            </option>
-                        </th:block>
+                        <option th:each="p : ${pageList}"
+                                th:value="${p.id}"
+                                th:text="${p.title}"
+                                th:selected="${selectedParentId != null and selectedParentId == p.id}">
+                        </option>
                     </select>
                 </div>
 

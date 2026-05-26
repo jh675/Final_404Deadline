@@ -165,6 +165,31 @@
       .perm-sub--view-only .perm-crud-row {
         justify-content: flex-start;
       }
+      .perm-list {
+        max-height: 24rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: #fff;
+        padding: 0.85rem 1rem;
+      }
+      .perm-list .perm-sub:last-child {
+        margin-bottom: 0;
+      }
+      .perm-list::-webkit-scrollbar {
+        width: 8px;
+      }
+      .perm-list::-webkit-scrollbar-thumb {
+        background: #cfd8dc;
+        border-radius: 4px;
+      }
+      .perm-list::-webkit-scrollbar-thumb:hover {
+        background: #b0bec5;
+      }
+      .perm-list::-webkit-scrollbar-track {
+        background: transparent;
+      }
       .perm-full-block {
         margin-bottom: 1rem;
       }
@@ -421,19 +446,10 @@
   </head>
   <body>
     <div layout:fragment="content">
-      <a
-        class="role-back-link"
-        th:href="@{/project/role/list}"
-        >← 역할 목록으로</a
-      >
+      <a class="role-back-link" th:href="@{/project/role/list}">← 역할 목록으로</a>
 
       <div class="role-page-head">
-        <h1
-          class="role-page-head__title"
-          th:text="${registerMode} ? '역할 등록' : '역할 상세'"
-        >
-          역할 상세
-        </h1>
+        <h1 class="role-page-head__title" th:text="${registerMode} ? '역할 등록' : '역할 상세'">역할 상세</h1>
         <hr class="role-page-head__rule" />
       </div>
 
@@ -451,48 +467,20 @@
             <div class="role-info-fields role-detail-form">
               <div class="role-info-fields__row" th:if="${registerMode}">
                 <label for="detailPrjName">프로젝트명</label>
-                <input
-                  type="text"
-                  id="detailPrjName"
-                  readonly
-                  th:value="${prjName}"
-                />
+                <input type="text" id="detailPrjName" readonly th:value="${prjName}" />
               </div>
               <div class="role-info-fields__row" th:if="${!registerMode}">
                 <label for="detailRoleCd">역할 코드</label>
-                <input
-                  type="text"
-                  id="detailRoleCd"
-                  readonly
-                  th:value="${currentRole.roleCd}"
-                />
+                <input type="text" id="detailRoleCd" readonly th:value="${currentRole.roleCd}" />
               </div>
               <div class="role-info-fields__row">
                 <label for="detailRoleName">역할명</label>
-                <input
-                  th:if="${registerMode}"
-                  type="text"
-                  id="detailRoleName"
-                  class="role-input--editable"
-                  placeholder="역할명을 입력해 주세요."
-                  autocomplete="off"
-                />
-                <input
-                  th:unless="${registerMode}"
-                  type="text"
-                  id="detailRoleName"
-                  readonly
-                  th:value="${currentRole.roleName}"
-                />
+                <input th:if="${registerMode}" type="text" id="detailRoleName" class="role-input--editable" placeholder="역할명을 입력해 주세요." autocomplete="off" />
+                <input th:unless="${registerMode}" type="text" id="detailRoleName" readonly th:value="${currentRole.roleName}" />
               </div>
               <div class="role-info-fields__row" th:if="${!registerMode}">
                 <label for="detailCreatedOn">권한 생성일</label>
-                <input
-                  type="text"
-                  id="detailCreatedOn"
-                  readonly
-                  th:value="${roleCreatedOnYmd}"
-                />
+                <input type="text" id="detailCreatedOn" readonly th:value="${roleCreatedOnYmd}" />
               </div>
             </div>
           </div>
@@ -514,19 +502,15 @@
             </button>
           </div>
           <div class="role-section__body">
-            <th:block
-              th:if="${menuSections != null and !menuSections.isEmpty()}"
-            >
+            <div class="perm-list" th:if="${menuSections != null and !menuSections.isEmpty()}">
               <div
                 class="perm-sub"
                 th:each="sec, secStat : ${menuSections}"
-                th:classappend="${#strings.equalsIgnoreCase(sec.sectionTitle, 'HISTORY')} ? ' perm-sub--view-only' : ''"
+                th:classappend="${#strings.equalsIgnoreCase(sec.sectionTitle, 'HISTORY') or #strings.equalsIgnoreCase(sec.sectionTitle, 'GANTT') or sec.sectionTitle == '간트차트'} ? ' perm-sub--view-only' : ''"
                 th:attr="data-section-key=${sec.sectionTitle}"
               >
                 <div class="perm-sub__head">
-                  <h3 class="perm-sub__title" th:text="${sec.sectionTitle}">
-                    구분
-                  </h3>
+                  <h3 class="perm-sub__title" th:text="${sec.sectionTitle}">구분</h3>
                   <button
                     type="button"
                     class="perm-toggle-btn perm-toggle-btn--section"
@@ -538,10 +522,7 @@
                   </button>
                 </div>
                 <hr class="role-section__divider" />
-                <div
-                  class="perm-full-block"
-                  th:if="${sec.crudSlots != null and !sec.crudSlots.isEmpty()}"
-                >
+                <div class="perm-full-block" th:if="${sec.crudSlots != null and !sec.crudSlots.isEmpty()}">
                   <div class="perm-crud-row">
                     <label
                       class="perm-grid__cell"
@@ -560,9 +541,7 @@
                     </label>
                   </div>
                 </div>
-                <th:block
-                  th:if="${sec.extraSlots != null and !sec.extraSlots.isEmpty()}"
-                >
+                <th:block th:if="${sec.extraSlots != null and !sec.extraSlots.isEmpty()}">
                   <div class="perm-full-block">
                     <h4 class="perm-subblock-title">기타 권한</h4>
                     <div class="perm-grid">
@@ -585,24 +564,15 @@
                   </div>
                 </th:block>
               </div>
-            </th:block>
-            <p
-              class="perm-empty"
-              th:if="${menuSections == null or menuSections.isEmpty()}"
-            >
+            </div>
+            <p class="perm-empty" th:if="${menuSections == null or menuSections.isEmpty()}">
               메뉴 권한 데이터가 없습니다.
             </p>
           </div>
         </section>
 
-        <section
-          th:if="${registerMode or currentRole != null}"
-          class="role-section"
-          aria-labelledby="role-groups-heading"
-        >
-          <h2 class="role-section__title" id="role-groups-heading">
-            이 역할을 보유한 그룹
-          </h2>
+        <section th:if="${registerMode or currentRole != null}" class="role-section" aria-labelledby="role-groups-heading">
+          <h2 class="role-section__title" id="role-groups-heading">이 역할을 보유한 그룹</h2>
           <div class="role-section__body">
             <div class="role-groups-panel">
               <div
@@ -612,77 +582,34 @@
                 role="region"
                 aria-label="역할 보유 그룹 목록"
               ></div>
-              <div
-                id="roleGroupToolbar"
-                class="role-group-toolbar"
-                th:classappend="${registerMode} ? '' : ' is-hidden'"
-              >
-                <button
-                  type="button"
-                  class="role-group-toolbar__btn"
-                  id="btnManageRoleGroups"
-                >
-                  그룹 관리
-                </button>
+              <div id="roleGroupToolbar" class="role-group-toolbar" th:classappend="${registerMode} ? '' : ' is-hidden'">
+                <button type="button" class="role-group-toolbar__btn" id="btnManageRoleGroups">그룹 관리</button>
               </div>
             </div>
           </div>
         </section>
         <div class="role-actions" th:if="${registerMode}">
-          <button type="button" class="role-actions__btn" id="btnRoleSave">
-            저장
-          </button>
-          <button
-            type="button"
-            class="role-actions__btn role-actions__btn--secondary"
-            id="btnRoleCancel"
-          >
-            취소
-          </button>
+          <button type="button" class="role-actions__btn" id="btnRoleSave">저장</button>
+          <button type="button" class="role-actions__btn role-actions__btn--secondary" id="btnRoleCancel">취소</button>
         </div>
 
-        <div
-          class="role-actions"
-          th:if="${!registerMode and currentRole != null}"
-        >
-          <button
-            type="button"
-            class="role-actions__btn"
-            id="btnRoleEdit"
-            data-label-edit="수정"
-            data-label-save="저장"
-          >
-            수정
-          </button>
-          <button
-            type="button"
-            class="role-actions__btn role-actions__btn--secondary is-hidden"
-            id="btnRoleCancelEdit"
-          >
-            취소
-          </button>
+        <div class="role-actions" th:if="${!registerMode and currentRole != null}">
+          <button type="button" class="role-actions__btn" id="btnRoleEdit" data-label-edit="수정" data-label-save="저장">수정</button>
+          <button type="button" class="role-actions__btn role-actions__btn--secondary is-hidden" id="btnRoleCancelEdit">취소</button>
         </div>
 
       </th:block>
 
       <th:block th:if="${registerMode or currentRole != null}">
-        <th:block
-          th:replace="~{project/role/modal/questionModal :: roleQuestionModal}"
-        ></th:block>
-        <th:block
-          th:replace="~{project/role/modal/questionModal :: roleQuestionModalScript}"
-        ></th:block>
+        <th:block th:replace="~{project/role/modal/questionModal :: roleQuestionModal}"></th:block>
+        <th:block th:replace="~{project/role/modal/questionModal :: roleQuestionModalScript}"></th:block>
       </th:block>
 
       <th:block th:if="${registerMode or currentRole != null}">
-        <div
-          th:replace="~{project/role/modal/roleGroupModal :: roleGroupPickOverlay}"
-        ></div>
+        <div th:replace="~{project/role/modal/roleGroupModal :: roleGroupPickOverlay}"></div>
       </th:block>
 
-      <script
-        th:if="${menuSections != null and !menuSections.isEmpty() and (registerMode or currentRole != null)}"
-      >
+      <script th:if="${menuSections != null and !menuSections.isEmpty() and (registerMode or currentRole != null)}">
         window.RolePermToggle = (function () {
           var SECTION_OFF = "전체 선택";
           var SECTION_ON = "전체 해제";
@@ -987,10 +914,7 @@
         /*]]>*/
       </script>
 
-      <script
-        th:if="${registerMode or currentRole != null}"
-        th:inline="javascript"
-      >
+      <script th:if="${registerMode or currentRole != null}" th:inline="javascript">
         /*<![CDATA[*/
         document.addEventListener("DOMContentLoaded", function () {
           var isRegisterMode = /*[[${registerMode}]]*/ false;

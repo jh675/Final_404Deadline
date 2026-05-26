@@ -20,9 +20,6 @@
 			<ul class="navbar-nav me-auto">
 
 				<!-- 공통 메뉴 -->
-				<li class="nav-item small">
-					편의를 위한 임시 메뉴입니다
-				</li>
 				<li class="nav-item">
 					<a class="nav-link" th:href="@{/}">
 						홈화면
@@ -60,54 +57,20 @@
 
 				<!-- 일반회원 -->
 				<th:block sec:authorize="hasRole('USER')">
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/issue/list}">
-							이슈
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/milestone}">
-							마일스톤
-						</a>
-					</li>
+					
 					<li class="nav-item">
 						<a class="nav-link" th:href="@{/calender/list}">
 							일정
 						</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/notice/list}">
-							공지사항
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/boards/list}">
-							게시판
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{#}">
-							문서(미연결)
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{#}">
-							간트차트(미연결)
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{#}">
-							위키(미연결)
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{#}">
-							작업내역(미연결)
-						</a>
-					</li>
-					<li class="nav-item">
 						<a class="nav-link" th:href="@{/management/project}">
-							프로젝트개요(미연결)
+							프로젝트 목록
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{#}">
+							마이페이지(미연결)
 						</a>
 					</li>
 
@@ -132,22 +95,91 @@
 			</ul>
 
 			<!-- 로그인 영역 -->
-			<div class="d-flex align-items-center gap-2"
-				sec:authorize="isAuthenticated()">
-
-				<span>
-					<strong sec:authentication="principal.name"></strong>님
-				</span>
-
-				<form th:action="@{/logout}" method="post">
-					<button type="submit"
-						class="btn btn-outline-danger btn-sm">
-						로그아웃
-					</button>
-				</form>
-
+			<div class="d-flex align-items-center gap-2" sec:authorize="isAuthenticated()">
+			    <div class="position-relative me-2" style="width: 300px;">
+			        <div class="input-group input-group-sm">
+			            <span class="input-group-text bg-gradient text-white" style="background-color: #5b6cff;">✨ AI</span>
+			            <input type="text" id="aiSearchInput" class="form-control" placeholder="지금 내가 해야할 일은?">
+			            <button class="btn btn-outline-primary" type="button" id="aiSearchBtn">묻기</button>
+			        </div>
+			    </div>
+			
+			    <span>
+			        <strong sec:authentication="principal.name"></strong>님
+			    </span>
+			
+			    <form th:action="@{/logout}" method="post">
+			        <button type="submit" class="btn btn-outline-danger btn-sm">
+			            로그아웃
+			        </button>
+			    </form>
+			</div>
+			
+			<div class="modal fade" id="aiResultModal" tabindex="-1" aria-hidden="true">
+			  <div class="modal-dialog modal-dialog-centered modal-lg">
+			    <div class="modal-content">
+			      <div class="modal-header bg-light">
+			        <h5 class="modal-title fw-bold">✨ AI 프로젝트 비서 답변</h5>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			      </div>
+			      <div class="modal-body">
+			        <div id="aiLoading" class="text-center my-4">
+			            <div class="spinner-border text-primary" role="status"></div>
+			            <p class="mt-2 text-muted">프로젝트 데이터를 분석 중입니다. 잠시만 기다려주세요...</p>
+			        </div>
+			        <div id="aiAnswerContent" class="lh-base" style="display:none; white-space: pre-wrap;"></div>
+			      </div>
+			    </div>
+			  </div>
 			</div>
 
+			<script th:inline="javascript">
+				document.addEventListener('DOMContentLoaded', function() {
+				    const searchBtn = document.getElementById('aiSearchBtn');
+				    const searchInput = document.getElementById('aiSearchInput');
+				    const modal = new bootstrap.Modal(document.getElementById('aiResultModal'));
+				    const loadingDiv = document.getElementById('aiLoading');
+				    const contentDiv = document.getElementById('aiAnswerContent');
+				
+				    function executeAiSearch() {
+				        const query = searchInput.value.trim();
+				        if(!query) {
+				            alert('질문을 입력해주세요!');
+				            return;
+				        }
+				
+				        // 모달 열고 로딩 상태로 초기화
+				        contentDiv.style.display = 'none';
+				        loadingDiv.style.display = 'block';
+				        modal.show();
+				
+				        csrfFetch('/ai/assistant', {
+				            method: 'POST',
+				            headers: { 'Content-Type': 'application/json' },
+				            body: JSON.stringify({ message: query })
+				        })
+				        .then(res => {
+				            if(!res.ok) throw new Error('AI 응답을 가져오지 못했습니다.');
+				            return res.text();
+				        })
+				        .then(data => {
+				            loadingDiv.style.display = 'none';
+				            contentDiv.textContent = data;
+				            contentDiv.style.display = 'block';
+				        })
+				        .catch(err => {
+				            loadingDiv.style.display = 'none';
+				            contentDiv.textContent = '오류가 발생했습니다: ' + err.message;
+				            contentDiv.style.display = 'block';
+				        });
+				    }
+				
+				    searchBtn.addEventListener('click', executeAiSearch);
+				    searchInput.addEventListener('keypress', function(e) {
+				        if(e.key === 'Enter') executeAiSearch();
+				    });
+				});
+			</script>
 		</div>
 	</div>
 </nav>

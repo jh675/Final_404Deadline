@@ -30,5 +30,5 @@ public interface IssueService {
 
     int insertComment(CommentInputVO vo);
     
-    List<IssueSummaryVO> getIssueIds();
+	List<IssueSummaryVO> getIssueIds(Long prjId, Long issueId);
 }

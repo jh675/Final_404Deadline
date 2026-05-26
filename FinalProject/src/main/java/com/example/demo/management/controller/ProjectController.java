@@ -87,7 +87,8 @@ public class ProjectController {
 
 	
 	@GetMapping("/management/projectcreate")
-	public String projectCreate(Model model, HttpSession session,ProjectVO vo) {
+	public String projectCreate(Model model, HttpSession session,ProjectVO vo,
+								@RequestParam(name = "copyFrom", required = false) Long copyFrom) {
 		UserVO user = (UserVO) session.getAttribute("loginUser");
 		if (user != null) {
 	        // userId 필드가 String이라면 user.getUserId()를, 
@@ -97,6 +98,13 @@ public class ProjectController {
 	    }
 		List<ProjectVO> list = projectservice.listProject(null);
 		model.addAttribute("projectList", list != null ? list : List.of());
+		
+		// 복사 기능 추가
+	    if (copyFrom != null) {
+	        ProjectVO copyProject = projectservice.getprojectid(copyFrom);
+	        model.addAttribute("copyProject", copyProject);
+	    }
+	    
 		return "management/projectcreate";
 	}
 

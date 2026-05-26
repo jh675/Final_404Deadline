@@ -347,8 +347,6 @@
 	<form id="issueRegistForm" th:action="@{/sign-up}">
 		<input type="hidden" id="issueId" name="id"
 			th:value="${issue != null and issue.id != null ? issue.id : ''}" />
-		<input type="hidden" id="memId" name="memId"
-			th:value="${#authentication.principal.id}" />
 		<div class="form-grid">
 			<label for="subject">제목<span class="req">*</span></label>
 			<div class="field-wrap" id="wrap-subject">

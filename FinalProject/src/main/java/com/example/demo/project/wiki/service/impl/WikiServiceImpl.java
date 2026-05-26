@@ -72,6 +72,11 @@ public class WikiServiceImpl implements WikiService {
 		// TODO Auto-generated method stub
 		return mapper.selectWikiContentLastVerById(id);
 	}
+	@Override
+	public List<WikiPageVO> selectWikiPageForTree(Long prjId, Long id) {
+		// TODO Auto-generated method stub
+		return mapper.selectWikiPageForTree(prjId, id);
+	}
 
 	
 }
