@@ -1,7 +1,8 @@
 package com.example.demo.management.service;
 
-import java.time.LocalDateTime;
 import java.util.Date;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -28,8 +29,12 @@ public class ProjectVO {
 	private Long userId;
 	private String enaNameCd;
 	@JsonFormat(pattern = "yyyy-MM-dd")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date closedDate;
 	private String prjHide;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date startDate;
 
 	/** PROC_PROJECT_CREATE IN — 체크된 모듈 코드 콤마 구분 (GANTT,ISSUE,...) */
 	private String enaId;

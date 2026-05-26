@@ -21,6 +21,7 @@ public class MilestoneController {
 		if (prjId == null) {
 			return "redirect:/management/project";
 		}
+		model.addAttribute("currentMenu", "milestone");
 		model.addAttribute("prjId", prjId);
 		return "project/milestone/timeline";
 	}
@@ -30,6 +31,7 @@ public class MilestoneController {
 	public String viewMilestoneDemo(
 			@RequestParam(value = "prjId", required = false) Long prjId,
 			Model model) {
+		model.addAttribute("currentMenu", "milestone");
 		model.addAttribute("prjId", prjId);
 		return "project/milestone/timeline-demo";
 	}

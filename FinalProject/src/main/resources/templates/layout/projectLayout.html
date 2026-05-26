@@ -84,7 +84,7 @@
                     <a th:if="${mod1.enaNameCd == '06MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'wiki' ? 'active fw-bold' : ''}" 
-                       th:href="@{#}">위키</a>
+                       th:href="@{/wiki}">위키</a>
 
                     <a th:if="${mod1.enaNameCd == '04MODULE'}" 
                        class="nav-link" 
@@ -104,7 +104,7 @@
                     <a th:if="${mod1.enaNameCd == '02MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
-                       th:href="@{#/ganttchart/list}">간트차트</a>
+                       th:href="@{/ganttchart/list}">간트차트</a>
 
                     <a th:if="${mod1.enaNameCd == '03MODULE'}" 
                        class="nav-link" 

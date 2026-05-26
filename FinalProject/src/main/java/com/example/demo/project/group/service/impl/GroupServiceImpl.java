@@ -8,18 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import com.example.demo.project.group.mapper.GroupMapper;
-import com.example.demo.project.group.service.GroupDetailVO;
-import com.example.demo.project.group.service.GroupInsertProcParam;
-import com.example.demo.project.group.service.GroupUpdateProcParam;
-import com.example.demo.project.group.service.GroupListCriteria;
-import com.example.demo.project.group.service.GroupMemberDetailRowVO;
-import com.example.demo.project.group.service.GroupMemberPickRowVO;
-import com.example.demo.project.group.service.GroupRoleDetailRowVO;
-import com.example.demo.project.group.service.GroupService;
-import com.example.demo.project.group.service.ProjectGroupRowVO;
-import com.example.demo.project.option.service.RoleGroupRowVO;
-import com.example.demo.project.option.service.RoleRevokeResultVO;
-import com.example.demo.project.option.service.RoleService;
+import com.example.demo.project.group.service.*;
+import com.example.demo.project.option.service.*;
 import lombok.RequiredArgsConstructor;
 
 /** 그룹 조회·등록·삭제 — DB 프로시저 호출 */

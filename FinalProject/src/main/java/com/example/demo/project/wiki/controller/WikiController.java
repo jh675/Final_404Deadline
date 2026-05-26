@@ -60,11 +60,13 @@ public class WikiController {
 			return "redirect:/management/project";
 		}
 		List<WikiPageVO> pageList = service.selectWikiPageForTree(projectId, id);
+		model.addAttribute("currentMenu", "wiki");
 		model.addAttribute("pageList", pageList);
 		if (id != null) {
 			WikiContentVO page = service.selectWikiContentLastVerById(id);
 			page.setId(id);
 			model.addAttribute("page", page);
+			model.addAttribute("selectedParentId", page.getParentId());
 			System.out.println(page);
 			List<AttachVO> existingFiles = attachService.selectAttachList("06MODULE", id);
 			model.addAttribute("existingFiles",
@@ -86,7 +88,7 @@ public class WikiController {
 			return "redirect:/";
 		}
 
-		Long id = service.insertWikiPage(wikiContentVO.getTitle(), projectId);
+		Long id = service.insertWikiPage(wikiContentVO.getTitle(), projectId, wikiContentVO.getParentId());
 		if(attachService.hasAttachmentFiles(files)) {
 			attachService.saveAndInsertAttachments(id, files, "06MODULE", "Wiki");
 		}
@@ -109,7 +111,7 @@ public class WikiController {
 		if (loginUser == null) {
 			return "redirect:/";
 		}
-
+		service.updateWikiPageParent(wikiContentVO.getPageId(), wikiContentVO.getParentId());
 
 		if(attachService.hasAttachmentFiles(files)) {
 			attachService.saveAndInsertAttachments(wikiContentVO.getPageId(), files, "06MODULE", "Wiki");
@@ -135,33 +137,84 @@ public class WikiController {
 
 	}
 	
-//	@GetMapping("wiki/index/tree")
-//	public String wikiTree(Model model, HttpSession session) {
-//		Long projectId = getCurrentProjectId(session);
-//		if (projectId == null) {
-//			return "redirect:/management/project";
-//		}
-//		List<WikiPageVO> pageList = service.selectWikiPageForTree(projectId, null);
-//		model.addAttribute("titleTree", pageList);
-//		model.addAttribute("mode", "tree");
-//		return "project/wiki/wikiIndex";
-//	}
-	
-	
-	@GetMapping({"/wiki","/wiki/view/{name}"})
-	public String wikiView(@PathVariable(required = false,name = "name") String name,Model model, HttpSession session) {
+	@GetMapping("wiki/index/tree")
+	public String wikiTree(Model model, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
 			return "redirect:/management/project";
 		}
-		WikiContentVO vo=service.selectWikiContentLastVerByTitle(projectId,name);
-		if (vo == null) {
+		model.addAttribute("currentMenu", "wiki");
+		model.addAttribute("type", "title");
+		model.addAttribute("titleTree", service.getTitleTree(projectId));
+		return "project/wiki/wikiIndex";
+	}
+
+	@GetMapping("/wiki/index")
+	public String wikiIndex(@RequestParam(value = "type", defaultValue = "title") String type,
+			Model model, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+
+		String currentType = "date".equalsIgnoreCase(type) ? "date" : "title";
+		model.addAttribute("currentMenu", "wiki");
+		model.addAttribute("type", currentType);
+		if ("date".equals(currentType)) {
+			model.addAttribute("dateGroups", service.getDateGroups(projectId));
+		} else {
+			model.addAttribute("titleTree", service.getTitleTree(projectId));
+		}
+		return "project/wiki/wikiIndex";
+	}
+	
+	
+	@GetMapping({"/wiki","/wiki/view/{name}"})
+	public String wikiView(@PathVariable(required = false,name = "name") String name,
+			@RequestParam(value = "version", required = false) Long version,
+			Model model, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+		WikiContentVO latestPage = service.selectWikiContentLastVerByTitle(projectId,name);
+		if (latestPage == null) {
 			return "redirect:/wiki";
 		}
-		List<AttachVO> existingFiles = attachService.selectAttachList("06MODULE", vo.getPageId());
+		WikiContentVO pageToShow = latestPage;
+		if (version != null && latestPage.getPageId() != null) {
+			WikiContentVO revisionPage = service.selectWikiContentByPageIdAndVersion(latestPage.getPageId(), version);
+			if (revisionPage != null) {
+				pageToShow = revisionPage;
+			}
+		}
+		List<AttachVO> existingFiles = attachService.selectAttachList("06MODULE", latestPage.getPageId());
+		model.addAttribute("currentMenu", "wiki");
 		model.addAttribute("attachments", existingFiles);
-		model.addAttribute("page", vo);
+		model.addAttribute("page", pageToShow);
+		model.addAttribute("latestVersion", latestPage.getVersion());
+		model.addAttribute("isHistoricalVersion",
+				pageToShow.getVersion() != null && latestPage.getVersion() != null
+				&& !pageToShow.getVersion().equals(latestPage.getVersion()));
 		return "project/wiki/wikiView";
+	}
+
+	@GetMapping("/wiki/history/{name}")
+	public String wikiHistory(@PathVariable("name") String name, Model model, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+
+		WikiContentVO page = service.selectWikiContentLastVerByTitle(projectId, name);
+		if (page == null || page.getPageId() == null) {
+			return "redirect:/wiki";
+		}
+
+		model.addAttribute("currentMenu", "wiki");
+		model.addAttribute("page", page);
+		model.addAttribute("historyList", service.selectWikiHistoryByPageId(page.getPageId()));
+		return "project/wiki/wikiHistory";
 	}
 	
 	

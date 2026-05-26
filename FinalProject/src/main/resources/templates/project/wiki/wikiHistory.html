@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/projectLayout}">
+<head>
+    <meta charset="UTF-8">
+    <title>위키 문서 역사</title>
+    <th:block layout:fragment="head-content">
+        <style>
+            .wiki-history-page {
+                font-family: "Malgun Gothic", "맑은 고딕", -apple-system, sans-serif;
+                color: #333;
+            }
+
+            .wiki-history-layout {
+                display: flex;
+                gap: 24px;
+                align-items: flex-start;
+            }
+
+            .wiki-history-main {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .wiki-history-sidebar {
+                width: 220px;
+                flex-shrink: 0;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                background: #fafafa;
+                padding: 16px 18px;
+            }
+
+            .wiki-history-sidebar h3 {
+                font-size: 14px;
+                font-weight: 700;
+                margin: 0 0 12px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .wiki-history-sidebar .index-title {
+                font-size: 12px;
+                font-weight: 600;
+                color: #666;
+                margin-bottom: 8px;
+            }
+
+            .wiki-history-sidebar ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .wiki-history-sidebar li + li {
+                margin-top: 6px;
+            }
+
+            .wiki-history-sidebar a {
+                font-size: 13px;
+                color: #2e7d32;
+                text-decoration: none;
+            }
+
+            .wiki-history-sidebar a:hover,
+            .wiki-history-sidebar a.is-active {
+                text-decoration: underline;
+                font-weight: 600;
+            }
+
+            .wiki-history-header {
+                display: flex;
+                justify-content: space-between;
+                gap: 16px;
+                align-items: flex-start;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+
+            .wiki-history-kicker {
+                margin: 0 0 8px;
+                font-size: 12px;
+                font-weight: 700;
+                color: #2e7d32;
+            }
+
+            .wiki-history-title {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+                line-height: 1.35;
+            }
+
+            .wiki-history-title small {
+                font-size: 24px;
+                font-weight: 600;
+                color: #555;
+            }
+
+            .wiki-history-desc {
+                margin: 10px 0 0;
+                font-size: 14px;
+                color: #666;
+                line-height: 1.6;
+            }
+
+            .wiki-history-actions {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .wiki-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 38px;
+                padding: 8px 18px;
+                border-radius: 8px;
+                border: 1px solid #d6d6d6;
+                background: #fff;
+                color: #444;
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            .wiki-btn:hover {
+                background: #f7f7f7;
+            }
+
+            .wiki-btn-primary {
+                border-color: #66bb6a;
+                color: #2e7d32;
+            }
+
+            .wiki-btn-primary:hover {
+                background: #f1f8e9;
+                color: #1b5e20;
+            }
+
+            .wiki-history-summary {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+
+            .wiki-history-stat {
+                border: 1px solid #e7e7e7;
+                border-radius: 10px;
+                background: #fff;
+                padding: 16px 18px;
+            }
+
+            .wiki-history-stat-label {
+                display: block;
+                font-size: 12px;
+                color: #777;
+                margin-bottom: 6px;
+            }
+
+            .wiki-history-stat strong {
+                font-size: 18px;
+                color: #222;
+            }
+
+            .wiki-history-panel {
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                background: #fff;
+                padding: 18px 22px;
+            }
+
+            .wiki-history-toolbar {
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                align-items: center;
+                flex-wrap: wrap;
+                margin-bottom: 18px;
+            }
+
+            .wiki-history-pager {
+                display: flex;
+                gap: 8px;
+            }
+
+            .wiki-history-note {
+                font-size: 12px;
+                color: #777;
+            }
+
+            .wiki-btn-compare[disabled] {
+                opacity: 0.45;
+                cursor: not-allowed;
+            }
+
+            .wiki-revision-list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .wiki-revision-item {
+                display: grid;
+                grid-template-columns: 28px minmax(0, 1fr);
+                gap: 12px;
+                align-items: flex-start;
+                padding: 14px 0;
+                border-top: 1px solid #f0f0f0;
+            }
+
+            .wiki-revision-item:first-child {
+                border-top: 0;
+                padding-top: 0;
+            }
+
+            .wiki-revision-item.is-latest {
+                background: linear-gradient(90deg, rgba(241, 248, 233, 0.55), rgba(255, 255, 255, 0));
+                border-radius: 8px;
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            .wiki-revision-check {
+                display: inline-flex;
+                padding-top: 3px;
+            }
+
+            .wiki-revision-meta {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 6px;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .wiki-revision-time {
+                color: #1f1f1f;
+                font-weight: 600;
+            }
+
+            .wiki-revision-links {
+                display: inline-flex;
+                gap: 6px;
+                font-size: 12px;
+            }
+
+            .wiki-revision-links a {
+                color: #1565c0;
+                text-decoration: none;
+            }
+
+            .wiki-revision-links a:hover {
+                text-decoration: underline;
+            }
+
+            .wiki-revision-tag {
+                font-weight: 700;
+                color: #1f1f1f;
+            }
+
+            .wiki-revision-badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: #f1f8e9;
+                color: #2e7d32;
+                font-size: 11px;
+                font-weight: 700;
+            }
+
+            .wiki-revision-author {
+                color: #1565c0;
+                font-weight: 600;
+            }
+
+            .wiki-revision-summary {
+                margin: 0;
+                font-size: 13px;
+                color: #666;
+                line-height: 1.6;
+            }
+
+            .wiki-history-empty {
+                margin: 0;
+                color: #888;
+                font-size: 14px;
+            }
+
+            @media (max-width: 900px) {
+                .wiki-history-summary {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .wiki-history-layout {
+                    flex-direction: column;
+                }
+
+                .wiki-history-sidebar {
+                    width: 100%;
+                }
+
+                .wiki-history-panel {
+                    padding: 18px;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content" class="wiki-history-page py-2">
+    <div class="wiki-history-layout">
+        <div class="wiki-history-main">
+            <div class="wiki-history-header">
+                <div>
+                    <p class="wiki-history-kicker">위키 문서 역사</p>
+                    <h1 class="wiki-history-title">
+                        <span th:text="${page.title}">SCP-6871</span>
+                        <small>(문서 역사)</small>
+                    </h1>
+                    <p class="wiki-history-desc">
+                        이 문서의 수정 이력을 시간순으로 확인할 수 있습니다.
+                    </p>
+                </div>
+                <div class="wiki-history-actions">
+                    <a class="wiki-btn" th:href="@{/wiki/view/{name}(name=${page.title})}">문서 보기</a>
+                    <a class="wiki-btn wiki-btn-primary"
+                       th:href="@{/wiki/register(id=${page.pageId != null ? page.pageId : page.id})}">편집</a>
+                </div>
+            </div>
+
+            <div class="wiki-history-summary">
+                <div class="wiki-history-stat">
+                    <span class="wiki-history-stat-label">총 리비전</span>
+                    <strong th:text="${historyList != null ? historyList.size() : 0}">0</strong>
+                </div>
+                <div class="wiki-history-stat">
+                    <span class="wiki-history-stat-label">최신 버전</span>
+                    <strong th:text="${page.version != null ? 'r' + page.version : '-'}">r0</strong>
+                </div>
+                <div class="wiki-history-stat">
+                    <span class="wiki-history-stat-label">최근 수정 시각</span>
+                    <strong th:text="${page.updatedOn != null ? #dates.format(page.updatedOn, 'yyyy-MM-dd HH:mm') : '-'}">2026-05-26 17:00</strong>
+                </div>
+            </div>
+
+            <section class="wiki-history-panel">
+                <div class="wiki-history-toolbar">
+                    <div class="wiki-history-pager">
+                        <button type="button" class="wiki-btn" disabled>이전</button>
+                        <button type="button" class="wiki-btn" disabled>다음</button>
+                    </div>
+
+                </div>
+
+                <th:block th:if="${historyList != null and !historyList.isEmpty()}">
+                    <ul class="wiki-revision-list">
+                        <li class="wiki-revision-item"
+                            th:each="revision, stat : ${historyList}"
+                            th:classappend="${stat.first} ? ' is-latest' : ''">
+                            <label class="wiki-revision-check" th:attr="for=${'revision-' + revision.version}">
+
+                            </label>
+                            <div>
+                                <div class="wiki-revision-meta">
+                                    <span class="wiki-revision-time"
+                                          th:text="${revision.updatedOn != null ? #dates.format(revision.updatedOn, 'yyyy-MM-dd HH:mm:ss') : '날짜 미상'}">2026-05-11 11:28:55</span>
+                                    <span class="wiki-revision-links">
+                                        <a th:href="@{/wiki/view/{name}(name=${page.title},version=${revision.version})}">보기</a>
+                                        <a th:href="@{/wiki/view/{name}(name=${page.title},version=${revision.version})}" target="_blank" rel="noopener">새 창</a>
+                                    </span>
+                                    <span class="wiki-revision-tag"
+                                          th:text="${revision.version != null ? 'r' + revision.version : 'r?'}">r74</span>
+                                    <span class="wiki-revision-badge" th:if="${stat.first}">최신</span>
+                                    <span class="wiki-revision-author"
+                                          th:if="${revision.modifierName != null and !#strings.isEmpty(revision.modifierName)}"
+                                          th:text="${revision.modifierName}">whk5879</span>
+                                    <span class="wiki-revision-author"
+                                          th:if="${revision.modifierName == null or #strings.isEmpty(revision.modifierName)}"
+                                          th:text="|사용자 #${revision.memId}|">사용자 #1</span>
+                                </div>
+                                <p class="wiki-revision-summary"
+                                   th:text="${revision.describe != null and !#strings.isEmpty(revision.describe) ? revision.describe : '수정 요약이 없습니다.'}">
+                                    원문에서 오래된 표현을 다듬었습니다.
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </th:block>
+
+                <p class="wiki-history-empty" th:if="${historyList == null or historyList.isEmpty()}">
+                    아직 표시할 수정 이력이 없습니다.
+                </p>
+            </section>
+        </div>
+
+        <aside class="wiki-history-sidebar">
+            <h3>사이드바</h3>
+            <div class="index-title">색인</div>
+            <ul>
+                <li><a th:href="@{/wiki}">첫페이지</a></li>
+                <li><a th:href="@{/wiki/index(type='title')}">제목별</a></li>
+                <li><a th:href="@{/wiki/index(type='date')}">날짜별</a></li>
+                <li><a class="is-active" th:href="@{/wiki/history/{name}(name=${page.title})}">문서 역사</a></li>
+            </ul>
+        </aside>
+    </div>
+
+    <script>
+        (function () {
+            var checks = Array.prototype.slice.call(document.querySelectorAll('.wiki-history-check'));
+            var compareButton = document.getElementById('compareButton');
+
+            if (!checks.length || !compareButton) {
+                return;
+            }
+
+            function getSelectedVersions() {
+                return checks
+                    .filter(function (checkbox) {
+                        return checkbox.checked;
+                    })
+                    .map(function (checkbox) {
+                        return checkbox.value;
+                    });
+            }
+
+            function syncCompareButton() {
+                compareButton.disabled = getSelectedVersions().length !== 2;
+            }
+
+            checks.forEach(function (checkbox) {
+                checkbox.addEventListener('change', syncCompareButton);
+            });
+
+            compareButton.addEventListener('click', function () {
+                var versions = getSelectedVersions();
+                if (versions.length !== 2) {
+                    return;
+                }
+
+                alert('선택한 리비전: r' + versions[0] + ' / r' + versions[1] + '\n비교 화면은 다음 단계에서 연결할 수 있습니다.');
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>
