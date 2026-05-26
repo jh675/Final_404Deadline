@@ -131,6 +131,7 @@ public class GroupController {
         body.put("ok", true);
         body.put("roleName", role.getRoleName());
         body.put("menus", menus == null ? List.of() : menus);
+        body.put("menuSections", roleService.selectMenuSectionsByRoleCd(prjId, roleCd));
         return ResponseEntity.ok(body);
     }
 

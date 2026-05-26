@@ -136,40 +136,17 @@
 
         <section aria-labelledby="history-search-heading">
           <h2 id="history-search-heading" class="visually-hidden">작업내역 검색</h2>
-          <form
-            class="history-search"
-            id="historySearchForm"
-            th:action="@{/project/history/list}"
-            method="get"
-          >
+          <form class="history-search" id="historySearchForm" th:action="@{/project/history/list}" method="get">
             <div class="history-search__bar">
               <div class="history-search__inline">
                 <label for="updatedFrom">일시</label>
-                <input
-                  type="date"
-                  id="updatedFrom"
-                  name="updatedFrom"
-                  th:value="${updatedFrom}"
-                />
+                <input type="date" id="updatedFrom" name="updatedFrom" th:value="${updatedFrom}" />
                 <span class="history-search__tilde">~</span>
-                <input
-                  type="date"
-                  id="updatedTo"
-                  name="updatedTo"
-                  th:value="${updatedTo}"
-                  aria-label="일시 종료"
-                />
+                <input type="date" id="updatedTo" name="updatedTo" th:value="${updatedTo}" aria-label="일시 종료"/>
               </div>
               <div class="history-search__inline">
                 <label for="modifierName">수정자</label>
-                <input
-                  type="text"
-                  id="modifierName"
-                  name="modifierName"
-                  th:value="${modifierName}"
-                  placeholder="이름"
-                  autocomplete="off"
-                />
+                <input type="text" id="modifierName" name="modifierName" th:value="${modifierName}" placeholder="이름" autocomplete="off"/>
               </div>
               <div class="history-search__inline">
                 <label for="tableName">항목명</label>
@@ -185,14 +162,7 @@
               </div>
               <div class="history-search__inline">
                 <label for="historyDetail">내용</label>
-                <input
-                  type="text"
-                  id="historyDetail"
-                  name="detail"
-                  th:value="${detail}"
-                  placeholder="내용 검색"
-                  autocomplete="off"
-                />
+                <input type="text" id="historyDetail" name="detail" th:value="${detail}" placeholder="내용 검색" autocomplete="off"/>
               </div>
               <div class="history-search__actions">
                 <button type="submit">검색</button>
