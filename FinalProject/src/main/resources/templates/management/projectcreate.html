@@ -17,10 +17,12 @@
     <h3>프로젝트 생성</h3>
 
     <div class="form-group">
-        이름 <input type="text" class="form-control" name="prjName" required autocomplete="off">
+        이름 <input type="text" class="form-control" name="prjName" required autocomplete="off"
+           th:value="${copyProject != null ? copyProject.prjName : ''}">
     </div>
     <div class="form-group">
-        식별자 <input type="text" class="form-control" name="prjIdentifier" required autocomplete="off">
+        식별자 <input type="text" class="form-control" name="prjIdentifier" required autocomplete="off"
+             th:value="${copyProject != null ? copyProject.prjIdentifier : ''}">
     </div>
     <div class="form-group" style="position: relative;">
     프로젝트 매니저 
@@ -44,17 +46,18 @@
 	"></div>
 </div>
     <div class="form-group">
-        설명 <textarea class="form-control" name="prjDesc"></textarea>
+        설명 <textarea class="form-control" name="prjDesc"
+              th:text="${copyProject != null ? copyProject.prjDesc : ''}"></textarea>
     </div>
     <div class="form-group">
         상위프로젝트
         <select name="prjParId">
-            <option value="">=== 선택 ===</option>
-            <option th:each="p : ${projectList}"
-                    th:value="${p.id}"
-                    th:text="${p.prjName}"
-                    th:if="${p.bizNo == #authentication.principal.bizNo}">프로젝트명</option>
-        </select>
+    <option value="" selected>=== 선택 ===</option>
+		<option th:each="p : ${projectList}"
+		    th:value="${p.id}"
+		    th:text="${p.prjName}"
+		    th:if="${p.bizNo == #authentication.principal.bizNo}">프로젝트명</option>
+</select>
     </div>
 
     <div class="form-group">
@@ -80,6 +83,12 @@
         const realUserId = document.getElementById('realUserId');
         const dropdown = document.getElementById('userDropdown');
 
+        const copyProject = /*[[${copyProject}]]*/ null;
+        if (copyProject && copyProject.userId) {
+            realUserId.value = copyProject.userId;
+            managerSearch.placeholder = '매니저를 다시 검색해주세요';
+        }
+        
         managerSearch.addEventListener('input', function() {
             const term = this.value.trim();
 
