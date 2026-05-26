@@ -43,14 +43,12 @@ public class AttachServiceImpl implements AttachService {
 	// db에 파일정보 등록
 	@Override
 	public int insertAttach(List<AttachVO> attachList) {
-		// TODO Auto-generated method stub
 		try {
 			for (AttachVO attachVO : attachList) {
 				mapper.insertAttach(attachVO);
 			}
 
 		} catch (Exception e) {
-			// TODO: handle exception
 			System.err.println(e);
 			return 0;
 		}
@@ -69,9 +67,6 @@ public class AttachServiceImpl implements AttachService {
 	// 첨부파일 삭제
 	@Override
 	public int deleteAttach(Long id) {
-		// TODO Auto-generated method stub
-		AttachVO attachVO= selectAttach(id);
-		
 		return mapper.deleteAttach(id);
 	}
 
@@ -153,13 +148,11 @@ public class AttachServiceImpl implements AttachService {
 	// 첨부파일 조회
 	@Override
 	public AttachVO selectAttach(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.selectAttach(id);
 	}
 
 	@Override
 	public void removeAttach(AttachVO attachVO) throws IOException {
-		// TODO Auto-generated method stub
 		Path filePath = Paths.get(attachVO.getDiskDirectory()).resolve(attachVO.getDiskFileName()).normalize();
 		//파일을 삭제한다
 		Files.delete(filePath);

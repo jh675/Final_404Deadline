@@ -18,7 +18,6 @@ public class WikiServiceImpl implements WikiService {
 	
 	@Override
 	public WikiContentVO selectWikiContentLastVerByTitle(Long id,String title) {
-		// TODO Auto-generated method stub
 		return mapper.selectWikiContentLastVerByTitle(id,title);
 	}
 
@@ -30,31 +29,26 @@ public class WikiServiceImpl implements WikiService {
 
 	@Override
 	public Long updateWikiContent(WikiContentVO wikiContentVO) {
-		// TODO Auto-generated method stub
 		return mapper.updateWikiContent(wikiContentVO);
 	}
 
 	@Override
 	public Long deleteWikiContent(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.deleteWikiContent(id);
 	}
 
 	@Override
 	public List<WikiPageVO> selectWikiPageListGroupDate(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.selectWikiPageListGroupDate(id);
 	}
 
 	@Override
 	public List<WikiPageVO> selectWikiPageListGroupParent(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.selectWikiPageListGroupParent(id);
 	}
 
 	@Override
 	public Long nameCheck(Long id,String name) {
-		// TODO Auto-generated method stub
 		return mapper.nameCheck(id,name);
 	}
 
@@ -69,12 +63,10 @@ public class WikiServiceImpl implements WikiService {
 
 	@Override
 	public WikiContentVO selectWikiContentLastVerById(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.selectWikiContentLastVerById(id);
 	}
 	@Override
 	public List<WikiPageVO> selectWikiPageForTree(Long prjId, Long id) {
-		// TODO Auto-generated method stub
 		return mapper.selectWikiPageForTree(prjId, id);
 	}
 
