@@ -115,6 +115,9 @@
 			    </form>
 			</div>
 			
+			<!-- TOAST UI Viewer (AI 답변 마크다운 렌더링용) -->
+			<link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.css" />
+
 			<div class="modal fade" id="aiResultModal" tabindex="-1" aria-hidden="true">
 			  <div class="modal-dialog modal-dialog-centered modal-lg">
 			    <div class="modal-content">
@@ -127,11 +130,21 @@
 			            <div class="spinner-border text-primary" role="status"></div>
 			            <p class="mt-2 text-muted">프로젝트 데이터를 분석 중입니다. 잠시만 기다려주세요...</p>
 			        </div>
-			        <div id="aiAnswerContent" class="lh-base" style="display:none; white-space: pre-wrap;"></div>
+			        <!-- 본문 (마크다운 → TOAST UI Viewer 렌더) -->
+			        <article id="aiAnswerContent" class="wiki-body"
+			                 style="display:none; line-height:1.7; font-size:14px;">
+			            <div id="aiAnswerViewer"></div>
+			            <p id="aiAnswerEmpty" class="wiki-body-empty"
+			               style="display:none; color:#888; margin:0;">
+			                내용이 없습니다.
+			            </p>
+			        </article>
 			      </div>
 			    </div>
 			  </div>
 			</div>
+
+			<script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.js"></script>
 
 			<script th:inline="javascript">
 				document.addEventListener('DOMContentLoaded', function() {
@@ -140,19 +153,53 @@
 				    const modal = new bootstrap.Modal(document.getElementById('aiResultModal'));
 				    const loadingDiv = document.getElementById('aiLoading');
 				    const contentDiv = document.getElementById('aiAnswerContent');
-				
+				    const viewerEl = document.getElementById('aiAnswerViewer');
+				    const emptyEl = document.getElementById('aiAnswerEmpty');
+
+				    let aiAnswerViewer = null;
+
+				    function renderAiAnswer(markdown) {
+				        if (aiAnswerViewer) {
+				            try { aiAnswerViewer.destroy(); } catch (e) {}
+				            aiAnswerViewer = null;
+				        }
+				        viewerEl.innerHTML = '';
+
+				        const md = (markdown || '').toString().trim();
+				        if (!md) {
+				            viewerEl.style.display = 'none';
+				            emptyEl.style.display = 'block';
+				            return;
+				        }
+
+				        emptyEl.style.display = 'none';
+				        viewerEl.style.display = '';
+
+				        if (window.toastui && window.toastui.Editor) {
+				            aiAnswerViewer = new toastui.Editor({
+				                el: viewerEl,
+				                viewer: true,
+				                height: 'auto',
+				                initialValue: md
+				            });
+				        } else {
+				            viewerEl.style.whiteSpace = 'pre-wrap';
+				            viewerEl.textContent = md;
+				        }
+				    }
+
 				    function executeAiSearch() {
 				        const query = searchInput.value.trim();
 				        if(!query) {
 				            alert('질문을 입력해주세요!');
 				            return;
 				        }
-				
+
 				        // 모달 열고 로딩 상태로 초기화
 				        contentDiv.style.display = 'none';
 				        loadingDiv.style.display = 'block';
 				        modal.show();
-				
+
 				        csrfFetch('/ai/assistant', {
 				            method: 'POST',
 				            headers: { 'Content-Type': 'application/json' },
@@ -164,16 +211,16 @@
 				        })
 				        .then(data => {
 				            loadingDiv.style.display = 'none';
-				            contentDiv.textContent = data;
+				            renderAiAnswer(data);
 				            contentDiv.style.display = 'block';
 				        })
 				        .catch(err => {
 				            loadingDiv.style.display = 'none';
-				            contentDiv.textContent = '오류가 발생했습니다: ' + err.message;
+				            renderAiAnswer('오류가 발생했습니다: ' + err.message);
 				            contentDiv.style.display = 'block';
 				        });
 				    }
-				
+
 				    searchBtn.addEventListener('click', executeAiSearch);
 				    searchInput.addEventListener('keypress', function(e) {
 				        if(e.key === 'Enter') executeAiSearch();

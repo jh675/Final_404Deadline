@@ -56,7 +56,6 @@ public class MilestoneRestController {
 //			System.out.println(milestoneVO);
 			return service.insertMilestone(milestoneVO);
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			return null;
 		}
@@ -66,7 +65,6 @@ public class MilestoneRestController {
 		try {
 			return service.insertMilestoneIssue(milestoneIssueVO);
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			return null;
 		}
@@ -76,7 +74,6 @@ public class MilestoneRestController {
 		try {
 			return service.insertTimeline(timelineVO);
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			return null;
 		}
@@ -98,7 +95,6 @@ public class MilestoneRestController {
 		try {
 			return service.updateMilestone(milestoneVO);
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			return null;
 		}
