@@ -74,14 +74,24 @@ public class MessagesController {
         return "redirect:/messages/list?boardId=" + messages.getBoardId();
     }
     
-    // 메시지 목록 조회 화면 이동
+    // 메시지 목록 조회 및 하단 상세 내용/댓글 로드 매핑 (오류 수정 완료)
     @GetMapping("/messages/list")
-    public String messagesList(Model model, @RequestParam("boardId") Long boardId, MessagesVO messages) {
+    public String messagesList(Model model, 
+                               @RequestParam("boardId") Long boardId, 
+                               @RequestParam(value = "id", required = false) Long id, 
+                               MessagesVO messages) {
         messages.setBoardId(boardId);
         
         model.addAttribute("list", messagesService.selectAll(messages)); // 메시지 목록 데이터
         model.addAttribute("boardId", boardId);
         model.addAttribute("board", boardsService.selectOne(boardId));   // 게시판 정보 
+        
+        // [상세] 버튼이나 제목을 눌러 id가 들어온 경우 단건 데이터를 정상적으로 바인딩합니다.
+        if (id != null) {
+            model.addAttribute("message", messagesService.selectOne(id)); 
+        }
+        
+        // return 문이 if문 밖으로 완전히 빠져나와 정상적으로 모든 상황에서 화면을 그려줍니다.
         return "project/messages/messagesList";
     }
     
