@@ -1,18 +1,12 @@
 package com.example.demo.project.member.service.impl;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.project.member.mapper.MemberMapper;
-import com.example.demo.project.member.service.CompanyMemberRowVO;
-import com.example.demo.project.member.service.MemberDetailVO;
-import com.example.demo.project.member.service.MemberGroupPickRowVO;
-import com.example.demo.project.member.service.MemberIssueRowVO;
-import com.example.demo.project.member.service.MemberListCriteria;
-import com.example.demo.project.member.service.MemberRegisterParam;
-import com.example.demo.project.member.service.MemberUpdateParam;
-import com.example.demo.project.member.service.MemberService;
-import com.example.demo.project.member.service.ProjectMemberRowVO;
+import com.example.demo.project.member.service.*;
 import lombok.RequiredArgsConstructor;
 
 /** 구성원 조회·제거 — 검증 후 Mapper 호출 */
@@ -37,6 +31,14 @@ public class MemberServiceImpl implements MemberService {
         }
         String name = memberMapper.selectProjectNameByPrjId(prjId);
         return name == null ? "" : name;
+    }
+
+    @Override
+    public ProjectPeriodVO selectProjectPeriod(Long prjId) {
+        if (prjId == null) {
+            return null;
+        }
+        return memberMapper.selectProjectPeriodByPrjId(prjId);
     }
 
     @Override
@@ -134,8 +136,24 @@ public class MemberServiceImpl implements MemberService {
         }
 
         String hireYmd = memberMapper.selectUserHireDateYmd(userId);
-        if (hireYmd != null && !hireYmd.isBlank() && start.compareTo(hireYmd.trim()) < 0) {
-            throw new IllegalArgumentException("프로젝트 투입일은 입사일 이후여야 합니다.");
+        ProjectPeriodVO period = memberMapper.selectProjectPeriodByPrjId(prjId);
+        String prjStart = period == null || period.getStartDate() == null ? "" : period.getStartDate().trim();
+        String prjClosed = period == null || period.getClosedDate() == null ? "" : period.getClosedDate().trim();
+
+        String minStart = "";
+        if (hireYmd != null && !hireYmd.isBlank()) {
+            minStart = hireYmd.trim();
+        }
+        if (!prjStart.isEmpty() && (minStart.isEmpty() || prjStart.compareTo(minStart) > 0)) {
+            minStart = prjStart;
+        }
+        if (!minStart.isEmpty() && start.compareTo(minStart) < 0) {
+            throw new IllegalArgumentException(
+                    "프로젝트 투입일은 입사일과 프로젝트 시작일 중 늦은 날짜(" + minStart + ") 이후여야 합니다.");
+        }
+        if (!prjClosed.isEmpty() && !end.isEmpty() && end.compareTo(prjClosed) > 0) {
+            throw new IllegalArgumentException(
+                    "프로젝트 종료일(" + prjClosed + ") 이후로는 지정할 수 없습니다.");
         }
 
         MemberRegisterParam param = new MemberRegisterParam();
@@ -149,6 +167,86 @@ public class MemberServiceImpl implements MemberService {
             throw new IllegalStateException("구성원 등록에 실패했습니다.");
         }
         return param.getMemberId();
+    }
+
+    @Override
+    @Transactional
+    public int registerMembers(
+            Long prjId,
+            List<Long> userIds,
+            Long grpId,
+            String prjStartDate,
+            String prjEndDate) {
+        if (prjId == null) {
+            throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
+        }
+        if (grpId == null) {
+            throw new IllegalArgumentException("소속 그룹을 선택하세요.");
+        }
+        if (userIds == null || userIds.isEmpty()) {
+            throw new IllegalArgumentException("등록할 직원을 선택하세요.");
+        }
+        List<Long> uniqueIds = new ArrayList<>(new LinkedHashSet<>(
+                userIds.stream().filter(java.util.Objects::nonNull).toList()));
+        if (uniqueIds.isEmpty()) {
+            throw new IllegalArgumentException("등록할 직원을 선택하세요.");
+        }
+
+        String start = prjStartDate == null ? "" : prjStartDate.trim();
+        if (start.isEmpty()) {
+            throw new IllegalArgumentException("프로젝트 투입일을 입력하세요.");
+        }
+        if (!start.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            throw new IllegalArgumentException("프로젝트 투입일 형식이 올바르지 않습니다.");
+        }
+
+        String end = prjEndDate == null ? "" : prjEndDate.trim();
+        if (!end.isEmpty() && !end.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            throw new IllegalArgumentException("프로젝트 종료일 형식이 올바르지 않습니다.");
+        }
+        if (!end.isEmpty() && end.compareTo(start) < 0) {
+            throw new IllegalArgumentException("프로젝트 종료일은 투입일 이후여야 합니다.");
+        }
+
+        if (memberMapper.countGrpInProject(prjId, grpId) < 1) {
+            throw new IllegalArgumentException("선택한 그룹이 이 프로젝트에 존재하지 않습니다.");
+        }
+
+        ProjectPeriodVO period = memberMapper.selectProjectPeriodByPrjId(prjId);
+        String prjStart = period == null || period.getStartDate() == null
+                ? ""
+                : period.getStartDate().trim();
+        String prjClosed = period == null || period.getClosedDate() == null
+                ? ""
+                : period.getClosedDate().trim();
+        if (!prjClosed.isEmpty() && !end.isEmpty() && end.compareTo(prjClosed) > 0) {
+            throw new IllegalArgumentException(
+                    "프로젝트 종료일(" + prjClosed + ") 이후로는 지정할 수 없습니다.");
+        }
+
+        for (Long uid : uniqueIds) {
+            if (memberMapper.countActiveMember(uid, grpId) > 0) {
+                throw new IllegalArgumentException(
+                        "이미 해당 그룹에 등록된 구성원이 포함되어 있습니다. (userId=" + uid + ")");
+            }
+            String hireYmd = memberMapper.selectUserHireDateYmd(uid);
+            String minStart = "";
+            if (hireYmd != null && !hireYmd.isBlank()) {
+                minStart = hireYmd.trim();
+            }
+            if (!prjStart.isEmpty() && (minStart.isEmpty() || prjStart.compareTo(minStart) > 0)) {
+                minStart = prjStart;
+            }
+            if (!minStart.isEmpty() && start.compareTo(minStart) < 0) {
+                throw new IllegalArgumentException(
+                        "프로젝트 투입일은 입사일과 프로젝트 시작일 중 늦은 날짜("
+                                + minStart + ") 이후여야 합니다. (userId=" + uid + ")");
+            }
+        }
+
+        memberMapper.insertMembers(
+                uniqueIds, grpId, start, end.isEmpty() ? null : end);
+        return uniqueIds.size();
     }
 
     @Override
@@ -188,6 +286,15 @@ public class MemberServiceImpl implements MemberService {
         }
         if (!end.isEmpty() && end.compareTo(start) < 0) {
             throw new IllegalArgumentException("프로젝트 종료일은 투입 시작일 이후여야 합니다.");
+        }
+
+        ProjectPeriodVO period = memberMapper.selectProjectPeriodByPrjId(prjId);
+        String prjClosed = period == null || period.getClosedDate() == null
+                ? ""
+                : period.getClosedDate().trim();
+        if (!prjClosed.isEmpty() && !end.isEmpty() && end.compareTo(prjClosed) > 0) {
+            throw new IllegalArgumentException(
+                    "프로젝트 종료일(" + prjClosed + ") 이후로는 지정할 수 없습니다.");
         }
 
         if (memberMapper.countGrpInProject(prjId, grpId) < 1) {

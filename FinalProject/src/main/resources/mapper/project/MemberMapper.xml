@@ -49,11 +49,23 @@
     WHERE P.ID = #{prjId}
   </select>
 
+  <!-- 구성원 등록 — 프로젝트 투입기간 제한용 기간 조회 -->
+  <select id="selectProjectPeriodByPrjId"
+    resultType="com.example.demo.project.member.service.ProjectPeriodVO">
+    SELECT
+      P.PRJ_NAME AS prjName,
+      TO_CHAR(P.START_DATE, 'YYYY-MM-DD') AS startDate,
+      TO_CHAR(P.CLOSED_DATE, 'YYYY-MM-DD') AS closedDate
+    FROM project P
+    WHERE P.ID = #{prjId}
+  </select>
+
   <!-- 구성원 등록 모달 — 동일 biz_no·활성 사용자, MEMBER 미등록(user_id 없음)만 -->
   <select id="selectCompanyMembersByPrjId"
     resultType="com.example.demo.project.member.service.CompanyMemberRowVO">
     SELECT
       U.ID AS userId,
+      U.LOGIN AS login,
       U.NAME AS userName,
       TO_CHAR(U.HIRE_DATE, 'YYYY-MM-DD') AS hireDate,
       U.GENDER_CD AS genderCd,
@@ -190,6 +202,28 @@
         </otherwise>
       </choose>
     )
+  </insert>
+
+  <!-- 구성원 일괄 등록 — PL/SQL 블록 + foreach. 동일 그룹·기간으로 N건 INSERT
+       빈 문자열은 서비스에서 null 로 정규화하여 전달하므로 TO_DATE(NULL, ...) → NULL -->
+  <insert id="insertMembers">
+    BEGIN
+      <foreach collection="userIds" item="uid" separator=";">
+        INSERT INTO MEMBER (
+          ID,
+          USER_ID,
+          GRP_ID,
+          PRJ_START_DATE,
+          PRJ_END_DATE
+        ) VALUES (
+          mem_seq.NEXTVAL,
+          #{uid},
+          #{grpId},
+          TO_DATE(#{prjStartDate}, 'YYYY-MM-DD'),
+          TO_DATE(#{prjEndDate}, 'YYYY-MM-DD')
+        )
+      </foreach>;
+    END;
   </insert>
 
   <!-- 구성원 수정 — 종료일·소속 그룹 (투입 시작일 변경 없음) -->
