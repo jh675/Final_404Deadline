@@ -57,9 +57,12 @@
 		    th:value="${p.id}"
 		    th:text="${p.prjName}"
 		    th:if="${p.bizNo == #authentication.principal.bizNo}">프로젝트명</option>
-</select>
+		</select>
     </div>
-
+    <div>
+	프로젝트 시작일:<input type="date" name="startDate" id="startDate">
+	프로젝트 종료일:<input type="date" name="closedDate" id="closedDate">  
+    </div>
     <div class="form-group">
         기본 모듈
         <div class="module-container">
@@ -77,6 +80,10 @@
     <button type="submit">생성</button>
     <a th:href="@{/management/project}">취소</a>
 </form>
+<script>
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('startDate').value = today;
+</script>
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function() {
         const managerSearch = document.getElementById('managerSearch');
