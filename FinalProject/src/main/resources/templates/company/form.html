@@ -59,7 +59,9 @@
 					<input type="text" name="bizNo" class="form-control"
 						placeholder="사업자번호를 입력해 주세요."
 						th:value="${company != null ? company.bizNo : ''}"
-						th:readonly="${company != null}">
+						th:readonly="${company != null}"
+						required>
+						
 
 				</div>
 
@@ -76,7 +78,8 @@
 
 					<input type="text" name="companyName" class="form-control"
 						placeholder="기업명을 입력해 주세요."
-						th:value="${company != null ? company.companyName : ''}">
+						th:value="${company != null ? company.companyName : ''}"
+						required>
 
 				</div>
 
@@ -124,8 +127,10 @@
 
 				<div class="col-9">
 
-					<input type="text" class="form-control"
-						th:value="${company != null ? company.login : ''}" readonly>
+					<input type="text" name="login" class="form-control"
+						th:value="${company != null ? company.login : ''}"
+						th:readonly="${company != null}"
+						required>
 
 				</div>
 
@@ -139,8 +144,9 @@
 
 				<div class="col-9">
 
-					<input type="text" class="form-control"
-						th:value="${company != null ? company.email : ''}" readonly>
+					<input type="text" name="email" class="form-control"
+						th:value="${company != null ? company.email : ''}"
+						required>
 
 				</div>
 

@@ -13,9 +13,8 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CAUserManageServiceImpl implements CAUserManageService { // 🚨 CA 서비스로 변경
+public class CAUserManageServiceImpl implements CAUserManageService { 
 	
-	// 🚨 CA 매퍼 주입으로 변경
 	private final CAUserManageMapper caUserManageMapper;
 	private final PasswordEncoder passwordEncoder;
 	

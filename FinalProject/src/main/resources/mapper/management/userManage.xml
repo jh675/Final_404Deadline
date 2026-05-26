@@ -97,4 +97,20 @@
         ORDER BY COMPANY_NAME
 
     </select>
+    
+    <select id="selectByLoginAndBizNo">
+	    SELECT 	 ID
+				,BIZ_NO
+				,LOGIN
+				,NAME
+				,TEL
+				,EMAIL
+				,ADMIN_CD
+				,STATUS_CD
+				,PRJ_MANAGER_CD
+				,MCP_CD
+	    FROM 	 users
+	    WHERE 	 BIZ_NO = #{bizNo} 
+	    AND 	 LOGIN = #{login}
+		</select>
 </mapper>

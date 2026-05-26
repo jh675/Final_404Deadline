@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.company.service.CompanyService;
 import com.example.demo.company.service.CompanyVO;
+import com.example.demo.management.userManage.service.UserManageVO;
 
 @Controller
 public class CompanyController {
@@ -43,19 +44,21 @@ public class CompanyController {
 	}
 	
 	@PostMapping("/company/form")
-	public String companyinsert(CompanyVO company) {
-		 //등록
-		if(companyService.selectOne(company.getBizNo()) == null) {
-		
-			companyService.insert(company);
-		
-		} else {
-		
-		//수정
-		
-			companyService.update(company);
-		}
-		return "redirect:/company/list";
+	public String companyinsert(CompanyVO company, UserManageVO user) {
+	    
+	    // 기업 등록 여부 확인
+	    if(companyService.selectOne(company.getBizNo()) == null) {
+	        
+	        // 등록 : 기업 등록 + 관리자 계정 동시 생성
+	        companyService.insertCompanyWithAdmin(company, user);
+	        
+	    } else {
+	        
+	        // 기업 정보 및 관리자 이메일 수정
+	        companyService.updateCompanyWithAdmin(company, user);
+	    }
+	    
+	    return "redirect:/company/list";
 	}
 	
 

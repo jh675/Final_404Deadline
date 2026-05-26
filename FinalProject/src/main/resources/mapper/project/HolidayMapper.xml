@@ -1,18 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
- <mapper namespace="com.example.demo.project.calender.mapper.HolidayMapper">
- 
- <!-- 공휴일 불러오기  -->
- <select id="getHolidays" resultType="HolidayVO" parameterType="int">
- 	 select id,
- 	        year,
- 	        month,
- 	        day,
- 	        holiday_name as holidayName
- 	  from holiday
- 	  where year = #{year}
- 	  order by month, day      
- </select>
- 
- </mapper>
+<mapper
+	namespace="com.example.demo.project.calender.mapper.HolidayMapper">
+
+	<!-- 공휴일 불러오기 -->
+	<select id="getHolidays" resultType="HolidayVO"
+		parameterType="int">
+		select id,
+		year,
+		month,
+		day,
+		holiday_name as holidayName
+		from holiday
+		where year = #{year}
+		order by month, day
+	</select>
+	<!--  공휴일 단건 저장 -->
+	<insert id="insertHoliday" parameterType="HolidayVO">
+		insert into holiday (
+		id,
+		year,
+		month,
+		day,
+		holiday_name)
+		values (
+		HOL_SEQ.NEXTVAL,
+		#{year},
+		#{month},
+		#{day},
+		#{holidayName}
+		)
+	</insert>
+	
+	<delete id="deleteByYear" parameterType="int">
+	 delete from holiday
+	 where year = #{year}	
+	</delete>
+	
+	<select id="existsByYear" parameterType="int" resultType="HolidayVO">
+		select id,
+			   year,
+			   month,
+			   day,
+			   holiday_name as holidayName
+		 from holiday
+		 where year = #{year}
+	</select>
+	
+
+</mapper>

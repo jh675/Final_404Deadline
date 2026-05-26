@@ -133,20 +133,6 @@
 .toastui-calendar-weekday-grid-more-events {
 	font-size: 0 !important;
 	display: block;
-	text-align: left; /* ✅ 왼쪽 정렬 */
-}
-
-.toastui-calendar-weekday-grid-more-events::before {
-	content: '+일정 더보기';
-	font-size: 11px;
-	color: #333;
-	display: block;
-	text-align: left;
-}
-
-.toastui-calendar-weekday-grid-more-events {
-	font-size: 0 !important;
-	display: block;
 	text-align: left; 
 }
 
@@ -157,6 +143,11 @@
 	display: block;
 	text-align: left;
 }
+.toastui-calendar-see-more-container {
+  height: 200px !important;
+}
+
+
 </style>
 
 <script
@@ -183,7 +174,7 @@
 					<span class="fw-bold text-center px-2" id="currentDate"
 						style="min-width: 90px; font-size: 14px;">년 월</span>
 					<button type="button" class="btn btn-outline-secondary btn-sm"
-						onclick="calendar.next(); updateDateLabel()">&gt;</button>
+						onclick="calendar.next(); updateDateLabel(); loadEvents()">&gt;</button>
 				</div>
 				<div class="d-flex align-items-center gap-2 ms-auto">
 					<select class="form-select form-select-sm" id="typeCd"
@@ -577,23 +568,32 @@
             document.getElementById('upd_place').value = data.place || ''; 
             document.getElementById('upd_calText').value = data.calText || '';
             
+            // 공유유형
             if (data.typeCd) {
                 const typeSelect = document.getElementById('upd_typeCd');
                 if (typeSelect) typeSelect.value = data.typeCd;
             }
             
+            // 일정유형 
+            if(data.calType) {
+				const calType = document.getElementById('upd_calType');
+				if (calType) calType.value = date.calType;
+            
+            }
+            
+            // 공유여부
             if (data.sharingCd) {
-                const radioBtn = document.querySelector(`input[name="sharingCd"][value="${data.sharingCd}"]`);
+                const radioBtn = document.querySelector(`input[name="upd_sharingCd"][value="${data.sharingCd}"]`);
                 if (radioBtn) radioBtn.checked = true;
             }
 
-            // 시작 날짜 및 시간 파싱 (.000Z 안전 제거 포함)
+            // 시작 날짜 및 시간 파싱
            if (data.calStart) {
                 const cleanStart = data.calStart.replace('T', ' ').split('.')[0]; 
                 const parts = cleanStart.split(' ');
                 document.getElementById('upd_startDate').value = parts[0];
                 if (parts[1]) {
-                	const cleanTime = parts[1].split('.')[0];
+                	const cleanTime = parts[1].substring(0, 8);
                     const startSelect = document.getElementById('upd_calStart');
                     if (startSelect) 
                     	startSelect.value = cleanTime;
@@ -602,12 +602,12 @@
             
             // 종료 날짜 및 시간 파싱
             if (data.calEnd) {
-                const delimiter = data.calEnd.includes('T') ? 'T' : ' ';
-                const parts = data.calEnd.split(delimiter);
+                const cleanEnd = data.calEnd.replace('T', ' ').split('.')[0];
+                const parts = cleanEnd.split(' ');
                 document.getElementById('upd_endDate').value = parts[0];
                 
                 if (parts[1]) {
-                    const cleanTime = parts[1].split('.')[0];
+                    const cleanTime = parts[1].substring(0, 8);
                     const endSelect = document.getElementById('upd_calEnd');
                     if (endSelect) 
                     	endSelect.value = cleanTime;
@@ -876,6 +876,7 @@
     	})
     	.then(res => res.json())
     	.then(data => {
+
 		  const holiday = data.map(h => ({
 				id: 'holiday_' + h.id,
 				calendarId: 'holiday',
@@ -916,6 +917,7 @@
         const map = { month: 0, week: 1, day: 2 };
         document.querySelectorAll('.view-btn')[map[view]].classList.add('active');
         updateDateLabel();
+        loadEvents();
     }
 
 

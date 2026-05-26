@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller;
 import com.example.demo.management.service.ProjectService;
 import com.example.demo.project.main.service.MainService;
 
-
 @Controller
 public class MainController {
 	

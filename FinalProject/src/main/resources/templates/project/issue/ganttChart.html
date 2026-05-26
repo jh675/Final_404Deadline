@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="https://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout/defaultLayout}">
+	layout:decorate="~{layout/projectLayout}">
 <head>
 <meta charset="UTF-8">
 <title>간트차트</title>
@@ -49,11 +49,6 @@
 	border-color: #1e8449;
 }
 
-/* 상태없음(null) - 회색 */
-.status-none .gantt_task_progress, .status-none.gantt_task_line {
-	background-color: #bdc3c7;
-	border-color: #95a5a6;
-}
 </style>
 
 <script
@@ -76,8 +71,7 @@
 					style="display: inline-block; width: 12px; height: 12px; background: #9b59b6; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>검토</span>
 				<span><span
 					style="display: inline-block; width: 12px; height: 12px; background: #27ae60; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>완료</span>
-				<span><span
-					style="display: inline-block; width: 12px; height: 12px; background: #bdc3c7; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>상태없음</span>
+
 			</div>
 
 			<!-- 간트차트 검색창 -->

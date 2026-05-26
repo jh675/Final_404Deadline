@@ -4,57 +4,171 @@
 <mapper namespace="com.example.demo.project.wiki.mapper.WikiMapper">
 	
 	<select id="selectWikiContentLastVerByTitle" resultType="wikiContentVO">
-		SELECT p.id as id,p.title AS title, c.content as content,c.page_id as page_id
+		SELECT
+			p.id AS id,
+			c.page_id AS pageId,
+			p.parent_id AS parentId,
+			c.version AS version,
+			c.describe AS describe,
+			c.content AS content,
+			p.title AS title,
+			c.updated_on AS updatedOn,
+			c.mem_id AS memId
 		FROM wiki_page p
 		JOIN wiki_content c ON p.last_ver = c.version AND p.id = c.page_id
-		JOIN wiki w ON w.prj_id = #{id} AND p.wiki_id = w.id
-		<if test="title != null and title != ''">
-			WHERE p.title = #{title}
-		</if>
-		<if test="title == null or title == ''">
-			AND p.title = w.start_page
-		</if>
+		JOIN wiki w ON w.id = p.wiki_id
+		WHERE w.prj_id = #{id}
+		<choose>
+			<when test="title != null and title != ''">
+				AND p.title = #{title}
+			</when>
+			<otherwise>
+				AND p.title = w.start_page
+			</otherwise>
+		</choose>
 	</select>
-	<select id="nameCheck" resultType="long">
-	select count(*)
-		from wiki_page p
-        join wiki w
-        on w.id = p.wiki_id
-		where w.prj_id = #{id}
-		and title=#{name}
-	</select>
+	
 	<select id="selectWikiContentLastVerById" resultType="wikiContentVO">
-		select p.id, p.title, c.content, c.describe, c.page_id, c.updated_on
-		from wiki_page p
-		join wiki_content c
-		on p.last_ver = c.version
-		and p.id = c.page_id
-		where p.id = #{id}
+		SELECT
+			p.id AS id,
+			c.page_id AS pageId,
+			p.parent_id AS parentId,
+			c.version AS version,
+			c.describe AS describe,
+			c.content AS content,
+			p.title AS title,
+			c.updated_on AS updatedOn,
+			c.mem_id AS memId
+		FROM wiki_page p
+		JOIN wiki_content c ON p.last_ver = c.version AND p.id = c.page_id
+		WHERE p.id = #{id}
 	</select>
+
+	<select id="selectWikiContentByPageIdAndVersion" resultType="wikiContentVO">
+		SELECT
+			p.id AS id,
+			c.page_id AS pageId,
+			p.parent_id AS parentId,
+			c.version AS version,
+			c.describe AS describe,
+			c.content AS content,
+			p.title AS title,
+			c.updated_on AS updatedOn,
+			c.mem_id AS memId,
+			GET_USERID_TO_NAME(c.mem_id) AS modifierName
+		FROM wiki_page p
+		JOIN wiki_content c ON p.id = c.page_id
+		WHERE p.id = #{pageId}
+		AND c.version = #{version}
+	</select>
+
+	<select id="selectWikiHistoryByPageId" resultType="wikiContentVO">
+		SELECT
+			p.id AS id,
+			c.page_id AS pageId,
+			p.parent_id AS parentId,
+			c.version AS version,
+			c.describe AS describe,
+			c.content AS content,
+			p.title AS title,
+			c.updated_on AS updatedOn,
+			c.mem_id AS memId,
+			GET_USERID_TO_NAME(c.mem_id) AS modifierName
+		FROM wiki_page p
+		JOIN wiki_content c ON p.id = c.page_id
+		WHERE p.id = #{pageId}
+		ORDER BY c.version DESC
+	</select>
+	
+	<select id="nameCheck" resultType="long">
+		select count(*)
+		from wiki_page p
+		join wiki w
+		on w.id = p.wiki_id
+		where w.prj_id = #{id}
+		and title = #{name}
+	</select>
+	
+	<select id="selectWikiIndexPages" resultType="wikiPageVO">
+		SELECT
+			p.id AS id,
+			p.wiki_id AS wikiId,
+			p.title AS title,
+			p.last_ver AS lastVer,
+			w.prj_id AS prjId,
+			p.parent_id AS parentId,
+			c.describe AS describe,
+			c.updated_on AS updatedOn
+		FROM wiki_page p
+		JOIN wiki w ON w.id = p.wiki_id
+		LEFT JOIN wiki_content c ON c.page_id = p.id AND c.version = p.last_ver
+		WHERE w.prj_id = #{projectId}
+		ORDER BY p.title
+	</select>
+	
+	<select id="selectWikiPageForDate" resultType="wikiPageVO">
+		SELECT
+			p.id AS id,
+			p.wiki_id AS wikiId,
+			p.title AS title,
+			p.last_ver AS lastVer,
+			w.prj_id AS prjId,
+			p.parent_id AS parentId,
+			c.describe AS describe,
+			c.updated_on AS updatedOn
+		FROM wiki_page p
+		JOIN wiki w ON w.id = p.wiki_id
+		LEFT JOIN wiki_content c ON c.page_id = p.id AND c.version = p.last_ver
+		WHERE w.prj_id = #{id}
+		ORDER BY c.updated_on DESC, p.title
+	</select>
+	
 	<select id="selectWikiPageForTree" resultType="wikiPageVO">
-		select p.id, p.title
+		select
+			p.id,
+			p.title,
+			p.parent_id AS parentId
 		from wiki_page p
 		join wiki i
 		on i.id = p.wiki_id
 		where i.prj_id = #{prjId}
 		<if test="id != null">
-			AND ID NOT IN (
-				SELECT ID
+			AND p.id NOT IN (
+				SELECT id
 				FROM wiki_page
-				START WITH ID = #{id}
-				CONNECT BY PRIOR ID = PARENT_ISSUE
+				START WITH id = #{id}
+				CONNECT BY PRIOR id = parent_id
 			)
 		</if>
-		order by p.id desc
-	</select>	
+		order by p.title
+	</select>
+	
+	<select id="selectWikiPageListGroupParent" resultType="wikiPageVO">
+		select
+			p.id,
+			p.title,
+			p.parent_id AS parentId
+		from wiki_page p
+		join wiki i
+		on i.id = p.wiki_id
+		where i.prj_id = #{id}
+		order by nvl(p.parent_id, 0), p.title
+	</select>
 	
 	<insert id="insertWikiPage" parameterType="wikiPageVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
 			select w_page_seq.nextval from dual
 		</selectKey>
-		insert into wiki_page (id, title, wiki_id)
-		values (#{id}, #{title}, (select id from wiki where prj_id = #{prjId}))
+		insert into wiki_page (id, title, wiki_id, parent_id)
+		values (#{id}, #{title}, (select id from wiki where prj_id = #{prjId}), #{parentId})
 	</insert>
+	
+	<update id="updateWikiPageParent" parameterType="wikiPageVO">
+		update wiki_page
+		set parent_id = #{parentId}
+		where id = #{id}
+	</update>
+	
 	<insert id="insertWikiContent" parameterType="wikiContentVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
 			select w_content_seq.nextval from dual

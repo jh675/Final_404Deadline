@@ -2,7 +2,6 @@ package com.example.demo.management.userManage.service;
 
 import java.util.List;
 
-
 import com.example.demo.company.service.CompanyVO;
 
 public interface UserManageService {
