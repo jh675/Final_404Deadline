@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class WikiVO {
-	private Long id;
-	private Long prjId;
-	private String startPage;
+	public Long id;
+	public Long prjId;
+	public String startPage;
 }

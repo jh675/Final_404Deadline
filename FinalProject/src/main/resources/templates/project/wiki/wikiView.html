@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/defaultLayout}">
+      layout:decorate="~{layout/projectLayout}">
 <head>
     <meta charset="UTF-8">
     <title>위키</title>
@@ -125,13 +125,15 @@
             }
 
             .wiki-btn-create,
-            .wiki-btn-edit {
+            .wiki-btn-edit,
+            .wiki-btn-history {
                 border-color: #66bb6a;
                 color: #2e7d32;
             }
 
             .wiki-btn-create:hover,
-            .wiki-btn-edit:hover {
+            .wiki-btn-edit:hover,
+            .wiki-btn-history:hover {
                 background: #f1f8e9;
                 color: #1b5e20;
             }
@@ -204,6 +206,27 @@
                 margin: 0;
             }
 
+            .wiki-version-notice {
+                margin: -4px 0 16px;
+                padding: 12px 16px;
+                border: 1px solid #ffe082;
+                border-radius: 6px;
+                background: #fff8e1;
+                color: #6d4c41;
+                font-size: 13px;
+                line-height: 1.6;
+            }
+
+            .wiki-version-notice a {
+                color: #2e7d32;
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+            .wiki-version-notice a:hover {
+                text-decoration: underline;
+            }
+
             .wiki-attachments {
                 margin-top: 24px;
                 padding-top: 16px;
@@ -266,11 +289,21 @@
                     <a class="wiki-btn wiki-btn-create" th:href="@{/wiki/register}">작성</a>
                     <a class="wiki-btn wiki-btn-edit"
                        th:href="@{/wiki/register(id=${page.id != null ? page.id : 0})}">편집</a>
+                    <a class="wiki-btn wiki-btn-history"
+                       th:href="@{/wiki/history/{name}(name=${page.title})}">역사</a>
                     <button type="button" class="wiki-btn wiki-btn-delete"
                             th:disabled="${hasChildren == true}"
                             th:attr="data-wiki-id=${page != null ? page.id : 0}"
                             onclick="confirmDelete(this)">삭제</button>
                 </div>
+            </div>
+
+            <div class="wiki-version-notice" th:if="${isHistoricalVersion}">
+                현재 <strong th:text="|r${page.version}|">r1</strong> 버전을 보고 있습니다.
+                최신 버전은
+                <strong th:text="|r${latestVersion}|">r2</strong>
+                입니다.
+                <a th:href="@{/wiki/view/{name}(name=${page.title})}">최신 문서 보기</a>
             </div>
 
             <!-- 5. 본문 (마크다운 → TOAST UI Viewer 렌더) -->
@@ -307,6 +340,7 @@
                 <li><a th:href="@{/wiki}">첫페이지</a></li>
                 <li><a th:href="@{/wiki/index(type='title')}">제목별</a></li>
                 <li><a th:href="@{/wiki/index(type='date')}">날짜별</a></li>
+                <li><a th:href="@{/wiki/history/{name}(name=${page.title})}">문서 역사</a></li>
             </ul>
         </aside>
     </div>

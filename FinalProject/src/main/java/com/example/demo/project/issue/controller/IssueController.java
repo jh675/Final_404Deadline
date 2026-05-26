@@ -63,6 +63,7 @@ public class IssueController {
 		}
 		issueVO.setPrjId(projectId);
 		List<IssueOutputVO> issueList = service.selectIssueList(issueVO);
+		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issueList", issueList);
 		return "project/issue/issueList";
 	}
@@ -77,6 +78,7 @@ public class IssueController {
 		if (issue == null || issue.getId() == null || !projectId.equals(issue.getPrjId())) {
 			return "redirect:/issue/list";
 		}
+		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issue", issue);
 
 		List<AttachVO> attachments = Collections.emptyList();
@@ -145,6 +147,7 @@ public class IssueController {
 			issue.setPrjId(projectId);
 		}
 		//모델에 담아서 보낸다
+		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issue", issue);
 		model.addAttribute("issueIds", service.getIssueIds(projectId, issue.getId()));
 		return "project/issue/issueRegist";

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/defaultLayout}">
+      layout:decorate="~{layout/projectLayout}">
 <head>
     <meta charset="UTF-8">
     <title>위키 색인</title>
@@ -305,7 +305,6 @@
     </th:block>
 </head>
 <body>
-    ddd
 <div layout:fragment="content" class="wiki-index-page py-2"
      th:with="currentType=${type != null and !#strings.isEmpty(type) ? type : 'title'}">
 
