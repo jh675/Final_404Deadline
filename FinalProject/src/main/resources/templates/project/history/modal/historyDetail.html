@@ -2,42 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
     <th:block th:fragment="historyDetailModal">
-      <div
-        class="modal fade"
-        id="historyDetailModal"
-        tabindex="-1"
-        aria-labelledby="historyDetailModalTitle"
-        aria-hidden="true"
-      >
+      <div class="modal fade" id="historyDetailModal" tabindex="-1" aria-labelledby="historyDetailModalTitle" aria-hidden="true" >
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
           <div class="modal-content history-detail-modal">
             <div class="modal-header">
               <h5 class="modal-title" id="historyDetailModalTitle">변경 상세</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="닫기"
-              ></button>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기" ></button>
             </div>
             <div class="modal-body">
-              <p
-                class="history-detail-modal__summary text-muted small mb-3"
-                id="historyDetailSummary"
-                hidden
-              ></p>
-              <p
-                class="history-detail-modal__empty text-muted mb-0"
-                id="historyDetailEmpty"
-                hidden
-              >
+              <p class="history-detail-modal__summary text-muted small mb-3" id="historyDetailSummary" hidden></p>
+              <p class="history-detail-modal__empty text-muted mb-0" id="historyDetailEmpty" hidden>
                 변경 필드 상세가 없습니다.
               </p>
-              <p
-                class="history-detail-modal__loading text-muted mb-0"
-                id="historyDetailLoading"
-                hidden
-              >
+              <p class="history-detail-modal__loading text-muted mb-0" id="historyDetailLoading" hidden >
                 불러오는 중…
               </p>
               <div id="historyDetailList" class="history-detail-list"></div>

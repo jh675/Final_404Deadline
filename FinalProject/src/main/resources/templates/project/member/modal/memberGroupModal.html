@@ -2,29 +2,17 @@
   <body>
     <!-- 구성원 등록·수정 — 프로젝트 내 그룹 선택 오버레이 (스타일은 memberManagementInfo.html) -->
     <th:block th:fragment="memberGroupPickOverlay">
-      <div class="mem-picker-overlay"
-        id="memGroupPickOverlay"
-        aria-hidden="true">
-        <div class="mem-picker" role="dialog"
-          aria-modal="true" aria-labelledby="memGroupPickTitle">
-          <div class="mem-picker__head" id="memGroupPickTitle">
-            소속 그룹 선택
-          </div>
+      <div class="mem-picker-overlay" id="memGroupPickOverlay" aria-hidden="true">
+        <div class="mem-picker" role="dialog" aria-modal="true" aria-labelledby="memGroupPickTitle">
+          <div class="mem-picker__head" id="memGroupPickTitle">소속 그룹 선택</div>
           <div class="mem-picker__search">
-            <label class="visually-hidden" for="memGroupSearchType">
-              검색 항목
-            </label>
+            <label class="visually-hidden" for="memGroupSearchType">검색 항목</label>
             <select id="memGroupSearchType" aria-label="검색 항목">
               <option value="id">그룹아이디</option>
               <option value="grpName" selected>그룹명</option>
             </select>
-            <label class="visually-hidden" for="memGroupSearchKeyword">
-              검색어
-            </label>
-            <input type="text" autocomplete="off"
-              id="memGroupSearchKeyword"
-              placeholder="검색어를 입력하세요"
-            />
+            <label class="visually-hidden" for="memGroupSearchKeyword">검색어</label>
+            <input type="text" autocomplete="off" id="memGroupSearchKeyword" placeholder="검색어를 입력하세요" />
           </div>
           <div class="mem-picker__list" id="memGroupPickList"></div>
           <div class="mem-picker__actions">
