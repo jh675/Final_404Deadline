@@ -1,11 +1,9 @@
 package com.example.demo.management.userManage.service;
 
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.example.demo.login.service.UserVO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
