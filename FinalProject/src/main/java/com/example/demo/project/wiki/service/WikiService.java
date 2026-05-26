@@ -11,5 +11,6 @@ public interface WikiService {
 	List<WikiPageVO> selectWikiPageListGroupDate(Long id);
 	List<WikiPageVO> selectWikiPageListGroupParent(Long id);
 	Long nameCheck(Long id,String name);
+	List<WikiPageVO> selectWikiPageForTree(Long prjId, Long id);
 	Long insertWikiPage(String title, long prjId);
 }

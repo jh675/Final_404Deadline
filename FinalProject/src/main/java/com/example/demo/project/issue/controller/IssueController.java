@@ -30,6 +30,7 @@ import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -42,16 +43,40 @@ public class IssueController {
 	@Autowired
 	private AttachService attachService;
 
+	private UserVO getLoginUser() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null && auth.getPrincipal() instanceof UserVO u) {
+			return u;
+		}
+		return null;
+	}
+
+	private Long getCurrentProjectId(HttpSession session) {
+		return (Long) session.getAttribute("currentProjectId");
+	}
+
 	@GetMapping("/issue/list")
-	public String issueList(Model model, @ModelAttribute("filter") IssueInputVO issueVO) {
+	public String issueList(Model model, @ModelAttribute("filter") IssueInputVO issueVO, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+		issueVO.setPrjId(projectId);
 		List<IssueOutputVO> issueList = service.selectIssueList(issueVO);
 		model.addAttribute("issueList", issueList);
 		return "project/issue/issueList";
 	}
 
 	@GetMapping("/issue/detail")
-	public String issueDetail(Model model, @RequestParam("id") Long id) {
+	public String issueDetail(Model model, @RequestParam("id") Long id, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
 		IssueOutputVO issue = service.selectIssue(id);
+		if (issue == null || issue.getId() == null || !projectId.equals(issue.getPrjId())) {
+			return "redirect:/issue/list";
+		}
 		model.addAttribute("issue", issue);
 
 		List<AttachVO> attachments = Collections.emptyList();
@@ -99,31 +124,46 @@ public class IssueController {
 
 	
 	@GetMapping("/issue/register")
-	public String issueRegister(Model model, @RequestParam(value = "id", required = false) Long id) {
+	public String issueRegister(Model model, @RequestParam(value = "id", required = false) Long id, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
 		IssueInputVO issue;
 		//id값이 있는경우(수정버튼 클릭해서 온경우)
 		if (id != null) {
 			//해당 아이디로 검색해서 값은 가져온다
 			issue = service.selectIssueForForm(id);
 			//만약 값이 없다면 잘못된 경로(임의로 id값을 집어넣은경우)이므로
-			if (issue == null || issue.getId() == null) {
+			if (issue == null || issue.getId() == null || !projectId.equals(issue.getPrjId())) {
 				//리스트쪽으로 돌려보낸다
 				return "redirect:/issue/list";
 			}
 		} else {
 			//id값이 없는경우 빈vo를 만든다
 			issue = IssueInputVO.builder().build();
+			issue.setPrjId(projectId);
 		}
 		//모델에 담아서 보낸다
 		model.addAttribute("issue", issue);
-		model.addAttribute("issueIds", service.getIssueIds());
+		model.addAttribute("issueIds", service.getIssueIds(projectId, issue.getId()));
 		return "project/issue/issueRegist";
 	}
 
 	@PostMapping(value = "/issue/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String issueInsert(@RequestPart("issue") IssueInputVO issueVO,
-			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
-		issueVO.setWriter((long)3);
+			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments,
+			HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		UserVO loginUser = getLoginUser();
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+		if (loginUser == null) {
+			return "redirect:/";
+		}
+		issueVO.setPrjId(projectId);
+		issueVO.setWriter(loginUser.getId());
 		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
@@ -137,12 +177,22 @@ public class IssueController {
 
 	@PostMapping(value = "/issue/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String issueUpdate(@RequestPart("issue") IssueInputVO issueVO,
-			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
+			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments,
+			HttpSession session) {
 		System.out.println(issueVO);
+		Long projectId = getCurrentProjectId(session);
+		UserVO loginUser = getLoginUser();
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+		if (loginUser == null) {
+			return "redirect:/";
+		}
 		if (issueVO.getId() == null) {
 			return "redirect:/issue/list";
 		}
-		issueVO.setLastUpdater((long)3);
+		issueVO.setPrjId(projectId);
+		issueVO.setLastUpdater(loginUser.getId());
 		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");

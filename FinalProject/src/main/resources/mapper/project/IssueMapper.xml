@@ -55,6 +55,13 @@
 			<if test="categoryCd != null and categoryCd != ''">
 				AND CATEGORY_CD = #{categoryCd}
 			</if>
+			<if test="milestoneId != null">
+				AND i.ID IN (
+					SELECT mi.issue_id
+					FROM milestone_issue mi
+					WHERE mi.milestone_id = #{milestoneId}
+				)		
+			</if>
 		</where>
 	</sql>
 
@@ -64,26 +71,26 @@
 	<select id="selectIssueList" parameterType="IssueInputVO"
 		resultType="IssueOutputVO">
 		SELECT
-		ID,
-		PRJ_ID,
-		SUBJECT,
-		DESCRIPTION,
-		get_sub_code_name(CATEGORY_CD) as CATEGORY_CD,
-		get_sub_code_name(STATUS_CD) as STATUS_CD,
-		get_sub_code_name(PRIORITY_CD)as PRIORITY_CD,
-		CREATED_ON,
-		UPDATED_ON,
-		EST_START_DATE,
-		DUE_DATE,
-		START_DATE,
-		CLOSED_DATE,
-		PARENT_ISSUE,
-		ROOT_ISSUE,
-		GET_USERID_TO_NAME (MEM_ID) as memName,
-		LFT,
-		RGT,
-		DONE_RATIO
-		FROM ISSUE
+		i.ID as id,
+		i.PRJ_ID as prjId,
+		i.SUBJECT as subject,
+		i.DESCRIPTION as description,
+		get_sub_code_name(i.CATEGORY_CD) as CATEGORY_CD,
+		get_sub_code_name(i.STATUS_CD) as STATUS_CD,
+		get_sub_code_name(i.PRIORITY_CD)as PRIORITY_CD,
+		i.CREATED_ON as createdOn,
+		i.UPDATED_ON as updatedOn,
+		i.EST_START_DATE as estStartDate,
+		i.DUE_DATE as dueDate,
+		i.START_DATE as startDate,
+		i.CLOSED_DATE as closedDate,
+		i.PARENT_ISSUE as parentIssue,
+		i.ROOT_ISSUE as rootIssue,
+		GET_USERID_TO_NAME (i.MEM_ID) as memName,
+		i.LFT as lft,
+		i.RGT as rgt,
+		i.DONE_RATIO as doneRatio
+		FROM ISSUE i
 		<include refid="issueSearchWhere" />
 		ORDER BY PRIORITY_CD DESC
 	</select>
@@ -180,7 +187,7 @@
 			</if>
 		) VALUES (
 			#{id},
-			3,
+			#{prjId},
 			#{subject},
 			#{description},
 			#{categoryCd},
@@ -316,7 +323,7 @@
 			c.WRITE_DATE,
 			GET_USERID_TO_NAME(c.MEM_ID) AS memId,
 			LEVEL AS depth
-		FROM issue_comment c
+		FROM issue_comment c	
 		WHERE c.issue_id = #{id}
 		START WITH c.parent_id IS NULL
 		CONNECT BY PRIOR c.id = c.parent_id
@@ -346,5 +353,15 @@
 	<select id="getIssueIds" resultType="IssueSummaryVO">
 		SELECT id AS id, subject AS subject
 		FROM ISSUE
+		WHERE PRJ_ID = #{prjId}
+		<if test="issueId != null">
+			AND ID NOT IN (
+				SELECT ID
+				FROM ISSUE
+				START WITH ID = #{issueId}
+				CONNECT BY PRIOR ID = PARENT_ISSUE
+			)
+		</if>
+		ORDER BY ID
 	</select>
 </mapper>

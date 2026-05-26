@@ -11,6 +11,7 @@ import com.example.demo.project.wiki.service.WikiPageVO;
 public interface WikiMapper {
 	WikiContentVO selectWikiContentLastVerByTitle (Long id,String title);
 	WikiContentVO selectWikiContentLastVerById(Long id);
+	List<WikiPageVO> selectWikiPageForTree(Long prjId, Long id);
 
 	Long insertWikiContent(WikiContentVO wikiContentVO);
 	Long updateWikiContent(WikiContentVO wikiContentVO);

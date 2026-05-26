@@ -112,8 +112,11 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
-	public List<IssueSummaryVO> getIssueIds() {
-		List<IssueSummaryVO> list = mapper.getIssueIds();
+	public List<IssueSummaryVO> getIssueIds(Long prjId, Long issueId) {
+		if (prjId == null) {
+			return Collections.emptyList();
+		}
+		List<IssueSummaryVO> list = mapper.getIssueIds(prjId, issueId);
 		return list != null ? list : Collections.emptyList();
 	}
 

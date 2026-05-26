@@ -689,7 +689,9 @@
             );
             let allCompanyMembers = [];
             let allGroups = [];
-
+            grpInput.addEventListener("click", function() {
+              openGroupPicker();
+            });
             function includesKeyword(value, keyword) {
               if (!keyword) return true;
               const text =
@@ -1063,6 +1065,7 @@
             }
 
             async function openGroupPicker() {
+			 
               if (!groupOverlay || !groupPickList) return;
               const pid = Number(prjId);
               if (isNaN(pid)) return;
