@@ -64,42 +64,7 @@ public class ProjectServiceImpl implements ProjectService {
 	    }
 	    vo.setId(projectId);
 
-	    if(gVo != null) {
-	    	gVo.setPrjId(Long.valueOf(vo.getId()));
-	    	projectMapper.groupInsert(gVo);
-	    	Long groupId = gVo.getGrpId();
-	    	if(mvo != null) {
-	    		mvo.setGrpId(groupId);
-	    		mvo.setUserId(vo.getUserId());
-	    		projectMapper.memberInsert(mvo);
-	    	}
-	    }
-	    if(wVo != null) {
-	    	wVo.setPrjId(Long.valueOf(vo.getId()));
-	    	projectMapper.wikiInsert(wVo);
-	    }
-	    if(rVo != null) {
-	    	rVo.setPrjId(Long.valueOf(vo.getId()));
-	    	projectMapper.roleInsert(rVo);
-	    	
-	    	Long roleCd = rVo.getRoleCd();
-	    	
-	    	rVo.setRoleCd(roleCd);
-	    	rVo.setRoleId("ROLE_ISSUE_ALL");
-	    	projectMapper.rolemenuInsert(rVo);
-	    	
-	    	rVo.setRoleId("ROLE_MEMBER_ALL");
-	    	projectMapper.rolemenuInsert(rVo);
-	    	
-	    	rVo.setRoleId("ROLE_GROUP_ALL");
-	    	projectMapper.rolemenuInsert(rVo);
-	    	
-	    	rVo.setRoleId("ROLE_HISTORY_VIEW");
-	    	projectMapper.rolemenuInsert(rVo);
-	    	
-	    	rVo.setGrpId(gVo.getGrpId());
-	    	projectMapper.grproleInsert(rVo);
-	    }
+	    
 	}
 	
 	@Override
