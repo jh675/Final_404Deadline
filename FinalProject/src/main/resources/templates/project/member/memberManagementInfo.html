@@ -9,7 +9,7 @@
     <meta charset="UTF-8" />
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
     <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
-    <title th:text="${registerMode} ? '구성원 등록' : (${editMode} ? '구성원 수정' : '구성원 상세')">구성원 상세</title>
+    <title th:text="${editMode} ? '구성원 수정' : '구성원 상세'">구성원 상세</title>
     <style>
       .mem-detail-form {
         --mem-label-w: 9.75rem;
@@ -394,39 +394,24 @@
       <a class="mem-info-page__back" th:href="@{/project/member/list}">← 구성원 목록으로</a>
 
       <header class="mem-info-page__head">
-        <h1 class="mem-info-page__title" th:text="${registerMode} ? '구성원 등록' : (${editMode} ? '구성원 수정' : '구성원 상세')">구성원 상세</h1>
+        <h1 class="mem-info-page__title" th:text="${editMode} ? '구성원 수정' : '구성원 상세'">구성원 상세</h1>
         <hr class="mem-info-page__rule" />
       </header>
 
-      <th:block th:if="${registerMode or !memberNotFound}">
+      <th:block th:if="${!memberNotFound}">
         <section class="mem-section" aria-labelledby="mem-basic-heading">
           <h2 class="mem-section__title" id="mem-basic-heading">기본정보</h2>
           <div class="mem-section__body">
             <div class="mem-basic-layout">
               <div class="mem-profile-slot" aria-hidden="true" title="프로필 이미지 영역">이미지</div>
               <div class="mem-basic-fields mem-detail-form">
-                <input type="hidden" id="detailSelectedUserId" th:if="${registerMode or editMode}" th:value="${detail.userId}" />
                 <div class="mem-field-row">
                   <label for="detailUserName">이름 <span class="req">*</span></label>
-                  <input
-                    type="text"
-                    id="detailUserName"
-                    th:readonly="${!registerMode}"
-                    th:classappend="${registerMode} ? 'mem-input--editable mem-input--picker' : ''"
-                    th:attr="placeholder=${registerMode} ? '클릭하여 직원을 선택하세요.' : ''"
-                    th:value="${detail.userName}"
-                    autocomplete="off"
-                  />
+                  <input type="text" id="detailUserName" readonly th:value="${detail.userName}" autocomplete="off" />
                 </div>
                 <div class="mem-field-row">
                   <label for="detailHireDate">입사일 <span class="req">*</span></label>
-                  <input
-                    type="text"
-                    id="detailHireDate"
-                    readonly
-                    th:attr="placeholder=${registerMode or editMode} ? '직원 선택 시 자동 입력' : ''"
-                    th:value="${detail.hireDate}"
-                  />
+                  <input type="text" id="detailHireDate" readonly th:value="${detail.hireDate}" />
                 </div>
                 <div class="mem-field-row">
                   <label>성별 <span class="req">*</span></label>
@@ -437,7 +422,7 @@
                         name="gender"
                         value="01GENDER"
                         disabled
-                        th:checked="${#strings.equalsIgnoreCase(detail.genderCd, '01GENDER') or (registerMode and detail.genderCd == null)}"
+                        th:checked="${#strings.equalsIgnoreCase(detail.genderCd, '01GENDER')}"
                       />
                       남
                     </label>
@@ -460,7 +445,7 @@
           </div>
         </section>
 
-        <section th:if="${viewMode or editMode}" class="mem-section" aria-labelledby="mem-account-heading">
+        <section class="mem-section" aria-labelledby="mem-account-heading">
           <h2 class="mem-section__title" id="mem-account-heading">계정 정보</h2>
           <div class="mem-section__body">
             <div class="mem-account-inline mem-detail-form">
@@ -508,13 +493,7 @@
             <div class="mem-basic-fields mem-detail-form">
               <div class="mem-field-row">
                 <label for="detailPrjName">프로젝트명 <span class="req">*</span></label>
-                <input
-                  type="text"
-                  id="detailPrjName"
-                  readonly
-                  th:attr="placeholder=${registerMode} ? '텍스트를 입력해 주세요.' : ''"
-                  th:value="${detail.prjName}"
-                />
+                <input type="text" id="detailPrjName" readonly th:value="${detail.prjName}" />
               </div>
               <div class="mem-field-row">
                 <label for="detailPrjStart">프로젝트 투입기간 <span class="req">*</span></label>
@@ -522,17 +501,16 @@
                   <input
                     type="date"
                     id="detailPrjStart"
-                    th:readonly="${viewMode or editMode}"
-                    th:classappend="${registerMode} ? 'mem-input--editable' : ''"
+                    readonly
                     placeholder="연도-월-일"
-                    th:value="${registerMode and (detail.prjStartDate == null or #strings.isEmpty(detail.prjStartDate)) ? #dates.format(#dates.createToday(), 'yyyy-MM-dd') : detail.prjStartDate}"
+                    th:value="${detail.prjStartDate}"
                   />
                   <span class="mem-period-tilde" aria-hidden="true">~</span>
                   <input
                     type="date"
                     id="detailPrjEnd"
                     th:readonly="${viewMode}"
-                    th:classappend="${registerMode or editMode} ? 'mem-input--editable' : ''"
+                    th:classappend="${editMode} ? 'mem-input--editable' : ''"
                     placeholder="연도-월-일"
                     th:value="${detail.prjEndDate}"
                   />
@@ -544,12 +522,12 @@
                   type="text"
                   id="detailGrpName"
                   th:readonly="${viewMode}"
-                  th:classappend="${registerMode or editMode} ? 'mem-input--editable mem-input--picker' : ''"
-                  th:attr="placeholder=${registerMode or editMode} ? '클릭하여 그룹을 선택하세요.' : ''"
+                  th:classappend="${editMode} ? 'mem-input--editable mem-input--picker' : ''"
+                  th:attr="placeholder=${editMode} ? '클릭하여 그룹을 선택하세요.' : ''"
                   th:value="${detail.grpName}"
                   autocomplete="off"
                 />
-                <input type="hidden" id="detailSelectedGrpId" name="grpId" th:if="${registerMode or editMode}" th:value="${detail.grpId}" />
+                <input type="hidden" id="detailSelectedGrpId" name="grpId" th:if="${editMode}" th:value="${detail.grpId}" />
               </div>
             </div>
           </div>
@@ -610,40 +588,34 @@
           </div>
         </section>
 
-        <div class="mem-actions" th:if="${registerMode}">
-          <button type="button" class="mem-actions__btn" id="btnMemberRegister">등록</button>
-          <a class="mem-actions__btn mem-actions__btn--secondary" th:href="@{/project/member/list}">취소</a>
-        </div>
+        <th:block th:if="${editMode}" th:replace="~{project/member/modal/memberGroupModal :: memberGroupPickOverlay}" />
 
-        <th:block th:if="${registerMode}" th:replace="~{project/member/modal/memberInfoModal :: memberInfoPickOverlay}" />
-        <th:block th:if="${registerMode or editMode}" th:replace="~{project/member/modal/memberGroupModal :: memberGroupPickOverlay}" />
-
-        <th:block th:if="${registerMode or editMode}">
+        <th:block th:if="${editMode}">
           <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModal}"></th:block>
           <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModalScript}"></th:block>
         </th:block>
 
         <div
-          th:if="${registerMode or editMode}"
+          th:if="${editMode}"
           id="memPageConfig"
           style="display: none"
-          th:attr="data-prj-id=${prjId},data-register-mode=${registerMode},data-edit-mode=${editMode},data-user-id=${userId},data-old-grp-id=${grpId},data-initial-end=${detail != null ? detail.prjEndDate : ''},data-initial-grp-id=${detail != null ? detail.grpId : ''}"
+          th:attr="data-prj-id=${prjId},data-user-id=${userId},data-old-grp-id=${grpId},data-initial-end=${detail != null ? detail.prjEndDate : ''},data-initial-grp-id=${detail != null ? detail.grpId : ''},data-prj-start=${detail != null ? detail.prjStartDate : ''},data-prj-closed=${prjClosedDate}"
         ></div>
 
-        <script th:if="${registerMode or editMode}">
+        <script th:if="${editMode}">
           (function () {
             const cfg = document.getElementById("memPageConfig");
             if (!cfg) return;
 
             const prjId = Number(cfg.dataset.prjId || 0);
-            const registerMode = cfg.dataset.registerMode === "true";
-            const editMode = cfg.dataset.editMode === "true";
             const pageUserId = cfg.dataset.userId
               ? Number(cfg.dataset.userId)
               : null;
             const pageOldGrpId = cfg.dataset.oldGrpId
               ? Number(cfg.dataset.oldGrpId)
               : null;
+            const prjStartYmd = String(cfg.dataset.prjStart || "");
+            const prjClosedYmd = String(cfg.dataset.prjClosed || "");
 
             function mountPickerOverlay(el) {
               if (el && el.parentElement !== document.body) {
@@ -659,66 +631,26 @@
               });
             }
 
-            const nameInput = document.getElementById("detailUserName");
-            const hireInput = document.getElementById("detailHireDate");
             const prjStartInput = document.getElementById("detailPrjStart");
             const prjEndInput = document.getElementById("detailPrjEnd");
-            const emailInput = document.getElementById("detailEmail");
-            const telInput = document.getElementById("detailTel");
-            const userIdInput = document.getElementById("detailSelectedUserId");
             const grpInput = document.getElementById("detailGrpName");
             const grpIdInput = document.getElementById("detailSelectedGrpId");
-            let pickOverlay = document.getElementById("memMemberPickOverlay");
-            const pickList = document.getElementById("memMemberPickList");
-            const pickCancel = document.getElementById("btnMemberPickCancel");
-            const memberSearchType = document.getElementById(
-              "memMemberSearchType",
-            );
-            const memberSearchKeyword = document.getElementById(
-              "memMemberSearchKeyword",
-            );
             let groupOverlay = document.getElementById("memGroupPickOverlay");
             const groupPickList = document.getElementById("memGroupPickList");
             const groupPickCancel = document.getElementById("btnGroupPickCancel");
 
-            mountPickerOverlay(pickOverlay);
             mountPickerOverlay(groupOverlay);
             const groupSearchType = document.getElementById("memGroupSearchType");
             const groupSearchKeyword = document.getElementById(
               "memGroupSearchKeyword",
             );
-            let allCompanyMembers = [];
             let allGroups = [];
-            grpInput.addEventListener("click", function() {
-              openGroupPicker();
-            });
+
             function includesKeyword(value, keyword) {
               if (!keyword) return true;
               const text =
                 value == null ? "" : String(value).trim().toLowerCase();
               return text.indexOf(keyword) !== -1;
-            }
-
-            function filterCompanyMembers(rows) {
-              const type = memberSearchType
-                ? memberSearchType.value
-                : "userName";
-              const keyword = memberSearchKeyword
-                ? memberSearchKeyword.value.trim().toLowerCase()
-                : "";
-              if (!keyword) return rows;
-              return rows.filter(function (r) {
-                if (type === "userId") {
-                  return includesKeyword(r.userId, keyword);
-                }
-                if (type === "tel") {
-                  return includesKeyword(r.tel, keyword);
-                }
-                if (type === "email") {
-                  return includesKeyword(r.email, keyword);
-                }
-                return includesKeyword(r.userName, keyword);
-              });
             }
 
             function filterGroups(rows) {
@@ -735,22 +667,9 @@
               });
             }
 
-            function resetMemberSearch() {
-              if (memberSearchType) memberSearchType.value = "userName";
-              if (memberSearchKeyword) memberSearchKeyword.value = "";
-            }
-
             function resetGroupSearch() {
               if (groupSearchType) groupSearchType.value = "grpName";
               if (groupSearchKeyword) groupSearchKeyword.value = "";
-            }
-
-            function todayYmd() {
-              const d = new Date();
-              const y = d.getFullYear();
-              const m = String(d.getMonth() + 1).padStart(2, "0");
-              const day = String(d.getDate()).padStart(2, "0");
-              return y + "-" + m + "-" + day;
             }
 
             function normalizeYmd(value) {
@@ -766,105 +685,34 @@
               return y + "-" + m + "-" + day;
             }
 
-            const initialPrjEndYmd = editMode
-              ? normalizeYmd(cfg.dataset.initialEnd || "")
-              : "";
-            const initialGrpId =
-              editMode && cfg.dataset.initialGrpId
-                ? Number(cfg.dataset.initialGrpId)
-                : null;
-
-            function maxYmd(a, b) {
-              if (!a) return b || "";
-              if (!b) return a;
-              return a >= b ? a : b;
-            }
-
-            function syncPrjStartConstraints() {
-              if (!prjStartInput) return;
-              const hireYmd = hireInput
-                ? normalizeYmd(hireInput.value)
-                : "";
-              if (hireYmd) {
-                prjStartInput.min = hireYmd;
-              } else {
-                prjStartInput.removeAttribute("min");
-              }
-              let current = normalizeYmd(prjStartInput.value);
-              if (!current && registerMode) {
-                current = todayYmd();
-              }
-              if (hireYmd && current && current < hireYmd) {
-                current = hireYmd;
-              }
-              if (current) {
-                prjStartInput.value = current;
-              }
-              syncPrjEndConstraints();
-            }
+            const initialPrjEndYmd = normalizeYmd(cfg.dataset.initialEnd || "");
+            const initialGrpId = cfg.dataset.initialGrpId
+              ? Number(cfg.dataset.initialGrpId)
+              : null;
 
             function syncPrjEndConstraints() {
               if (!prjEndInput) return;
               const start = prjStartInput
                 ? normalizeYmd(prjStartInput.value)
-                : "";
+                : normalizeYmd(prjStartYmd);
               if (start) {
                 prjEndInput.min = start;
               } else {
                 prjEndInput.removeAttribute("min");
               }
+              if (prjClosedYmd) {
+                prjEndInput.max = prjClosedYmd;
+              } else {
+                prjEndInput.removeAttribute("max");
+              }
               let end = normalizeYmd(prjEndInput.value);
               if (start && end && end < start) {
                 end = start;
-              }
-              if (end) {
                 prjEndInput.value = end;
               }
-            }
-
-            function initPrjStartDate() {
-              if (!prjStartInput) return;
-              if (registerMode && !normalizeYmd(prjStartInput.value)) {
-                prjStartInput.value = todayYmd();
+              if (prjClosedYmd && end && end > prjClosedYmd) {
+                prjEndInput.value = prjClosedYmd;
               }
-              syncPrjStartConstraints();
-            }
-
-            function setGender(genderCd) {
-              const radios = document.querySelectorAll('input[name="gender"]');
-              if (!radios.length) return;
-              const code = (genderCd || "").toUpperCase();
-              let matched = false;
-              radios.forEach(function (radio) {
-                const on =
-                  code && (radio.value || "").toUpperCase() === code;
-                radio.checked = on;
-                if (on) matched = true;
-              });
-              if (!matched && radios[0]) {
-                radios[0].checked = true;
-              }
-            }
-
-            function applyCompanyMember(member) {
-              if (!member) return;
-              if (member.userName != null) {
-                nameInput.value = member.userName;
-              }
-              if (hireInput && member.hireDate != null) {
-                hireInput.value = member.hireDate;
-              }
-              if (emailInput && member.email != null) {
-                emailInput.value = member.email;
-              }
-              if (telInput && member.tel != null) {
-                telInput.value = member.tel;
-              }
-              if (userIdInput && member.userId != null) {
-                userIdInput.value = String(member.userId);
-              }
-              setGender(member.genderCd);
-              syncPrjStartConstraints();
             }
 
             function resolveGroupId(row) {
@@ -888,121 +736,6 @@
               }
               if (grpIdInput) {
                 grpIdInput.value = gid != null ? String(gid) : "";
-              }
-            }
-
-            function closeMemberPicker() {
-              if (!pickOverlay) return;
-              pickOverlay.classList.remove("is-open");
-              pickOverlay.setAttribute("aria-hidden", "true");
-            }
-
-            function renderCompanyMemberList(rows, emptyMessage) {
-              if (!pickList) return;
-              pickList.innerHTML = "";
-              if (!rows.length) {
-                const p = document.createElement("p");
-                p.className = "mem-picker__empty";
-                p.textContent =
-                  emptyMessage || "선택할 직원이 없습니다.";
-                pickList.appendChild(p);
-                return;
-              }
-              rows.forEach(function (r) {
-                if (r.userId == null) return;
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = "mem-picker__item";
-                const main = document.createElement("span");
-                main.textContent = r.userName || "(이름 없음)";
-                btn.appendChild(main);
-                const subParts = [];
-                if (r.email) subParts.push(r.email);
-                if (r.tel) subParts.push(r.tel);
-                if (subParts.length) {
-                  const sub = document.createElement("span");
-                  sub.className = "mem-picker__item-sub";
-                  sub.textContent = subParts.join(" · ");
-                  btn.appendChild(sub);
-                }
-                btn.addEventListener("click", function () {
-                  applyCompanyMember(r);
-                  closeMemberPicker();
-                });
-                pickList.appendChild(btn);
-              });
-            }
-
-            function refreshCompanyMemberListView() {
-              const filtered = filterCompanyMembers(allCompanyMembers);
-              renderCompanyMemberList(
-                filtered,
-                allCompanyMembers.length
-                  ? "검색 결과가 없습니다."
-                  : registerMode
-                    ? "등록 가능한 구성원이 없습니다."
-                    : "선택할 구성원이 없습니다.",
-              );
-            }
-
-            async function openMemberPicker() {
-              if (!pickOverlay || !pickList) return;
-              const pid = Number(prjId);
-              if (isNaN(pid)) return;
-              resetMemberSearch();
-              pickList.innerHTML = "불러오는 중…";
-              pickOverlay.classList.add("is-open");
-              pickOverlay.setAttribute("aria-hidden", "false");
-              try {
-                let membersUrl = "/project/member/companyMembers";
-                if (registerMode) {
-                  membersUrl += "?excludeRegistered=true";
-                }
-                const res = await fetch(membersUrl, {
-                  credentials: "same-origin",
-                });
-                const data = await res.json().catch(function () {
-                  return {};
-                });
-                allCompanyMembers =
-                  data && Array.isArray(data.content) ? data.content : [];
-                refreshCompanyMemberListView();
-              } catch (e) {
-                allCompanyMembers = [];
-                pickList.innerHTML = "";
-                const p = document.createElement("p");
-                p.className = "mem-picker__empty";
-                p.textContent = "구성원 목록을 불러오지 못했습니다.";
-                pickList.appendChild(p);
-              }
-            }
-
-            if (registerMode && pickList) {
-              if (memberSearchType) {
-                memberSearchType.addEventListener(
-                  "change",
-                  refreshCompanyMemberListView,
-                );
-              }
-              if (memberSearchKeyword) {
-                memberSearchKeyword.addEventListener(
-                  "input",
-                  refreshCompanyMemberListView,
-                );
-              }
-
-              attachPickerOpen(nameInput, openMemberPicker);
-
-              if (pickCancel) {
-                pickCancel.addEventListener("click", closeMemberPicker);
-              }
-
-              if (pickOverlay) {
-                pickOverlay.addEventListener("click", function (e) {
-                  if (e.target === pickOverlay) {
-                    closeMemberPicker();
-                  }
-                });
               }
             }
 
@@ -1101,7 +834,7 @@
               groupSearchKeyword.addEventListener("input", refreshGroupListView);
             }
 
-            if ((registerMode || editMode) && groupPickList) {
+            if (groupPickList) {
               attachPickerOpen(grpInput, openGroupPicker);
             }
 
@@ -1117,17 +850,11 @@
               });
             }
 
-            initPrjStartDate();
-
-            if (registerMode && prjStartInput) {
-              prjStartInput.addEventListener("change", syncPrjStartConstraints);
-              prjStartInput.addEventListener("input", syncPrjStartConstraints);
-            }
-
             if (prjEndInput) {
               prjEndInput.addEventListener("change", syncPrjEndConstraints);
               prjEndInput.addEventListener("input", syncPrjEndConstraints);
             }
+            syncPrjEndConstraints();
 
             function buildCsrfHeaders() {
               const headers = { "Content-Type": "application/json" };
@@ -1192,99 +919,16 @@
               return lines.join("\n");
             }
 
-            const registerBtn = document.getElementById("btnMemberRegister");
-            if (registerMode && registerBtn) {
-              registerBtn.addEventListener("click", async function () {
-                const pid = Number(prjId);
-                const uid = userIdInput
-                  ? Number(userIdInput.value)
-                  : NaN;
-                const gid = grpIdInput ? Number(grpIdInput.value) : NaN;
-                const start = prjStartInput
-                  ? normalizeYmd(prjStartInput.value)
-                  : "";
-                const end = prjEndInput
-                  ? normalizeYmd(prjEndInput.value)
-                  : "";
-
-                if (isNaN(pid)) {
-                  await alertMsg("프로젝트 ID가 올바르지 않습니다.", "알림");
-                  return;
-                }
-                if (isNaN(uid) || !userIdInput || !userIdInput.value.trim()) {
-                  await alertMsg("직원을 선택하세요.", "알림");
-                  return;
-                }
-                if (isNaN(gid) || !grpIdInput || !grpIdInput.value.trim()) {
-                  await alertMsg("소속 그룹을 선택하세요.", "알림");
-                  return;
-                }
-                if (!start) {
-                  await alertMsg("프로젝트 투입일을 입력하세요.", "알림");
-                  return;
-                }
-                const hireYmd = hireInput
-                  ? normalizeYmd(hireInput.value)
-                  : "";
-                if (hireYmd && start < hireYmd) {
-                  await alertMsg(
-                    "프로젝트 투입일은 입사일 이후여야 합니다.",
-                    "알림",
-                  );
-                  return;
-                }
-                if (end && end < start) {
-                  await alertMsg(
-                    "프로젝트 종료일은 투입일 이후여야 합니다.",
-                    "알림",
-                  );
-                  return;
-                }
-
-                const payload = {
-                  userId: uid,
-                  grpId: gid,
-                  prjStartDate: start,
-                  prjEndDate: end || null,
-                };
-
-                registerBtn.disabled = true;
-                try {
-                  const res = await fetch("/project/member/registerMember", {
-                    method: "POST",
-                    headers: buildCsrfHeaders(),
-                    credentials: "same-origin",
-                    body: JSON.stringify(payload),
-                  });
-                  const data = await res.json().catch(function () {
-                    return {};
-                  });
-                  if (!res.ok || !data || data.ok !== true) {
-                    const errText =
-                      (data && data.message) ||
-                      (res.status === 403
-                        ? "권한이 없거나 보안 토큰이 만료되었습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요."
-                        : "구성원 등록 중 오류가 발생했습니다.");
-                    await alertMsg(errText, "오류");
-                    return;
-                  }
-                  await alertMsg("구성원이 등록되었습니다.", "알림");
-                  window.location.href = "/project/member/list";
-                } catch (e) {
-                  await alertMsg("구성원 등록 중 오류가 발생했습니다.", "오류");
-                } finally {
-                  registerBtn.disabled = false;
-                }
-              });
-            }
-
             const saveBtn = document.getElementById("btnMemberSave");
-            if (editMode && saveBtn) {
+            if (saveBtn) {
               saveBtn.addEventListener("click", async function () {
                 const pid = Number(prjId);
                 const uid = Number(pageUserId);
                 const oldGid = Number(pageOldGrpId);
-                const gid = grpIdInput ? Number(grpIdInput.value) : NaN;
+                const gidRaw = grpIdInput && grpIdInput.value
+                  ? grpIdInput.value.trim()
+                  : "";
+                const gid = gidRaw ? Number(gidRaw) : NaN;
                 const start = prjStartInput
                   ? normalizeYmd(prjStartInput.value)
                   : "";
@@ -1304,7 +948,7 @@
                   await alertMsg("기존 그룹 정보가 올바르지 않습니다.", "알림");
                   return;
                 }
-                if (isNaN(gid) || !grpIdInput || !grpIdInput.value.trim()) {
+                if (!gidRaw || isNaN(gid)) {
                   await alertMsg("소속 그룹을 선택하세요.", "알림");
                   return;
                 }
@@ -1315,6 +959,13 @@
                 if (end && end < start) {
                   await alertMsg(
                     "프로젝트 종료일은 투입 시작일 이후여야 합니다.",
+                    "알림",
+                  );
+                  return;
+                }
+                if (prjClosedYmd && end && end > prjClosedYmd) {
+                  await alertMsg(
+                    "프로젝트 종료일은 " + prjClosedYmd + " 이전이어야 합니다.",
                     "알림",
                   );
                   return;

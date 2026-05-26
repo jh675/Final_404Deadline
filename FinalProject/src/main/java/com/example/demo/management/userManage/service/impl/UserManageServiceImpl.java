@@ -9,7 +9,6 @@ import com.example.demo.company.service.CompanyVO;
 import com.example.demo.management.userManage.mapper.UserManageMapper;
 import com.example.demo.management.userManage.service.UserManageService;
 import com.example.demo.management.userManage.service.UserManageVO;
-import com.example.demo.util.attach.service.AttachService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +18,6 @@ public class UserManageServiceImpl implements UserManageService{
 	
 	private final UserManageMapper userManageMapper;
 	private final PasswordEncoder passwordEncoder;
-	private final AttachService attachService;
 	
 	@Override
 	public List<UserManageVO> selectAll(UserManageVO userManage) {

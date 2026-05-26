@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/project/member")
 @RequiredArgsConstructor
 public class MemberController {
+
+    private static final Logger log = LoggerFactory.getLogger(MemberController.class);
 
     private final MemberService memberService;
 
@@ -56,18 +60,7 @@ public class MemberController {
         model.addAttribute("currentMenu", "member");
 
         if (userId == null || grpId == null) {
-            model.addAttribute("registerMode", true);
-            model.addAttribute("editMode", false);
-            model.addAttribute("viewMode", false);
-            model.addAttribute("userId", null);
-            model.addAttribute("grpId", null);
-            model.addAttribute("memberNotFound", false);
-            model.addAttribute("detail", MemberDetailVO.builder()
-                    .prjId(prjId)
-                    .prjName(memberService.selectProjectName(prjId))
-                    .build());
-            model.addAttribute("issues", List.<MemberIssueRowVO>of());
-            return "project/member/memberManagementInfo";
+            return "redirect:/project/member/list";
         }
 
         model.addAttribute("registerMode", false);
@@ -90,12 +83,35 @@ public class MemberController {
         model.addAttribute("detail", detail);
         model.addAttribute("pwUpdatedOnYmd", formatDateYmd(detail.getPwUpdatedOn()));
         model.addAttribute("lastLoginOnYmd", formatDateYmd(detail.getLastLoginOn()));
+        if (editMode) {
+            ProjectPeriodVO period = memberService.selectProjectPeriod(prjId);
+            model.addAttribute("prjClosedDate", period != null ? period.getClosedDate() : null);
+        }
         model.addAttribute(
                 "issues",
                 editMode
                         ? List.<MemberIssueRowVO>of()
                         : memberService.selectMemberIssues(prjId, userId, grpId));
         return "project/member/memberManagementInfo";
+    }
+
+    /** 구성원 등록 화면 — TUI Grid 기반 (memberJoin.html) */
+    @GetMapping("/join")
+    public String memberJoin(HttpSession session, Model model) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return "redirect:/management/project";
+        }
+        ProjectPeriodVO period = memberService.selectProjectPeriod(prjId);
+        String prjName = period != null && period.getPrjName() != null
+                ? period.getPrjName()
+                : memberService.selectProjectName(prjId);
+        model.addAttribute("prjId", prjId);
+        model.addAttribute("prjName", prjName);
+        model.addAttribute("prjStartDate", period != null ? period.getStartDate() : null);
+        model.addAttribute("prjClosedDate", period != null ? period.getClosedDate() : null);
+        model.addAttribute("currentMenu", "member");
+        return "project/member/memberJoin";
     }
 
     @GetMapping("/projectGroups")
@@ -179,6 +195,39 @@ public class MemberController {
         }
     }
 
+    /** 다중 직원 일괄 등록 — 동일 그룹·기간으로 N건 INSERT (트랜잭션) */
+    @PostMapping("/registerMembers")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> registerMembers(
+            @RequestBody(required = false) MemberBulkRegisterRequest body, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
+        }
+        try {
+            if (body == null) {
+                return badRequest("요청이 올바르지 않습니다.");
+            }
+            int registered = memberService.registerMembers(
+                    prjId,
+                    body.userIds(),
+                    body.grpId(),
+                    body.prjStartDate(),
+                    body.prjEndDate());
+            Map<String, Object> ok = new LinkedHashMap<>();
+            ok.put("ok", true);
+            ok.put("registered", registered);
+            ok.put("grpId", body.grpId());
+            ok.put("prjId", prjId);
+            return ResponseEntity.ok(ok);
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
+        } catch (Exception e) {
+            log.error("registerMembers failed - prjId={}, body={}", prjId, body, e);
+            return serverError("구성원 등록 중 오류가 발생했습니다.");
+        }
+    }
+
     @PostMapping("/deleteMembers")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteMembers(
@@ -238,6 +287,9 @@ public class MemberController {
 
     public record MemberRegisterRequest(
             Long userId, Long grpId, String prjStartDate, String prjEndDate) {}
+
+    public record MemberBulkRegisterRequest(
+            List<Long> userIds, Long grpId, String prjStartDate, String prjEndDate) {}
 
     public record MemberDeleteRequest(List<MemberKey> members) {}
 

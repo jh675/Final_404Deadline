@@ -54,6 +54,8 @@
         #{prjParId, mode=IN, jdbcType=NUMERIC},
         #{prjIdentifier, mode=IN, jdbcType=VARCHAR},
         #{enaId, mode=IN, jdbcType=VARCHAR},
+        #{startDate, mode=IN, jdbcType=DATE},
+        #{closedDate, mode=IN, jdbcType=DATE},
         #{resultStatus, mode=OUT, jdbcType=VARCHAR},
         #{resultMsg, mode=OUT, jdbcType=VARCHAR}
       )

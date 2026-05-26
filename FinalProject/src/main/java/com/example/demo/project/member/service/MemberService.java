@@ -11,6 +11,9 @@ public interface MemberService {
     /** 구성원 등록 화면 — 프로젝트명 */
     String selectProjectName(Long prjId);
 
+    /** 구성원 등록 — 프로젝트 기간(투입일·종료일 제한용) */
+    ProjectPeriodVO selectProjectPeriod(Long prjId);
+
     /**
      * 프로젝트 수행 기업 소속 사용자 목록 (STATUS_CD=01ACTIVE).
      * {@code excludeRegistered=true} 이면 MEMBER.USER_ID에 없는 사용자만.
@@ -30,6 +33,18 @@ public interface MemberService {
     Long registerMember(
             Long prjId,
             Long userId,
+            Long grpId,
+            String prjStartDate,
+            String prjEndDate);
+
+    /**
+     * 구성원 일괄 등록 — 선택한 userId 전부에 대해 동일한 그룹·기간으로 INSERT ALL.
+     * 사전 검증을 모두 통과한 뒤 한 번에 N건 INSERT. 하나라도 실패 시 전체 롤백.
+     * 등록된 건수를 반환한다.
+     */
+    int registerMembers(
+            Long prjId,
+            java.util.List<Long> userIds,
             Long grpId,
             String prjStartDate,
             String prjEndDate);
