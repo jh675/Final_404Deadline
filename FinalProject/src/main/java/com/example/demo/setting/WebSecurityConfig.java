@@ -19,15 +19,33 @@ class WebSecurityConfig {
 	private final UserDetailsService userDetailsService;
 	private final CustomLoginSuccessHandler customLoginSuccessHandler;
 	private final CustomAuthFailureHandler customAuthFailureHandler;
+	private final ProjectAuthorizationManager projectAuthorizationManager;
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		// @formatter:off
 		http
 			.authorizeHttpRequests((requests) -> requests
-				.requestMatchers("/**", "/login/**", "/css/**", "/js/**").permitAll()
+				.requestMatchers("/login/**", "/css/**", "/js/**").permitAll()
 				.requestMatchers("/admin/**").hasAnyRole("ADMIN") // 시스템관리자 01ROLE
 				.requestMatchers("/cadmin/**").hasAnyRole("CADMIN") // 기업관리자 02ROLE
+				// ★ 추가: DB에 등록된 세부 프로젝트 권한이 필요한 URL 패턴들 (그룹으로 묶어서 매니저 적용)
+				.requestMatchers(
+					"/project/issue/**", 
+					"/project/member/**", 
+					"/project/group/**", 
+					"/project/history/**",
+					"/project/notice/**",
+					"/project/gantt/**",
+					"/project/calendar/**",
+					"/project/milestone/**",
+					"/project/wiki/**",
+					"/project/docs/**",
+					"/project/board/**",
+					"/project/role/**",
+					"/project/timeline/**",
+					"/project/board/message/**"
+				).access(projectAuthorizationManager)
 				.requestMatchers("/user/**").hasAnyRole("USER") // 일반 이용자 03ROLE
 				.anyRequest().authenticated()
 			)
