@@ -15,6 +15,7 @@ import lombok.Setter;
 public class CompanyMemberRowVO {
 
     private Long userId;
+    private String login;
     private String userName;
     private String hireDate;
     private String genderCd;

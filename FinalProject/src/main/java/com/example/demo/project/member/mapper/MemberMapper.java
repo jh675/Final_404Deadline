@@ -14,6 +14,9 @@ public interface MemberMapper {
 
     String selectProjectNameByPrjId(@Param("prjId") Long prjId);
 
+    /** 프로젝트 투입기간 제한용 — PROJECT.START_DATE / CLOSED_DATE */
+    ProjectPeriodVO selectProjectPeriodByPrjId(@Param("prjId") Long prjId);
+
     /** 프로젝트 수행 기업(biz_no) 소속 사용자 목록 */
     List<CompanyMemberRowVO> selectCompanyMembersByPrjId(
             @Param("prjId") Long prjId,
@@ -44,6 +47,13 @@ public interface MemberMapper {
     String selectUserHireDateYmd(@Param("userId") Long userId);
 
     int insertMember(MemberRegisterParam param);
+
+    /** INSERT ALL + foreach 기반 일괄 등록 — 동일 그룹·기간으로 N건 INSERT */
+    int insertMembers(
+            @Param("userIds") List<Long> userIds,
+            @Param("grpId") Long grpId,
+            @Param("prjStartDate") String prjStartDate,
+            @Param("prjEndDate") String prjEndDate);
 
     int updateMember(MemberUpdateParam param);
 }

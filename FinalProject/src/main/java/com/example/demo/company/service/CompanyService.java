@@ -2,8 +2,6 @@ package com.example.demo.company.service;
 
 import java.util.List;
 
-import com.github.pagehelper.PageInfo;
-
 public interface CompanyService {
 	List<CompanyVO> selectAll(CompanyVO company);
 	CompanyVO selectOne(String bizNo);

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.example.demo.management.userManage.mapper.CAUserManageMapper;
 import com.example.demo.management.userManage.service.CAUserManageService;
 import com.example.demo.management.userManage.service.UserManageVO;
-import com.example.demo.util.attach.service.AttachService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +18,6 @@ public class CAUserManageServiceImpl implements CAUserManageService { // 🚨 CA
 	// 🚨 CA 매퍼 주입으로 변경
 	private final CAUserManageMapper caUserManageMapper;
 	private final PasswordEncoder passwordEncoder;
-	private final AttachService attachService;
 	
 	@Override
 	public List<UserManageVO> selectAll(UserManageVO userManage) {
