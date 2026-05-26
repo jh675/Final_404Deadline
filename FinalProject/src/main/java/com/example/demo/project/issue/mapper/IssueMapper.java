@@ -3,6 +3,7 @@ package com.example.demo.project.issue.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.example.demo.project.issue.service.CommentInputVO;
 import com.example.demo.project.issue.service.CommentOutputVO;
@@ -38,5 +39,5 @@ public interface IssueMapper {
     List<CommentOutputVO> getComment(Long id);
 
     int insertComment(CommentInputVO vo);
-    List<IssueSummaryVO> getIssueIds();
+	List<IssueSummaryVO> getIssueIds(@Param("prjId") Long prjId, @Param("issueId") Long issueId);
 }

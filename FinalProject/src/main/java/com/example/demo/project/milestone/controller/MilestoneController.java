@@ -5,13 +5,22 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class MilestoneController {
 
 	@GetMapping("/milestone")
 	public String viewMilestone(
 			@RequestParam(value = "prjId", required = false) Long prjId,
+			HttpSession session,
 			Model model) {
+		if (prjId == null) {
+			prjId = (Long) session.getAttribute("currentProjectId");
+		}
+		if (prjId == null) {
+			return "redirect:/management/project";
+		}
 		model.addAttribute("prjId", prjId);
 		return "project/milestone/timeline";
 	}

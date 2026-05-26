@@ -31,6 +31,22 @@
 		and p.id = c.page_id
 		where p.id = #{id}
 	</select>
+	<select id="selectWikiPageForTree" resultType="wikiPageVO">
+		select p.id, p.title
+		from wiki_page p
+		join wiki i
+		on i.id = p.wiki_id
+		where i.prj_id = #{prjId}
+		<if test="id != null">
+			AND ID NOT IN (
+				SELECT ID
+				FROM wiki_page
+				START WITH ID = #{id}
+				CONNECT BY PRIOR ID = PARENT_ISSUE
+			)
+		</if>
+		order by p.id desc
+	</select>	
 	
 	<insert id="insertWikiPage" parameterType="wikiPageVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">

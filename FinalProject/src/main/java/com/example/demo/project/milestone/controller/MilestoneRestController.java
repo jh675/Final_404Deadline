@@ -18,12 +18,18 @@ import com.example.demo.project.milestone.service.MilestoneService;
 import com.example.demo.project.milestone.service.MilestoneTimelineVO;
 import com.example.demo.project.milestone.service.MilestoneVO;
 
+import jakarta.servlet.http.HttpSession;
+
 @RestController
 @RequestMapping("/api/milestone")
 public class MilestoneRestController {
 
 	@Autowired
 	private MilestoneService service;
+
+	private Long getCurrentProjectId(HttpSession session) {
+		return (Long) session.getAttribute("currentProjectId");
+	}
 
 	@GetMapping("/list/{id}") 
 	public List<MilestoneIssueVO> getMilestoneIssueList(@PathVariable("id") Long id) {
@@ -32,12 +38,21 @@ public class MilestoneRestController {
 	}
 	
 	@GetMapping("/{id}")
-	public List<MilestoneVO> selectMilestoneList(@PathVariable("id") Long id) {
-		return service.selectMilestoneList(id);
+	public List<MilestoneVO> selectMilestoneList(@PathVariable("id") Long id, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return List.of();
+		}
+		return service.selectMilestoneList(projectId);
 	}
 	@PostMapping("/milestone")
-	public Long insertMilestone(@RequestBody MilestoneVO milestoneVO) {
+	public Long insertMilestone(@RequestBody MilestoneVO milestoneVO, HttpSession session) {
 		try {
+			Long projectId = getCurrentProjectId(session);
+			if (projectId == null) {
+				return null;
+			}
+			milestoneVO.setPrjId(projectId);
 //			System.out.println(milestoneVO);
 			return service.insertMilestone(milestoneVO);
 		} catch (Exception e) {
@@ -67,8 +82,12 @@ public class MilestoneRestController {
 		}
 	}
 	@GetMapping("/notinissue/{id}")
-	public List<IssueSummaryVO> selectMilestoneNotInIssue(@PathVariable("id") Long id) {
-		return service.selectMilestoneNotInIssue(id);
+	public List<IssueSummaryVO> selectMilestoneNotInIssue(@PathVariable("id") Long id, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return List.of();
+		}
+		return service.selectMilestoneNotInIssue(projectId);
 	}
 	@DeleteMapping("/issue/{id}")
 	public Long deleteMilestoneIssue(@PathVariable("id")Long id) {

@@ -38,6 +38,5 @@ public class IssueInputVO {
 	private Long writer;
 	private Long lastUpdater;
 	/** 하위이슈 목록 페이징(무한스크롤) — MyBatis에서만 사용 */
-	private Integer offset;
-	private Integer limit;
+	private Long milestoneId;
 }
