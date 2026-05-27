@@ -10,6 +10,7 @@
 	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">	
 <script
 	src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
@@ -25,6 +26,7 @@
 
 <body>
 	<div layout:fragment="content">
+	 <div id="wrapper">
 		<h2>기업리스트</h2>
 		<div class="d-flex justify-content-end mb-3">
 
@@ -35,7 +37,7 @@
 					style="width: 150px;">
 
 					<option value="" th:selected="${company.searchType == null}">
-						선택</option>
+						모두</option>
 
 					<option value="bizNo"
 						th:selected="${company.searchType == 'bizNo'}">사업자번호</option>
@@ -51,7 +53,7 @@
 						th:selected="${company.searchType == 'address'}">주소</option>
 
 				</select> <input class="form-control me-2" type="search" name="keyword"
-					placeholder="기업명 검색">
+					placeholder="검색">
 
 				<button class="btn btn-success text-nowrap" type="submit">검색</button>
 
@@ -87,7 +89,7 @@
 			 { header: '사업자번호', name: 'bizNo', width: 150 , align:'center',  sortable:true },
 			    { header: '기업명', name: 'companyName', width: 150, align:'center', sortable: true },
 			    { header: '전화번호', name: 'tel', width: 150, align:'center', sortable: true },
-			    { header: '주소', name: 'address', width: 300, align:'left', sortable: true },
+			    { header: '주소', name: 'address', width: 250, align:'left', sortable: true },
 			    { header: '관리자ID', name: 'login', width: 150, align:'center', sortable: true },
 			    { header: '이메일', name: 'email', width: 150, align:'center', sortable: true },
 			    { header: '활성여부',
@@ -145,6 +147,7 @@
 
 
 </script>
+	</div>
 	</div>
 </body>
 </html>
