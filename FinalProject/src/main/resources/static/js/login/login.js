@@ -31,7 +31,7 @@ companyNameInput.addEventListener('input', function(e) {
                         li.textContent = company.companyName; // 기업명 표시
                         
                         // 클릭 시 선택 로직
-                        li.addEventListener('click', function() {
+                        li.addEventListener('mousedown', function() {
                             companyNameInput.value = company.companyName; // 화면엔 기업명
                             bizNoInput.value = company.bizNo;             // hidden엔 사업자번호
                             companyDropdown.style.display = 'none';       // 드롭다운 닫기
@@ -48,12 +48,14 @@ companyNameInput.addEventListener('input', function(e) {
     }, 300);
 });
 
-// 외부 클릭 시 드롭다운 닫기
-document.addEventListener('click', function(e) {
-    if (!companyNameInput.contains(e.target) && !companyDropdown.contains(e.target)) {
-        companyDropdown.style.display = 'none';
-    }
+companyNameInput.addEventListener('blur', function() {
+	// 포커스를 잃는 순간, 검색 0.3초 대기 타이머를 강제로 취소
+    clearTimeout(debounceTimer);
+    
+	// 드롭다운 닫기
+    companyDropdown.style.display = 'none';
 });
+
 // 폼 제출 시 검증 및 자동 매칭 로직
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     // 폼 기본 제출 동작 막기
