@@ -67,9 +67,18 @@
 	    ) }
 	</insert>
 
+	<select id="checkUpdateIdDuplicate" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM USERS 
+	    WHERE BIZ_NO = #{bizNo} 
+	      AND LOGIN = #{login} 
+	      AND ID != #{id} 
+	</select>
+	      
 	<update id="updateUser">
 	    UPDATE USERS
 	    SET
+	    	LOGIN = #{login},
 	        NAME = #{name},
 	        TEL = #{tel},
 	        EMAIL = #{email},
@@ -77,6 +86,30 @@
 	        PRJ_MANAGER_CD = #{prjManagerCd},
 	        MCP_CD = #{mcpCd}
 	    WHERE ID = #{id}
+	    AND   BIZ_NO = #{bizNo}
+	</update>
+	
+	<update id="bulkUpdateUsers" parameterType="map">
+	    UPDATE USERS
+	    <set>
+	        <choose>
+	            <when test="type == 'status'">
+	                STATUS_CD = #{value}
+	                <if test="value == '02ACTIVE'">
+	                    , MCP_CD = '01ACTIVE'
+	                </if>
+	            </when>
+	            
+	            <when test="type == 'prjManager'">
+	                PRJ_MANAGER_CD = #{value}
+	            </when>
+	        </choose>
+	    </set>
+	    WHERE 	BIZ_NO = #{bizNo}
+	    AND		ID IN
+	    <foreach item="id" collection="ids" open="(" separator="," close=")">
+	        #{id}
+	    </foreach>
 	</update>
 	
 	</mapper>

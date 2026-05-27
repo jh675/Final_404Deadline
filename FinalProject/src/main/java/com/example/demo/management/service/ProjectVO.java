@@ -35,12 +35,18 @@ public class ProjectVO {
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date startDate;
-
+	private String managerName;
 	/** PROC_PROJECT_CREATE IN — 체크된 모듈 코드 콤마 구분 (GANTT,ISSUE,...) */
 	private String enaId;
 	/** PROC_PROJECT_CREATE OUT */
 	private String resultStatus;
 	private String resultMsg;
+	
+	private Long   copyPrjId;    // 복사 원본 프로젝트 ID (없으면 null)
+	private String copyGroups;   // "Y" / "N"
+	private String copyUsers;    // "Y" / "N"
+	private String copyRoles;
+	
 	
 	//그룹테이블
 	private Long prjId;

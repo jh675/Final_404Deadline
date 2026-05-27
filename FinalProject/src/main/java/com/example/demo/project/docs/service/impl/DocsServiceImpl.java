@@ -31,8 +31,8 @@ public class DocsServiceImpl implements DocsService {
 	}
 
 	@Override
-	public int update(DocsVO vo) {
-		return docsMapper.update(vo);
+	public void update(DocsVO vo) {
+	    docsMapper.update(vo);
 	}
 
 	@Override

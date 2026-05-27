@@ -8,13 +8,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.example.demo.company.mapper.CompanyMapper;
 import com.example.demo.company.service.CompanyVO;
 import com.example.demo.login.mapper.LoginMapper;
 import com.example.demo.login.service.LoginService;
 import com.example.demo.login.service.UserVO;
+import com.example.demo.management.userManage.mapper.UserManageMapper;
+import com.example.demo.management.userManage.service.UserManageVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,8 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 
 	private final LoginMapper loginMapper;
 	private final PasswordEncoder passwordEncoder;
+	private final CompanyMapper companyMapper;
+	private final UserManageMapper userManageMapper;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -68,6 +74,17 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 				bizNo.substring(3, 5) + "-" +
 				bizNo.substring(5);
 		
+		// 소속 기업의 활성 상태 검증
+		String companyStatus = loginMapper.selectCompanyStatus(bizNo);
+		
+		if (companyStatus == null) {
+			throw new UsernameNotFoundException("등록되지 않은 기업입니다.");
+		}
+		
+		// 기업 상태가 '01ACTIVE'(활성)가 아닌 경우 즉시 차단
+		if (!"01ACTIVE".equals(companyStatus)) {
+			throw new DisabledException("소속 기업이 활성 되어있지 않아 로그인이 제한되었습니다. 관리자에게 문의하세요.");
+		}
 		// DB 조회용 파라미터 세팅
 		UserVO param = new UserVO();
 		param.setBizNo(bizNo);
@@ -119,5 +136,35 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 	@Override
 	public void updateLastLogOn(UserVO vo) {
 		loginMapper.updateLastLogOn(vo);
+	}
+	
+	@Transactional
+	@Override
+	public void requestCompanyRegistration(CompanyVO company, UserManageVO user) {
+	    
+	    // 1. 기업 상태: '03ACTIVE' (승인 요청/대기) 강제 세팅
+	    company.setIsActiveCd("03ACTIVE");
+	    companyMapper.insert(company);
+	    
+	    // 2. 기업 관리자 계정 초기값 세팅
+	    user.setBizNo(company.getBizNo());
+	    user.setPassword(passwordEncoder.encode(user.getLogin())); 
+	    user.setAdminCd("02ROLE"); // 기업관리자 권한
+	    
+	    // 🚨 계정 상태: '02ACTIVE' (비활성) 강제 세팅
+	    user.setStatusCd("02ACTIVE"); 
+	    
+	    user.setPrjManagerCd("01ACTIVE"); 
+	    user.setMcpCd("01ACTIVE"); // 나중에 활성화 시 비밀번호 재설정 필요하도록 세팅
+	    
+	    if (user.getName() == null || user.getName().trim().isEmpty()) {
+	        user.setName(company.getCompanyName() + " 관리자"); 
+	    }
+	    if (user.getTel() == null || user.getTel().trim().isEmpty()) {
+	        user.setTel(company.getTel());
+	    }
+
+	    // 3. 비활성 상태로 유저 INSERT
+	    userManageMapper.insertUser(user);
 	}
 }
