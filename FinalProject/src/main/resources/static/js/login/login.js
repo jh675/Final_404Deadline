@@ -127,7 +127,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
             else {
                 // 검색 결과가 없을 경우
                 companyNameInput.classList.add('is-invalid');
-                feedbackDiv.textContent = "존재하지 않거나 비활성화된 기업입니다.";
+                feedbackDiv.textContent = "존재하지 않거나 비활성화 상태의 기업입니다.";
             }
         })
         .catch(error => {

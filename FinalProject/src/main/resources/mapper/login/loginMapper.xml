@@ -58,4 +58,10 @@
 		SET    last_log_on = SYSDATE
 		WHERE  id = #{id}
 	</update>
+	
+	<select id="selectCompanyStatus" resultType="string">
+	    SELECT IS_ACTIVE_CD
+	    FROM COMPANY
+	    WHERE BIZ_NO = #{bizNo}
+	</select>
 </mapper>
