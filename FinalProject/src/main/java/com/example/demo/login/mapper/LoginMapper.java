@@ -14,4 +14,5 @@ public interface LoginMapper {
 	List<CompanyVO> searchActiveCompanies(String keyword);
 	int updateMcpCd(UserVO vo);
 	int updateLastLogOn(UserVO vo);
+	String selectCompanyStatus(String bizNo);
 }

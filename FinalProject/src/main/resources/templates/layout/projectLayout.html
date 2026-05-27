@@ -38,35 +38,35 @@
                 <!-- (기본으로 항상 있는 항목) -->
                 <li class="nav-item">
                     <a class="nav-link" 
-                       th:classappend="${currentMenu == 'dashboard' ? 'active fw-bold' : ''}" 
+                       th:classappend="${session.currentMenu == 'dashboard' ? 'active fw-bold' : ''}" 
                        th:href="@{/project/main}">
                         개요
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
-                       th:classappend="${currentMenu == 'member' ? 'active fw-bold' : ''}"
+                       th:classappend="${session.currentMenu == 'member' ? 'active fw-bold' : ''}"
                        th:href="@{/project/member/list}">
                         구성원
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
-                       th:classappend="${currentMenu == 'group' ? 'active fw-bold' : ''}"
+                       th:classappend="${session.currentMenu == 'group' ? 'active fw-bold' : ''}"
                        th:href="@{/project/group/list}">
                         그룹
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
-                       th:classappend="${currentMenu == 'role' ? 'active fw-bold' : ''}"
+                       th:classappend="${session.currentMenu == 'role' ? 'active fw-bold' : ''}"
                        th:href="@{/project/role/list}">
                         권한
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" 
-                       th:classappend="${currentMenu == 'history' ? 'active fw-bold' : ''}" 
+                       th:classappend="${session.currentMenu == 'history' ? 'active fw-bold' : ''}" 
                        th:href="@{/project/history/list}">
                         작업내역
                     </a>
@@ -83,17 +83,17 @@
 
                     <a th:if="${mod1.enaNameCd == '06MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${currentMenu == 'wiki' ? 'active fw-bold' : ''}" 
+                       th:classappend="${session.currentMenu == 'wiki' ? 'active fw-bold' : ''}" 
                        th:href="@{/wiki}">위키</a>
 
                     <a th:if="${mod1.enaNameCd == '04MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${currentMenu == 'issue' ? 'active fw-bold' : ''}" 
+                       th:classappend="${session.currentMenu == 'issue' ? 'active fw-bold' : ''}" 
                        th:href="@{/issue/list}">이슈</a>
 
                     <a th:if="${mod1.enaNameCd == '05MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${currentMenu == 'milestone' ? 'active fw-bold' : ''}" 
+                       th:classappend="${session.currentMenu == 'milestone' ? 'active fw-bold' : ''}" 
                        th:href="@{/milestone}">마일스톤</a>
                     
                     <a th:if="${mod1.enaNameCd == '08MODULE'}" 
@@ -105,15 +105,10 @@
                        class="nav-link" 
                        th:classappend="${currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
                        th:href="@{/project/gantt/list}">간트차트</a>
-
-                    <a th:if="${mod1.enaNameCd == '03MODULE'}" 
-                       class="nav-link" 
-                       th:classappend="${currentMenu == 'calendar' ? 'active fw-bold' : ''}" 
-                       th:href="@{/project/calender/list}">일정</a>
-                       
+                
                     <a th:if="${mod1.enaNameCd == '07MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${currentMenu == 'docs' ? 'active fw-bold' : ''}" 
+                       th:classappend="${session.currentMenu == 'docs' ? 'active fw-bold' : ''}" 
                        th:href="@{/docs/list}">문서</a> 
                 </li> 
             </ul> 

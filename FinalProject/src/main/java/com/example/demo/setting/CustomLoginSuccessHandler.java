@@ -33,7 +33,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler{
 		if ("01ACTIVE".equals(vo.getMcpCd())) {
 			needsPasswordReset = true;
 		} else {
-			// 2. 90일 경과 여부 체크
+			// 90일 경과 여부 체크
 			LocalDate pwUpdatedDate = null;
 			
 			// Date 타입을 LocalDate로 변환하여 계산
@@ -45,7 +45,6 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler{
 
 			if (pwUpdatedDate != null) {
 				long daysBetween = ChronoUnit.DAYS.between(pwUpdatedDate, LocalDate.now());
-				
 				// 90일이 지났다면
 				if (daysBetween >= 90) {
 					needsPasswordReset = true;
@@ -56,7 +55,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler{
 			}
 		}
 
-		// 3. 상태에 따른 분기 처리
+		// 상태에 따른 분기 처리
 		if (needsPasswordReset) {
 			// 비밀번호 변경 페이지로 강제 이동 
 			response.sendRedirect("/login/password-reset"); 

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="companyRequestModal">
+        <div class="modal fade" id="companyRequestModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">기업 등록 요청</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    
+                    <form th:action="@{/login/company/request}" method="post">
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">사업자번호 <span class="text-danger" style="color: #ff4d4f;">*</span></label>
+                                <input type="text" name="bizNo" class="form-control" placeholder="123-45-67890" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">기업명 <span class="text-danger" style="color: #ff4d4f;">*</span></label>
+                                <input type="text" name="companyName" class="form-control" placeholder="기업명을 입력해 주세요" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">전화번호 <span class="text-danger" style="color: #ff4d4f;">*</span></label>
+                                <input type="text" name="tel" class="form-control" placeholder="대표 전화번호를 입력해 주세요" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">주소 <span class="text-danger" style="color: #ff4d4f;">*</span></label>
+                                <input type="text" name="address" class="form-control" placeholder="회사 주소를 입력해 주세요" required>
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">관리자 아이디 <span class="text-danger" style="color: #ff4d4f;">*</span></label>
+                                <input type="text" name="login" class="form-control" placeholder="사용할 관리자 아이디" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">관리자 이메일 <span class="text-danger" style="color: #ff4d4f;">*</span></label>
+                                <input type="email" name="email" class="form-control" placeholder="관리자 이메일을 입력해 주세요" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit" class="btn btn-dark px-5 py-2 fw-semibold" style="border-radius: 6px;">등록 요청</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
