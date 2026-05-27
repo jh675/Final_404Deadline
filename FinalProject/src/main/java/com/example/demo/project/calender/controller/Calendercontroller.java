@@ -36,7 +36,7 @@ public class Calendercontroller {
 	}
 	
 	// 일정목록 가져오기 
-	@GetMapping("/calender/listJson" )
+	@GetMapping("/calender/listJson")
 	@ResponseBody
 	public List<CalenderVO> calenderListJson(@RequestParam(name = "typeCd", defaultValue = "") String typeCd) {
 		CalenderVO vo = new CalenderVO();
@@ -46,7 +46,7 @@ public class Calendercontroller {
 	}
 	
 	// 일정 등록
-	@PostMapping("calender/insert")
+	@PostMapping("/calender/insert")
 	@ResponseBody
 	 public int post(CalenderVO vo) {
 		vo.setMemId(getLoginUser().getId().intValue());
@@ -74,7 +74,7 @@ public class Calendercontroller {
 	}
 
 	// 일정 검색 
-	@GetMapping("calender/search")
+	@GetMapping("/calender/search")
 	@ResponseBody
 	 public List<CalenderVO>search(CalenderVO vo) {
 		vo.setMemId(getLoginUser().getId().intValue());
