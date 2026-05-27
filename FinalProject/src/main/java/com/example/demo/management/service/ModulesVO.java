@@ -8,4 +8,5 @@ public class ModulesVO {
 	private Long prjId;
 	private String enaNameCd;
 	private String enaNameNm;
+	private String moduleCode;
 }

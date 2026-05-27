@@ -128,8 +128,7 @@
 	        <input type="hidden" id="selectedBizNo">
 	        <div id="companyDropdown" class="search-dropdown"></div>
 	    </div>
-	    <div class="search-autocomplete"
-	    	 th:if="${#authentication.principal.adminNm == '시스템관리자'}">
+	    <div class="search-autocomplete">
 	        <label for="projectSearch">프로젝트명</label>
 	        <div class="search-input-group">
 	            <input type="text" id="projectSearch" class="form-control form-control-sm"
@@ -154,57 +153,51 @@
           <th class="text-center" th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">설정</th>
         </tr>
       </thead>
-      <tbody>
-        <!-- 2. data-status 속성을 추가하여 closedDate 여부에 따라 progress 또는 complete 값을 가짐 -->
-        <tr th:each="pro : ${projectinfo.list}"
-            th:if="${#authentication.principal.adminNm == '시스템관리자'
-                or (#authentication.principal.adminNm == '사원' and pro.prjHide == 'N')
-                or (pro.bizNo == #authentication.principal.bizNo and pro.prjHide == 'N')}"
-            th:data-status="${pro.closedDate == null ? 'progress' : 'complete'}"
-            th:attr="data-prj-name=${pro.prjName}, data-biz-no=${pro.bizNo}">
-          <td class="row-index"></td>
-          <td ><a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a></td>
-          <td th:text="${pro.prjIdentifier}"></td>
-          <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
-			    <th:block th:each="c : ${companyList}">
-			        <span th:if="${pro.bizNo == c.bizNo}" th:text="${c.companyName}"></span>
-			    </th:block>
-			</td>
-              
-          
-          <td th:text="${pro.prjDesc}"></td>
-          <td
-            th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"
-          ></td>
-          <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
-          <td class="text-center" th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">
-           <div class="btn-group dropend">
-              <button
-				  type="button"
-				  class="btn btn-sm btn-outline-secondary"
-				  data-bs-toggle="dropdown"
-				  data-bs-boundary="viewport" 
-				  aria-expanded="false"
-				>
-				  ...
-				</button>
+<tbody>
+    <tr th:each="pro : ${projectinfo.list}"
+        th:if="${#authentication.principal.adminNm == '시스템관리자'
+            or (#authentication.principal.adminNm == '사원' and pro.prjHide == 'N')
+            or (pro.bizNo == #authentication.principal.bizNo and pro.prjHide == 'N')}"
+        th:data-status="${pro.prjStatusCd == '04PROSTAT' || pro.prjStatusCd == '05PROSTAT' ? 'complete' : 'progress'}"
+        th:attr="data-prj-name=${pro.prjName}, data-biz-no=${pro.bizNo}, data-par-id=${pro.prjParId}, data-prj-id=${pro.id}">
+      <td class="row-index"></td>
+      <td>
+          <span th:if="${pro.prjParId != null}" style="margin-left: 20px;">↳ </span>
+          <a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a>
+      </td>
+      <td th:text="${pro.prjIdentifier}"></td>
+      <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
+          <th:block th:each="c : ${companyList}">
+              <span th:if="${pro.bizNo == c.bizNo}" th:text="${c.companyName}"></span>
+          </th:block>
+      </td>
+      <td th:text="${pro.prjDesc}"></td>
+      <td th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"></td>
+      <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
+      <td class="text-center" th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">
+          <div class="btn-group dropend">
+              <button type="button" class="btn btn-sm btn-outline-secondary"
+                  data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false">
+                  ...
+              </button>
               <ul class="dropdown-menu shadow-sm">
-                <li><a class="dropdown-item" href="#">설정</a></li>
-                <li><a class="dropdown-item" href="#"
-				       th:data-id="${pro.id}"
-				       onclick="copyProject(this); return false;">복사</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li><button type="button" class="dropdown-item text-danger"
-					          data-bs-toggle="modal" 
-					          data-bs-target="#deleteproject"
-					          th:data-id="${pro.id}" 
-					          onclick="openDeleteModal(this)"
-							>삭제</button></li>	
+                  <li><a class="dropdown-item" href="#"
+                         th:data-id="${pro.id}"
+                         onclick="editProject(this); return false;">수정</a></li>
+                  <li><a class="dropdown-item" href="#"
+                         th:data-id="${pro.id}"
+                         onclick="copyProject(this); return false;">복사</a></li>
+                  <li><hr class="dropdown-divider" /></li>
+                  <li><button type="button" class="dropdown-item text-danger"
+                              data-bs-toggle="modal"
+                              data-bs-target="#deleteproject"
+                              th:data-id="${pro.id}"
+                              onclick="openDeleteModal(this)">삭제</button></li>
               </ul>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+          </div>
+      </td>
+    </tr>
+</tbody>
     </table>
             <div th:replace="~{management/modal/deleteprojectmodal :: deleteproject}"></div>
 	</div>
@@ -220,6 +213,11 @@
     function copyProject(el) {
         const id = el.getAttribute('data-id');
         location.href = '/management/projectcreate?copyFrom=' + id;
+    }
+    
+    function editProject(el) {
+        const id = el.getAttribute('data-id');
+        location.href = '/management/projectupdate?id=' + id;
     }
     </script>
     
@@ -251,34 +249,74 @@
       }
 
       function applyAllFilters() {
-        const selectValue = document.getElementById("projectStatusSelect").value;
-        const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-name]");
+    	    const selectValue = document.getElementById("projectStatusSelect").value;
+    	    const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-name]");
 
-        rows.forEach(row => {
-          const status = row.getAttribute("data-status");
-          const bizNo = row.getAttribute("data-biz-no") || '';
-          const prjName = row.getAttribute("data-prj-name") || '';
+    	    // 1단계: 각 행의 기본 매칭 여부 계산
+    	    rows.forEach(row => {
+    	        const status = row.getAttribute("data-status");
+    	        const bizNo = row.getAttribute("data-biz-no") || '';
+    	        const prjName = row.getAttribute("data-prj-name") || '';
 
-          let visible = status === selectValue;
+    	        let matched = status === selectValue;
 
-          if (appliedBizNo) {
-            visible = visible && bizNo === appliedBizNo;
-          } else if (appliedCompanyTerm) {
-            const matchedBizNos = companyData
-              .filter(c => includesTerm(c.companyName, appliedCompanyTerm))
-              .map(c => c.bizNo);
-            visible = visible && matchedBizNos.includes(bizNo);
-          }
+    	        if (appliedBizNo) {
+    	            matched = matched && bizNo === appliedBizNo;
+    	        } else if (appliedCompanyTerm) {
+    	            const matchedBizNos = companyData
+    	                .filter(c => includesTerm(c.companyName, appliedCompanyTerm))
+    	                .map(c => c.bizNo);
+    	            matched = matched && matchedBizNos.includes(bizNo);
+    	        }
 
-          if (appliedPrjName) {
-            visible = visible && prjName === appliedPrjName;
-          } else if (appliedProjectTerm) {
-            visible = visible && includesTerm(prjName, appliedProjectTerm);
-          }
+    	        if (appliedPrjName) {
+    	            matched = matched && prjName === appliedPrjName;
+    	        } else if (appliedProjectTerm) {
+    	            matched = matched && includesTerm(prjName, appliedProjectTerm);
+    	        }
 
-          row.style.display = visible ? "" : "none";
-        });
-      }
+    	        row._matched = matched;
+    	    });
+
+    	    // 2단계: 매칭된 행 기준으로 상위/하위 ID 수집 (반복으로 모든 계층 처리)
+    	    let changed = true;
+    	    while (changed) {
+    	        changed = false;
+    	        const visibleIds = new Set();
+
+    	        rows.forEach(row => {
+    	            if (row._matched) {
+    	                visibleIds.add(row.getAttribute("data-prj-id"));
+    	            }
+    	        });
+
+    	        rows.forEach(row => {
+    	            if (!row._matched) {
+    	                const prjId = row.getAttribute("data-prj-id") || '';
+    	                const parId = row.getAttribute("data-par-id") || '';
+
+    	                // 상위가 매칭되어 있으면 하위도 표시
+    	                if (parId && visibleIds.has(parId)) {
+    	                    row._matched = true;
+    	                    changed = true;
+    	                }
+
+    	                // 하위가 매칭되어 있으면 상위도 표시
+    	                rows.forEach(child => {
+    	                    if (child._matched && child.getAttribute("data-par-id") === prjId) {
+    	                        row._matched = true;
+    	                        changed = true;
+    	                    }
+    	                });
+    	            }
+    	        });
+    	    }
+
+    	    // 3단계: 표시 여부 결정
+    	    rows.forEach(row => {
+    	        row.style.display = row._matched ? "" : "none";
+    	    });
+    	}
 
       function filterProjects() {
         applyAllFilters();

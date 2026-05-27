@@ -5,18 +5,22 @@
  
  <select id="listProject" resultType="ProjectVO">
  	SELECT p.*, c.company_name as companyName
-	FROM project p
-	LEFT JOIN company c ON p.biz_no = c.biz_no
+    FROM project p
+    LEFT JOIN company c ON p.biz_no = c.biz_no
+    ORDER BY p.prj_lft
  </select>
  
 
 <select id="searchUsersByBizNo" resultType="com.example.demo.login.service.UserVO">
     SELECT 
         id     AS "id", 
-        name   AS "name"  <!-- VO 필드명이 name이면 반드시 "name"으로 별칭 -->
+        name   AS "name",  <!-- VO 필드명이 name이면 반드시 "name"으로 별칭 -->
+        login  AS "login",
+        email  AS "email"
     FROM users 
     WHERE biz_no = #{bizNo}
       AND name LIKE '%' || #{term} || '%'
+      AND PRJ_MANAGER_CD = '01ACTIVE'
 </select>
  
  <select id="userProjectList" resultType="ProjectVO">
@@ -46,20 +50,24 @@
  
 <insert id="projectInsert" parameterType="ProjectVO" statementType="CALLABLE">
     {
-      CALL PROC_PROJECT_CREATE(
-        #{prjName, mode=IN, jdbcType=VARCHAR},
-        #{bizNo, mode=IN, jdbcType=VARCHAR},
-        #{prjDesc, mode=IN, jdbcType=VARCHAR},
-        #{userId, mode=IN, jdbcType=NUMERIC},
-        #{prjParId, mode=IN, jdbcType=NUMERIC},
-        #{prjIdentifier, mode=IN, jdbcType=VARCHAR},
-        #{enaId, mode=IN, jdbcType=VARCHAR},
-        #{startDate, mode=IN, jdbcType=DATE},
-        #{closedDate, mode=IN, jdbcType=DATE},
-        #{resultStatus, mode=OUT, jdbcType=VARCHAR},
-        #{resultMsg, mode=OUT, jdbcType=VARCHAR}
-      )
-    }
+	  CALL PROC_PROJECT_CREATE(
+	    #{prjName,      mode=IN,  jdbcType=VARCHAR},
+	    #{bizNo,        mode=IN,  jdbcType=VARCHAR},
+	    #{prjDesc,      mode=IN,  jdbcType=VARCHAR},
+	    #{userId,       mode=IN,  jdbcType=NUMERIC},
+	    #{prjParId,     mode=IN,  jdbcType=NUMERIC},
+	    #{prjIdentifier,mode=IN,  jdbcType=VARCHAR},
+	    #{enaId,        mode=IN,  jdbcType=VARCHAR},
+	    #{startDate,    mode=IN,  jdbcType=DATE},
+	    #{closedDate,   mode=IN,  jdbcType=DATE},
+	    #{copyPrjId,    mode=IN,  jdbcType=NUMERIC},
+	    #{copyGroups,   mode=IN,  jdbcType=VARCHAR},
+	    #{copyUsers,    mode=IN,  jdbcType=VARCHAR},
+	    #{copyRoles,    mode=IN,  jdbcType=VARCHAR},
+	    #{resultStatus, mode=OUT, jdbcType=VARCHAR},
+	    #{resultMsg,    mode=OUT, jdbcType=VARCHAR}
+	  )
+	}
 </insert>
 
 <select id="findIdByIdentifier" resultType="long">
@@ -71,6 +79,25 @@
         ORDER BY id DESC
     ) WHERE ROWNUM = 1
 </select>
+
+<update id="projectUpdate" parameterType="com.example.demo.management.service.ProjectVO" statementType="CALLABLE">
+    {
+        CALL PROC_PROJECT_UPDATE(
+            #{id},
+            #{prjName},
+            #{prjDesc},
+            #{userId},
+            #{prjParId, jdbcType=NUMERIC},
+            #{prjStatusCd},
+            #{startDate, jdbcType=DATE},
+            #{closedDate, jdbcType=DATE},
+            #{enaId, jdbcType=VARCHAR},
+            #{resultStatus, mode=OUT, jdbcType=VARCHAR},
+            #{resultMsg, mode=OUT, jdbcType=VARCHAR}
+        )
+    }
+</update>
+
 
 
 <update id="projectHide" parameterType="ProjectVO" >
@@ -89,11 +116,13 @@
 </select>
  
  <select id="listModules" resultType="ModulesVO">
- 	select ena_name_cd,  
-      get_sub_code_name(e.ena_name_cd) ena_name_nm 
-      from enabled_modules e
- 	where prj_id = #{prjId}
- </select>
+    SELECT e.ena_name_cd,
+           get_sub_code_name(e.ena_name_cd) ena_name_nm,
+           s.note AS module_code
+    FROM enabled_modules e
+    LEFT JOIN sub_code s ON e.ena_name_cd = s.s_code
+    WHERE e.prj_id = #{prjId}
+</select>
  
  <select id="getprojectid" resultType="ProjectVO">
  	select *
