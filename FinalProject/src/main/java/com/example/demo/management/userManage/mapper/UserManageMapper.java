@@ -17,4 +17,6 @@ public interface UserManageMapper {
 	List<CompanyVO> selectCompanyList();
 	UserManageVO selectByLoginAndBizNo(UserManageVO vo);
 	int bulkUpdateUsers(Map<String, Object> payload);
+	int checkCompanyExists(String bizNo);
+	int checkUpdateIdDuplicate(UserManageVO vo);
 }

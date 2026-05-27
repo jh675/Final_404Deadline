@@ -13,4 +13,5 @@ public interface CAUserManageMapper {
 	int updateUser(UserManageVO vo);
 	UserManageVO selectOne(Long id);
 	int bulkUpdateUsers(Map<String, Object> payload);
+	int checkUpdateIdDuplicate(UserManageVO vo);
 }

@@ -62,7 +62,13 @@ public class UserManageController {
 	public Map<String, String> userUpdate(@RequestBody UserManageVO vo) {
 	    int updateCnt = userManageService.updateUser(vo);
 	    Map<String, String> result = new HashMap<>();
-	    if(updateCnt > 0) {
+    	
+	    // 기업 번호 검증 실패 결과가 넘어온 경우
+	    if ("INVALID_BIZNO".equals(vo.getResult())) {
+	        result.put("result", "INVALID_BIZNO");
+	    } else if ("DUPLICATE_LOGIN".equals(vo.getResult())) {
+	        result.put("result", "DUPLICATE_LOGIN");
+	    } else if (updateCnt > 0) {
 	        result.put("result", "SUCCESS");
 	    } else {
 	        result.put("result", "ERROR");
@@ -131,7 +137,7 @@ public class UserManageController {
 	    return ResponseEntity.ok().body("SUCCESS");
 	}
 	
-	// 💡 다중 일괄 업데이트 컨트롤러 추가
+	// 다중 일괄 업데이트
 	@PutMapping("/users/bulk-update")
 	@ResponseBody
 	public Map<String, String> bulkUpdateUsers(@RequestBody Map<String, Object> payload) {

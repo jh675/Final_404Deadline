@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         el: document.getElementById('grid'),
 
         data: userData,
-		autowidth: true,
+        autowidth: true,
         scrollX: false,
         scrollY: false,
         bodyHeight: 'auto',
@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         minBodyHeight: 200,
 
         columns: [
+            {
+                header: '이름',
+                name: 'name',
+                align: 'center',
+            },
             {
                 header: '아이디',
                 name: 'login',
@@ -28,47 +33,43 @@ document.addEventListener('DOMContentLoaded', async function() {
                 sortable: true
             },
             {
+                header: '계정상태',
+                name: 'statusNm',
+                align: 'center',
+                sortable: true
+            },
+            {
+                header: '역할',
+                name: 'prjManagerNm',
+                align: 'center',
+                sortable: true,
+
+                formatter: ({ value }) => {
+                    const roleMap = {
+                        '활성': '프로젝트매니저',
+                        '비활성': '사원'
+                    };
+
+                    return roleMap[value] || value;
+                }
+            },
+            {
                 header: '소속기업',
                 name: 'compNm',
                 align: 'center',
                 sortable: true
             },
             {
-                header: '이름',
-                name: 'name',
-                align: 'center',
-            },
-            {
                 header: '이메일',
                 name: 'email',
-				align: 'center',
+                align: 'center',
             },
             {
                 header: '전화번호',
                 name: 'tel',
                 align: 'center',
             },
-            {
-                header: '계정상태',
-                name: 'statusNm',
-                align: 'center',
-                sortable: true
-            },
-			{
-                header: '역할',
-                name: 'prjManagerNm',
-                align: 'center',
-                sortable: true,
-				
-				formatter: ({ value }) => {
-				    const roleMap = {
-				        '활성': '프로젝트매니저',
-				        '비활성': '사원'
-				    };
 
-				    return roleMap[value] || value;
-				}
-            },
             {
                 header: '수정',
                 name: 'edit',
@@ -87,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         ],
-		rowHeaders: ['checkbox', 'rowNum'],
+        rowHeaders: ['checkbox', 'rowNum'],
 
         // 페이징
         pageOptions: {
@@ -96,50 +97,50 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-	// 수정 함수 호출을 위한 연결
+    // 수정 함수 호출을 위한 연결
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('edit-btn')) {
             const id = e.target.dataset.id;
             openUpdateModal(id);
         }
     });
-	
-	// 기업 목록 불러오는 함수
-	async function loadCompanyList() {
-	    const response = await csrfFetch('/admin/companyList');
-	    const companyList = await response.json();
-	    const select = document.getElementById('bizNo');
-	    select.innerHTML = `
+
+    // 기업 목록 불러오는 함수
+    async function loadCompanyList() {
+        const response = await csrfFetch('/admin/companyList');
+        const companyList = await response.json();
+        const select = document.getElementById('bizNo');
+        select.innerHTML = `
 	        <option value="">선택</option>
 	    `;
-	    companyList.forEach(company => {
-	        select.innerHTML += `
+        companyList.forEach(company => {
+            select.innerHTML += `
 	            <option value="${company.bizNo}">
 	                ${company.companyName}
 	            </option>
 	        `;
-	    });
-	}
-	
-	// 💡 1. 로딩 직후 체크박스 컬럼을 먼저 숨깁니다. (UX 기획 반영)
+        });
+    }
+
+    // 로딩 직후 체크박스 컬럼 숨기기.
     grid.hideColumn('_checked');
 
-    // 💡 2. 일괄작업 모드 켜기
+    // 일괄작업 버튼 누르면
     document.getElementById('toggleBulkModeBtn').addEventListener('click', function() {
         this.classList.add('d-none'); // 일괄작업 버튼 숨기기
         document.getElementById('bulkControls').classList.remove('d-none'); // 적용 컨트롤 보이기
         grid.showColumn('_checked'); // 🌟 그리드 체크박스 나타나기!
     });
 
-    // 💡 3. 일괄작업 모드 취소
+    // 일괄작업 취소 버튼
     document.getElementById('cancelBulkModeBtn').addEventListener('click', function() {
         document.getElementById('bulkControls').classList.add('d-none');
         document.getElementById('toggleBulkModeBtn').classList.remove('d-none');
         grid.uncheckAll(); // 체크된 것 모두 해제
         grid.hideColumn('_checked'); // 🌟 그리드 체크박스 숨기기!
     });
-	
-	// 💡 2. 일괄 처리 적용 버튼 이벤트
+
+    // 일괄 처리 적용 버튼 이벤트
     document.getElementById('bulkApplyBtn').addEventListener('click', async function() {
         const actionVal = document.getElementById('bulkActionType').value;
         if (!actionVal) {
@@ -157,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // actionVal 분리 (예: 'status_01ACTIVE' -> type: 'status', value: '01ACTIVE')
         const [updateType, updateValue] = actionVal.split('_');
 
-        // 🚨 UX 방어 로직: 관리자의 PM 권한을 해제하려고 할 때 차단
+        // 관리자의 PM 권한을 해제하려고 할 때 차단
         if (updateType === 'prjManager' && updateValue === '02ACTIVE') {
             const hasAdmin = checkedRows.some(row => row.adminCd === '01ROLE' || row.adminCd === '02ROLE');
             if (hasAdmin) {
@@ -199,25 +200,25 @@ document.addEventListener('DOMContentLoaded', async function() {
             alert('서버 통신 중 오류가 발생했습니다.');
         }
     });
-	
-	await loadCompanyList();
-	
-	// 회원권한 변경 이벤트
-	document.getElementById('adminCd').addEventListener('change', function () {
-	    changeRoleArea(this.value);
-	});
-	
-	// 소속기업 변경 시 기업번호 input에 값 세팅
-		document.getElementById('bizNo').addEventListener('change', function() {
-		    document.getElementById('bizNoView').value = this.value;
-		});
-		
-	// 저장 버튼 공통 처리
+
+    await loadCompanyList();
+
+    // 회원권한 변경 이벤트
+    document.getElementById('adminCd').addEventListener('change', function() {
+        changeRoleArea(this.value);
+    });
+
+    // 소속기업 변경 시 기업번호 input에 값 세팅
+    document.getElementById('bizNo').addEventListener('change', function() {
+        document.getElementById('bizNoView').value = this.value;
+    });
+
+    // 저장 버튼 공통 처리
     document.getElementById('saveBtn').addEventListener('click', async function() {
-		// 등록, 수정 판별
+        // 등록, 수정 판별
         const mode = this.dataset.mode;
-		
-		// 이전 에러 상태 초기화 (아이디 중복 메시지도 기본 메시지로 원상복구)
+
+        // 이전 에러 상태 초기화 (아이디 중복 메시지도 기본 메시지로 원상복구)
         const inputs = ['login', 'name', 'hireDate', 'adminCd', 'bizNo'];
         inputs.forEach(id => {
             const el = document.getElementById(id);
@@ -228,12 +229,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // 필수 항목 유효성 검사 (빈칸 체크)
         let isValid = true;
-        
+
         const loginInput = document.getElementById('login');
         const nameInput = document.getElementById('name');
         const hireDateInput = document.getElementById('hireDate');
-        const adminCdSelect = document.getElementById('adminCd'); 
-        const bizNoSelect = document.getElementById('bizNo'); 
+        const adminCdSelect = document.getElementById('adminCd');
+        const bizNoSelect = document.getElementById('bizNo');
 
         // 아이디 검사
         if (!loginInput.value.trim()) {
@@ -263,20 +264,20 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // 하나라도 비어있다면 폼 제출 중단
         if (!isValid) return;
-		
+
         const body = {
-			id: document.getElementById('userId').value,
-		    bizNo: document.getElementById('bizNo').value,
-		    login: document.getElementById('login').value,
-		    name: document.getElementById('name').value,
-		    email: document.getElementById('email').value,
-		    tel: document.getElementById('tel').value,
-		    adminCd: document.getElementById('adminCd').value,
-		    statusCd: document.querySelector('input[name="statusCd"]:checked').value,
-		    prjManagerCd: document.querySelector('input[name="prjManagerCd"]:checked').value,
-			hireDate: document.getElementById('hireDate').value,
-			genderCd: document.querySelector('input[name="genderCd"]:checked').value,
-			mcpCd: document.querySelector('input[name="mcpCd"]:checked').value
+            id: document.getElementById('userId').value,
+            bizNo: document.getElementById('bizNo').value,
+            login: document.getElementById('login').value,
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            tel: document.getElementById('tel').value,
+            adminCd: document.getElementById('adminCd').value,
+            statusCd: document.querySelector('input[name="statusCd"]:checked').value,
+            prjManagerCd: document.querySelector('input[name="prjManagerCd"]:checked').value,
+            hireDate: document.getElementById('hireDate').value,
+            genderCd: document.querySelector('input[name="genderCd"]:checked').value,
+            mcpCd: document.querySelector('input[name="mcpCd"]:checked').value
         };
 
         let url = '';
@@ -298,59 +299,90 @@ document.addEventListener('DOMContentLoaded', async function() {
             body: JSON.stringify(body)
         });
 
-		const result = await response.json();
-		
-		let isSuccess = false;
-		let finalUserId = document.getElementById('userId').value;
+        const result = await response.json();
+
+        let isSuccess = false;
+        let finalUserId = document.getElementById('userId').value;
 
 		if (mode === 'insert') {
-            if (result.result === 'DUPLICATE') {
-                loginInput.classList.add('is-invalid');
-                if (loginError) loginError.textContent = '해당 기업에 이미 사용 중인 아이디입니다.';
-                loginInput.focus();
-                return; 
-            }
+	        // 아이디 중복 에러
+	        if (result.result === 'DUPLICATE') {
+	            loginInput.classList.add('is-invalid');
+	            if (loginError) loginError.textContent = '해당 기업에 이미 사용 중인 아이디입니다.';
+	            loginInput.focus();
+	            return; 
+	        }
+	        
+	        // 존재하지 않는 기업번호 에러
+	        if (result.result === 'INVALID_BIZNO') {
+	            if (bizNoSelect) {
+	                bizNoSelect.classList.add('is-invalid');
+	                document.getElementById('bizNoError').textContent = '존재하지 않은 기업번호입니다.';
+	                bizNoSelect.focus();
+	            }
+	            return;
+	        }
+	        
 			if (result.result === 'SUCCESS' && result.id) { 
 		    	isSuccess = true;
 		        finalUserId = result.id; 
 			}
-		} else { // mode === 'update' 인 경우
+		} else { 
+	        // 존재하지 않는 기업번호 에러 (수정)
+	        if (result.result === 'INVALID_BIZNO') {
+	            if (bizNoSelect) {
+	                bizNoSelect.classList.add('is-invalid');
+	                document.getElementById('bizNoError').textContent = '존재하지 않은 기업번호입니다.';
+	                bizNoSelect.focus();
+	            }
+	            return;
+	        }
+			// 소속기업 아이디 중복 체크
+			if (result.result === 'DUPLICATE_LOGIN') {
+		        loginInput.classList.add('is-invalid');
+		        if (loginError) {
+		            loginError.textContent = '해당 기업에 이미 사용 중인 아이디입니다.';
+		        }
+		        loginInput.focus();
+		        return; 
+		    }
+			
 		    if (result.result === 'SUCCESS') {
 		        isSuccess = true;
 			}
 		}
 
-		if (isSuccess) {
-	        // 프로필 이미지 동기화
-	        try {
-	            if (isProfileDeleted && finalUserId) {
-	                // 삭제 대기 중이면 기존 이미지 지우기
-	                await csrfFetch(`/admin/user/profile/${finalUserId}`, { method: "DELETE" });
-	                
-	            } else if (pendingProfileFile && finalUserId) {
-	                // 업로드 대기 중인 새 파일이 있으면 업로드하기
-	                const formData = new FormData();
-	                formData.append("userId", finalUserId);
-	                formData.append("file", pendingProfileFile);
-	                await csrfFetch("/admin/user/profile", { method: "POST", body: formData });
-	            }
-	            
-	            // 모든 작업 완료
-	            alert(mode === 'insert' ? '회원 등록이 완료되었습니다.' : '회원 수정이 완료되었습니다.');
-	            location.reload();
-	            
-	        } catch (error) {
-	            console.error(error);
-	            alert("회원 정보는 저장되었으나, 프로필 이미지 처리에 실패했습니다.");
-	            location.reload(); // 일단 정보는 저장되었으므로 리로드
-	        }
-	
-	    } else {
-	        alert('처리 중 오류가 발생했습니다.');
-	    }
-	});
+        if (isSuccess) {
+            // 프로필 이미지 동기화
+            try {
+                if (isProfileDeleted && finalUserId) {
+                    // 삭제 대기 중이면 기존 이미지 지우기
+                    await csrfFetch(`/admin/user/profile/${finalUserId}`, { method: "DELETE" });
 
-	// 입력창에 값을 입력하면 빨간 경고 테두리와 메시지를 지워줌
+                } else if (pendingProfileFile && finalUserId) {
+                    // 업로드 대기 중인 새 파일이 있으면 업로드하기
+                    const formData = new FormData();
+                    formData.append("userId", finalUserId);
+                    formData.append("file", pendingProfileFile);
+                    await csrfFetch("/admin/user/profile", { method: "POST", body: formData });
+                }
+
+                // 모든 작업 완료
+                alert(mode === 'insert' ? '회원 등록이 완료되었습니다.' : '회원 수정이 완료되었습니다.');
+                location.reload();
+
+            } catch (error) {
+                console.error(error);
+                alert("회원 정보는 저장되었으나, 프로필 이미지 처리에 실패했습니다.");
+                location.reload(); // 일단 정보는 저장되었으므로 리로드
+            }
+
+        } else {
+            alert('처리 중 오류가 발생했습니다.');
+        }
+    });
+
+    // 입력창에 값을 입력하면 빨간 경고 테두리와 메시지를 지워줌
     ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -362,8 +394,17 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         }
     });
+
+	// 입력창 변경 시 에러 초기화 구문 안쪽에 추가
+    const bizNoSelectElement = document.getElementById('bizNo');
+    if (bizNoSelectElement) {
+        bizNoSelectElement.addEventListener('change', function() {
+            const errorDiv = document.getElementById('bizNoError');
+            if (errorDiv) errorDiv.textContent = '소속기업을 선택해주세요.'; 
+        });
+    }
 	
-	// 💡 4. 모달창: '비활성' 체크 시 자동으로 '비밀번호 초기화 필요' 체크
+    // 💡 4. 모달창: '비활성' 체크 시 자동으로 '비밀번호 초기화 필요' 체크
     const statusInactive = document.getElementById('statusInactive');
     const mcpActive = document.getElementById('mcpActive'); // 필요(01ACTIVE) 라디오 버튼
 
@@ -387,11 +428,11 @@ async function loadProfileImage(userId) {
         if (res.ok) {
             // 응답이 존재하면 JSON 파싱
             const text = await res.text();
-            if(text) {
+            if (text) {
                 const data = JSON.parse(text);
                 if (data && data.id) {
                     // 브라우저 캐시 방지를 위해 파라미터(t) 추가
-                    img.src = `/download/${data.id}?t=${new Date().getTime()}`; 
+                    img.src = `/download/${data.id}?t=${new Date().getTime()}`;
                     img.classList.remove("d-none");
                     emptyText.style.display = "none";
                 }
@@ -403,7 +444,7 @@ async function loadProfileImage(userId) {
 }
 
 // 파일 선택 버튼 클릭 (유효성 검사 추가)
-document.getElementById('uploadBtn').addEventListener('click', function () {
+document.getElementById('uploadBtn').addEventListener('click', function() {
     document.getElementById('profileImage').click();
 });
 
@@ -419,26 +460,26 @@ document.getElementById('profileImage').addEventListener('change', function(e) {
     reader.onload = function(event) {
         // 원본 이미지를 자르기 모달로 전달
         document.getElementById('imageToCrop').src = event.target.result;
-        
+
         // 자르기 모달 띄우기
         const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
         cropModal.show();
     };
     reader.readAsDataURL(file);
-    
+
     // 같은 파일을 다시 선택해도 change 이벤트가 발생하도록 input 초기화
-    this.value = ''; 
+    this.value = '';
 });
 
 // 자르기 모달이 생성되면
-document.getElementById('cropModal').addEventListener('shown.bs.modal', function () {
+document.getElementById('cropModal').addEventListener('shown.bs.modal', function() {
     const image = document.getElementById('imageToCrop');
-    
+
     // 이전에 쓰던 자르기 데이터가 남아있다면 초기화
     if (cropper) {
         cropper.destroy();
     }
-    
+
     // 3:4 비율로 세팅
     cropper = new Cropper(image, {
         aspectRatio: 3 / 4, // 비율 고정
@@ -469,25 +510,25 @@ document.getElementById('applyCropBtn').addEventListener('click', function() {
     // 자른 사진 데이터를 File 객체로 변환하여 저장
     canvas.toBlob(function(blob) {
         const croppedFile = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
-        pendingProfileFile = croppedFile; 
+        pendingProfileFile = croppedFile;
         isProfileDeleted = false;
-        
+
         // 자르기 모달 닫기
         const cropModal = bootstrap.Modal.getInstance(document.getElementById('cropModal'));
         cropModal.hide();
-        
+
     }, 'image/jpeg', 0.9);
 });
 
 // 삭제 버튼 클릭 시 (서버 삭제 X, 로컬 UI만 지우고 변수에 표시)
-document.getElementById('deleteImageBtn').addEventListener('click', function () {
+document.getElementById('deleteImageBtn').addEventListener('click', function() {
     // 대기열 비우기 및 삭제 플래그 켜기
     pendingProfileFile = null;
     isProfileDeleted = true;
-    
+
     // UI 및 input 초기화
-    document.getElementById('profileImage').value = ''; 
-    resetProfileImageUI(); 
+    document.getElementById('profileImage').value = '';
+    resetProfileImageUI();
 });
 
 // 프로필 UI 초기화 (이미지 숨기고 텍스트 표시)
@@ -502,81 +543,80 @@ function resetProfileImageUI() {
 
 // 등록 모달 함수
 window.openInsertModal = function() {
-	
-	// 신규 등록 시 이미지 상태 초기화
-	pendingProfileFile = null;
-	isProfileDeleted = false;
-	resetProfileImageUI();
-	document.getElementById('profileImage').value = '';
-	
-	// 모든 에러 상태(빨간 테두리) 지우기
+
+    // 신규 등록 시 이미지 상태 초기화
+    pendingProfileFile = null;
+    isProfileDeleted = false;
+    resetProfileImageUI();
+    document.getElementById('profileImage').value = '';
+
+    // 모든 에러 상태(빨간 테두리) 지우기
     ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.remove('is-invalid');
     });
-		
+
     document.getElementById('modalTitle').textContent = '회원 정보 등록';
     document.getElementById('userForm').reset();
     document.getElementById('userId').value = '';
-    document.getElementById('login').readOnly = false;
-    document.getElementById('bizNoView').readOnly = true; // 기업번호는 항상 readonly
+    document.getElementById('bizNoView').disabled = true; // 기업번호는 항상 readonly
     document.getElementById('saveBtn').dataset.mode = 'insert';
     document.getElementById('saveBtn').textContent = '등록';
     changeRoleArea(document.getElementById('adminCd').value);
-	document.getElementById('mcpActive').checked = true;
-    
+    document.getElementById('mcpActive').checked = true;
+
     // 신규 등록 시 프로필 이미지 초기화 (초기화면 유지)
     resetProfileImageUI();
-    
+
     const modal = new bootstrap.Modal(document.getElementById('userInsert'));
     modal.show();
 }
 
 // 수정 모달 함수
 window.openUpdateModal = function(id) {
-	
+
     const row = userData.find(user => Number(user.id) === Number(id));
 
     if (!row) {
         alert('사용자 정보를 찾을 수 없습니다.');
         return;
     }
-	
-	// 신규 등록 시 이미지 상태 초기화
-	pendingProfileFile = null;
-	isProfileDeleted = false;
-	document.getElementById('profileImage').value = '';
-	
-	// 모든 에러 상태(빨간 테두리) 지우기
-	['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
-	    const el = document.getElementById(id);
-	    if (el) el.classList.remove('is-invalid');
-	});	
-    
-	// 제목 변경
+
+    // 신규 등록 시 이미지 상태 초기화
+    pendingProfileFile = null;
+    isProfileDeleted = false;
+    document.getElementById('profileImage').value = '';
+
+    // 모든 에러 상태(빨간 테두리) 지우기
+    ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+    });
+
+    // 제목 변경
     document.getElementById('modalTitle').textContent = '회원 정보 수정';
 
     // hidden id
     document.getElementById('userId').value = row.id ?? '';
 
-/*	?? 문법은 아래 의미	
-	if (row.id === null || row.id === undefined) {
-	    document.getElementById('userId').value = '';
-	} else {
-	    document.getElementById('userId').value = row.id;
-	}
-*/  
-  
-	// 아이디
+    /*	?? 문법은 아래 의미	
+        if (row.id === null || row.id === undefined) {
+            document.getElementById('userId').value = '';
+        } else {
+            document.getElementById('userId').value = row.id;
+        }
+    */
+
+    // 아이디
     document.getElementById('login').value = row.login ?? '';
 
     // 회원권한
     document.getElementById('adminCd').value = row.adminCd ?? '';
-	changeRoleArea(row.adminCd);
-	
+    changeRoleArea(row.adminCd);
+
     // 소속기업
-	document.getElementById('bizNo').value = row.bizNo ?? '';
-	document.getElementById('bizNoView').value = row.bizNo ?? '';
+    document.getElementById('bizNo').value = row.bizNo ?? '';
+    document.getElementById('bizNoView').value = row.bizNo ?? '';
 
     // 이름
     document.getElementById('name').value = row.name ?? '';
@@ -586,17 +626,17 @@ window.openUpdateModal = function(id) {
 
     // 전화번호
     document.getElementById('tel').value = row.tel ?? '';
-	
-	// 등록일자
-	document.getElementById('hireDate').value = row.hireDate ?? '';
 
-	// 성별
-	if (row.genderCd === '02GENDER') {
-	    document.getElementById('female').checked = true;
-	} else {
-	    document.getElementById('male').checked = true;
-	}
-	
+    // 등록일자
+    document.getElementById('hireDate').value = row.hireDate ?? '';
+
+    // 성별
+    if (row.genderCd === '02GENDER') {
+        document.getElementById('female').checked = true;
+    } else {
+        document.getElementById('male').checked = true;
+    }
+
     // 역할 radio
     if (row.prjManagerNm === '활성') {
         document.getElementById('projectManager').checked = true;
@@ -610,19 +650,16 @@ window.openUpdateModal = function(id) {
     } else {
         document.getElementById('statusActive').checked = true;
     }
-	
-	// 비밀번호 초기화 (mcpCd) 라디오
-	if (row.mcpCd === '02ACTIVE') {
-	    document.getElementById('mcpInactive').checked = true;
-	} else {
-	    document.getElementById('mcpActive').checked = true;
-	}
 
-    // 수정 모드에서는 readonly
-    document.getElementById('login').readOnly = true;
+    // 비밀번호 초기화 (mcpCd) 라디오
+    if (row.mcpCd === '02ACTIVE') {
+        document.getElementById('mcpInactive').checked = true;
+    } else {
+        document.getElementById('mcpActive').checked = true;
+    }
 
     // 기업번호는 항상 readonly
-    document.getElementById('bizNoView').readOnly = true;
+    document.getElementById('bizNoView').disabled = true;
 
     // 저장버튼 mode
     document.getElementById('saveBtn').dataset.mode = 'update';
@@ -630,10 +667,17 @@ window.openUpdateModal = function(id) {
     // 저장 버튼 텍스트 변경
     document.getElementById('saveBtn').textContent = '수정';
 
-	// 해당 유저의 프로필 이미지 불러오기
+    // 해당 유저의 프로필 이미지 불러오기
     loadProfileImage(row.id);
 
-	    // modal open
+	// 시스템관리자라면 소속기업 선택을 막기.
+	if (row.adminCd === '01ROLE') {
+	    document.getElementById('bizNo').disabled = true;
+	} else {
+	    document.getElementById('bizNo').disabled = false;
+	}
+	
+    // modal open
     const modal = new bootstrap.Modal(document.getElementById('userInsert'));
     modal.show();
 }
@@ -641,17 +685,42 @@ window.openUpdateModal = function(id) {
 // 기업관리자, 시스템 관리자 프로젝트 매니저 역할 고정
 function changeRoleArea(adminCd) {
     const roleArea = document.getElementById('prjManagerArea');
+    const bizNoSelect = document.getElementById('bizNo');     // 소속기업 select
+    const bizNoView = document.getElementById('bizNoView');     // 기업번호 input
+    // 시스템관리자(01ROLE)를 선택한 경우
+    if (adminCd === '01ROLE') {
+        // 자동으로 본사 기업번호 매핑
+        if (bizNoSelect) {
+            bizNoSelect.value = '';        
+            bizNoSelect.disabled = true;  
+        }
+        if (bizNoView) {
+            bizNoView.value = '124-87-03358'; 
+        }
 
-    // 시스템관리자 / 기업관리자
-    if (adminCd === '01ROLE' || adminCd === '02ROLE') {
-        // 프로젝트 매니저 강제 선택
+        // 역할은 프로젝트 매니저 강제 선택 및 영역 숨김
         document.getElementById('projectManager').checked = true;
-        // 역할 영역 숨김
         roleArea.style.display = 'none';
-    } else {
-        // 역할 영역 표시
-		document.getElementById('teamMember').checked = true;
-        roleArea.style.display = '';
+    }
+    // 기업관리자(02ROLE) 또는 사원(03ROLE)을 선택한 경우
+    else {
+        if (bizNoSelect) {
+            bizNoSelect.disabled = false; // 소속기업을 고를 수 있도록 활성화
+			
+			// 다른 권한으로 돌아왔을 때, 기업번호 변경
+			if (bizNoView) {
+			    bizNoView.value = bizNoSelect.value; 
+			}
+        }
+
+        // 역할 제어 
+        if (adminCd === '02ROLE') {
+            document.getElementById('projectManager').checked = true;
+            roleArea.style.display = 'none';
+        } else {
+            document.getElementById('teamMember').checked = true;
+            roleArea.style.display = '';
+        }
     }
 }
 
@@ -666,22 +735,21 @@ searchForm.addEventListener('submit', function(e) {
     // 검색어는 있는데 검색조건이 없는 경우
     if (keyword !== '' && searchType === '') {
         e.preventDefault();
-		document.getElementById('searchType').classList.add('is-invalid');
+        document.getElementById('searchType').classList.add('is-invalid');
         warning.classList.remove('d-none');
         return;
     }
-	
-	// 검색조건은 있는데 검색어가 없는 경우
-	if (searchType !== '' && keyword === '') {
-	    e.preventDefault();
-		document.getElementById('searchType').classList.remove('is-invalid');
-	    warning.innerText = '검색어를 입력해주세요.';
-	    warning.classList.remove('d-none');
 
-	    return;
-	}
+    // 검색조건은 있는데 검색어가 없는 경우
+    if (searchType !== '' && keyword === '') {
+        e.preventDefault();
+        document.getElementById('searchType').classList.remove('is-invalid');
+        warning.innerText = '검색어를 입력해주세요.';
+        warning.classList.remove('d-none');
+        return;
+    }
 
     // 정상일 경우 경고 숨김
-	document.getElementById('searchType').classList.remove('is-invalid');
+    document.getElementById('searchType').classList.remove('is-invalid');
     warning.classList.add('d-none');
 });

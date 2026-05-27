@@ -75,9 +75,18 @@
 
 	</insert>
 
+	<select id="checkUpdateIdDuplicate" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM USERS 
+	    WHERE BIZ_NO = #{bizNo} 
+	      AND LOGIN = #{login} 
+	      AND ID != #{id} 
+	</select>
+	      
 	<update id="updateUser">
 	    UPDATE USERS
 	    SET
+	    	LOGIN = #{login},
 	        BIZ_NO = #{bizNo},
 	        NAME = #{name},
 	        TEL = #{tel},
@@ -94,8 +103,8 @@
                ,COMPANY_NAME
         FROM 	COMPANY
         WHERE 	IS_ACTIVE_CD = '01ACTIVE'
+          AND   BIZ_NO != '124-87-03358' 
         ORDER BY COMPANY_NAME
-
     </select>
     
     <select id="selectByLoginAndBizNo">
@@ -135,4 +144,11 @@
 	        #{id}
 	    </foreach>
 	</update>
+	
+	<select id="checkCompanyExists" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM COMPANY 
+	    WHERE BIZ_NO = #{bizNo} 
+	</select>	
+	
 </mapper>

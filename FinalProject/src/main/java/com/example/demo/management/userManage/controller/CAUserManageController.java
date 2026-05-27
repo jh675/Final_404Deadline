@@ -76,10 +76,15 @@ public class CAUserManageController {
 	@ResponseBody
 	public Map<String, String> userUpdate(@RequestBody UserManageVO vo) {
 		
-
+		vo.setBizNo(getCurrentAdmin().getBizNo());
+		
 	    int updateCnt = caUserManageService.updateUser(vo);
 	    Map<String, String> result = new HashMap<>();
-	    if(updateCnt > 0) {
+
+	    // 성공 체크
+	    if ("DUPLICATE_LOGIN".equals(vo.getResult())) {
+	        result.put("result", "DUPLICATE_LOGIN");
+	    } else if(updateCnt > 0) {
 	        result.put("result", "SUCCESS");
 	    } else {
 	        result.put("result", "ERROR");
@@ -138,7 +143,11 @@ public class CAUserManageController {
 	@PutMapping("/users/bulk-update")
 	@ResponseBody
 	public Map<String, String> bulkUpdateUsers(@RequestBody Map<String, Object> payload) {
-	    // payload 안에는 ids(리스트), type(문자열), value(문자열) 가 들어있습니다.
+		
+		// payload에 기업번호를 집어넣기
+		payload.put("bizNo", getCurrentAdmin().getBizNo());
+	    
+		// payload 안에는 ids(리스트), type(문자열), value(문자열) 가 들어있습니다.
 	    int updateCnt = caUserManageService.bulkUpdateUsers(payload);
 	    
 	    Map<String, String> result = new HashMap<>();

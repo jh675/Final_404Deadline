@@ -14,16 +14,27 @@ document.addEventListener('DOMContentLoaded', async function() {
         rowHeight: 40,
         minBodyHeight: 200,
         columns: [
+			{ 
+				header: '이름', 
+				name: 'name', 
+				align: 'center' 
+			},
             { 
 				header: '아이디', 
 				name: 'login', 
 				align: 'center' 
 			},
 			{ 
-				header: '계정권한',
+				header: '회원 권한',
 				name: 'adminNm', 
 				align: 'center', 
 				sortable: true,
+			},
+			{ 
+				header: '계정상태', 
+				name: 'statusNm', 
+				align: 'center', 
+				sortable: true 
 			},
             { 
 				header: '역할',
@@ -40,9 +51,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 				    return roleMap[value] || value;
 				}
 			},
-            { 
-				header: '이름', 
-				name: 'name', 
+			{ 
+				header: '이메일', 
+				name: 'email', 
 				align: 'center' 
 			},
             { 
@@ -50,17 +61,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 				name: 'tel', 
 				align: 'center' 
 			}, 
-            { 
-				header: '이메일', 
-				name: 'email', 
-				align: 'center' 
-			},
-            { 
-				header: '활성여부', 
-				name: 'statusNm', 
-				align: 'center', 
-				sortable: true 
-			},
             {
                 header: '수정',
                 name: 'edit',
@@ -245,6 +245,16 @@ document.addEventListener('DOMContentLoaded', async function() {
 			}
 			
 		} else { // mode === 'update' 인 경우
+			// 업데이트 체크
+		    if (result.result === 'DUPLICATE_LOGIN') {
+		        loginInput.classList.add('is-invalid');
+		        if (loginError) {
+		            loginError.textContent = '해당 기업에 이미 사용 중인 아이디입니다.';
+		        }
+		        loginInput.focus();
+		        return; // 이미지 동기화나 모달 닫기 등을 실행하지 않고 여기서 멈춤!
+		    }
+		    
 		    if (result.result === 'SUCCESS') {
 		        isSuccess = true;
 			}
@@ -424,7 +434,6 @@ window.openInsertModal = function() {
     // 신규 등록 시 기업번호 칸을 백엔드에서 전달받은 변수(또는 공백)로 채움
     document.getElementById('bizNoView').value = currentCaBizNo;
 
-    document.getElementById('login').readOnly = false;
     document.getElementById('saveBtn').dataset.mode = 'insert';
     document.getElementById('saveBtn').textContent = '등록';
 	document.getElementById('mcpActive').checked = true;
@@ -498,7 +507,6 @@ window.openUpdateModal = function(id) {
 	    document.getElementById('mcpActive').checked = true;
 	}
 
-    document.getElementById('login').readOnly = true;
     document.getElementById('saveBtn').dataset.mode = 'update';
     document.getElementById('saveBtn').textContent = '수정';
 
