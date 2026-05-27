@@ -130,4 +130,20 @@ public class UserManageController {
 	    
 	    return ResponseEntity.ok().body("SUCCESS");
 	}
+	
+	// 💡 다중 일괄 업데이트 컨트롤러 추가
+	@PutMapping("/users/bulk-update")
+	@ResponseBody
+	public Map<String, String> bulkUpdateUsers(@RequestBody Map<String, Object> payload) {
+	    // payload 안에는 ids(리스트), type(문자열), value(문자열) 가 들어있습니다.
+	    int updateCnt = userManageService.bulkUpdateUsers(payload);
+	    
+	    Map<String, String> result = new HashMap<>();
+	    if (updateCnt > 0) {
+	        result.put("result", "SUCCESS");
+	    } else {
+	        result.put("result", "ERROR");
+	    }
+	    return result;
+	}
 }

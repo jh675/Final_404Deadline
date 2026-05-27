@@ -242,33 +242,75 @@ document.getElementById('uploadBtn').addEventListener('click', () => {
     document.getElementById('profileImage').click();
 });
 
-// 파일 업로드 처리 (비율 검증)
-document.getElementById('profileImage').addEventListener('change', async function() {
+let cropper = null;
+
+// 이미지 자르기 모달 띄우기
+document.getElementById('profileImage').addEventListener('change', function(e) {
     const file = this.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(e) {
-        const imgObj = new Image();
-        imgObj.src = e.target.result;
-        imgObj.onload = function() {
-            const ratio = Math.round((imgObj.width / imgObj.height) * 100) / 100;
-            if (ratio < 0.7 || ratio > 0.8) {
-                document.getElementById('wrongImageSize').innerHTML = `사진 비율이 맞지 않습니다.<br>현재 이미지 크기: ${imgObj.width}px x ${imgObj.height}px<br>비율: ${ratio}`;
-                document.getElementById('profileImage').value = '';
-                return;
-            }
-            document.getElementById('wrongImageSize').innerHTML = '';
-            pendingProfileFile = file;
-            isProfileDeleted = false;
-
-            const previewImg = document.getElementById("profilePreview");
-            previewImg.src = e.target.result;
-            previewImg.classList.remove("d-none");
-            document.getElementById("emptyImageText").style.display = "none";
-        };
+    reader.onload = function(event) {
+        // 원본 이미지를 자르기 모달로 전달
+        document.getElementById('imageToCrop').src = event.target.result;
+        
+        // 자르기 모달 띄우기
+        const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+        cropModal.show();
     };
     reader.readAsDataURL(file);
+    
+    // 같은 파일을 다시 선택해도 change 이벤트가 발생하도록 input 초기화
+    this.value = ''; 
+});
+
+// 자르기 모달이 생성되면
+document.getElementById('cropModal').addEventListener('shown.bs.modal', function () {
+    const image = document.getElementById('imageToCrop');
+    
+    // 이전에 쓰던 자르기 데이터가 남아있다면 초기화
+    if (cropper) {
+        cropper.destroy();
+    }
+    
+    // 3:4 비율로 세팅
+    cropper = new Cropper(image, {
+        aspectRatio: 3 / 4, // 비율 고정
+        viewMode: 1,        // 자르기 범위가 캔버스 밖으로 나가지 않게
+        dragMode: 'move',   // 마우스로 박스 대신 사진 자체를 움직이게 함
+        autoCropArea: 0.8,  // 처음에 사진의 80% 크기로 박스 자동 생성
+    });
+});
+
+// 잘라낸 결과물 저장 및 미리보기 갱신
+document.getElementById('applyCropBtn').addEventListener('click', function() {
+    if (!cropper) return;
+
+    // 결과물을 300x400 해상도로 설정
+    const canvas = cropper.getCroppedCanvas({
+        width: 300,
+        height: 400
+    });
+
+    // 등록 화면의 '미리보기' 업데이트
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const previewImg = document.getElementById("profilePreview");
+    previewImg.src = dataUrl;
+    previewImg.classList.remove("d-none");
+    document.getElementById("emptyImageText").style.display = "none";
+    document.getElementById('wrongImageSize').innerHTML = ''; // 에러문구 제거
+
+    // 자른 사진 데이터를 File 객체로 변환하여 저장
+    canvas.toBlob(function(blob) {
+        const croppedFile = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
+        pendingProfileFile = croppedFile; 
+        isProfileDeleted = false;
+        
+        // 자르기 모달 닫기
+        const cropModal = bootstrap.Modal.getInstance(document.getElementById('cropModal'));
+        cropModal.hide();
+        
+    }, 'image/jpeg', 0.9);
 });
 
 // 이미지 삭제 버튼

@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         el: document.getElementById('grid'),
 
         data: userData,
-
-        scrollX: true,
+		autowidth: true,
+        scrollX: false,
         scrollY: false,
 
         bodyHeight: 'auto',
@@ -17,60 +17,59 @@ document.addEventListener('DOMContentLoaded', async function() {
         minBodyHeight: 200,
 
         columns: [
-
-
             {
                 header: '아이디',
                 name: 'login',
-                width: 150,
                 align: 'center',
             },
-
             {
                 header: '회원 권한',
                 name: 'adminNm',
-                width: 120,
                 align: 'center',
                 sortable: true
             },
-
             {
                 header: '소속기업',
                 name: 'compNm',
-                width: 180,
                 align: 'center',
                 sortable: true
             },
-
             {
                 header: '이름',
                 name: 'name',
-                width: 120,
                 align: 'center',
             },
-
             {
                 header: '이메일',
-				width: 260,
                 name: 'email',
 				align: 'center',
             },
-
             {
                 header: '전화번호',
                 name: 'tel',
-                width: 150,
                 align: 'center',
             },
-
             {
-                header: '활성여부',
+                header: '계정상태',
                 name: 'statusNm',
-                width: 120,
                 align: 'center',
                 sortable: true
             },
+			{
+                header: '역할',
+                name: 'prjManagerNm',
+                align: 'center',
+                sortable: true,
+				
+				formatter: ({ value }) => {
+				    const roleMap = {
+				        '활성': '프로젝트매니저',
+				        '비활성': '사원'
+				    };
 
+				    return roleMap[value] || value;
+				}
+            },
             {
                 header: '수정',
                 name: 'edit',
@@ -89,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         ],
-		rowHeaders: ['rowNum'],
+		rowHeaders: ['checkbox', 'rowNum'],
 
         // 페이징
         pageOptions: {
@@ -122,6 +121,85 @@ document.addEventListener('DOMContentLoaded', async function() {
 	        `;
 	    });
 	}
+	
+	// 💡 1. 로딩 직후 체크박스 컬럼을 먼저 숨깁니다. (UX 기획 반영)
+    grid.hideColumn('_checked');
+
+    // 💡 2. 일괄작업 모드 켜기
+    document.getElementById('toggleBulkModeBtn').addEventListener('click', function() {
+        this.classList.add('d-none'); // 일괄작업 버튼 숨기기
+        document.getElementById('bulkControls').classList.remove('d-none'); // 적용 컨트롤 보이기
+        grid.showColumn('_checked'); // 🌟 그리드 체크박스 나타나기!
+    });
+
+    // 💡 3. 일괄작업 모드 취소
+    document.getElementById('cancelBulkModeBtn').addEventListener('click', function() {
+        document.getElementById('bulkControls').classList.add('d-none');
+        document.getElementById('toggleBulkModeBtn').classList.remove('d-none');
+        grid.uncheckAll(); // 체크된 것 모두 해제
+        grid.hideColumn('_checked'); // 🌟 그리드 체크박스 숨기기!
+    });
+	
+	// 💡 2. 일괄 처리 적용 버튼 이벤트
+    document.getElementById('bulkApplyBtn').addEventListener('click', async function() {
+        const actionVal = document.getElementById('bulkActionType').value;
+        if (!actionVal) {
+            alert('일괄 처리할 작업을 선택해주세요.');
+            return;
+        }
+
+        // 체크된 행 데이터들 가져오기 (TUI Grid 내장 함수)
+        const checkedRows = grid.getCheckedRows();
+        if (checkedRows.length === 0) {
+            alert('선택된 회원이 없습니다. 체크박스를 선택해주세요.');
+            return;
+        }
+
+        // actionVal 분리 (예: 'status_01ACTIVE' -> type: 'status', value: '01ACTIVE')
+        const [updateType, updateValue] = actionVal.split('_');
+
+        // 🚨 UX 방어 로직: 관리자의 PM 권한을 해제하려고 할 때 차단
+        if (updateType === 'prjManager' && updateValue === '02ACTIVE') {
+            const hasAdmin = checkedRows.some(row => row.adminCd === '01ROLE' || row.adminCd === '02ROLE');
+            if (hasAdmin) {
+                alert('시스템/기업관리자의 프로젝트 매니저 권한은 해제할 수 없습니다.\n일반 사원만 선택해주세요.');
+                return;
+            }
+        }
+
+        if (!confirm(`선택한 ${checkedRows.length}명의 회원을 일괄 변경하시겠습니까?`)) {
+            return;
+        }
+
+        // 체크된 회원들의 ID만 추출
+        const userIds = checkedRows.map(row => row.id);
+
+        // 서버로 보낼 Payload
+        const payload = {
+            ids: userIds,
+            type: updateType, // 'status' 또는 'prjManager'
+            value: updateValue // '01ACTIVE' 또는 '02ACTIVE'
+        };
+
+        try {
+            const response = await csrfFetch('/admin/users/bulk-update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (result.result === 'SUCCESS') {
+                alert('일괄 처리가 완료되었습니다.');
+                location.reload();
+            } else {
+                alert('처리 중 오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('Bulk Update Error:', error);
+            alert('서버 통신 중 오류가 발생했습니다.');
+        }
+    });
 	
 	await loadCompanyList();
 	
@@ -285,6 +363,18 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         }
     });
+	
+	// 💡 4. 모달창: '비활성' 체크 시 자동으로 '비밀번호 초기화 필요' 체크
+    const statusInactive = document.getElementById('statusInactive');
+    const mcpActive = document.getElementById('mcpActive'); // 필요(01ACTIVE) 라디오 버튼
+
+    if (statusInactive && mcpActive) {
+        statusInactive.addEventListener('change', function() {
+            if (this.checked) {
+                mcpActive.checked = true; // 자동으로 '필요'로 변경!
+            }
+        });
+    }
 }); // grid와 페이징 생성
 
 // 특정 유저의 프로필 이미지 불러오기
@@ -318,54 +408,85 @@ document.getElementById('uploadBtn').addEventListener('click', function () {
     document.getElementById('profileImage').click();
 });
 
-// 파일 업로드 처리
-document.getElementById('profileImage').addEventListener('change', async function () {
+
+let cropper = null;
+
+// 이미지 자르기 모달 띄우기
+document.getElementById('profileImage').addEventListener('change', function(e) {
     const file = this.files[0];
     if (!file) return;
 
-	// 이미지 가로/세로 비율 검사 (3:4 비율 체크)
     const reader = new FileReader();
-    reader.onload = function(e) {
-        // 임시 이미지 객체를 만들어 해상도를 체크.
-        const imgObj = new Image();
-        imgObj.src = e.target.result;
+    reader.onload = function(event) {
+        // 원본 이미지를 자르기 모달로 전달
+        document.getElementById('imageToCrop').src = event.target.result;
         
-        imgObj.onload = function() {
-            const width = imgObj.width;
-            const height = imgObj.height;
-            
-            // 비율 계산 
-            const ratio = Math.round((width / height) * 100) / 100;
-            // 3:4 비율은 0.75 (0.7 ~ 0.8 사이면 허용)
-            if (ratio < 0.7 || ratio > 0.8) {
-                document.getElementById('wrongImageSize').innerHTML = `사진 비율이 맞지 않습니다.<br>
-																	   현재 이미지 크기: ${width}px x ${height}px<br>
-																	   비율: ${ratio}`;
-                document.getElementById('profileImage').value = ''; // 선택 취소
-                return;
-            }
-
-            // 검증 통과 프로필 이미지 등록
-			document.getElementById('wrongImageSize').innerHTML = '';
-            pendingProfileFile = file;
-            isProfileDeleted = false; 
-
-            const previewImg = document.getElementById("profilePreview");
-            previewImg.src = e.target.result;
-            previewImg.classList.remove("d-none");
-            document.getElementById("emptyImageText").style.display = "none";
-        };
+        // 자르기 모달 띄우기
+        const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+        cropModal.show();
     };
     reader.readAsDataURL(file);
+    
+    // 같은 파일을 다시 선택해도 change 이벤트가 발생하도록 input 초기화
+    this.value = ''; 
 });
 
-// [삭제 버튼] 클릭 시 (서버 삭제 X, 로컬 UI만 지우고 변수에 표시)
+// 자르기 모달이 생성되면
+document.getElementById('cropModal').addEventListener('shown.bs.modal', function () {
+    const image = document.getElementById('imageToCrop');
+    
+    // 이전에 쓰던 자르기 데이터가 남아있다면 초기화
+    if (cropper) {
+        cropper.destroy();
+    }
+    
+    // 3:4 비율로 세팅
+    cropper = new Cropper(image, {
+        aspectRatio: 3 / 4, // 비율 고정
+        viewMode: 1,        // 자르기 범위가 캔버스 밖으로 나가지 않게
+        dragMode: 'move',   // 마우스로 박스 대신 사진 자체를 움직이게 함
+        autoCropArea: 0.8,  // 처음에 사진의 80% 크기로 박스 자동 생성
+    });
+});
+
+// 잘라낸 결과물 저장 및 미리보기 갱신
+document.getElementById('applyCropBtn').addEventListener('click', function() {
+    if (!cropper) return;
+
+    // 결과물을 300x400 해상도로 설정
+    const canvas = cropper.getCroppedCanvas({
+        width: 300,
+        height: 400
+    });
+
+    // 등록 화면의 '미리보기' 업데이트
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const previewImg = document.getElementById("profilePreview");
+    previewImg.src = dataUrl;
+    previewImg.classList.remove("d-none");
+    document.getElementById("emptyImageText").style.display = "none";
+    document.getElementById('wrongImageSize').innerHTML = ''; // 에러문구 제거
+
+    // 자른 사진 데이터를 File 객체로 변환하여 저장
+    canvas.toBlob(function(blob) {
+        const croppedFile = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
+        pendingProfileFile = croppedFile; 
+        isProfileDeleted = false;
+        
+        // 자르기 모달 닫기
+        const cropModal = bootstrap.Modal.getInstance(document.getElementById('cropModal'));
+        cropModal.hide();
+        
+    }, 'image/jpeg', 0.9);
+});
+
+// 삭제 버튼 클릭 시 (서버 삭제 X, 로컬 UI만 지우고 변수에 표시)
 document.getElementById('deleteImageBtn').addEventListener('click', function () {
-    // 1. 대기열 비우기 및 삭제 플래그 켜기
+    // 대기열 비우기 및 삭제 플래그 켜기
     pendingProfileFile = null;
     isProfileDeleted = true;
     
-    // 2. UI 및 input 초기화
+    // UI 및 input 초기화
     document.getElementById('profileImage').value = ''; 
     resetProfileImageUI(); 
 });
