@@ -78,8 +78,8 @@
                     <!-- ENA_NAME_CD가 'NOTICE'면 공지사항 탭 생성 -->
                     <a th:if="${mod1.enaNameCd == '01MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${currentMenu == 'notice' ? 'active fw-bold' : ''}" 
-                       th:href="@{/notice/list}">공지사항</a>
+                       th:classappend="${session.currentMenu == 'notice' ? 'active fw-bold' : ''}" 
+                       th:href="@{/project/notice/list}">공지사항</a>
 
                     <a th:if="${mod1.enaNameCd == '06MODULE'}" 
                        class="nav-link" 
@@ -99,7 +99,7 @@
                     <a th:if="${mod1.enaNameCd == '08MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'board' ? 'active fw-bold' : ''}" 
-                       th:href="@{/boards/list}">게시판</a>
+                       th:href="@{/project/boards/list}">게시판</a>
                        
                     <a th:if="${mod1.enaNameCd == '02MODULE'}" 
                        class="nav-link" 

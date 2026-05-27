@@ -1,181 +1,257 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/projectLayout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/projectLayout}">
 <head>
-    <meta charset="UTF-8">
-    <title>공지사항 관리</title>
-    <style>
-        #noticeListArea, #noticeDetailArea { font-size: 0.875rem; }
-        .table { font-size: 0.85rem; } 
-        .table th, .table td { padding: 0.5rem 0.75rem !important; }
+<meta charset="UTF-8">
+<title>공지사항 관리</title>
+<style>
+#noticeListArea, #noticeDetailArea {
+	font-size: 0.875rem;
+}
 
-        .bg-light-green { background-color: #f1f8e9 !important; }
-        .bg-mint-highlight { background-color: #e8f5e9 !important; border-left: 4px solid #66bb6a !important; }
-        .text-success-dark { color: #2e7d32 !important; }
-        
-        .btn-green { background-color: #66bb6a; color: white; border: none; border-radius: 50px; font-size: 0.85rem; padding: 0.4rem 1.2rem !important; }
-        .btn-green:hover { background-color: #43a047; color: white; }
-        .btn-outline-success, .btn-outline-danger { font-size: 0.8rem; padding: 0.25rem 0.5rem !important; }
-        
-        .notice-click-title { cursor: pointer; text-decoration: none; color: #212529; font-weight: 500; }
-        .notice-click-title:hover { color: #2e7d32; text-decoration: underline; }
-        
-        .detail-view-box { 
-            white-space: pre-wrap; 
-            word-break: break-all; 
-            min-height: 200px; 
-            background-color: #ffffff; 
-            border: 1px solid #dee2e6; 
-            border-radius: 12px;
-            padding: 1.25rem;
-            line-height: 1.5;
-            color: #333;
-            font-size: 0.875rem;
-        }
-        .detail-label { font-weight: 600; color: #6c757d; font-size: 0.8rem; margin-bottom: 0.3rem; display: block; }
+#noticeListArea .table {
+	font-size: 0.85rem;
+}
 
-        .pagination { gap: 6px; border: none; }
-        .pagination .page-link { border: 1px solid #dee2e6; color: #555; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-decoration: none; font-size: 0.8rem; }
-        .pagination .page-item:first-child .page-link, .pagination .page-item:last-child .page-link { border-radius: 50px !important; padding: 5px 14px; font-weight: 500; }
-        .pagination .page-item:not(:first-child):not(:last-child) .page-link { border-radius: 6px !important; min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
-        .pagination .page-item.active .page-link { background-color: #66bb6a !important; border-color: #66bb6a !important; color: white !important; }
-        .pagination .page-item.disabled .page-link { background-color: #f8f9fa; color: #ccc; pointer-events: none; }
-    </style>
+#noticeListArea .table th, #noticeListArea .table td {
+	padding: 0.5rem 0.75rem !important;
+}
+
+.bg-light-green {
+	background-color: #f1f8e9 !important;
+}
+
+.bg-mint-highlight {
+	background-color: #e8f5e9 !important;
+	border-left: 4px solid #66bb6a !important;
+}
+
+.text-success-dark {
+	color: #2e7d32 !important;
+}
+
+.notice-click-title {
+	cursor: pointer;
+	text-decoration: none;
+	color: #212529;
+	font-weight: 500;
+}
+
+.notice-click-title:hover {
+	color: #2e7d32;
+	text-decoration: underline;
+}
+
+.detail-view-box {
+	white-space: pre-wrap;
+	word-break: break-all;
+	min-height: 200px;
+	background-color: #ffffff;
+	border: 1px solid #dee2e6;
+	border-radius: 12px;
+	padding: 1.25rem;
+	line-height: 1.5;
+	color: #333;
+	font-size: 0.875rem;
+}
+
+.detail-label {
+	font-weight: 600;
+	color: #6c757d;
+	font-size: 0.8rem;
+	margin-bottom: 0.3rem;
+	display: block;
+}
+
+.pagination {
+	gap: 6px;
+	border: none;
+}
+
+.pagination .page-link {
+	border: 1px solid #dee2e6;
+	color: #555;
+	background-color: #fff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	text-decoration: none;
+	font-size: 0.8rem;
+}
+
+.pagination .page-item:first-child .page-link, .pagination .page-item:last-child .page-link
+	{
+	border-radius: 50px !important;
+	padding: 5px 14px;
+	font-weight: 500;
+}
+
+.pagination .page-item:not(:first-child):not(:last-child) .page-link {
+	border-radius: 6px !important;
+	min-width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.pagination .page-item.active .page-link {
+	background-color: #66bb6a !important;
+	border-color: #66bb6a !important;
+	color: white !important;
+}
+
+.pagination .page-item.disabled .page-link {
+	background-color: #f8f9fa;
+	color: #ccc;
+	pointer-events: none;
+}
+</style>
 </head>
 <body>
-<div layout:fragment="content">
-    
-    <div id="noticeListArea">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold text-success-dark mb-0">공지사항 관리</h4>
-            <button type="button" class="btn btn-green shadow-sm" th:onclick="|location.href='@{/notice/register}'|">공지사항 등록</button>
-        </div>
+	<div layout:fragment="content">
+	<div id="wrapper">
+		<div id="noticeListArea">
+			<div class="d-flex justify-content-between align-items-center mb-3">
+				<h4 class="fw-bold text-success-dark mb-0">공지사항 관리</h4>
+				<button type="button" class="btn btn-success shadow-sm"
+					th:onclick="|location.href='@{/project/notice/register}'|">공지사항 등록</button>
+			</div>
 
-        <div class="card border-0 shadow-sm mb-3">
-            <div class="card-body p-2">
-                <form th:action="@{/notice/list}" method="get" class="row g-2">
-                    <div class="col-auto">
-                        <div class="input-group input-group-sm">
-                            <input type="text" name="keyword" class="form-control border-success-subtle" th:value="${param.keyword}" placeholder="검색어를 입력하세요" style="width: 220px;">
-                            <button class="btn btn-outline-success px-3" type="submit">검색</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+			<div class="card border-0 shadow-sm mb-3">
+				<div class="card-body p-2">
+					<form th:action="@{/projcet/notice/list}" method="get" class="row g-2">
+						<div class="col-auto">
+							<div class="input-group input-group-sm">
+								<input type="text" name="keyword"
+									class="form-control border-success-subtle"
+									th:value="${param.keyword}" placeholder="검색어를 입력하세요"
+									style="width: 220px;">
+								<button class="btn btn-outline-success px-3" type="submit">검색</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
 
-        <div class="card border-0 shadow-sm overflow-hidden">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="noticeTable">
-                    <thead class="bg-light-green text-success-dark">
-                        <tr>
-                            <th class="text-center" style="width: 60px;">번호</th>
-                            <th>제목</th>
-                            <th class="text-center" style="width: 120px;">작성자</th>
-                            <th class="text-center" style="width: 120px;">작성일</th>
-                            <th class="text-center" style="width: 140px;">관리</th>
-                        </tr>
-                    </thead>
-                    <tbody id="noticeTbody">
-                        <!-- 📌 스크립트에서 활용할 고유 ID 추출을 위해 th:data-id="${notice.id}" 가 정의되어 있어야 합니다 -->
-                        <tr th:each="notice, noticeStat : ${list}" 
-                            th:classappend="${notice.isFixed == '01ACTIVE'} ? 'bg-mint-highlight' : ''"
-                            th:data-id="${notice.id}"
-                            th:data-fixed="${notice.isFixed}"
-                            th:data-title="${notice.title}"
-                            th:data-memid="${notice.memId}"
-                            th:data-date="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"
-                            th:data-description="${notice.description ?: '내용이 없습니다.'}"
-                            class="notice-row">
-                            <td class="text-center">
-                                <div class="d-inline-flex align-items-center justify-content-center" style="gap: 4px;">
-                                    <span th:if="${notice.isFixed == '01ACTIVE'}" style="font-size: 0.85rem; line-height: 1; position: relative; top: -1px;">📌</span>
-                                    <span class="num-text" th:classappend="${notice.isFixed == '01ACTIVE'} ? 'fw-bold text-success' : 'text-muted'"></span>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="notice-click-title" 
-                                     th:classappend="${notice.isFixed == '01ACTIVE'} ? 'fw-bold' : ''" 
-                                     th:text="${notice.title}"
-                                     onclick="openNoticeDetail(this)"></div>
-                            </td>
-                            <td class="text-muted text-center" th:text="${notice.memId}"></td>
-                            <td class="text-muted text-center" th:text="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"></td>
-                            <td class="text-center">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-outline-success" th:onclick="|location.href='@{/notice/modify(id=${notice.id})}'|">수정</button>
-                                    <button type="button" class="btn btn-outline-danger" th:onclick="|if(confirm('정말로 삭제하시겠습니까?')) location.href='@{/notice/delete(id=${notice.id})}'|">삭제</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(list)}" id="emptyNoticeRow">
-                            <td colspan="5" class="text-center py-5 text-muted">등록된 공지사항이 없습니다.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+			<div class="card border-0 shadow-sm overflow-hidden">
+				<div class="table-responsive">
+					<table class="table table-hover align-middle mb-0" id="noticeTable">
+						<thead class="bg-light-green text-success-dark">
+							<tr>
+								<th class="text-center" style="width: 60px;">번호</th>
+								<th>제목</th>
+								<th class="text-center" style="width: 120px;">작성자</th>
+								<th class="text-center" style="width: 120px;">작성일</th>
+								<th class="text-center" style="width: 140px;">관리</th>
+							</tr>
+						</thead>
+						<tbody id="noticeTbody">
 
-            <div class="card-footer bg-white border-0 py-3">
-                <nav>
-                    <ul class="pagination justify-content-center mb-0" id="pagination"></ul>
-                </nav>
-            </div>
-        </div>
-    </div>
+							<tr th:each="notice, noticeStat : ${list}"
+								th:classappend="${notice.isFixed == '01ACTIVE'} ? 'bg-mint-highlight' : ''"
+								th:data-id="${notice.id}" th:data-fixed="${notice.isFixed}"
+								th:data-title="${notice.title}" th:data-memid="${notice.memId}"
+								th:data-date="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"
+								th:data-description="${notice.description ?: '내용이 없습니다.'}"
+								class="notice-row">
+								<td class="text-center">
+									<div
+										class="d-inline-flex align-items-center justify-content-center"
+										style="gap: 4px;">
+										<span th:if="${notice.isFixed == '01ACTIVE'}"
+											style="font-size: 0.85rem; line-height: 1; position: relative; top: -1px;">📌</span>
+										<span class="num-text"
+											th:classappend="${notice.isFixed == '01ACTIVE'} ? 'fw-bold text-success' : 'text-muted'"></span>
+									</div>
+								</td>
+								<td>
+									<div class="notice-click-title"
+										th:classappend="${notice.isFixed == '01ACTIVE'} ? 'fw-bold' : ''"
+										th:text="${notice.title}" onclick="openNoticeDetail(this)"></div>
+								</td>
+								<td class="text-muted text-center" th:text="${notice.memId}"></td>
+								<td class="text-muted text-center"
+									th:text="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"></td>
+								<td class="text-center">
+									<div class="btn-group">
+										<button type="button" class="btn btn-outline-success"
+											th:onclick="|location.href='@{/project/notice/modify(id=${notice.id})}'|">수정</button>
+										<button type="button" class="btn btn-outline-danger"
+											th:onclick="|if(confirm('정말로 삭제하시겠습니까?')) location.href='@{/projcet/notice/delete(id=${notice.id})}'|">삭제</button>
+									</div>
+								</td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(list)}" id="emptyNoticeRow">
+								<td colspan="5" class="text-center py-5 text-muted">등록된
+									공지사항이 없습니다.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
-
-    <div id="noticeDetailArea" style="display: none;">
-        <div class="mb-3">
-            <h4 class="fw-bold text-success-dark mb-1">공지사항 내용 보기</h4>
-            <p class="text-muted small mb-0">해당 공지사항의 상세 내용을 확인할 수 있습니다.</p>
-        </div>
-
-        <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 15px;">
-
-            <div class="card-body p-4">
-                
-                <div class="row border-bottom pb-3 mb-3">
-                    <div class="col-md-4">
-                        <span class="detail-label">작성자</span>
-                        <div id="viewMemId" class="fw-bold text-dark"></div>
-                    </div>
-                    <div class="col-md-4">
-                        <span class="detail-label">등록일</span>
-                        <div id="viewDate" class="text-dark"></div>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <span class="detail-label text-success-dark">제목</span>
-                    <h4 id="viewTitle" class="fw-bold text-dark border-start border-success border-4 ps-3 mb-0"></h4>
-                </div>
-
-                <div class="mb-4">
-                    <span class="detail-label text-success-dark">공지 내용</span>
-                    <div id="viewDescription" class="detail-view-box shadow-sm"></div>
-                </div>
-
-                <div class="mb-4">
-                    <span class="detail-label text-success-dark">첨부파일</span>
-                    <div class="p-3 bg-light rounded border">
-                        <ul id="fileListContainer" class="list-unstyled mb-0">
-                            <li class="text-muted small">조회 중...</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-center border-top pt-3">
-                    <button type="button" class="btn btn-light border px-4 py-1.5 shadow-sm" 
-                            style="border-radius: 50px; font-weight: 600; min-width: 140px; font-size: 0.85rem;"
-                            onclick="closeNoticeDetail()">닫기</button>
-                </div>
-            </div>
-        </div>
-    </div>
+				<div class="card-footer bg-white border-0 py-3">
+					<nav>
+						<ul class="pagination justify-content-center mb-0" id="pagination"></ul>
+					</nav>
+				</div>
+			</div>
+		</div>
 
 
-    <script th:inline="javascript">
+		<div id="noticeDetailArea" style="display: none;">
+			<div class="mb-3">
+				<h4 class="fw-bold text-success-dark mb-1">공지사항 내용 보기</h4>
+				<p class="text-muted small mb-0">해당 공지사항의 상세 내용을 확인할 수 있습니다.</p>
+			</div>
+
+			<div class="card border-0 shadow-sm overflow-hidden"
+				style="border-radius: 15px;">
+
+				<div class="card-body p-4">
+
+					<div class="row border-bottom pb-3 mb-3">
+						<div class="col-md-4">
+							<span class="detail-label">작성자</span>
+							<div id="viewMemId" class="fw-bold text-dark"></div>
+						</div>
+						<div class="col-md-4">
+							<span class="detail-label">등록일</span>
+							<div id="viewDate" class="text-dark"></div>
+						</div>
+					</div>
+
+					<div class="mb-4">
+						<span class="detail-label text-success-dark">제목</span>
+						<h4 id="viewTitle"
+							class="fw-bold text-dark border-start border-success border-4 ps-3 mb-0"></h4>
+					</div>
+
+					<div class="mb-4">
+						<span class="detail-label text-success-dark">공지 내용</span>
+						<div id="viewDescription" class="detail-view-box shadow-sm"></div>
+					</div>
+
+					<div class="mb-4">
+						<span class="detail-label text-success-dark">첨부파일</span>
+						<div class="p-3 bg-light rounded border">
+							<ul id="fileListContainer" class="list-unstyled mb-0">
+								<li class="text-muted small">조회 중...</li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="d-flex justify-content-center border-top pt-3">
+						<button type="button"
+							class="btn btn-light border px-4 py-1.5 shadow-sm"
+							style="border-radius: 50px; font-weight: 600; min-width: 140px; font-size: 0.85rem;"
+							onclick="closeNoticeDetail()">닫기</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<script th:inline="javascript">
         function openNoticeDetail(element) {
             const row = element.closest('.notice-row');
             
@@ -333,6 +409,7 @@
             if (rows.length > 0) displayPage(1);
         });
     </script>
-</div>
+	</div>
+	</div>
 </body>
 </html>

@@ -6,8 +6,7 @@ layout:decorate="~{layout/projectLayout}">
     <meta charset="UTF-8">
     <title>메시지 목록 및 상세</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; color: #333; }
-        .btn { padding: 8px 16px; border: 1px solid #ccc; background-color: #fff; border-radius: 4px; cursor: pointer; }
+
         
         .list-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         .list-table th, .list-table td { border: 1px solid #eee; padding: 12px; text-align: center; }
@@ -45,6 +44,7 @@ layout:decorate="~{layout/projectLayout}">
 </head>
 <body>
 <div layout:fragment="content">
+<div id="wrapper">
     <h2> <span th:text="${board.name}">0</span> </h2>
     <div th:text="${board.description}"></div>
     <div style="margin-bottom: 15px;">
@@ -83,12 +83,14 @@ layout:decorate="~{layout/projectLayout}">
     </table>
 
     <div th:if="${message != null}" class="detail-container">
-        <h2>프로젝트 게시글 상세 보기</h2>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 10px;">
+            <h2 style="margin: 0; border: none; padding: 0;">프로젝트 게시글 상세 보기</h2>
+            <button type="button" class="btn" th:onclick="|location.href='/messages/list?boardId=' + ${boardId}|" style="padding: 4px 12px; font-size: 14px;">상세 닫기</button>
+        </div>
         
         <div class="info-header">
             <div>작성자: <span th:text="${message.userId != null ? message.userId : '익명'}">익명</span></div>
-            <div>작성일: <span th:text="${#temporals.format(message.createdOn, 'yyyy-MM-dd')}">2026-05-22</span></div>
-            <div>조회수: <span th:text="${message.views ?: 0}">0</span>회</div>
+            <div>작성일: <span th:text="${#dates.format(message.createdOn, 'yyyy-MM-dd')}">2026-05-22</span></div>
         </div>
         
         <div class="form-group">
@@ -119,6 +121,7 @@ layout:decorate="~{layout/projectLayout}">
             </form>
         </div>
     </div>
+</div>
 </div>
 </body>
 </html>

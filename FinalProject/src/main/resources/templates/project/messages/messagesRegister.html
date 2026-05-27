@@ -6,10 +6,6 @@ layout:decorate="~{layout/projectLayout}">
     <meta charset="UTF-8">
     <title>프로젝트 게시판 관리</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; color: #333; background-color: #f9f9f9; }
-        .modify-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border: 1px solid #e1e1e1; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        h2 { margin-bottom: 25px; font-size: 22px; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: bold; color: #2e7d32; margin-bottom: 8px; font-size: 15px; }
         .form-group label .required { color: #d32f2f; margin-left: 4px; }
@@ -18,13 +14,13 @@ layout:decorate="~{layout/projectLayout}">
         .form-control:focus { border-color: #2e7d32; outline: none; }
         
         .btn-group { text-align: right; margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; }
-        .btn { padding: 10px 24px; border: 1px solid #ccc; background-color: #fff; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
         .btn-submit { background-color: #1b5e20; color: white; border: none; font-weight: bold; }
         .btn-submit:hover { background-color: #2e7d32; }
     </style>
 </head>
 <body>
-<div layout:fragment="content" class="modify-container">
+<div layout:fragment="content">
+<div id="wrapper">
     <h2 th:text="${message?.id != null} ? '프로젝트 게시판 수정' : '프로젝트 게시판 등록'">게시판 관리</h2>
     
     <form th:action="${message?.id != null} ? @{/messages/update} : @{/messages/insert}" 
@@ -54,6 +50,7 @@ layout:decorate="~{layout/projectLayout}">
             <button type="submit" class="btn btn-submit" th:text="${message?.id != null} ? '수정' : '등록'">확인</button>
         </div>
     </form>
+</div>
 </div>
 </body>
 </html>
