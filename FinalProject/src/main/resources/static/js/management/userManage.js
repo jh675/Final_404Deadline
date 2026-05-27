@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 		autowidth: true,
         scrollX: false,
         scrollY: false,
-
         bodyHeight: 'auto',
         rowHeight: 40,
         minBodyHeight: 200,

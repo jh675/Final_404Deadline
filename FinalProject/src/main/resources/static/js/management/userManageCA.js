@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     const grid = new tui.Grid({
         el: document.getElementById('grid'),
         data: userData,
-        scrollX: true,
+		autowidth: true,
+        scrollX: false,
         scrollY: false,
         bodyHeight: 'auto',
         rowHeight: 40,
@@ -16,20 +17,17 @@ document.addEventListener('DOMContentLoaded', async function() {
             { 
 				header: '아이디', 
 				name: 'login', 
-				width: 150, 
 				align: 'center' 
 			},
 			{ 
 				header: '계정권한',
 				name: 'adminNm', 
-				width: 120, 
 				align: 'center', 
 				sortable: true,
 			},
             { 
 				header: '역할',
 				name: 'prjManagerNm', 
-				width: 120, 
 				align: 'center', 
 				sortable: true,
 				
@@ -45,25 +43,21 @@ document.addEventListener('DOMContentLoaded', async function() {
             { 
 				header: '이름', 
 				name: 'name', 
-				width: 120, 
 				align: 'center' 
 			},
             { 
 				header: '전화번호', 
 				name: 'tel', 
-				width: 150, 
 				align: 'center' 
 			}, 
             { 
 				header: '이메일', 
-				width: 260, 
 				name: 'email', 
 				align: 'center' 
 			},
             { 
 				header: '활성여부', 
 				name: 'statusNm', 
-				width: 120, 
 				align: 'center', 
 				sortable: true 
 			},
@@ -77,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         ],
-		rowHeaders: ['rowNum'],
+		rowHeaders: ['checkbox', 'rowNum'],
         pageOptions: { useClient: true, perPage: 10 }
     });
 
@@ -88,6 +82,85 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
+	// 💡 1. 로딩 직후 체크박스 컬럼을 먼저 숨깁니다. (UX 기획 반영)
+    grid.hideColumn('_checked');
+
+    // 💡 2. 일괄작업 모드 켜기
+    document.getElementById('toggleBulkModeBtn').addEventListener('click', function() {
+        this.classList.add('d-none'); // 일괄작업 버튼 숨기기
+        document.getElementById('bulkControls').classList.remove('d-none'); // 적용 컨트롤 보이기
+        grid.showColumn('_checked'); // 🌟 그리드 체크박스 나타나기!
+    });
+
+    // 💡 3. 일괄작업 모드 취소
+    document.getElementById('cancelBulkModeBtn').addEventListener('click', function() {
+        document.getElementById('bulkControls').classList.add('d-none');
+        document.getElementById('toggleBulkModeBtn').classList.remove('d-none');
+        grid.uncheckAll(); // 체크된 것 모두 해제
+        grid.hideColumn('_checked'); // 🌟 그리드 체크박스 숨기기!
+    });
+	
+	// 💡 2. 일괄 처리 적용 버튼 이벤트
+    document.getElementById('bulkApplyBtn').addEventListener('click', async function() {
+        const actionVal = document.getElementById('bulkActionType').value;
+        if (!actionVal) {
+            alert('일괄 처리할 작업을 선택해주세요.');
+            return;
+        }
+
+        // 체크된 행 데이터들 가져오기 (TUI Grid 내장 함수)
+        const checkedRows = grid.getCheckedRows();
+        if (checkedRows.length === 0) {
+            alert('선택된 회원이 없습니다. 체크박스를 선택해주세요.');
+            return;
+        }
+
+        // actionVal 분리 (예: 'status_01ACTIVE' -> type: 'status', value: '01ACTIVE')
+        const [updateType, updateValue] = actionVal.split('_');
+
+        // 🚨 UX 방어 로직: 관리자의 PM 권한을 해제하려고 할 때 차단
+        if (updateType === 'prjManager' && updateValue === '02ACTIVE') {
+            const hasAdmin = checkedRows.some(row => row.adminCd === '01ROLE' || row.adminCd === '02ROLE');
+            if (hasAdmin) {
+                alert('시스템/기업관리자의 프로젝트 매니저 권한은 해제할 수 없습니다.\n일반 사원만 선택해주세요.');
+                return;
+            }
+        }
+
+        if (!confirm(`선택한 ${checkedRows.length}명의 회원을 일괄 변경하시겠습니까?`)) {
+            return;
+        }
+
+        // 체크된 회원들의 ID만 추출
+        const userIds = checkedRows.map(row => row.id);
+
+        // 서버로 보낼 Payload
+        const payload = {
+            ids: userIds,
+            type: updateType, // 'status' 또는 'prjManager'
+            value: updateValue // '01ACTIVE' 또는 '02ACTIVE'
+        };
+
+        try {
+            const response = await csrfFetch('/cadmin/users/bulk-update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (result.result === 'SUCCESS') {
+                alert('일괄 처리가 완료되었습니다.');
+                location.reload();
+            } else {
+                alert('처리 중 오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('Bulk Update Error:', error);
+            alert('서버 통신 중 오류가 발생했습니다.');
+        }
+    });
+	
     // 저장 버튼 공통 처리
     document.getElementById('saveBtn').addEventListener('click', async function() {
         const mode = this.dataset.mode;

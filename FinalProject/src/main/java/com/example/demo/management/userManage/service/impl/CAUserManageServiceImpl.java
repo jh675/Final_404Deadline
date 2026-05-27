@@ -1,6 +1,7 @@
 package com.example.demo.management.userManage.service.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,5 +41,10 @@ public class CAUserManageServiceImpl implements CAUserManageService {
 	@Override
 	public UserManageVO selectOne(Long id) {
 	    return caUserManageMapper.selectOne(id);
+	}
+	
+	@Override
+	public int bulkUpdateUsers(Map<String, Object> payload) {
+	    return caUserManageMapper.bulkUpdateUsers(payload);
 	}
 }

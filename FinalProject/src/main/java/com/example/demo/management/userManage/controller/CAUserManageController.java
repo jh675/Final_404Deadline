@@ -9,7 +9,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.login.service.UserVO;
@@ -123,5 +132,21 @@ public class CAUserManageController {
 	        }
 	    }
 	    return ResponseEntity.ok().body("SUCCESS");
+	}
+	
+	// 다중 일괄 업데이트
+	@PutMapping("/users/bulk-update")
+	@ResponseBody
+	public Map<String, String> bulkUpdateUsers(@RequestBody Map<String, Object> payload) {
+	    // payload 안에는 ids(리스트), type(문자열), value(문자열) 가 들어있습니다.
+	    int updateCnt = caUserManageService.bulkUpdateUsers(payload);
+	    
+	    Map<String, String> result = new HashMap<>();
+	    if (updateCnt > 0) {
+	        result.put("result", "SUCCESS");
+	    } else {
+	        result.put("result", "ERROR");
+	    }
+	    return result;
 	}
 }
