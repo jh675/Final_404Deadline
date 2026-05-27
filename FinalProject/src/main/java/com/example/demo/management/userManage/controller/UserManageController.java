@@ -24,6 +24,8 @@ import com.example.demo.management.userManage.service.UserManageService;
 import com.example.demo.management.userManage.service.UserManageVO;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
+import com.example.demo.util.subCode.service.SubcodeService;
+import com.example.demo.util.subCode.service.SubcodeVO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +38,13 @@ public class UserManageController {
 	
 	private final UserManageService userManageService;
 	private final AttachService attachService;
+	private final SubcodeService subCodeService;
 	
 	@GetMapping("/userList")
 	public String userList(Model model, @ModelAttribute("filter01") UserManageVO userManage) {
 		List<UserManageVO> list = userManageService.selectAll(userManage);
+		List<SubcodeVO> activeCodeList = subCodeService.getSubCodeList("00ACTIVE");
+		model.addAttribute("activeCodeList", activeCodeList);
 		model.addAttribute("userList", list);
 		return "management/user/userList";
 	}

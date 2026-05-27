@@ -40,17 +40,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             },
             {
                 header: '역할',
-                name: 'prjManagerNm',
+                name: 'prjManagerCd',
                 align: 'center',
                 sortable: true,
 
                 formatter: ({ value }) => {
-                    const roleMap = {
-                        '활성': '프로젝트매니저',
-                        '비활성': '사원'
-                    };
-
-                    return roleMap[value] || value;
+                    return activeCodeMap[value] || value;
                 }
             },
             {

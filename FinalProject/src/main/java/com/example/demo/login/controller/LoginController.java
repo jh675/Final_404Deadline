@@ -84,10 +84,10 @@ public class LoginController {
 	    return loginService.searchActiveCompanies(keyword);
 	}
 
-		@GetMapping("/login/password-reset")
-		public String showPasswordResetPage() {
-			return "login/pwReset"; 
-		}
+	@GetMapping("/login/password-reset")
+	public String showPasswordResetPage() {
+		return "login/pwReset"; 
+	}
 	
 	// 비밀번호 재설정 처리
 	@PostMapping("/login/password-reset")
@@ -99,6 +99,7 @@ public class LoginController {
 		if (authentication != null && authentication.getPrincipal() instanceof UserVO) {
 			UserVO vo = (UserVO) authentication.getPrincipal();
 			loginService.updatePassword(vo, newPassword);
+			loginService.updateLastLogOn(vo);
 			vo.setMcpCd("02ACTIVE");
 			return "success";
 		}
