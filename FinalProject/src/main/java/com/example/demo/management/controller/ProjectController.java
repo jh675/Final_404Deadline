@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.demo.company.service.CompanyService;
 import com.example.demo.company.service.CompanyVO;
 import com.example.demo.login.service.UserVO;
+import com.example.demo.management.service.ModulesVO;
 import com.example.demo.management.service.ProjectService;
 import com.example.demo.management.service.ProjectVO;
 import com.example.demo.project.calender.service.CalenderService;
@@ -120,6 +121,8 @@ public class ProjectController {
 	        Map<String, Object> map = new HashMap<>();
 	        map.put("id", user.getId());
 	        map.put("name", user.getName());
+	        map.put("login", user.getLogin());
+	        map.put("email", user.getEmail());
 	        return map;
 	    }).collect(Collectors.toList());
 	}
@@ -143,6 +146,52 @@ public class ProjectController {
 	    return "redirect:/management/project";
 	}
 	
+	@GetMapping("/management/projectupdate")
+	public String projectUpdate(@RequestParam("id") Long id, Model model, Authentication authentication) {
+
+	    ProjectVO editProject = projectservice.getprojectid(id);
+
+	    // 매니저 이름 조회
+	    if (editProject.getUserId() != null) {
+	        List<UserVO> userList = projectservice.searchUsersByBizNo(editProject.getBizNo(), "");
+	        userList.stream()
+	            .filter(u -> u.getId().equals(editProject.getUserId()))
+	            .findFirst()
+	            .ifPresent(u -> editProject.setManagerName(
+	                u.getName() + "," + u.getLogin() + "," + u.getEmail()));
+	    }
+
+	    // 활성화된 모듈 조회 후 enaId에 세팅
+	    List<ModulesVO> moduleList = projectservice.listModules(id);
+	    if (moduleList != null && !moduleList.isEmpty()) {
+	        String enaId = moduleList.stream()
+	            .map(ModulesVO::getModuleCode)
+	            .collect(Collectors.joining(","));
+	        editProject.setEnaId(enaId);
+	    }
+
+	    List<ProjectVO> list = projectservice.listProject(null);
+	    model.addAttribute("editProject", editProject);
+	    model.addAttribute("projectList", list != null ? list : List.of());
+
+	    return "management/projectupdate";
+	}
+
+	@PostMapping("/management/projectupdate")
+	public String projectUpdatePost(ProjectVO vo,
+	                                @RequestParam(value = "moduleList", required = false) List<String> moduleList,
+	                                Authentication authentication) {
+	    
+	    if (authentication != null && authentication.getPrincipal() instanceof UserVO loginUser) {
+	        vo.setBizNo(loginUser.getBizNo());
+	    }
+	    
+	    projectservice.updateProject(vo, moduleList);
+	    
+	    return "redirect:/management/project";
+	}
+	
+	
 	@PostMapping("/management/hide")
 	public String projectHide(ProjectVO vo ,RedirectAttributes rttr) {
 		projectservice.projectHide(vo);
@@ -164,7 +213,7 @@ public class ProjectController {
 	    return "redirect:/management/project";
 	}
 	
-	//대시보
+	//대시보드
 	@GetMapping("/project/main")
 	public String goMain( ProjectVO vo , Model model, 
 			             IssueInputVO ivo, 

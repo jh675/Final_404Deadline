@@ -102,13 +102,16 @@ public class CompanyServiceImpl implements CompanyService {
 			existingUser.setEmail(user.getEmail());
 			existingUser.setTel(user.getTel()); // 기업 전화번호와 연동되거나 혹은 관리자 번호
 
-			// 기업이 비활성화되면 관리자 계정도 같이 비활성화되도록 연동
-			if ("02ACTIVE".equals(company.getIsActiveCd())) {
-				existingUser.setStatusCd("02ACTIVE"); // 계정 비활성 코드
-			} else {
-				existingUser.setStatusCd("01ACTIVE"); // 계정 활성 코드
-			}
-
+	        // 기업 상태와 관리자 계정 상태 연동 로직
+	        if ("01ACTIVE".equals(company.getIsActiveCd())) {
+	            // 기업을 활성해주면 관리자 계정도 활성
+	            existingUser.setStatusCd("01ACTIVE"); 
+	        } else {
+	            // 기업을 비활성 처리하면 관리자 계정도 비활성!
+	            existingUser.setStatusCd("02ACTIVE");
+	            existingUser.setMcpCd("01ACTIVE"); // 계정이 비활성화 되면 비밀번호 변경 필요 상태로 전환
+	        }
+	        
 			userManageMapper.updateUser(existingUser);
 		}
 	}

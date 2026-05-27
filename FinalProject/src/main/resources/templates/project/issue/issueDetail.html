@@ -229,11 +229,15 @@
 	color: #c33;
 }
 
-/* 첨부: 한 줄 3칸 그리드 (스크롤은 .attach-list-scroll-wrap + 스크립트로 처리) */
+/* 첨부: 3열 그리드, 2줄까지 노출 후 더보기/접기 */
 .attach-list-scroll-wrap {
-	overflow-x: hidden;
+	overflow: hidden;
 	min-height: 0;
-	scrollbar-gutter: stable;
+}
+
+.attach-list-scroll-wrap.is-expanded {
+	max-height: none !important;
+	overflow: visible;
 }
 
 .attach-list.attach-list--grid {
@@ -246,6 +250,24 @@
 .attach-list.attach-list--grid .attach-item {
 	min-width: 0;
 	overflow-wrap: anywhere;
+}
+
+.attach-list-toggle {
+	display: inline-flex;
+	align-items: center;
+	margin-top: 8px;
+	padding: 0;
+	border: none;
+	background: none;
+	color: #5b6cff;
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.attach-list-toggle:hover {
+	color: #4956d8;
+	text-decoration: underline;
 }
 
 table.data-table {
@@ -403,6 +425,16 @@ table.data-table tbody td {
 	align-items: center;
 }
 
+.history-detail-link {
+	color: #1976d2;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.history-detail-link:hover {
+	color: #1565c0;
+}
+
 .comment-actions .btn-reply {
 	padding: 4px 10px;
 	font-size: 12px;
@@ -512,12 +544,12 @@ table.data-table tbody td {
 		<div class="meta-item">
 			<label>시작 예정일</label>
 			<input type="text" readonly
-				th:attr="data-server-date=${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
+				th:value="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : '—'}" />
 		</div>
 		<div class="meta-item">
 			<label>종료 예정일</label>
 			<input type="text" readonly
-				th:attr="data-server-date=${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
+				th:value="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : '—'}" />
 		</div>
 		<div class="meta-item">
 			<label>시작일</label>
@@ -548,7 +580,8 @@ table.data-table tbody td {
 		<div class="attach-list" th:if="${attachments == null or attachments.isEmpty()}">
 			<p style="font-size:13px;color:#666;padding:8px 0;">첨부된 파일이 없습니다.</p>
 		</div>
-		<div id="attachListScroll" class="attach-list-scroll-wrap" th:if="${attachments != null and !attachments.isEmpty()}">
+		<div id="attachListScroll" class="attach-list-scroll-wrap is-collapsed"
+			th:if="${attachments != null and !attachments.isEmpty()}">
 			<div class="attach-list attach-list--grid">
 				<span class="attach-item" th:each="a : ${attachments}">
 					<span class="attach-item-name" th:text="${a.fileName != null ? a.fileName : a.diskFileName}">파일명</span>
@@ -560,6 +593,8 @@ table.data-table tbody td {
 				</span>
 			</div>
 		</div>
+		<button type="button" id="attachListToggle" class="attach-list-toggle" hidden
+			aria-controls="attachListScroll" aria-expanded="false">더보기</button>
 	</div>
 
 	<div class="section-block">
@@ -572,7 +607,7 @@ table.data-table tbody td {
 
 	<div class="tab-row" role="tablist">
 		<button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="comments">
-			댓글 <span class="badge-count" th:text="${commentTotal != null ? commentTotal : 0}">0</span>
+			댓글 <span class="badge-count" id="commentCountBadge">0</span>
 		</button>
 		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="related">연관된 이슈</button>
 		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="history">히스토리</button>
@@ -580,26 +615,9 @@ table.data-table tbody td {
 
 	<div class="tab-panel-wrap" id="tabPanels">
 		<div class="tab-panel is-visible" id="panel-comments" role="tabpanel" data-panel="comments">
-			<div class="comment-thread" th:if="${comments == null or comments.isEmpty()}">
-				<p style="font-size:13px;color:#666;padding:8px 0;">등록된 댓글이 없습니다.</p>
-			</div>
-			<div class="comment-thread" th:if="${comments != null and !comments.isEmpty()}">
+			<div class="comment-thread">
 				<div class="comment-thread-scroll" id="commentThreadScroll">
-					<div class="comment" th:each="c, cStat : ${comments}"
-						th:classappend="${c.depth != null and c.depth > 1} ? ' is-reply'"
-						th:style="|margin-left: ${(c.depth != null and c.depth > 1) ? (c.depth - 1) * 16 : 0}px|">
-						<div class="meta">
-							<span class="comment-num" th:text="|${cStat.count}번 댓글|">1번 댓글</span>
-							<strong th:text="${c.memId != null and !#strings.isEmpty(c.memId)} ? ${c.memId} : '—'">작성자</strong>
-							<span th:attr="data-server-date=${c.writeDate != null ? #dates.format(c.writeDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}">날짜</span>
-						</div>
-						<div th:text="${c.content != null ? c.content : ''}">댓글내용</div>
-						<div class="comment-actions" th:if="${c.id != null}">
-							<button type="button" class="btn-reply"
-								th:data-comment-id="${c.id}"
-								th:data-comment-num="${cStat.count}">댓글달기</button>
-						</div>
-					</div>
+					<p style="font-size:13px;color:#666;padding:8px 0;">댓글을 불러오는 중입니다.</p>
 				</div>
 			</div>
 			<div class="comment-form-wrap">
@@ -607,7 +625,7 @@ table.data-table tbody td {
 					<span id="replyHintText"></span>
 					<button type="button" id="cancelReplyBtn">답글 취소</button>
 				</div>
-				<form class="comment-form" id="issueCommentForm" th:action="@{/issue/comment}" method="post">
+				<form class="comment-form" id="issueCommentForm" th:data-issue-id="${issue.id}">
 					<input type="hidden" name="issueId" th:value="${issue.id}" />
 					<input type="hidden" name="parentId" id="commentParentId" value="" />
 					<textarea name="content" placeholder="댓글 내용" required></textarea>
@@ -619,7 +637,7 @@ table.data-table tbody td {
 		<div class="tab-panel" id="panel-related" role="tabpanel" data-panel="related" hidden>
 			<div class="inner-table-title">
 				<span>연관된 이슈</span>
-				<span class="badge-count">3</span>
+				<span class="badge-count" id="relatedIssueCountBadge">0</span>
 			</div>
 			<table class="data-table">
 				<thead>
@@ -629,21 +647,9 @@ table.data-table tbody td {
 						<th>담당자</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody id="relatedIssueTbody">
 					<tr>
-						<td>이슈1</td>
-						<td>종료</td>
-						<td>홍길동</td>
-					</tr>
-					<tr>
-						<td>이슈2</td>
-						<td>진행</td>
-						<td>김길동</td>
-					</tr>
-					<tr>
-						<td>이슈3</td>
-						<td>신규</td>
-						<td>김길동</td>
+						<td colspan="3" style="color:#666;">연관 이슈를 불러오는 중입니다.</td>
 					</tr>
 				</tbody>
 			</table>
@@ -652,31 +658,19 @@ table.data-table tbody td {
 		<div class="tab-panel" id="panel-history" role="tabpanel" data-panel="history" hidden>
 			<div class="inner-table-title">
 				<span>히스토리</span>
-				<span class="badge-count">3</span>
+				<span class="badge-count" id="historyCountBadge">0</span>
 			</div>
 			<table class="data-table">
 				<thead>
 					<tr>
 						<th>일시</th>
-						<th>담당자</th>
+						<th>수정자</th>
 						<th>내용</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody id="historyTbody">
 					<tr>
-						<td>2003.02.18 14:05:23</td>
-						<td>이름 A</td>
-						<td>SR260211_4482 내용을 변경하였습니다</td>
-					</tr>
-					<tr>
-						<td>2003.02.18 14:05:23</td>
-						<td>이름 B</td>
-						<td>SR260211_4482 내용을 변경하였습니다</td>
-					</tr>
-					<tr>
-						<td>2003.02.18 14:05:23</td>
-						<td>이름 A</td>
-						<td>SR260211_4482 내용을 변경하였습니다</td>
+						<td colspan="3" style="color:#666;">히스토리를 불러오는 중입니다.</td>
 					</tr>
 				</tbody>
 			</table>
@@ -685,6 +679,9 @@ table.data-table tbody td {
 	</th:block>
 </div>
 </div>
+
+<th:block th:replace="~{project/history/modal/historyDetail :: historyDetailModal}"></th:block>
+<th:block th:replace="~{project/history/modal/historyDetail :: historyDetailModalScript}"></th:block>
 
 <script th:inline="javascript">
 (function () {
@@ -737,6 +734,301 @@ table.data-table tbody td {
 			activate(btn.getAttribute('data-tab'));
 		});
 	});
+
+})();
+
+(function () {
+	var panel = document.getElementById('panel-related');
+	var tbody = document.getElementById('relatedIssueTbody');
+	var countBadge = document.getElementById('relatedIssueCountBadge');
+	var form = document.getElementById('issueCommentForm');
+	if (!panel || !tbody || !form) return;
+
+	var issueId = form.getAttribute('data-issue-id');
+	var loaded = false;
+	var tokenMeta = document.querySelector('meta[name="_csrf"]');
+	var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+
+	function getCsrfHeaders() {
+		var headers = {};
+		if (tokenMeta && headerMeta) {
+			headers[headerMeta.content] = tokenMeta.content;
+		}
+		return headers;
+	}
+
+	function escapeHtml(value) {
+		return String(value == null ? '' : value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
+	function renderEmpty(message) {
+		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">' + escapeHtml(message) + '</td></tr>';
+		if (countBadge) {
+			countBadge.textContent = '0';
+		}
+	}
+
+	function renderRelatedIssues(issues) {
+		if (!Array.isArray(issues) || issues.length === 0) {
+			renderEmpty('연관된 이슈가 없습니다.');
+			return;
+		}
+
+		tbody.innerHTML = issues.map(function (issue) {
+			var id = issue.id;
+			var subject = escapeHtml(issue.subject || '제목 없음');
+			var status = escapeHtml(issue.statusCd || '—');
+			var memName = escapeHtml(issue.memName || '—');
+			var subjectCell = id != null
+				? '<a href="/issue/detail?id=' + encodeURIComponent(id) + '">' + subject + '</a>'
+				: subject;
+
+			return '<tr>'
+				+ '<td>' + subjectCell + '</td>'
+				+ '<td>' + status + '</td>'
+				+ '<td>' + memName + '</td>'
+				+ '</tr>';
+		}).join('');
+
+		if (countBadge) {
+			countBadge.textContent = String(issues.length);
+		}
+	}
+
+	function parseError(res) {
+		return res.text().then(function (text) {
+			if (!text) {
+				return '연관 이슈 조회에 실패했습니다.';
+			}
+			try {
+				var data = JSON.parse(text);
+				return data.message || '연관 이슈 조회에 실패했습니다.';
+			} catch (e) {
+				return text;
+			}
+		});
+	}
+
+	function loadRelatedIssues() {
+		if (!issueId) {
+			renderEmpty('이슈 정보를 확인할 수 없습니다.');
+			return;
+		}
+		if (loaded) {
+			return;
+		}
+		loaded = true;
+
+		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">연관 이슈를 불러오는 중입니다.</td></tr>';
+
+		fetch('/issue/api/' + encodeURIComponent(issueId) + '/relIssue', {
+			method: 'GET',
+			headers: getCsrfHeaders()
+		})
+			.then(function (res) {
+				if (!res.ok) {
+					loaded = false;
+					return parseError(res).then(function (message) {
+						throw new Error(message);
+					});
+				}
+				return res.json();
+			})
+			.then(renderRelatedIssues)
+			.catch(function (err) {
+				renderEmpty(err && err.message ? err.message : '연관 이슈 조회에 실패했습니다.');
+			});
+	}
+
+	document.querySelectorAll('.tab-btn[data-tab="related"]').forEach(function (btn) {
+		btn.addEventListener('click', loadRelatedIssues);
+	});
+
+	if (panel.classList.contains('is-visible')) {
+		loadRelatedIssues();
+	}
+})();
+
+(function () {
+	var panel = document.getElementById('panel-history');
+	var tbody = document.getElementById('historyTbody');
+	var countBadge = document.getElementById('historyCountBadge');
+	var form = document.getElementById('issueCommentForm');
+	if (!panel || !tbody || !form) return;
+
+	var issueId = form.getAttribute('data-issue-id');
+	var loaded = false;
+	var historyRows = [];
+	var tokenMeta = document.querySelector('meta[name="_csrf"]');
+	var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+
+	function getCsrfHeaders() {
+		var headers = {};
+		if (tokenMeta && headerMeta) {
+			headers[headerMeta.content] = tokenMeta.content;
+		}
+		return headers;
+	}
+
+	function escapeHtml(value) {
+		return String(value == null ? '' : value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
+	function formatHistoryDate(value) {
+		return value ? dateUtils.format(value, 'YYYY-MM-DD HH:mm') : '—';
+	}
+
+	function resolveHistoryId(row) {
+		if (!row) return null;
+		var raw = row.historyId != null ? row.historyId : row.id;
+		if (raw == null || raw === '') return null;
+		var n = Number(raw);
+		return Number.isFinite(n) ? n : null;
+	}
+
+	function openHistoryDetailModal(historyId, row) {
+		if (historyId == null) return;
+		var summaryParts = [];
+		if (row && row.updatedOn) summaryParts.push(formatHistoryDate(row.updatedOn));
+		if (row && row.modifierName) {
+			summaryParts.push(row.modifierName);
+		} else if (row && row.userId != null) {
+			summaryParts.push('사용자 #' + row.userId);
+		}
+		if (row && row.detail) summaryParts.push(row.detail);
+		if (window.HistoryDetailModal && typeof window.HistoryDetailModal.open === 'function') {
+			window.HistoryDetailModal.open({
+				historyId: historyId,
+				summary: summaryParts.join(' · ')
+			});
+		}
+	}
+
+	function renderDetailCell(row) {
+		var text = row.detail == null ? '' : String(row.detail);
+		var historyId = resolveHistoryId(row);
+		if (!text || historyId == null) {
+			return escapeHtml(text || '—');
+		}
+		return '<span class="history-detail-link" role="button" tabindex="0" data-history-id="'
+			+ historyId + '">' + escapeHtml(text) + '</span>';
+	}
+
+	function renderEmpty(message) {
+		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">' + escapeHtml(message) + '</td></tr>';
+		if (countBadge) {
+			countBadge.textContent = '0';
+		}
+	}
+
+	function renderHistory(rows) {
+		historyRows = Array.isArray(rows) ? rows : [];
+		if (historyRows.length === 0) {
+			renderEmpty('등록된 히스토리가 없습니다.');
+			return;
+		}
+
+		tbody.innerHTML = historyRows.map(function (row) {
+			var updatedOn = escapeHtml(formatHistoryDate(row.updatedOn));
+			var modifier = escapeHtml(row.modifierName || (row.userId != null ? ('사용자 #' + row.userId) : '—'));
+			return '<tr>'
+				+ '<td>' + updatedOn + '</td>'
+				+ '<td>' + modifier + '</td>'
+				+ '<td>' + renderDetailCell(row) + '</td>'
+				+ '</tr>';
+		}).join('');
+
+		if (countBadge) {
+			countBadge.textContent = String(historyRows.length);
+		}
+	}
+
+	function handleHistoryDetailActivate(linkEl) {
+		if (!linkEl) return;
+		var historyId = Number(linkEl.getAttribute('data-history-id'));
+		if (!Number.isFinite(historyId) || historyId <= 0) return;
+		var row = historyRows.find(function (item) {
+			return resolveHistoryId(item) === historyId;
+		});
+		openHistoryDetailModal(historyId, row);
+	}
+
+	tbody.addEventListener('click', function (e) {
+		var linkEl = e.target.closest('[data-history-id]');
+		if (!linkEl) return;
+		handleHistoryDetailActivate(linkEl);
+	});
+
+	tbody.addEventListener('keydown', function (e) {
+		if (e.key !== 'Enter' && e.key !== ' ') return;
+		var linkEl = e.target.closest('[data-history-id]');
+		if (!linkEl) return;
+		e.preventDefault();
+		handleHistoryDetailActivate(linkEl);
+	});
+
+	function parseError(res) {
+		return res.text().then(function (text) {
+			if (!text) {
+				return '히스토리 조회에 실패했습니다.';
+			}
+			try {
+				var data = JSON.parse(text);
+				return data.message || '히스토리 조회에 실패했습니다.';
+			} catch (e) {
+				return text;
+			}
+		});
+	}
+
+	function loadHistory() {
+		if (!issueId) {
+			renderEmpty('이슈 정보를 확인할 수 없습니다.');
+			return;
+		}
+		if (loaded) {
+			return;
+		}
+		loaded = true;
+
+		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">히스토리를 불러오는 중입니다.</td></tr>';
+
+		fetch('/issue/api/' + encodeURIComponent(issueId) + '/history', {
+			method: 'GET',
+			headers: getCsrfHeaders()
+		})
+			.then(function (res) {
+				if (!res.ok) {
+					loaded = false;
+					return parseError(res).then(function (message) {
+						throw new Error(message);
+					});
+				}
+				return res.json();
+			})
+			.then(renderHistory)
+			.catch(function (err) {
+				renderEmpty(err && err.message ? err.message : '히스토리 조회에 실패했습니다.');
+			});
+	}
+
+	document.querySelectorAll('.tab-btn[data-tab="history"]').forEach(function (btn) {
+		btn.addEventListener('click', loadHistory);
+	});
+
+	if (panel.classList.contains('is-visible')) {
+		loadHistory();
+	}
 })();
 
 (function () {
@@ -744,16 +1036,166 @@ table.data-table tbody td {
 	if (!panel) return;
 
 	var form = document.getElementById('issueCommentForm');
+	var threadScroll = document.getElementById('commentThreadScroll');
 	var parentInput = document.getElementById('commentParentId');
 	var hintRow = document.getElementById('replyHintRow');
 	var hintText = document.getElementById('replyHintText');
 	var cancelBtn = document.getElementById('cancelReplyBtn');
-	if (!form || !parentInput) return;
+	var countBadge = document.getElementById('commentCountBadge');
+	if (!form || !threadScroll || !parentInput) return;
+
+	var issueId = form.getAttribute('data-issue-id');
+	var textarea = form.querySelector('textarea[name="content"]');
+	var tokenMeta = document.querySelector('meta[name="_csrf"]');
+	var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+
+	function getCsrfHeaders() {
+		var headers = {};
+		if (tokenMeta && headerMeta) {
+			headers[headerMeta.content] = tokenMeta.content;
+		}
+		return headers;
+	}
+
+	function escapeHtml(value) {
+		return String(value == null ? '' : value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
+	function layoutCommentThreadScroll() {
+		var items = threadScroll.querySelectorAll(':scope > .comment');
+		if (items.length <= 3) {
+			threadScroll.style.maxHeight = '';
+			threadScroll.style.overflowY = '';
+			return;
+		}
+		var r0 = items[0].getBoundingClientRect();
+		var r2 = items[2].getBoundingClientRect();
+		var h = r2.bottom - r0.top;
+		threadScroll.style.maxHeight = Math.ceil(h) + 'px';
+		threadScroll.style.overflowY = 'auto';
+	}
 
 	function clearReplyTarget() {
 		parentInput.value = '';
-		hintText.textContent = '';
-		if (hintRow) hintRow.hidden = true;
+		if (hintText) {
+			hintText.textContent = '';
+		}
+		if (hintRow) {
+			hintRow.hidden = true;
+		}
+	}
+
+	function setReplyTarget(commentId, commentNum) {
+		parentInput.value = commentId;
+		if (hintText) {
+			if (commentNum != null && String(commentNum).length) {
+				hintText.textContent = commentNum + '번 댓글에 댓글 작성중';
+			} else {
+				hintText.textContent = '선택한 댓글에 댓글 작성중';
+			}
+		}
+		if (hintRow) {
+			hintRow.hidden = false;
+		}
+		if (textarea) {
+			textarea.focus();
+		}
+	}
+
+	function renderEmpty(message) {
+		threadScroll.innerHTML = '<p style="font-size:13px;color:#666;padding:8px 0;">'
+			+ escapeHtml(message) + '</p>';
+		if (countBadge) {
+			countBadge.textContent = '0';
+		}
+		layoutCommentThreadScroll();
+	}
+
+	function formatCommentDate(value) {
+		return value ? dateUtils.format(value, 'YYYY-MM-DD HH:mm') : '—';
+	}
+
+	function renderComments(comments) {
+		if (!Array.isArray(comments) || comments.length === 0) {
+			renderEmpty('등록된 댓글이 없습니다.');
+			return;
+		}
+
+		var html = comments.map(function (comment, index) {
+			var depth = Number(comment.depth || 1);
+			var indent = depth > 1 ? (depth - 1) * 16 : 0;
+			var className = 'comment' + (depth > 1 ? ' is-reply' : '');
+			var author = escapeHtml(comment.memId || '—');
+			var writeDate = escapeHtml(formatCommentDate(comment.writeDate));
+			var content = escapeHtml(comment.content || '').replace(/\r?\n/g, '<br>');
+			var replyButton = comment.id != null
+				? '<div class="comment-actions">'
+					+ '<button type="button" class="btn-reply" data-comment-id="' + escapeHtml(comment.id)
+					+ '" data-comment-num="' + (index + 1) + '">댓글달기</button>'
+				+ '</div>'
+				: '';
+
+			return '<div class="' + className + '" style="margin-left:' + indent + 'px">'
+				+ '<div class="meta">'
+				+ '<span class="comment-num">' + (index + 1) + '번 댓글</span>'
+				+ '<strong>' + author + '</strong>'
+				+ '<span>' + writeDate + '</span>'
+				+ '</div>'
+				+ '<div>' + content + '</div>'
+				+ replyButton
+				+ '</div>';
+		}).join('');
+
+		threadScroll.innerHTML = html;
+		if (countBadge) {
+			countBadge.textContent = String(comments.length);
+		}
+		layoutCommentThreadScroll();
+	}
+
+	function parseError(res) {
+		return res.text().then(function (text) {
+			if (!text) {
+				return '요청 처리에 실패했습니다.';
+			}
+			try {
+				var data = JSON.parse(text);
+				return data.message || '요청 처리에 실패했습니다.';
+			} catch (e) {
+				return text;
+			}
+		});
+	}
+
+	function loadComments() {
+		if (!issueId) {
+			renderEmpty('이슈 정보를 확인할 수 없습니다.');
+			return Promise.resolve();
+		}
+
+		threadScroll.innerHTML = '<p style="font-size:13px;color:#666;padding:8px 0;">댓글을 불러오는 중입니다.</p>';
+
+		return fetch('/issue/api/' + encodeURIComponent(issueId) + '/comments', {
+			method: 'GET',
+			headers: getCsrfHeaders()
+		})
+			.then(function (res) {
+				if (!res.ok) {
+					return parseError(res).then(function (message) {
+						throw new Error(message);
+					});
+				}
+				return res.json();
+			})
+			.then(renderComments)
+			.catch(function (err) {
+				renderEmpty(err && err.message ? err.message : '댓글 조회에 실패했습니다.');
+			});
 	}
 
 	panel.addEventListener('click', function (e) {
@@ -761,73 +1203,142 @@ table.data-table tbody td {
 		if (!btn) return;
 		var cid = btn.getAttribute('data-comment-id');
 		if (!cid) return;
-		parentInput.value = cid;
-		var num = btn.getAttribute('data-comment-num');
-		if (hintText) {
-			if (num != null && String(num).length) {
-				hintText.textContent = num + '번 댓글에 댓글 작성중';
-			} else {
-				hintText.textContent = '선택한 댓글에 댓글 작성중';
-			}
-		}
-		if (hintRow) hintRow.hidden = false;
-		var ta = form.querySelector('textarea[name="content"]');
-		if (ta) ta.focus();
+		setReplyTarget(cid, btn.getAttribute('data-comment-num'));
 	});
 
 	if (cancelBtn) {
 		cancelBtn.addEventListener('click', clearReplyTarget);
 	}
-})();
 
-(function () {
-	function layoutCommentThreadScroll() {
-		var wrap = document.getElementById('commentThreadScroll');
-		if (!wrap) return;
-		var items = wrap.querySelectorAll(':scope > .comment');
-		if (items.length <= 3) {
-			wrap.style.maxHeight = '';
-			wrap.style.overflowY = '';
+	form.addEventListener('submit', function (e) {
+		e.preventDefault();
+
+		var content = textarea ? textarea.value.trim() : '';
+		if (!content) {
+			alert('댓글 내용을 입력해주세요.');
+			if (textarea) {
+				textarea.focus();
+			}
 			return;
 		}
-		var r0 = items[0].getBoundingClientRect();
-		var r2 = items[2].getBoundingClientRect();
-		var h = r2.bottom - r0.top;
-		wrap.style.maxHeight = Math.ceil(h) + 'px';
-		wrap.style.overflowY = 'auto';
-	}
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', layoutCommentThreadScroll);
-	} else {
-		layoutCommentThreadScroll();
-	}
+
+		var headers = getCsrfHeaders();
+		headers['Content-Type'] = 'application/json';
+
+		fetch('/issue/api/' + encodeURIComponent(issueId) + '/comments', {
+			method: 'POST',
+			headers: headers,
+			body: JSON.stringify({
+				parentId: parentInput.value ? Number(parentInput.value) : null,
+				content: content
+			})
+		})
+			.then(function (res) {
+				if (!res.ok) {
+					return parseError(res).then(function (message) {
+						throw new Error(message);
+					});
+				}
+				return res.json();
+			})
+			.then(function () {
+				if (textarea) {
+					textarea.value = '';
+				}
+				clearReplyTarget();
+				return loadComments();
+			})
+			.catch(function (err) {
+				alert(err && err.message ? err.message : '댓글 등록에 실패했습니다.');
+			});
+	});
+
 	window.addEventListener('resize', layoutCommentThreadScroll);
+	loadComments();
 })();
 
 (function () {
-	function layoutAttachListScroll() {
-		var wrap = document.getElementById('attachListScroll');
-		if (!wrap) return;
+	var ATTACH_COLS = 3;
+	var ATTACH_VISIBLE_ROWS = 2;
+	var ATTACH_MAX_VISIBLE = ATTACH_COLS * ATTACH_VISIBLE_ROWS;
+
+	function getCollapsedHeight(wrap) {
 		var items = wrap.querySelectorAll('.attach-item');
-		if (items.length <= 3) {
-			wrap.style.maxHeight = '';
-			wrap.style.overflowY = '';
+		if (items.length <= ATTACH_MAX_VISIBLE) return null;
+		var top = items[0].getBoundingClientRect().top;
+		var bottom = items[0].getBoundingClientRect().bottom;
+		var limit = Math.min(ATTACH_MAX_VISIBLE, items.length);
+		for (var i = 1; i < limit; i++) {
+			bottom = Math.max(bottom, items[i].getBoundingClientRect().bottom);
+		}
+		return Math.ceil(bottom - top);
+	}
+
+	function updateToggleLabel(btn, total, expanded) {
+		if (expanded) {
+			btn.textContent = '접기';
+			btn.setAttribute('aria-expanded', 'true');
 			return;
 		}
-		var r0 = items[0].getBoundingClientRect();
-		var r1 = items[1].getBoundingClientRect();
-		var r2 = items[2].getBoundingClientRect();
-		var bottom = Math.max(r0.bottom, r1.bottom, r2.bottom);
-		var h = bottom - r0.top;
-		wrap.style.maxHeight = Math.ceil(h) + 'px';
-		wrap.style.overflowY = 'auto';
+		var hidden = total - ATTACH_MAX_VISIBLE;
+		btn.textContent = '+' + hidden + '개 더보기';
+		btn.setAttribute('aria-expanded', 'false');
 	}
+
+	function layoutAttachList() {
+		var wrap = document.getElementById('attachListScroll');
+		var btn = document.getElementById('attachListToggle');
+		if (!wrap) return;
+
+		var items = wrap.querySelectorAll('.attach-item');
+		var total = items.length;
+		var expanded = wrap.classList.contains('is-expanded');
+
+		if (total <= ATTACH_MAX_VISIBLE) {
+			wrap.classList.remove('is-collapsed', 'is-expanded');
+			wrap.style.maxHeight = '';
+			if (btn) btn.hidden = true;
+			return;
+		}
+
+		if (btn) {
+			btn.hidden = false;
+			updateToggleLabel(btn, total, expanded);
+		}
+
+		if (expanded) {
+			wrap.style.maxHeight = '';
+			return;
+		}
+
+		wrap.classList.add('is-collapsed');
+		var h = getCollapsedHeight(wrap);
+		if (h) wrap.style.maxHeight = h + 'px';
+	}
+
+	function initAttachListToggle() {
+		var wrap = document.getElementById('attachListScroll');
+		var btn = document.getElementById('attachListToggle');
+		if (!wrap) return;
+
+		if (btn) {
+			btn.addEventListener('click', function () {
+				var expanded = !wrap.classList.contains('is-expanded');
+				wrap.classList.toggle('is-expanded', expanded);
+				wrap.classList.toggle('is-collapsed', !expanded);
+				layoutAttachList();
+			});
+		}
+
+		layoutAttachList();
+	}
+
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', layoutAttachListScroll);
+		document.addEventListener('DOMContentLoaded', initAttachListToggle);
 	} else {
-		layoutAttachListScroll();
+		initAttachListToggle();
 	}
-	window.addEventListener('resize', layoutAttachListScroll);
+	window.addEventListener('resize', layoutAttachList);
 })();
 
 (function () {

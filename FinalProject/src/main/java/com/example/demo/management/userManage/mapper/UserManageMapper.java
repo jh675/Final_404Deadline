@@ -1,6 +1,7 @@
 package com.example.demo.management.userManage.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -15,4 +16,7 @@ public interface UserManageMapper {
 	UserManageVO selectOne(Long id);
 	List<CompanyVO> selectCompanyList();
 	UserManageVO selectByLoginAndBizNo(UserManageVO vo);
+	int bulkUpdateUsers(Map<String, Object> payload);
+	int checkCompanyExists(String bizNo);
+	int checkUpdateIdDuplicate(UserManageVO vo);
 }

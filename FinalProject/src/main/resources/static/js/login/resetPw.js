@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             li.style.cursor = 'pointer';
                             li.textContent = company.companyName;
 
-                            li.addEventListener('click', function() {
+                            li.addEventListener('mousedown', function() {
                                 resetCompanyNameInput.value = company.companyName;
                                 resetBizNo.value = company.bizNo;
                                 resetCompanyDropdown.style.display = 'none';
@@ -68,13 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(error => console.error('Error:', error));
         }, 300);
     });
-
-    // 외부 클릭 시 드롭다운 닫기
-    document.addEventListener('click', function(e) {
-        if (!resetCompanyNameInput.contains(e.target) && !resetCompanyDropdown.contains(e.target)) {
-            resetCompanyDropdown.style.display = 'none';
-        }
-    });
+	
+	resetCompanyNameInput.addEventListener('blur', function() {
+	    // 포커스를 잃는 순간, 검색 0.3초 대기 타이머를 강제로 취소
+	    clearTimeout(debounceTimer);
+	    
+	    // 드롭다운 닫기
+	    resetCompanyDropdown.style.display = 'none';
+	});
 
     function showMessage(message, type) {
         messageArea.className = `alert alert-${type}`;

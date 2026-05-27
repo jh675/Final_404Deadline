@@ -24,6 +24,8 @@ import com.example.demo.management.userManage.service.UserManageService;
 import com.example.demo.management.userManage.service.UserManageVO;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
+import com.example.demo.util.subCode.service.SubcodeService;
+import com.example.demo.util.subCode.service.SubcodeVO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +38,13 @@ public class UserManageController {
 	
 	private final UserManageService userManageService;
 	private final AttachService attachService;
+	private final SubcodeService subCodeService;
 	
 	@GetMapping("/userList")
 	public String userList(Model model, @ModelAttribute("filter01") UserManageVO userManage) {
 		List<UserManageVO> list = userManageService.selectAll(userManage);
+		List<SubcodeVO> activeCodeList = subCodeService.getSubCodeList("00ACTIVE");
+		model.addAttribute("activeCodeList", activeCodeList);
 		model.addAttribute("userList", list);
 		return "management/user/userList";
 	}
@@ -62,7 +67,13 @@ public class UserManageController {
 	public Map<String, String> userUpdate(@RequestBody UserManageVO vo) {
 	    int updateCnt = userManageService.updateUser(vo);
 	    Map<String, String> result = new HashMap<>();
-	    if(updateCnt > 0) {
+    	
+	    // 기업 번호 검증 실패 결과가 넘어온 경우
+	    if ("INVALID_BIZNO".equals(vo.getResult())) {
+	        result.put("result", "INVALID_BIZNO");
+	    } else if ("DUPLICATE_LOGIN".equals(vo.getResult())) {
+	        result.put("result", "DUPLICATE_LOGIN");
+	    } else if (updateCnt > 0) {
 	        result.put("result", "SUCCESS");
 	    } else {
 	        result.put("result", "ERROR");
@@ -129,5 +140,21 @@ public class UserManageController {
 	    }
 	    
 	    return ResponseEntity.ok().body("SUCCESS");
+	}
+	
+	// 다중 일괄 업데이트
+	@PutMapping("/users/bulk-update")
+	@ResponseBody
+	public Map<String, String> bulkUpdateUsers(@RequestBody Map<String, Object> payload) {
+	    // payload 안에는 ids(리스트), type(문자열), value(문자열) 가 들어있습니다.
+	    int updateCnt = userManageService.bulkUpdateUsers(payload);
+	    
+	    Map<String, String> result = new HashMap<>();
+	    if (updateCnt > 0) {
+	        result.put("result", "SUCCESS");
+	    } else {
+	        result.put("result", "ERROR");
+	    }
+	    return result;
 	}
 }

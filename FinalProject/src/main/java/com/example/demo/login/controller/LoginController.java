@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.demo.company.service.CompanyVO;
 import com.example.demo.login.service.LoginService;
 import com.example.demo.login.service.UserVO;
+import com.example.demo.management.userManage.service.UserManageVO;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -83,10 +84,10 @@ public class LoginController {
 	    return loginService.searchActiveCompanies(keyword);
 	}
 
-		@GetMapping("/login/password-reset")
-		public String showPasswordResetPage() {
-			return "login/pwReset"; 
-		}
+	@GetMapping("/login/password-reset")
+	public String showPasswordResetPage() {
+		return "login/pwReset"; 
+	}
 	
 	// 비밀번호 재설정 처리
 	@PostMapping("/login/password-reset")
@@ -98,6 +99,7 @@ public class LoginController {
 		if (authentication != null && authentication.getPrincipal() instanceof UserVO) {
 			UserVO vo = (UserVO) authentication.getPrincipal();
 			loginService.updatePassword(vo, newPassword);
+			loginService.updateLastLogOn(vo);
 			vo.setMcpCd("02ACTIVE");
 			return "success";
 		}
@@ -108,5 +110,14 @@ public class LoginController {
 	@GetMapping("/errorTest")
 	public String errorpgTest() {
 		return "error/403";
+	}
+	
+	@PostMapping("/login/company/request")
+	public String requestCompanyRegistration(CompanyVO company, UserManageVO user) {
+	    // 💡 서비스 호출
+		loginService.requestCompanyRegistration(company, user);
+	    
+	    // 완료 후 다시 로그인 페이지로 보내면서 파라미터 전달 (예: alert 띄우기 용도)
+	    return "redirect:/login?reqSuccess=true";
 	}
 }

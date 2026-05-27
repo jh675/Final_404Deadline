@@ -58,10 +58,6 @@
 			               class="form-control"
 			               placeholder="검색어 입력">
 			    </div>
-				<div id="searchWarning"
-				     class="text-danger small mt-1 d-none">
-					검색 조건을 선택해주세요.
-				</div>
 			    <!-- 버튼 -->
 			    <div class="d-flex gap-2">
 				    <button type="submit"
@@ -72,14 +68,35 @@
 				       class="btn btn-outline-secondary">
 				        초기화
 				    </a>
-				
+				</div>
+				<div id="searchWarning"
+				     class="text-danger small mt-1 d-none">
+					검색 조건을 선택해주세요.
 				</div>
 			</form>
 		</div>
 		
 		<div id="grid"></div>
-		<div class="d-flex justify-content-end mb-3">
-			<button type="button" class="btn btn-primary" onclick="openInsertModal()">회원 등록</button>
+		<div class="d-flex justify-content-between align-items-center mb-2">
+		    <div class="d-flex align-items-center gap-2">
+		        <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleBulkModeBtn">일괄작업</button>
+		
+		        <div id="bulkControls" class="d-none d-flex align-items-center gap-2">
+		            <select id="bulkActionType" class="form-select form-select-sm" style="width: auto;">
+		                <option value="">일괄 작업 선택</option>
+		                <option value="status_01ACTIVE">계정 활성화</option>
+		                <option value="status_02ACTIVE">계정 비활성화</option>
+		                <option value="prjManager_01ACTIVE">PM 역할 부여</option>
+		                <option value="prjManager_02ACTIVE">PM 역할 해제</option>
+		            </select>
+		            <button type="button" class="btn btn-sm btn-secondary" id="bulkApplyBtn">적용</button>
+		            <button type="button" class="btn btn-sm btn-light" id="cancelBulkModeBtn">취소</button>
+		        </div>
+		    </div>
+		    
+		    <div>
+		        <button type="button" class="btn btn-sm btn-primary" onclick="openInsertModal()">회원 등록</button>
+		    </div>
 		</div>
 
 		</div>
@@ -87,6 +104,13 @@
 
 		<script th:inline="javascript">
 			const userData = /*[[${userList}]]*/[];
+			const activeCodeList = /*[[${activeCodeList}]]*/ [];
+			// 2. 배열을 키-값 쌍의 객체(Map)로 변환
+		    // 결과: { "01ACTIVE": "활성", "02ACTIVE": "비활성", "03ACTIVE": "승인대기" }
+		    const activeCodeMap = activeCodeList.reduce((acc, code) => {
+		        acc[code.scode] = code.name; // VO의 필드명에 맞게 소문자로 작성 (예: sCode -> scode)
+		        return acc;
+		    }, {});
 		</script>
 
 		<!-- pagination JS가 grid JS보다 먼저 -->

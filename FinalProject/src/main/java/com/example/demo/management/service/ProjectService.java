@@ -21,5 +21,5 @@ public interface ProjectService {
 	List<ModulesVO> listModules(Long projectId);
 	List<GroupDetailVO> listGroup(GroupDetailVO gvo);
 	List<MemberDetailVO> listMember(MemberDetailVO mvo);
-	
+	int updateProject(ProjectVO vo, List<String> moduleList);
 }

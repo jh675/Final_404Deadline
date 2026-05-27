@@ -1,6 +1,7 @@
 package com.example.demo.project.ganttchart.controller;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +16,8 @@ import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class Ganttchartconttoller {
 
@@ -28,21 +31,26 @@ public class Ganttchartconttoller {
 	}
 
 	// 간트차트 페이지 접속
-	@GetMapping("/ganttchart/list")
+	@GetMapping("/project/gantt/list")
 	public String ganttchartlist(Model model) {
 		model.addAttribute("currentMenu", "gantt");
 		return "project/issue/ganttChart";  
 	}
 
 	// 이슈목록 가져오기
-	 @GetMapping("/ganttchart/listget") 
-	 @ResponseBody
-	 public List<IssueOutputVO> getIssue(
-			 @RequestParam(name = "filter", defaultValue = "all") String filter) { 
+	@GetMapping("/project/gantt/listget")
+	@ResponseBody
+	public List<IssueOutputVO> getIssue(@RequestParam(name = "filter", defaultValue = "all") String filter,
+			HttpSession session) {
 
-		 IssueInputVO param = new IssueInputVO();
-		 Long loginMemId = getLoginUser().getId();
-		 
+		// 세션에서 프로젝트 ID를 꺼냅니다.
+		Long prjId = (Long) session.getAttribute("currentProjectId"); // 대소문자 주의
+		
+		IssueInputVO param = new IssueInputVO();
+		param.setPrjId(prjId);
+		Long loginMemId = getLoginUser().getId();
+		
+		// 개인필터 적용 
 		 // 조회 시 개인/ 그룹 필터 추가 
 		 switch (filter) {
 		  case "my": // 개인 필터
@@ -51,8 +59,9 @@ public class Ganttchartconttoller {
 		  case "all": // 그룹 전체 조회 
 			  default:
 				  break;
-		 }		 
-		 return issueService.selectIssueList(param);
-	 }
+		 }	
+		
+		return issueService.selectIssueList(param);
+	}
 
 }

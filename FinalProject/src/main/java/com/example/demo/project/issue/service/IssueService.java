@@ -1,6 +1,9 @@
 package com.example.demo.project.issue.service;
 
 import java.util.List;
+import java.util.Map;
+
+import com.example.demo.project.history.service.HistoryVO;
 
 public interface IssueService {
     List<IssueOutputVO> selectIssueList(IssueInputVO issueVO);
@@ -31,4 +34,9 @@ public interface IssueService {
     int insertComment(CommentInputVO vo);
     
 	List<IssueSummaryVO> getIssueIds(Long prjId, Long issueId);
+	List<IssueOutputVO> getRelationIssue(Long id);
+	List<HistoryVO> getHistory(Long id);
+    List<Map<String, Object>> getPivotStatus(Long prjId);
+    List<Map<String, Object>> getPivotPriority(Long prjId);
+    List<Map<String, Object>> getPivotCategory(Long prjId);
 }

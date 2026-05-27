@@ -103,5 +103,12 @@ public class ProjectServiceImpl implements ProjectService {
 		return projectMapper.listMember(mvo);
 	}
 	
-	
+	@Override
+	@Transactional
+	public int updateProject(ProjectVO vo, List<String> moduleList) {
+	    if (moduleList != null && !moduleList.isEmpty()) {
+	        vo.setEnaId(String.join(",", moduleList));
+	    }
+	    return projectMapper.projectUpdate(vo);
+	}
 }
