@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/projectLayout}">
+
+<head>
+<meta charset="UTF-8">
+<title>문서정보등록수정</title>
+
+<style>
+.doc-form-container {
+	max-width: 900px;
+	margin: 30px auto;
+}
+
+.doc-card {
+	background: white;
+	border-radius: 12px;
+	padding: 30px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.doc-title {
+	font-size: 28px;
+	font-weight: bold;
+	margin-bottom: 30px;
+}
+
+.form-label {
+	font-weight: 600;
+	margin-bottom: 10px;
+}
+
+.form-control-custom {
+	width: 100%;
+	border: 1px solid #dcdcdc;
+	border-radius: 8px;
+	padding: 12px;
+	font-size: 15px;
+}
+
+.form-control-custom:focus {
+	outline: none;
+	border-color: #4b96e6;
+	box-shadow: 0 0 0 3px rgba(75, 150, 230, 0.15);
+}
+
+.textarea-custom {
+	min-height: 350px;
+	resize: vertical;
+}
+
+.btn-area {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 30px;
+}
+</style>
+
+</head>
+
+<body>
+
+	<div layout:fragment="content">
+
+		<div class="doc-form-container">
+
+			<div class="doc-card">
+
+				
+				<div class="doc-title" th:text="${docs.id == null or docs.id == 0} ? '문서 등록' : '문서 수정'">문서 수정</div>
+
+				
+				<form
+					th:action="${docs.id == null or docs.id == 0} ? @{/docs/register} : @{/docs/update}"
+					method="post" th:object="${docs}" enctype="multipart/form-data">
+
+					<input type="hidden" th:field="*{id}"> <input type="hidden"
+						th:field="*{prjId}">
+
+					<div class="mb-4">
+
+						<label class="form-label"> 제목 </label> <input type="text"
+							class="form-control-custom" th:field="*{title}">
+
+					</div>
+
+					<div class="mb-4">
+
+						<label class="form-label"> 내용 </label>
+
+						<textarea class="form-control-custom textarea-custom"
+							th:field="*{description}">
+        </textarea>
+
+						<div class="mb-3">
+							<label class="form-label">첨부파일</label>
+							<div class="input-group">
+							
+								<input type="file" name="attachments"
+									class="form-control border-secondary-subtle"
+									multiple="multiple">
+							</div>
+							<div class="mt-3">
+
+								<div th:each="file : ${files}">
+
+									<a th:href="@{/download/{id}(id=${file.id})}"
+										th:text="${file.fileName}"> </a>
+
+								</div>
+
+							</div>
+
+
+						</div>
+
+						<div class="btn-area">
+
+							<button type="button" class="btn btn-secondary"
+								onclick="history.back()">취소</button>
+
+							<button type="submit" class="btn btn-primary">
+								
+								<span th:text="${docs.id == null or docs.id == 0} ? '등록' : '수정'"></span>
+							</button>
+						</div>
+				</form>
+			</div>
+
+		</div>
+
+	</div>
+
+</body>
+</html>
