@@ -30,19 +30,19 @@
                 <choose>
 
                     <when test="searchType == 'bizNo'">
-                        biz_no like '%' || #{keyword} || '%'
+                        c.biz_no like '%' || #{keyword} || '%'
                     </when>
 
                     <when test="searchType == 'companyName'">
-                        company_name like '%' || #{keyword} || '%'
+                        c.company_name like '%' || #{keyword} || '%'
                     </when>
 
                     <when test="searchType == 'tel'">
-                        tel like '%' || #{keyword} || '%'
+                        c.tel like '%' || #{keyword} || '%'
                     </when>
 
                     <when test="searchType == 'address'">
-                        address like '%' || #{keyword} || '%'
+                        c.address like '%' || #{keyword} || '%'
                     </when>
 
                 </choose>

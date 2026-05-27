@@ -1,10 +1,12 @@
 package com.example.demo.project.issue.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.example.demo.project.history.service.HistoryVO;
 import com.example.demo.project.issue.service.CommentInputVO;
 import com.example.demo.project.issue.service.CommentOutputVO;
 import com.example.demo.project.issue.service.IssueInputVO;
@@ -40,4 +42,9 @@ public interface IssueMapper {
 
     int insertComment(CommentInputVO vo);
 	List<IssueSummaryVO> getIssueIds(@Param("prjId") Long prjId, @Param("issueId") Long issueId);
+	List<IssueOutputVO> getRelationIssue(Long id);
+	List<HistoryVO> getHistory(Long id);
+    List<Map<String, Object>> getPivotStatus(@Param("prjId") Long prjId);
+    List<Map<String, Object>> getPivotPriority(@Param("prjId") Long prjId);
+    List<Map<String, Object>> getPivotCategory(@Param("prjId") Long prjId);
 }

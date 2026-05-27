@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,9 @@ import com.example.demo.project.messages.service.MessagesService;
 import com.example.demo.project.messages.service.MessagesVO;
 import com.example.demo.util.attach.service.AttachService;
 
+import jakarta.servlet.http.HttpSession;
+
+@RequestMapping("/project")
 @Controller
 public class MessagesController {
     
@@ -26,9 +30,7 @@ public class MessagesController {
     @Autowired
     private AttachService attachService;     // 첨부파일 관리 서비스
     
-    /**
-     * 1. 메시지 등록 화면 이동
-     */
+    //메시지 등록화면
     @GetMapping("/messages/register")
     public String insertForm(Model model, @RequestParam("boardId") Long boardId) {
         MessagesVO message = new MessagesVO();
@@ -79,19 +81,19 @@ public class MessagesController {
     public String messagesList(Model model, 
                                @RequestParam("boardId") Long boardId, 
                                @RequestParam(value = "id", required = false) Long id, 
-                               MessagesVO messages) {
+                               MessagesVO messages , 
+                               HttpSession session) {
+    	session.setAttribute("currentMenu", "messages");
         messages.setBoardId(boardId);
         
         model.addAttribute("list", messagesService.selectAll(messages)); // 메시지 목록 데이터
         model.addAttribute("boardId", boardId);
         model.addAttribute("board", boardsService.selectOne(boardId));   // 게시판 정보 
         
-        // [상세] 버튼이나 제목을 눌러 id가 들어온 경우 단건 데이터를 정상적으로 바인딩합니다.
         if (id != null) {
             model.addAttribute("message", messagesService.selectOne(id)); 
         }
         
-        // return 문이 if문 밖으로 완전히 빠져나와 정상적으로 모든 상황에서 화면을 그려줍니다.
         return "project/messages/messagesList";
     }
     

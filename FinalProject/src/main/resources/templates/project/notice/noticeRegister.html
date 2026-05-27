@@ -1,21 +1,16 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="https://www.thymeleaf.org"
+<html xmlns:th="https://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/defaultLayout}">
+      layout:decorate="~{layout/projectLayout}">
 <head>
     <meta charset="UTF-8">
     <title>공지사항 관리</title>
     <style>
-        .container-fluid { font-size: 0.875rem; } /* 기본 14px 수준으로 축소 */
         .form-control, .form-select { font-size: 0.85rem; padding: 0.4rem 0.75rem !important; }
         textarea.form-control { font-size: 0.85rem; padding: 0.6rem 0.75rem !important; }
         
         .text-success-dark { color: #2e7d32 !important; }
-        
-        .btn-green { background-color: #66bb6a; color: white; border: none; border-radius: 50px; font-size: 0.85rem; padding: 0.4rem 1.2rem !important; }
-        .btn-green:hover { background-color: #43a047; color: white; }
-        .btn-outline-danger, .btn-light { font-size: 0.85rem; padding: 0.4rem 1rem !important; }
+
         
         .form-label { font-weight: 600; color: #495057; font-size: 0.825rem; margin-bottom: 0.3rem; }
         .form-check-input:checked { background-color: #66bb6a; border-color: #66bb6a; }
@@ -24,8 +19,8 @@
 </head>
 <body>
 
-<div layout:fragment="content" class="container-fluid py-3">
-
+<div layout:fragment="content">
+<div id="wrapper">
     <div class="mb-3">
 
         <h4 class="fw-bold text-success-dark mb-1" th:text="${notice.id != null} ? '공지사항 수정' : '공지사항 등록'">공지사항 등록</h4>
@@ -39,8 +34,8 @@
                   enctype="multipart/form-data">
                 
                 <input type="hidden" name="id" th:value="${notice.id}">
-                <input type="hidden" name="prjId" th:value="${4}">
-                <input type="hidden" name="memId" th:value="${1}">
+                <input type="hidden" name="prjId" th:value="${session.currentProjectId}">
+				
                 
                 <div class="mb-3 p-2.5 bg-light rounded-3 d-flex align-items-center" style="padding: 0.6rem 1rem !important;">
                     <div class="form-check form-switch mb-0">
@@ -70,19 +65,20 @@
 
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <button type="button" th:if="${notice.id != null}" class="btn btn-outline-danger px-3" style="border-radius: 50px;"
-                                th:onclick="|if(confirm('정말 삭제하시겠습니까?')) location.href='@{/notice/delete(id=${notice.id})}'|">삭제하기</button>
+                        <button type="button" th:if="${notice.id != null}" class="btn btn-danger px-3" 
+                                th:onclick="|if(confirm('정말 삭제하시겠습니까?')) location.href='@{/project/notice/delete(id=${notice.id})}'|">삭제하기</button>
                     </div>
                     
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light border px-3" style="border-radius: 50px;" th:onclick="|location.href='@{/notice/list}'|">취소</button>
-                        <button type="submit" class="btn btn-green shadow-sm px-4" th:text="${notice.id != null} ? '수정 완료' : '등록 완료'">등록 완료</button>
+                        <button type="button" class="btn btn-light px-3"  th:onclick="|location.href='@{/project/notice/list}'|">취소</button>
+                        <button type="submit" class="btn btn-success shadow-sm px-4" th:text="${notice.id != null} ? '수정 완료' : '등록 완료'">등록 완료</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
+</div>
 </div>
 </body>
 </html>

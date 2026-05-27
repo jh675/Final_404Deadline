@@ -1,11 +1,15 @@
 package com.example.demo.project.issue.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.project.history.service.HistoryVO;
 import com.example.demo.project.issue.mapper.IssueMapper;
 import com.example.demo.project.issue.service.CommentInputVO;
 import com.example.demo.project.issue.service.CommentOutputVO;
@@ -16,6 +20,10 @@ import com.example.demo.project.issue.service.IssueSummaryVO;
 
 @Service
 public class IssueServiceImpl implements IssueService {
+
+	private static final List<String> STATUS_COLS = List.of("신규", "진행중", "검토", "완료");
+	private static final List<String> PRIORITY_COLS = List.of("최상", "상", "중", "하");
+	private static final List<String> CATEGORY_COLS = List.of("버그", "기능", "작업", "개선");
 
 	@Autowired
 	IssueMapper mapper;
@@ -114,6 +122,119 @@ public class IssueServiceImpl implements IssueService {
 		}
 		List<IssueSummaryVO> list = mapper.getIssueIds(prjId, issueId);
 		return list != null ? list : Collections.emptyList();
+	}
+
+	@Override
+	public List<IssueOutputVO> getRelationIssue(Long id) {
+		if (id == null) {
+			return Collections.emptyList();
+		}
+		List<IssueOutputVO> list = mapper.getRelationIssue(id);
+		return list != null ? list : Collections.emptyList();
+	}
+
+	@Override
+	public List<HistoryVO> getHistory(Long id) {
+		if (id == null) {
+			return Collections.emptyList();
+		}
+		List<HistoryVO> list = mapper.getHistory(id);
+		return list != null ? list : Collections.emptyList();
+	}
+
+	@Override
+	public List<Map<String, Object>> getPivotStatus(Long prjId) {
+		if (prjId == null) {
+			return Collections.emptyList();
+		}
+		return normalizePivotRows(mapper.getPivotStatus(prjId), STATUS_COLS);
+	}
+
+	@Override
+	public List<Map<String, Object>> getPivotPriority(Long prjId) {
+		if (prjId == null) {
+			return Collections.emptyList();
+		}
+		return normalizePivotRows(mapper.getPivotPriority(prjId), PRIORITY_COLS);
+	}
+
+	@Override
+	public List<Map<String, Object>> getPivotCategory(Long prjId) {
+		if (prjId == null) {
+			return Collections.emptyList();
+		}
+		return normalizePivotRows(mapper.getPivotCategory(prjId), CATEGORY_COLS);
+	}
+
+	/**
+	 * MyBatis Map 키(대소문자·Oracle PIVOT 열명)를 화면용으로 통일합니다.
+	 * label + valueColumns 키만 남깁니다.
+	 */
+	private List<Map<String, Object>> normalizePivotRows(List<Map<String, Object>> raw, List<String> valueColumns) {
+		if (raw == null || raw.isEmpty()) {
+			return Collections.emptyList();
+		}
+		List<Map<String, Object>> result = new ArrayList<>(raw.size());
+		for (Map<String, Object> row : raw) {
+			if (row == null) {
+				continue;
+			}
+			Map<String, Object> normalized = new LinkedHashMap<>();
+			String label = asString(findMapValue(row, "name", "NAME", "label", "LABEL"));
+			if (label == null || label.isBlank()) {
+				label = "미배정";
+			}
+			normalized.put("label", label);
+			for (String col : valueColumns) {
+				normalized.put(col, toCount(findMapValue(row, col)));
+			}
+			result.add(normalized);
+		}
+		return result;
+	}
+
+	private Object findMapValue(Map<String, Object> row, String... keys) {
+		for (String key : keys) {
+			if (row.containsKey(key)) {
+				return row.get(key);
+			}
+		}
+		for (Map.Entry<String, Object> entry : row.entrySet()) {
+			String mapKey = entry.getKey();
+			if (isMetaColumn(mapKey)) {
+				continue;
+			}
+			for (String wanted : keys) {
+				if (mapKey.equals(wanted)
+						|| mapKey.trim().equals(wanted)
+						|| mapKey.equalsIgnoreCase(wanted)) {
+					return entry.getValue();
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean isMetaColumn(String key) {
+		return "MEM_ID".equalsIgnoreCase(key) || "mem_id".equalsIgnoreCase(key) || "memId".equalsIgnoreCase(key);
+	}
+
+	private String asString(Object value) {
+		return value == null ? null : value.toString();
+	}
+
+	private int toCount(Object value) {
+		if (value == null) {
+			return 0;
+		}
+		if (value instanceof Number number) {
+			return number.intValue();
+		}
+		try {
+			return Integer.parseInt(value.toString());
+		} catch (NumberFormatException ex) {
+			return 0;
+		}
 	}
 
 }

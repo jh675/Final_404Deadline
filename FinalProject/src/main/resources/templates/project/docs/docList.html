@@ -32,15 +32,33 @@
 
 			data: docsData,
 			columns: [
-				    { header: '제목', name: 'title', width: 150, align:'center', sortable: true },
+				    { header: '제목', 
+					  name: 'title', 
+					  width: 150, align:'center', sortable: true,
+					  formatter: ({ row, value }) => {
+
+							return `
+								<a href="/docs/form?id=${row.id}">
+									${value}
+								</a>
+							`;
+						}},
+				    { header: '내용', name: 'description', width: 400, align:'center', sortable: true },
 				    { header: '작성자', name: 'memId', width: 150, align:'center', sortable: true },
-				    { header: '작성일', name: 'createdOn', width: 300, align:'left', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') },
+				    { header: '작성일', name: 'createdOn', width: 150, align:'left', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') },
 				    { header: '수정',
 				       name: 'edit',
 				       width: 100, align:'center', sortable: true, 
 				       formatter: function() {
 				            return '<button class="btn btn-secondary btn-sm">수정</button>';
 				        }
+	            },
+				    { header: '삭제',
+						   name: 'deleteBtn',
+						   width: 100, align:'center', sortable: true, 
+						   formatter: function() {
+						        return '<button class="btn btn-danger btn-sm">삭제</button>';
+						    }
 	            }
 
 			],
@@ -52,7 +70,25 @@
 			}
 
 		});
+		grid.on('click', (ev) => {
+
+		    if (ev.columnName === 'edit') {
+		        const row = grid.getRow(ev.rowKey);
+		        location.href = '/docs/form?id=' + row.id;
+
+		    }
+		    
+		    if (ev.columnName === 'deleteBtn') {
+		        const row = grid.getRow(ev.rowKey);
+		        if (confirm("정말로 이 문서를 삭제하시겠습니까?")) {
+		            location.href = '/docs/delete?id=' + row.id;
+		        }
+		    }    
+
+		});
 	</script>
+
+		<a href="/docs/register" class="btn btn-primary"> 등록 </a>
 	</div>
 </body>
 </html>
