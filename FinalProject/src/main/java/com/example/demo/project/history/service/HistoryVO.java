@@ -1,6 +1,6 @@
 package com.example.demo.project.history.service;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -30,8 +30,8 @@ public class HistoryVO {
   private Long tableId;
   /** 수정자({@code HISTORY.MEM_ID}) */
   private Long userId;
-  /** 히스토리 기록 일시({@code HISTORY.UPDATED_ON}) */
-  private LocalDateTime updatedOn;
+  /** 히스토리 기록 일시({@code HISTORY.UPDATED_ON}) — Oracle UTC 저장, Jackson KST 직렬화 */
+  private Date updatedOn;
   /** 설명 정보({@code HISTORY.DETAIL}) */
   private String detail;
 

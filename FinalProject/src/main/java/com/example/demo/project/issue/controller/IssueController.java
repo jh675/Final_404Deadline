@@ -22,11 +22,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.login.service.UserVO;
+import com.example.demo.management.service.ProjectService;
 import com.example.demo.project.issue.service.CommentInputVO;
-import com.example.demo.project.issue.service.CommentOutputVO;
 import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
+import com.example.demo.project.member.service.MemberListCriteria;
+import com.example.demo.project.member.service.MemberService;
+import com.example.demo.project.milestone.service.MilestoneService;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
@@ -38,10 +41,19 @@ import lombok.extern.slf4j.Slf4j;
 public class IssueController {
 
 	@Autowired
-	private IssueService service;
+	private IssueService issueService;
 
 	@Autowired
 	private AttachService attachService;
+	
+	@Autowired
+	private MemberService memberService;
+	
+	@Autowired
+	private MilestoneService milestoneService;
+	
+	@Autowired
+	private ProjectService projectService;
 
 	private UserVO getLoginUser() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -62,7 +74,10 @@ public class IssueController {
 			return "redirect:/management/project";
 		}
 		issueVO.setPrjId(projectId);
-		List<IssueOutputVO> issueList = service.selectIssueList(issueVO);
+		MemberListCriteria filter = new MemberListCriteria();
+		filter.setPrjId(projectId);
+		List<IssueOutputVO> issueList = issueService.selectIssueList(issueVO);
+		model.addAttribute("members", memberService.selectProjectMemberList(filter));
 		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issueList", issueList);
 		return "project/issue/issueList";
@@ -74,7 +89,7 @@ public class IssueController {
 		if (projectId == null) {
 			return "redirect:/management/project";
 		}
-		IssueOutputVO issue = service.selectIssue(id);
+		IssueOutputVO issue = issueService.selectIssue(id);
 		if (issue == null || issue.getId() == null || !projectId.equals(issue.getPrjId())) {
 			return "redirect:/issue/list";
 		}
@@ -86,19 +101,14 @@ public class IssueController {
 			List<AttachVO> loaded = attachService.selectAttachList("04MODULE", id);
 			attachments = loaded != null ? loaded : Collections.emptyList();
 			model.addAttribute("ParentIssue",
-					issue.getParentIssue() == null ? null : service.getParentIssue(issue.getParentIssue()));
-			model.addAttribute("childIssueTotal", service.countChildIssues(id));
-			model.addAttribute("childIssueList", service.selectChildIssueList(id));
-			List<CommentOutputVO> comments = service.getComment(id);
-			model.addAttribute("comments", comments);
-			model.addAttribute("commentTotal", comments.size());
+					issue.getParentIssue() == null ? null : issueService.getParentIssue(issue.getParentIssue()));
+			model.addAttribute("childIssueTotal", issueService.countChildIssues(id));
+			model.addAttribute("childIssueList", issueService.selectChildIssueList(id));
 		} else {
 			model.addAttribute("childIssueTotal", 0L);
 			model.addAttribute("childIssueList", Collections.emptyList());
 			if (issue != null) {
 				model.addAttribute("ParentIssue", null);
-				model.addAttribute("comments", Collections.emptyList());
-				model.addAttribute("commentTotal", 0);
 			}
 		}
 		model.addAttribute("attachments", attachments);
@@ -120,7 +130,7 @@ public class IssueController {
 		if (auth != null && auth.getPrincipal() instanceof UserVO u) {
 			vo.setMemId(u.getId());
 		}
-		service.insertComment(vo);
+		issueService.insertComment(vo);
 		return "redirect:/issue/detail?id=" + vo.getIssueId();
 	}
 
@@ -135,7 +145,7 @@ public class IssueController {
 		//id값이 있는경우(수정버튼 클릭해서 온경우)
 		if (id != null) {
 			//해당 아이디로 검색해서 값은 가져온다
-			issue = service.selectIssueForForm(id);
+			issue = issueService.selectIssueForForm(id);
 			//만약 값이 없다면 잘못된 경로(임의로 id값을 집어넣은경우)이므로
 			if (issue == null || issue.getId() == null || !projectId.equals(issue.getPrjId())) {
 				//리스트쪽으로 돌려보낸다
@@ -147,9 +157,15 @@ public class IssueController {
 			issue.setPrjId(projectId);
 		}
 		//모델에 담아서 보낸다
+		
+		MemberListCriteria filter = new MemberListCriteria();
+		filter.setPrjId(projectId);
+		model.addAttribute("milestones",milestoneService.selectMilestoneList(projectId));
+		model.addAttribute("members", memberService.selectProjectMemberList(filter));
 		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issue", issue);
-		model.addAttribute("issueIds", service.getIssueIds(projectId, issue.getId()));
+		model.addAttribute("issueIds", issueService.getIssueIds(projectId, issue.getId()));
+		model.addAttribute("project", projectService.getprojectid(projectId));
 		return "project/issue/issueRegist";
 	}
 
@@ -171,7 +187,7 @@ public class IssueController {
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
 		}
-		Long issueId = service.insertIssue(issueVO);
+		Long issueId = issueService.insertIssue(issueVO);
 		if (hasFiles && issueId != null) {
 			attachService.saveAndInsertAttachments(issueId, attachments, "04MODULE", "ISSUE");
 		}
@@ -201,14 +217,14 @@ public class IssueController {
 			issueVO.setIsAttachCd("01ISATTACH");
 			attachService.saveAndInsertAttachments(issueVO.getId(), attachments, "04MODULE", "ISSUE");
 		}
-		service.updateIssue(issueVO);
+		issueService.updateIssue(issueVO);
 		return "redirect:/issue/detail?id=" + issueVO.getId();
 	}
 
 	@PostMapping("/issue/register-start-date")
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> registerStartDate(@RequestParam("id") Long id) {
-		int updated = service.updateIssueStartDate(id);
+		int updated = issueService.updateIssueStartDate(id);
 		if (updated <= 0) {
 			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
 		}
@@ -222,7 +238,7 @@ public class IssueController {
 	@PostMapping("/issue/register-closed-date")
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> registerClosedDate(@RequestParam("id") Long id) {
-		int updated = service.updateIssueClosedDate(id);
+		int updated = issueService.updateIssueClosedDate(id);
 		if (updated <= 0) {
 			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
 		}
@@ -233,5 +249,23 @@ public class IssueController {
 		return ResponseEntity.ok(body);
 	}
 
+	@GetMapping("/issue/pivot")
+	public String issuePivot(Model model, HttpSession session) {
 
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+		List<Map<String, Object>> pivotStatus = issueService.getPivotStatus(projectId);
+		List<Map<String, Object>> pivotPriority = issueService.getPivotPriority(projectId);
+		List<Map<String, Object>> pivotCategory = issueService.getPivotCategory(projectId);
+		model.addAttribute("pivotStatus", pivotStatus);
+		model.addAttribute("pivotPriority", pivotPriority);
+		model.addAttribute("pivotCategory", pivotCategory);
+		model.addAttribute("priorityCols", List.of("최상", "상", "중", "하"));
+		model.addAttribute("categoryCols", List.of("버그", "기능", "작업", "개선"));
+		model.addAttribute("statusCols", List.of("신규", "진행중", "검토", "완료"));
+		model.addAttribute("currentMenu", "issue");
+		return "project/issue/issuePivot";
+	}
 }

@@ -252,7 +252,7 @@
 
 	<update id="updateIssueClosedDate" parameterType="long">
 		UPDATE ISSUE
-		SET (CLOSED_DATE, UPDATED_ON) = (SELECT SYSDATE, SYSDATE FROM DUAL)
+		SET (CLOSED_DATE, UPDATED_ON,STATUS_CD ,DONE_RATIO) = (SELECT SYSDATE, SYSDATE,'04ISSUESTATUS',100 FROM DUAL)
 		WHERE ID = #{id}
 	</update>
 
@@ -363,5 +363,120 @@
 			)
 		</if>
 		ORDER BY ID
+	</select>
+	
+	<select id="getRelationIssue" resultType="IssueOutputVO">
+		SELECT
+			i.ID,
+			i.PRJ_ID,
+			i.SUBJECT,
+			get_sub_code_name(i.STATUS_CD) AS STATUS_CD,
+			GET_USERID_TO_NAME(i.MEM_ID) AS memName
+		FROM ISSUE i
+		WHERE i.ID IN (
+			SELECT mi2.issue_id
+			FROM milestone_issue mi1
+			JOIN milestone_issue mi2 ON mi1.milestone_id = mi2.milestone_id
+			WHERE mi1.issue_id = #{id}
+				AND mi2.issue_id != #{id}
+		)
+		ORDER BY i.ID DESC
+	</select>
+	<select id="getHistory" resultType="com.example.demo.project.history.service.HistoryVO">
+		SELECT
+			H.ID AS id,
+			H.ID AS historyId,
+			H.TABLE_NAME AS tableName,
+			H.TABLE_ID AS tableId,
+			H.MEM_ID AS userId,
+			H.UPDATED_ON AS updatedOn,
+			H.DETAIL AS detail,
+			U.NAME AS modifierName
+		FROM HISTORY H
+		LEFT JOIN USERS U ON U.ID = H.MEM_ID
+		WHERE H.TABLE_NAME = 'ISSUE'
+			AND H.TABLE_ID = #{id}
+		ORDER BY H.UPDATED_ON DESC, H.ID DESC
+	</select>
+	<select id="getPivotStatus" resultType="map">
+		SELECT
+			mem_id,
+			name,
+			NVL("신규", 0)   AS "신규",
+			NVL("진행중", 0) AS "진행중",
+			NVL("검토", 0)   AS "검토",
+			NVL("완료", 0)   AS "완료"
+		FROM (
+			SELECT
+				NVL(i.mem_id, 0) AS mem_id,
+				NVL(get_userid_to_name(i.mem_id), '미배정') AS name,
+				get_sub_code_name(i.status_cd) AS status
+			FROM issue i
+			WHERE i.prj_id = #{prjId}
+		)
+		PIVOT (
+			COUNT(*)
+			FOR status IN (
+				'신규'   AS "신규",
+				'진행중' AS "진행중",
+				'검토'   AS "검토",
+				'완료'   AS "완료"
+			)
+		)
+		ORDER BY mem_id
+	</select>
+	<select id="getPivotPriority" resultType="map">
+		SELECT
+			mem_id,
+			name,
+			NVL("최상", 0) AS "최상",
+			NVL("상", 0)   AS "상",
+			NVL("중", 0)   AS "중",
+			NVL("하", 0)   AS "하"
+		FROM (
+			SELECT
+				NVL(i.mem_id, 0) AS mem_id,
+				NVL(get_userid_to_name(i.mem_id), '미배정') AS name,
+				get_sub_code_name(i.priority_cd) AS status
+			FROM issue i
+			WHERE i.prj_id = #{prjId}
+		)
+		PIVOT (
+			COUNT(*)
+			FOR status IN (
+				'최상' AS "최상",
+				'상'   AS "상",
+				'중'   AS "중",
+				'하'   AS "하"
+			)
+		)
+		ORDER BY mem_id
+	</select>
+	<select id="getPivotCategory" resultType="map">
+		SELECT
+			mem_id,
+			name,
+			NVL("버그", 0) AS "버그",
+			NVL("기능", 0) AS "기능",
+			NVL("작업", 0) AS "작업",
+			NVL("개선", 0) AS "개선"
+		FROM (
+			SELECT
+				NVL(i.mem_id, 0) AS mem_id,
+				NVL(get_userid_to_name(i.mem_id), '미배정') AS name,
+				get_sub_code_name(i.category_cd) AS status
+			FROM issue i
+			WHERE i.prj_id = #{prjId}
+		)
+		PIVOT (
+			COUNT(*)
+			FOR status IN (
+				'버그' AS "버그",
+				'기능' AS "기능",
+				'작업' AS "작업",
+				'개선' AS "개선"
+			)
+		)
+		ORDER BY mem_id
 	</select>
 </mapper>
