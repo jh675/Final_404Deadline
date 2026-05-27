@@ -104,12 +104,12 @@
                     <a th:if="${mod1.enaNameCd == '02MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
-                       th:href="@{/ganttchart/list}">간트차트</a>
+                       th:href="@{/project/gantt/list}">간트차트</a>
 
                     <a th:if="${mod1.enaNameCd == '03MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'calendar' ? 'active fw-bold' : ''}" 
-                       th:href="@{/calender/list}">일정</a>
+                       th:href="@{/project/calender/list}">일정</a>
                        
                     <a th:if="${mod1.enaNameCd == '07MODULE'}" 
                        class="nav-link" 
