@@ -56,6 +56,7 @@
 }
 
 .form-grid input[type="text"],
+.form-grid input[type="date"],
 .form-grid input[type="datetime-local"],
 .form-grid select,
 .form-grid textarea {
@@ -111,16 +112,45 @@
 	gap: 10px;
 }
 
+.attachment-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
 .attach-row {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 10px;
 	flex-wrap: wrap;
+	padding: 10px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fff;
 }
 
-.attach-row input[type="file"] {
+.attach-file-name {
 	flex: 1;
-	min-width: 200px;
+	min-width: 0;
+	font-size: 13px;
+	color: #333;
+	overflow-wrap: anywhere;
+}
+
+.attach-file-meta {
+	font-size: 12px;
+	color: #777;
+}
+
+.attach-hidden-input {
+	display: none;
+}
+
+.attach-row .btn-ghost {
 	font-size: 13px;
 }
 
@@ -359,34 +389,41 @@
 			<label for="memId">담당자</label>
 			<div class="field-wrap" id="wrap-memId">
 				<select id="memId" name="memId">
-					<option value="">미정</option>
-					<option value="1">홍길동</option>
-					<option value="2">김길동</option>
-					<option value="3">김민수</option>
-					<option value="4">배민수</option>
+					<option value=""
+						th:selected="${issue == null or issue.memId == null}">미정</option>
+					<option th:each="member : ${members}"
+						th:value="${member.userId}"
+						th:text="${member.userName}"
+						th:selected="${issue != null and issue.memId != null and issue.memId == member.userId}">담당자</option>
 				</select>
 				<p class="err-msg" id="err-memId">담당자를 선택해 주세요.</p>
 			</div>
 
 			<label for="estStartDate">시작예정일</label>
 			<div class="field-wrap">
-				<input type="datetime-local" id="estStartDate" name="estStartDate" step="60"
-					th:value="${issue != null and issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd''T''HH:mm') : ''}" />
+				<input type="date" id="estStartDate" name="estStartDate"
+					th:value="${issue != null and issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : (project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : '')}"
+					th:attr="min=${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : null},
+						max=${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : null}" />
 			</div>
 
 			<label for="dueDate">종료예정일</label>
 			<div class="field-wrap">
-				<input type="datetime-local" id="dueDate" name="dueDate" step="60"
-					th:value="${issue != null and issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd''T''HH:mm') : ''}" />
+				<input type="date" id="dueDate" name="dueDate"
+					th:value="${issue != null and issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : (project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : '')}"
+					th:attr="min=${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : null},
+						max=${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : null}" />
 			</div>
 
 			<label for="milestoneId">마일스톤</label>
 			<div class="field-wrap">
 				<select id="milestoneId" name="milestoneId">
-					<option value="">없음</option>
-					<option value="1">마일스톤1</option>
-					<option value="2">마일스톤2</option>
-					<option value="3">마일스톤3</option>
+					<option value=""
+						th:selected="${issue == null or issue.milestoneId == null}">없음</option>
+					<option th:each="milestone : ${milestones}"
+						th:value="${milestone.id}"
+						th:text="${milestone.name}"
+						th:selected="${issue != null and issue.milestoneId != null and issue.milestoneId == milestone.id}">마일스톤</option>
 				</select>
 			</div>
 
@@ -396,7 +433,8 @@
 					<span>첨부 목록 (최대 5개, 합계 50MB 이하)</span>
 					<button type="button" class="btn-ghost" id="btnAddFile">파일추가</button>
 				</div>
-				<div class="attach-rows" id="attachRows"></div>
+				<ul class="attachment-list" id="attachRows"></ul>
+				<input type="file" id="fileInput" name="attachments" class="attach-hidden-input" multiple accept="*/*" />
 				<p class="err-msg" id="err-attach">첨부 용량은 합계 50MB를 넘을 수 없습니다.</p>
 			</div>
 
@@ -449,8 +487,6 @@
 						th:selected="${issue != null and issue.statusCd == '02ISSUESTAT'}">진행중</option>
 					<option value="03ISSUESTAT"
 						th:selected="${issue != null and issue.statusCd == '03ISSUESTAT'}">검토</option>
-					<option value="04ISSUESTAT"
-						th:selected="${issue != null and issue.statusCd == '04ISSUESTAT'}">완료</option>
 				</select>
 			</div>
 
@@ -495,6 +531,7 @@
 	var MAX_TOTAL_BYTES = 50 * 1024 * 1024;
 	var form = document.getElementById('issueRegistForm');
 	var attachRows = document.getElementById('attachRows');
+	var fileInput = document.getElementById('fileInput');
 	var btnAddFile = document.getElementById('btnAddFile');
 	var btnCancel = document.getElementById('btnCancel');
 	var errAttach = document.getElementById('err-attach');
@@ -502,10 +539,17 @@
 	var STATUS_PROGRESS = '02ISSUESTAT';
 	var STATUS_REVIEW = '03ISSUESTAT';
 	var STATUS_DONE = '04ISSUESTAT';
+	var lockedStatusCd = null;
+	var selectedFiles = [];
+
+	function getEffectiveStatus() {
+		if (lockedStatusCd) return lockedStatusCd;
+		var statusEl = document.getElementById('statusCd');
+		return statusEl ? statusEl.value : STATUS_NEW;
+	}
 
 	function getProgressValueClamp() {
-		var statusEl = document.getElementById('statusCd');
-		var status = statusEl ? statusEl.value : STATUS_NEW;
+		var status = getEffectiveStatus();
 		if (status === STATUS_NEW) return { min: 0, max: 0 };
 		if (status === STATUS_PROGRESS) return { min: 10, max: 90 };
 		if (status === STATUS_REVIEW || status === STATUS_DONE) return { min: 100, max: 100 };
@@ -526,12 +570,11 @@
 	}
 
 	function applyProgressByStatus() {
-		var statusEl = document.getElementById('statusCd');
 		var r = document.getElementById('doneRatio');
 		var hint = document.getElementById('progressStatusHint');
-		if (!statusEl || !r) return;
+		if (!r) return;
 
-		var status = statusEl.value || STATUS_NEW;
+		var status = getEffectiveStatus() || STATUS_NEW;
 		if (status === STATUS_NEW) {
 			r.disabled = true;
 			r.min = 0;
@@ -552,7 +595,7 @@
 			r.min = 100;
 			r.max = 100;
 			r.value = '100';
-			if (hint) hint.textContent = '검토·완료 상태에서는 진척율이 100%로 고정됩니다.';
+			if (hint) hint.textContent = '검토 상태에서는 진척율이 100%로 고정됩니다.';
 		}
 		syncDoneRatioDisplay();
 	}
@@ -577,9 +620,26 @@
 			var m = document.getElementById('memId');
 			if (m) m.value = String(issue.memId);
 		}
+		if (issue.milestoneId != null && issue.milestoneId !== '') {
+			var ms = document.getElementById('milestoneId');
+			if (ms) ms.value = String(issue.milestoneId);
+		}
 		if (issue.statusCd) {
 			var s = document.getElementById('statusCd');
-			if (s) s.value = issue.statusCd;
+			if (s) {
+				if (issue.statusCd === STATUS_DONE) {
+					lockedStatusCd = STATUS_DONE;
+					var doneOpt = document.createElement('option');
+					doneOpt.value = STATUS_DONE;
+					doneOpt.textContent = '완료';
+					doneOpt.selected = true;
+					doneOpt.disabled = true;
+					s.appendChild(doneOpt);
+					s.disabled = true;
+				} else {
+					s.value = issue.statusCd;
+				}
+			}
 		}
 		if (issue.doneRatio != null && issue.doneRatio !== '') {
 			var r = document.getElementById('doneRatio');
@@ -603,46 +663,89 @@
 		statusCdEl.addEventListener('change', applyProgressByStatus);
 	}
 
-	function fileRow() {
-		var row = document.createElement('div');
-		row.className = 'attach-row';
-		var input = document.createElement('input');
-		input.type = 'file';
-		input.name = 'attachments';
-		var del = document.createElement('button');
-		del.type = 'button';
-		del.className = 'btn-ghost';
-		del.textContent = '첨부삭제';
-		del.addEventListener('click', function () {
-			row.remove();
-			updateAddButtonState();
+	function formatBytes(bytes) {
+		if (!bytes) return '0B';
+		if (bytes < 1024) return bytes + 'B';
+		if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
+		return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+	}
+
+	function renderSelectedFiles() {
+		if (!attachRows) return;
+		attachRows.innerHTML = '';
+		selectedFiles.forEach(function (file, index) {
+			var row = document.createElement('li');
+			row.className = 'attach-row';
+
+			var nameWrap = document.createElement('div');
+			nameWrap.className = 'attach-file-name';
+			nameWrap.textContent = file.name;
+
+			var meta = document.createElement('span');
+			meta.className = 'attach-file-meta';
+			meta.textContent = ' (' + formatBytes(file.size) + ')';
+			nameWrap.appendChild(meta);
+
+			var del = document.createElement('button');
+			del.type = 'button';
+			del.className = 'btn-ghost';
+			del.textContent = '첨부삭제';
+			del.addEventListener('click', function () {
+				selectedFiles.splice(index, 1);
+				renderSelectedFiles();
+				updateAddButtonState();
+			});
+
+			row.appendChild(nameWrap);
+			row.appendChild(del);
+			attachRows.appendChild(row);
 		});
-		row.appendChild(input);
-		row.appendChild(del);
-		return row;
 	}
 
 	function updateAddButtonState() {
-		var n = attachRows.querySelectorAll('.attach-row').length;
-		btnAddFile.disabled = n >= MAX_FILES;
+		btnAddFile.disabled = selectedFiles.length >= MAX_FILES;
 	}
 
-	function addFileRow() {
-		if (attachRows.querySelectorAll('.attach-row').length >= MAX_FILES) return;
-		attachRows.appendChild(fileRow());
+	function totalSelectedBytes() {
+		return selectedFiles.reduce(function (sum, file) {
+			return sum + (file && file.size ? file.size : 0);
+		}, 0);
+	}
+
+	function addSelectedFiles(files) {
+		if (!files || !files.length) return;
+		var nextFiles = selectedFiles.slice();
+		for (var i = 0; i < files.length; i += 1) {
+			if (nextFiles.length >= MAX_FILES) break;
+			nextFiles.push(files[i]);
+		}
+		var totalBytes = nextFiles.reduce(function (sum, file) {
+			return sum + (file && file.size ? file.size : 0);
+		}, 0);
+		if (totalBytes > MAX_TOTAL_BYTES) {
+			errAttach.classList.add('is-visible');
+			return;
+		}
+		selectedFiles = nextFiles;
+		errAttach.classList.remove('is-visible');
+		renderSelectedFiles();
 		updateAddButtonState();
 	}
 
-	btnAddFile.addEventListener('click', addFileRow);
-	addFileRow();
+	btnAddFile.addEventListener('click', function () {
+		if (fileInput && !btnAddFile.disabled) {
+			fileInput.click();
+		}
+	});
 
-	function totalSelectedBytes() {
-		var sum = 0;
-		attachRows.querySelectorAll('input[type="file"]').forEach(function (inp) {
-			if (inp.files && inp.files[0]) sum += inp.files[0].size;
+	if (fileInput) {
+		fileInput.addEventListener('change', function () {
+			addSelectedFiles(Array.from(fileInput.files || []));
+			fileInput.value = '';
 		});
-		return sum;
 	}
+
+	updateAddButtonState();
 
 	function setFieldError(idWrap, idErr, show) {
 		var w = document.getElementById(idWrap);
@@ -678,7 +781,7 @@
 			memId: document.getElementById('memId').value ? Number(document.getElementById('memId').value) : null,
 			categoryCd: document.getElementById('categoryCd').value,
 			priorityCd: document.getElementById('priorityCd').value,
-			statusCd: document.getElementById('statusCd').value,
+			statusCd: getEffectiveStatus(),
 			doneRatio: document.getElementById('doneRatio').value ? Number(document.getElementById('doneRatio').value) : 0,
 			description: document.getElementById('description').value || '',
 			parentIssue: document.getElementById('parentIssue').value ? Number(document.getElementById('parentIssue').value) : null
@@ -690,10 +793,8 @@
 
 		var formData = new FormData();
 		formData.append('issue', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-		attachRows.querySelectorAll('input[type="file"]').forEach(function (inp) {
-			if (inp.files && inp.files[0]) {
-				formData.append('attachments', inp.files[0]);
-			}
+		selectedFiles.forEach(function (file) {
+			formData.append('attachments', file);
 		});
 
 		var headers = {};

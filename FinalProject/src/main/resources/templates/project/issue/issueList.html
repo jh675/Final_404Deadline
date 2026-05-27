@@ -86,6 +86,29 @@
 	background-color: #4956d8;
 }
 
+.search-cancel-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	padding: 0 16px;
+	background-color: #fff;
+	color: #555;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	cursor: pointer;
+	font-weight: 600;
+	white-space: nowrap;
+	flex-shrink: 0;
+	text-decoration: none;
+}
+
+.search-cancel-btn:hover {
+	background-color: #f5f5f5;
+	color: #333;
+}
+
 .right-area {
 	margin-left: auto;
 	display: flex;
@@ -207,10 +230,9 @@
 				<label for="memId">담당자</label>
 				<select id="memId" th:field="*{memId}">
 					<option value="">미선택</option>
-					<option value="1">홍길동</option>
-					<option value="2">김길동</option>
-					<option value="3">김민수</option>
-					<option value="4">배민수</option>
+					<option th:each="member : ${members}"
+						th:value="${member.userId}"
+						th:text="${member.userName}">담당자</option>
 				</select>
 			</div>
 
@@ -227,6 +249,7 @@
 				</label>
 
 				<button type="submit" class="search-btn">검색</button>
+				<a th:href="@{/issue/list}" class="search-cancel-btn">취소</a>
 			</div>
 		</form>
 		
@@ -393,7 +416,7 @@
 						formatter: ({ value }) => (value == null ? '' : value + '%')
 					},
 					{
-						header: '일정',
+						header: '수정',
 						name: 'dateActions',
 						width: 150,
 						align: 'right',
@@ -403,8 +426,8 @@
 							if (id == null) return '';
 							const hasStart = hasIssueDate(row.startDate);
 							const hasClosed = hasIssueDate(row.closedDate);
-							const startDisabled = hasStart ? ' disabled' : '';
-							const closedDisabled = hasClosed ? ' disabled' : '';
+							const startDisabled = hasStart ? 'disabled' : '';
+							const closedDisabled = hasClosed || !hasStart ? 'disabled' : '';
 							const startTitle = hasStart
 								? '시작일이 이미 등록되어 있습니다'
 								: '오늘 날짜로 시작일 등록';
