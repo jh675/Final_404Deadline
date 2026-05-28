@@ -10,4 +10,10 @@
 	FROM    sub_code
 	WHERE   m_code = #{mCode}
 	</select>
+	
+	<select id="selectScodeNm">
+	SELECT  name
+	FROM	sub_code
+	WHERE	s_code = #{sCode}
+	</select>
 </mapper>
