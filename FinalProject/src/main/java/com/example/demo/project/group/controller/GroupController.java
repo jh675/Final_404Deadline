@@ -36,11 +36,10 @@ public class GroupController {
         criteria.setPrjId(prjId);
         criteria.normalized();
         model.addAttribute("rows", groupService.selectProjectGroupList(criteria));
-        model.addAttribute("prjId", prjId);
         model.addAttribute("grpName", criteria.getGrpName());
         model.addAttribute("createdFrom", criteria.getCreatedFrom());
         model.addAttribute("createdTo", criteria.getCreatedTo());
-        model.addAttribute("currentMenu", "group");
+        session.setAttribute("currentMenu", "group");
         return "project/group/groupManagement";
     }
 
@@ -51,15 +50,11 @@ public class GroupController {
             return "redirect:/management/project";
         }
         Long grpId = criteria.getGrpId();
-        model.addAttribute("prjId", prjId);
-        model.addAttribute("currentMenu", "group");
-
         if (grpId == null) {
             model.addAttribute("registerMode", true);
             model.addAttribute("groupNotFound", false);
             model.addAttribute("detail", GroupDetailVO.builder()
                     .prjId(prjId)
-                    .prjName(groupService.selectProjectName(prjId))
                     .grpName("")
                     .build());
             model.addAttribute("members", List.<GroupMemberDetailRowVO>of());
