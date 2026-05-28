@@ -3,7 +3,7 @@ let pendingProfileFile = null; // 업로드 대기 중인 파일 객체
 let isProfileDeleted = false;  // 기존 이미지 삭제 대기 플래그
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // Grid 생성
+	// Grid 생성
     const grid = new tui.Grid({
         el: document.getElementById('grid'),
 
@@ -34,9 +34,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             },
             {
                 header: '계정상태',
-                name: 'statusNm',
+                name: 'statusCd',
                 align: 'center',
-                sortable: true
+                sortable: true,
+				formatter: ({ value }) => {
+				return activeCodeMap[value] || value;
+				}
             },
             {
                 header: '역할',
@@ -45,7 +48,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                 sortable: true,
 
                 formatter: ({ value }) => {
-                    return activeCodeMap[value] || value;
+					// '01ACTIVE'를 '활성'으로 변환
+                    const statusName = activeCodeMap[value] || value;
+
+                    // 화면 표시용 단어로 변환.(활성 상태 서브코드를 사용해서 하드코딩 변환 필요)
+                    const roleUiMap = {
+                        '활성': '프로젝트 매니저',
+                        '비활성': '사원'
+                    };
+
+                    // 최종적으로 '프로젝트 매니저' 또는 '사원' 리턴
+                    return roleUiMap[statusName] || statusName;
                 }
             },
             {

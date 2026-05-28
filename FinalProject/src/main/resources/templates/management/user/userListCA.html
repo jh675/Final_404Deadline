@@ -14,66 +14,73 @@
 <body>
 	<div layout:fragment="content">
 	<div id="wrapper">
-		<h3 class="mb-3">회원 목록</h3>
-		<div>
-			<form id="searchForm"
-			      th:action="@{/cadmin/userList}"
-			      method="get"
-			      th:object="${filter01}"
-			      class="d-flex align-items-end gap-3 mb-3 flex-wrap">
-
-			    <!-- 권한 -->
-			    <div>
-			        <label for="categoryCd" class="form-label">계정 권한</label>
-			
-			        <select id="categoryCd"
-			                th:field="*{prjManagerCd}"
-			                class="form-select">
-			            <option value="">전체</option>
-			            <option value="01ACTIVE">프로젝트 매니저</option>
-			            <option value="02ACTIVE">사원</option>
-			        </select>
-			    </div>
-			
-			    <!-- 검색 종류 -->
-			    <div>
-			        <label for="searchType" class="form-label">검색 조건</label>
-			        <select id="searchType"
-			                th:field="*{searchType}"
-			                class="form-select">
-			            <option value="">선택</option>
-			            <option value="login">아이디</option>
-			            <option value="name">이름</option>
-			            <option value="email">이메일</option>
-			        </select>
-			    </div>
-			    <!-- 검색어 -->
-			    <div>
-			        <label for="keyword" class="form-label">검색어</label>
-			        <input type="text"
-			               id="keyword"
-			               th:field="*{keyword}"
-			               class="form-control"
-			               placeholder="검색어 입력">
-			    </div>
-			    <!-- 버튼 -->
-			    <div class="d-flex gap-2">
-				    <button type="submit"
-				            class="btn btn-primary">
-				        검색
-				    </button>
-				    <a th:href="@{/cadmin/userList}"
-				       class="btn btn-outline-secondary">
-				        초기화
-				    </a>
-				</div>
-				<div id="searchWarning"
-				     class="text-danger small mt-1 d-none">
-					검색 조건을 선택해주세요.
-				</div>
-			</form>
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<h3 class="mb-3 fw-bold">회원 목록</h3>
+			<div class="position-relative">
+				<form id="searchForm"
+				      th:action="@{/cadmin/userList}"
+				      method="get"
+				      th:object="${filter01}"
+				      class="d-flex align-items-end gap-3 mb-3 flex-wrap">
+	
+				    <!-- 권한 -->
+				    <div class="d-flex align-items-center gap-2">
+				        <label for="categoryCd" 
+				        	   class="form-label mb-0 text-nowrap text-muted small">계정 권한</label>
+				        <select id="categoryCd"
+				                th:field="*{prjManagerCd}"
+				                class="form-select form-select-sm" 
+		                		style="width: 140px;">
+				            <option value="">전체</option>
+				            <option value="01ACTIVE">프로젝트 매니저</option>
+				            <option value="02ACTIVE">사원</option>
+				        </select>
+				    </div>
+				    
+				    <div class="vr mx-1 text-secondary"></div> 
+				
+				    <!-- 검색 종류 -->
+				    <div class="d-flex align-items-center gap-2">
+				        <label  for="searchType" 
+				        		class="form-label mb-0 text-nowrap text-muted small">검색 조건</label>
+				        <select id="searchType"
+				                th:field="*{searchType}"
+				                class="form-select form-select-sm" 
+		                		style="width: 110px;">
+				            <option value="">선택</option>
+				            <option value="login">아이디</option>
+				            <option value="name">이름</option>
+				            <option value="email">이메일</option>
+				        </select>
+				    </div>
+				    <!-- 검색어 -->
+				    <div>
+				        <input type="text"
+				               id="keyword"
+				               th:field="*{keyword}"
+				               class="form-control form-control-sm"
+				               placeholder="검색어 입력"
+				               style="width: 180px;">
+				    </div>
+				    <!-- 버튼 -->
+				    <div class="d-flex gap-2">
+					    <button type="submit"
+					            class="btn btn-sm btn-dark px-3">
+					        검색
+					    </button>
+					    <a th:href="@{/cadmin/userList}"
+					       class="btn btn-sm btn-outline-secondary px-3">
+					        초기화
+					    </a>
+					</div>
+				</form>
+					<div id="searchWarning"
+					     class="text-danger mt-1 d-none position-absolute w-100 text-end" 
+					     style="font-size: 0.8rem; top: 70%; right: 10px;">
+						검색 조건을 선택해주세요.
+					</div>
+			</div>
 		</div>
-		
 		<div id="grid"></div>
 		<div class="d-flex justify-content-between align-items-center mb-2">
 		    <div class="d-flex align-items-center gap-2">
@@ -109,6 +116,7 @@
 		<script
 			src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+		<script th:src="@{/js/common/gridTheme.js}"></script>
 		<script th:src="@{/js/management/userManageCA.js}"></script>
 	</div>
 </body>
