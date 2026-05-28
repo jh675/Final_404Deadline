@@ -16,15 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.example.demo.project.group.service.GroupListCriteria;
+import com.example.demo.project.group.service.*;
 import jakarta.servlet.http.HttpSession;
-import com.example.demo.project.group.service.GroupService;
-import com.example.demo.project.option.service.RoleGroupsCriteria;
-import com.example.demo.project.option.service.RoleInfoCriteria;
-import com.example.demo.project.option.service.RoleListCriteria;
-import com.example.demo.project.option.service.RoleRevokeResultVO;
-import com.example.demo.project.option.service.RoleService;
-import com.example.demo.project.option.service.RoleVO;
+import com.example.demo.project.option.service.*;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -47,12 +41,11 @@ public class RoleController {
         criteria.setPrjId(prjId);
         RoleVO search = criteria.toSearchVo();
         model.addAttribute("rows", roleService.selectRoleList(search));
-        model.addAttribute("prjId", prjId);
         model.addAttribute("permissionKey", search.getPermissionKey());
         model.addAttribute("permissionName", search.getPermissionName());
         model.addAttribute("createdFrom", search.getCreatedFrom());
         model.addAttribute("createdTo", search.getCreatedTo());
-        model.addAttribute("currentMenu", "role");
+        session.setAttribute("currentMenu", "role");
         return "project/role/roleManagement";
     }
 
@@ -67,15 +60,12 @@ public class RoleController {
             return "redirect:/management/project";
         }
         Long roleCd = criteria.getRoleCd();
-        model.addAttribute("prjId", prjId);
-        model.addAttribute("currentMenu", "role");
         List<RoleVO> allMenus = roleService.selectAllMenus();
 
         if (roleCd == null) {
             model.addAttribute("registerMode", true);
             model.addAttribute("roleNotFound", false);
             model.addAttribute("roleCd", null);
-            model.addAttribute("prjName", groupService.selectProjectName(prjId));
             model.addAttribute("menuSections", roleService.buildMenuSections(allMenus, Set.of()));
             return "project/role/roleManagementInfo";
         }

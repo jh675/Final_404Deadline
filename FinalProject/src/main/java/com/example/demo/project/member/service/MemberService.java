@@ -49,11 +49,12 @@ public interface MemberService {
             String prjStartDate,
             String prjEndDate);
 
-    /** 구성원 수정 — 종료일·소속 그룹 (투입 시작일 변경 없음) */
+    /** 구성원 수정 — 투입기간·소속 그룹 */
     void updateMember(
             Long prjId,
             Long userId,
             Long oldGrpId,
             Long grpId,
+            String prjStartDate,
             String prjEndDate);
 }

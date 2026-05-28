@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.demo.project.member.service.*;
+import com.example.demo.util.attach.service.AttachService;
+import com.example.demo.util.attach.service.AttachVO;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +31,7 @@ public class MemberController {
     private static final Logger log = LoggerFactory.getLogger(MemberController.class);
 
     private final MemberService memberService;
+    private final AttachService attachService;
 
     @GetMapping("/list")
     public String memberList(MemberListCriteria criteria, HttpSession session, Model model) {
@@ -39,12 +42,11 @@ public class MemberController {
         criteria.setPrjId(prjId);
         criteria.normalized();
         model.addAttribute("rows", memberService.selectProjectMemberList(criteria));
-        model.addAttribute("prjId", prjId);
         model.addAttribute("memberName", criteria.getMemberName());
         model.addAttribute("grpName", criteria.getGrpName());
         model.addAttribute("prjStartFrom", criteria.getPrjStartFrom());
         model.addAttribute("prjStartTo", criteria.getPrjStartTo());
-        model.addAttribute("currentMenu", "member");
+        session.setAttribute("currentMenu", "member");
         return "project/member/memberManagement";
     }
 
@@ -81,6 +83,10 @@ public class MemberController {
         model.addAttribute("editMode", editMode);
         model.addAttribute("viewMode", !editMode);
         model.addAttribute("detail", detail);
+        List<AttachVO> profileImages = attachService.selectAttachListByContainer("users", userId);
+        Long profileImageAttachId =
+                profileImages.isEmpty() ? null : profileImages.get(profileImages.size() - 1).getId();
+        model.addAttribute("profileImageAttachId", profileImageAttachId);
         model.addAttribute("pwUpdatedOnYmd", formatDateYmd(detail.getPwUpdatedOn()));
         model.addAttribute("lastLoginOnYmd", formatDateYmd(detail.getLastLoginOn()));
         if (editMode) {
@@ -97,20 +103,10 @@ public class MemberController {
 
     /** 구성원 등록 화면 — TUI Grid 기반 (memberJoin.html) */
     @GetMapping("/join")
-    public String memberJoin(HttpSession session, Model model) {
-        Long prjId = (Long) session.getAttribute("currentProjectId");
-        if (prjId == null) {
+    public String memberJoin(HttpSession session) {
+        if (session.getAttribute("currentProjectId") == null) {
             return "redirect:/management/project";
         }
-        ProjectPeriodVO period = memberService.selectProjectPeriod(prjId);
-        String prjName = period != null && period.getPrjName() != null
-                ? period.getPrjName()
-                : memberService.selectProjectName(prjId);
-        model.addAttribute("prjId", prjId);
-        model.addAttribute("prjName", prjName);
-        model.addAttribute("prjStartDate", period != null ? period.getStartDate() : null);
-        model.addAttribute("prjClosedDate", period != null ? period.getClosedDate() : null);
-        model.addAttribute("currentMenu", "member");
         return "project/member/memberJoin";
     }
 
@@ -149,7 +145,12 @@ public class MemberController {
                 return badRequest("요청이 올바르지 않습니다.");
             }
             memberService.updateMember(
-                    prjId, body.userId(), body.oldGrpId(), body.grpId(), body.prjEndDate());
+                    prjId,
+                    body.userId(),
+                    body.oldGrpId(),
+                    body.grpId(),
+                    body.prjStartDate(),
+                    body.prjEndDate());
             Map<String, Object> ok = new LinkedHashMap<>();
             ok.put("ok", true);
             ok.put("prjId", prjId);
@@ -283,7 +284,7 @@ public class MemberController {
     }
 
     public record MemberUpdateRequest(
-            Long userId, Long oldGrpId, Long grpId, String prjEndDate) {}
+            Long userId, Long oldGrpId, Long grpId, String prjStartDate, String prjEndDate) {}
 
     public record MemberRegisterRequest(
             Long userId, Long grpId, String prjStartDate, String prjEndDate) {}

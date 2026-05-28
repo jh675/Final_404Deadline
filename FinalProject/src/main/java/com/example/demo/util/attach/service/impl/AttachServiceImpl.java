@@ -64,6 +64,15 @@ public class AttachServiceImpl implements AttachService {
 		List<AttachVO> list = mapper.selectAttachList(tableName, containerId);
 		return list != null ? list : Collections.emptyList();
 	}
+	
+	@Override
+	public List<AttachVO> selectAttachListByContainer(String containerType, Long containerId) {
+		if (containerType == null || containerType.isBlank() || containerId == null) {
+			return Collections.emptyList();
+		}
+		List<AttachVO> list = mapper.selectAttachListByContainer(containerType, containerId);
+		return list != null ? list : Collections.emptyList();
+	}
 	// 첨부파일 삭제
 	@Override
 	public int deleteAttach(Long id) {

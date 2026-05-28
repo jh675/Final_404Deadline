@@ -16,6 +16,7 @@ import lombok.Setter;
 @Builder
 public class MemberIssueRowVO {
 
+    private Long issueId;
     private String priorityCd;
     private String subject;
     private String categoryCd;
