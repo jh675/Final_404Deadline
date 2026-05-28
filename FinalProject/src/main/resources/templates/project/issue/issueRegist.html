@@ -509,10 +509,10 @@
 				<p class="form-hint">10% 단위로만 조절됩니다.</p>
 			</div>
 
-			<label for="description">설명</label>
+			<label for="description">설명<span class="req">*</span></label>
 			<div class="field-wrap">
 				<textarea id="description" name="description" placeholder="설명 입력"
-					th:text="${issue != null and issue.description != null ? issue.description : ''}"></textarea>
+					th:text="${issue != null and issue.description != null ? issue.description : ''}" required="required"></textarea>
 			</div>
 		</div>
 
