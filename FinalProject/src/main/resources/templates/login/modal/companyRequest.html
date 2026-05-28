@@ -10,11 +10,15 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     
-                    <form th:action="@{/login/company/request}" method="post">
+                    <form th:action="@{/login/company/request}" method="post" id="companyRequestForm">
                         <div class="modal-body p-4">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">사업자번호 <span class="text-danger" style="color: #ff4d4f;">*</span></label>
-                                <input type="text" name="bizNo" class="form-control" placeholder="123-45-67890" required>
+                                <div class="input-group">
+                                    <input type="text" id="reqBizNo" name="bizNo" class="form-control" placeholder="123-45-67890" maxlength="12" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="btnCheckBizNo">중복확인</button>
+                                </div>
+                                <div id="bizNoFeedback" class="small mt-1"></div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">기업명 <span class="text-danger" style="color: #ff4d4f;">*</span></label>
@@ -47,6 +51,7 @@
                 </div>
             </div>
         </div>
+    <script th:src="@{/js/login/companyRequest.js}"></script>
     </div>
 </body>
 </html>
