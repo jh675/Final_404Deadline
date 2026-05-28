@@ -32,8 +32,8 @@ public class Ganttchartconttoller {
 
 	// 간트차트 페이지 접속
 	@GetMapping("/project/gantt/list")
-	public String ganttchartlist(Model model) {
-		model.addAttribute("currentMenu", "gantt");
+	public String ganttchartlist(HttpSession session) {
+		session.setAttribute("currentMenu", "gantt");
 		return "project/issue/ganttChart";  
 	}
 

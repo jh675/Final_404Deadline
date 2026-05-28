@@ -1,9 +1,19 @@
 package com.example.demo.project.group.mapper;
 
+import java.util.Date;
 import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import com.example.demo.project.group.service.*;
+
+import com.example.demo.project.group.service.GroupDetailVO;
+import com.example.demo.project.group.service.GroupInsertProcParam;
+import com.example.demo.project.group.service.GroupListCriteria;
+import com.example.demo.project.group.service.GroupMemberDetailRowVO;
+import com.example.demo.project.group.service.GroupMemberPickRowVO;
+import com.example.demo.project.group.service.GroupRoleDetailRowVO;
+import com.example.demo.project.group.service.GroupUpdateProcParam;
+import com.example.demo.project.group.service.ProjectGroupRowVO;
 
 /** 그룹 MyBatis — GRP 목록·연쇄 삭제 */
 @Mapper
@@ -43,4 +53,7 @@ public interface GroupMapper {
 
     /** DB {@code PROC_GRP_UPDATE} — memIds null이면 구성원 변경 없음 */
     void callProcGrpUpdate(GroupUpdateProcParam param);
+    
+ // 그룹 참여 감지용
+    List<GroupDetailVO> findByCreatedOnAfter(Date date);
 }

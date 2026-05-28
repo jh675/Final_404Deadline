@@ -18,4 +18,5 @@ public interface MilestoneService {
 	List<IssueSummaryVO> selectMilestoneNotInIssue(Long id);
 	Long updateMilestone(MilestoneVO milestoneVO);
 	Long getAvg(Long id);
+	Long getExpectedProgress(Long id);
 }

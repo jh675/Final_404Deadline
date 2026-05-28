@@ -147,6 +147,7 @@
 .toastui-calendar-see-more-container {
 	height: 200px !important;
 }
+
 </style>
 
 <script
@@ -359,7 +360,16 @@
 	//=========================================================================================
 	// 2. 서버에서 일정 불러오기
 	//=========================================================================================   
-    function loadEvents(typeCd = '') {
+    
+			// 종료일 하루 추가 
+	
+		function addDay(dateStr) {
+			const day = new Date(dateStr);
+			day.setDate(day.getDate() + 1);
+			return day.toISOString().split('T')[0];
+		
+		}
+		function loadEvents(typeCd = '') {
     	csrfFetch(`/calender/listJson?typeCd=${typeCd}`, { 
             headers: { 'X-Requested-With': 'XMLHttpRequest' } 
         })
@@ -373,8 +383,8 @@
                           : item.typeCd === '02CALTYPE' ? 'group' 
                           : item.typeCd === '03CALTYPE' ? 'company' : 'personal',
                 title: item.calText || '제목없음',
-                start: new Date(item.calStart),
-                end: new Date(item.calEnd),
+                start: item.calStart.split('T')[0],          
+                end: item.calEnd.split('T')[0],
                 extendedProps: {
                     calStart: item.calStart,
                     calEnd: item.calEnd,
@@ -391,6 +401,7 @@
             
             // 캘린더에 공휴일 일정 불러오기 
             return loadHoliday(calendar.getDate().getFullYear());
+ 
         });
     }
     
@@ -443,6 +454,7 @@
 
         // 부트스트랩 모달 인스턴스 생성 및 표시
         openModal('insertModalOverlay');
+        
     });
 
     
@@ -486,7 +498,8 @@
         const endDate = document.getElementById('ins_endDate').value;
         const startTime = document.getElementById('ins_calStart').value || '09:00:00';
         const endTime = document.getElementById('ins_calEnd').value || '18:00:00';
-		const sharingCd = document.querySelector('input[name="sharingCd"]').value;
+		const checkedRadio = document.querySelector('input[name="sharingCd"]:checked').value;
+        const sharingCd = checkedRadio ? checkedRadio.value : '02CALSHARE';
         // 등록 시 시간 표시 (선택한 날짜 + 시간)
         const calStart = `${startDate} ${startTime}`;
         const calEnd = `${endDate} ${endTime}`;
@@ -583,6 +596,8 @@
 	    // 값 강제 세팅
 	    selectElement.value = timeValue;
 	}
+	
+
 
     // 1) 일정 클릭 시 수정 모달 띄우기
     calendar.on('clickEvent', ({event}) => {
@@ -918,9 +933,7 @@
     	});
     	
       }
-		
-		
-	
+
 	//=========================================================================================
 	//9. 기타 함수 
 	//=========================================================================================	
@@ -951,6 +964,8 @@
         const typeCd = document.getElementById('typeCd').value;
         loadEvents(typeCd);
     }
+    
+ 
 	
 	
 	//=========================================================================================

@@ -46,7 +46,7 @@
 				<th:block sec:authorize="hasRole('ADMIN')">
 
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/company/list}">
+						<a class="nav-link" th:href="@{/admin/company/list}">
 							기업관리
 						</a>
 					</li>
@@ -104,10 +104,51 @@
 			        </div>
 			    </div>
 				
+				<input type="hidden" id="loginUserId" 
+       				   th:value="${#authentication != null and #authentication.principal != 'anonymousUser' ? #authentication.principal.username : 0}"/>
+				<!-- 🔔 알림 버튼 드롭다운 -->
+				<div class="dropdown me-2">
+				    <button class="btn btn-outline-secondary btn-sm position-relative" 
+				            type="button" 
+				            id="notificationBtn"
+				            data-bs-toggle="dropdown" 
+				            data-bs-auto-close="outside"
+				            aria-expanded="false">
+				        🔔
+				        <!-- 읽지 않은 알림 개수 뱃지 -->
+				        <span id="notificationBadge" 
+				              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+				              style="display:none; font-size:10px;">
+				            0
+				        </span>
+				    </button>
+				
+				    <!-- 드롭다운 알림 목록 -->
+				    <ul class="dropdown-menu dropdown-menu-end p-0"
+				        style="width:350px; max-height:400px; overflow-y:auto;">
+				
+				        <!-- 헤더 -->
+				        <li class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-light">
+				            <strong>🔔 알림</strong>
+				            <button class="btn btn-sm btn-link text-muted p-0" id="clearAllBtn">
+				                전체 삭제
+				            </button>
+				        </li>
+				
+				        <!-- 알림 목록 -->
+				        <div id="notificationList">
+				            <li class="text-center text-muted py-4" id="emptyNoti">
+				                새로운 알림이 없습니다
+				            </li>
+				        </div>
+				
+				    </ul>
+				</div>
+				
 			    <span>
 			        <strong sec:authentication="principal.name"></strong>님
 			    </span>
-			
+				
 			    <form th:action="@{/logout}" method="post">
 			        <button type="submit" class="btn btn-outline-danger btn-sm">
 			            로그아웃
@@ -226,6 +267,116 @@
 				        if(e.key === 'Enter') executeAiSearch();
 				    });
 				});
+			</script>
+			<!-- SSE 연결 스크립트 -->
+			<script th:inline="javascript">
+			document.addEventListener('DOMContentLoaded', function () {
+			
+				const userId = String(document.getElementById('loginUserId').value);
+				if (!userId || userId === "0") return;
+			
+			    // 비로그인이면 SSE 연결 안 함
+			    if (!userId) return;
+			
+			    const badge       = document.getElementById('notificationBadge');
+			    const list        = document.getElementById('notificationList');
+			    const emptyNoti   = document.getElementById('emptyNoti');
+			    const clearAllBtn = document.getElementById('clearAllBtn');
+			
+			    let unreadCount = 0;
+			
+			    function getIcon(message) {
+			        if (message.includes('이슈가 등록'))        return '🐛';
+			        if (message.includes('이슈 상태가 변경'))   return '🔄';
+			        if (message.includes('프로젝트 그룹'))      return '👥';
+			        if (message.includes('공지사항'))           return '📢';
+			        if (message.includes('프로젝트 진행상태')) return '📊';
+			        if (message.includes('회사 일정이 등록'))   return '📅';
+			        if (message.includes('1시간 후 일정'))      return '⏰';
+			        return '🔔';
+			    }
+			
+			    function addNotification(message) {
+			        emptyNoti.style.display = 'none';
+			
+			        const icon = getIcon(message);
+			        const time = new Date().toLocaleTimeString();
+			
+			        const item = document.createElement('li');
+			        item.className = 'dropdown-item border-bottom py-2 px-3';
+			        item.style.whiteSpace = 'normal';
+			        item.style.cursor = 'default';
+			        item.innerHTML = `
+			            <div class="d-flex justify-content-between align-items-start">
+			                <div>
+			                    <span>${icon}</span>
+			                    <small class="ms-1">${message}</small>
+			                </div>
+			                <button class="btn btn-sm btn-link text-muted p-0 ms-2 delete-btn" 
+			                        style="font-size:12px; flex-shrink:0;">✕</button>
+			            </div>
+			            <div class="text-muted mt-1" style="font-size:11px;">${time}</div>
+			        `;
+			
+			        item.querySelector('.delete-btn').addEventListener('click', function () {
+			            item.remove();
+			            unreadCount = Math.max(0, unreadCount - 1);
+			            updateBadge();
+			            checkEmpty();
+			        });
+			
+			        list.prepend(item);
+			        unreadCount++;
+			        updateBadge();
+			
+			        if (Notification.permission === 'granted') {
+			            new Notification(`${icon} 회사 알림`, { body: message });
+			        }
+			    }
+			
+			    function updateBadge() {
+			        if (unreadCount > 0) {
+			            badge.style.display = 'block';
+			            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+			        } else {
+			            badge.style.display = 'none';
+			        }
+			    }
+			
+			    function checkEmpty() {
+			        const items = list.querySelectorAll('.dropdown-item');
+			        if (items.length === 0) {
+			            emptyNoti.style.display = 'block';
+			        }
+			    }
+			
+			    clearAllBtn.addEventListener('click', function () {
+			        list.querySelectorAll('.dropdown-item').forEach(item => item.remove());
+			        unreadCount = 0;
+			        updateBadge();
+			        checkEmpty();
+			    });
+			
+			    document.getElementById('notificationBtn').addEventListener('click', function () {
+			        unreadCount = 0;
+			        updateBadge();
+			    });
+			
+			    if (Notification.permission === 'default') {
+			        Notification.requestPermission();
+			    }
+			
+			    // SSE 연결
+			    const eventSource = new EventSource(`/api/notifications/subscribe?userId=${userId}`);
+			
+			    eventSource.addEventListener('notification', function (event) {
+			        addNotification(event.data);
+			    });
+			
+			    eventSource.onerror = function () {
+			        console.warn('SSE 연결이 끊겼습니다. 재연결 시도 중...');
+			    };
+			});
 			</script>
 		</div>
 	</div>

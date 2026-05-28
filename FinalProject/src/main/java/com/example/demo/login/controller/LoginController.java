@@ -1,6 +1,8 @@
 package com.example.demo.login.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.company.service.CompanyVO;
+import com.example.demo.login.mapper.LoginMapper;
 import com.example.demo.login.service.LoginService;
 import com.example.demo.login.service.UserVO;
 import com.example.demo.management.userManage.service.UserManageVO;
@@ -24,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LoginController {
 	private final LoginService loginService;
+	private final LoginMapper loginMapper;
 	
 	@GetMapping("/")
 	public String main(Model model, HttpSession session) {
@@ -112,12 +116,27 @@ public class LoginController {
 		return "error/403";
 	}
 	
+	@GetMapping("/login/company/check-bizno")
+	@ResponseBody
+	public Map<String, Object> checkBizNo(@RequestParam("bizNo") String bizNo) {
+	    Map<String, Object> response = new HashMap<>();
+	    
+	    String statusCd = loginMapper.selectCompanyStatus(bizNo);
+	    
+	    if (statusCd != null) {
+	        response.put("exists", true);
+	        response.put("statusCd", statusCd);
+	    } else {
+	        response.put("exists", false);
+	    }
+	    
+	    return response;
+	}
+	
 	@PostMapping("/login/company/request")
 	public String requestCompanyRegistration(CompanyVO company, UserManageVO user) {
-	    // 💡 서비스 호출
 		loginService.requestCompanyRegistration(company, user);
 	    
-	    // 완료 후 다시 로그인 페이지로 보내면서 파라미터 전달 (예: alert 띄우기 용도)
 	    return "redirect:/login?reqSuccess=true";
 	}
 }

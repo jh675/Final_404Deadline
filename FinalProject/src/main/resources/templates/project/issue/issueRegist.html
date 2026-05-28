@@ -509,10 +509,10 @@
 				<p class="form-hint">10% 단위로만 조절됩니다.</p>
 			</div>
 
-			<label for="description">설명</label>
+			<label for="description">설명<span class="req">*</span></label>
 			<div class="field-wrap">
 				<textarea id="description" name="description" placeholder="설명 입력"
-					th:text="${issue != null and issue.description != null ? issue.description : ''}"></textarea>
+					th:text="${issue != null and issue.description != null ? issue.description : ''}" required="required"></textarea>
 			</div>
 		</div>
 
@@ -803,7 +803,7 @@
 		if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
 			headers[headerMeta.content] = tokenMeta.content;
 		}
-		var saveUrl = /*[[${issue != null and issue.id != null} ? @{/issue/update} : @{/issue/insert}]]*/ '/issue/insert';
+		var saveUrl = /*[[${issue != null and issue.id != null} ? @{/project/issue/update} : @{/project/issue/insert}]]*/ '/project/issue/insert';
 		fetch(saveUrl, {
 			method: 'POST',
 			headers: headers,
@@ -814,7 +814,7 @@
 				return;
 			}
 			if (res.ok) {
-				window.location.href = /*[[@{/issue/list}]]*/ '/issue/list';
+				window.location.href = /*[[@{/project/issue/list}]]*/ '/project/issue/list';
 				return;
 			}
 			alert('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');

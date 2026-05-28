@@ -20,7 +20,7 @@
 
 		<script th:inline="javascript">
 		const docsData = /*[[${list}]]*/ [];
-		
+		 
 		const grid = new tui.Grid({
 			el: document.getElementById('grid'), 
 			autowidth: true,
@@ -38,28 +38,45 @@
 					  formatter: ({ row, value }) => {
 
 							return `
-								<a href="/docs/form?id=${row.id}">
+								<a href="/project/docs/form?id=${row.id}">
 									${value}
 								</a>
 							`;
 						}},
-				    { header: '내용', name: 'description', width: 400, align:'center', sortable: true },
+						{ header: '첨부파일', 
+							  name: 'fileCount', 
+							  width: 100, 
+							  align: 'center',
+							  formatter: ({ row }) => {
+							      // 마이바티스 selectAll 쿼리에서 새로 생성한 file_count(자바 필드명 fileCount) 값을 검사합니다.
+							      if (row.fileCount > 0) {
+							          return '<span style="font-size: 16px; cursor: default;" title="첨부파일 있음">📎</span>';
+							      }
+							      return ''; // 첨부파일이 없으면 빈칸으로 표시
+							  }
+							},
+
 				    { header: '작성자', name: 'memId', width: 150, align:'center', sortable: true },
 				    { header: '작성일', name: 'createdOn', width: 150, align:'left', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') },
 				    { header: '수정',
-				       name: 'edit',
-				       width: 100, align:'center', sortable: true, 
-				       formatter: function() {
-				            return '<button class="btn btn-secondary btn-sm">수정</button>';
-				        }
-	            },
-				    { header: '삭제',
-						   name: 'deleteBtn',
-						   width: 100, align:'center', sortable: true, 
-						   formatter: function() {
-						        return '<button class="btn btn-danger btn-sm">삭제</button>';
-						    }
-	            }
+					       name: 'edit',
+					       width: 100, align:'center', sortable: true, 
+					       formatter: () => '<button class="btn btn-secondary btn-sm">수정</button>'
+		                  },
+
+	               { header: '삭제',
+	                  name: 'deleteBtn',
+	                  width: 100,
+	                  align:'center',
+	                  sortable: true,
+	                  formatter: ({ row }) => {
+	                      return '<button class="btn btn-danger btn-sm" ' +
+	                             'data-bs-toggle="modal" ' +
+	                             'data-bs-target="#deleteModal" ' +
+	                             'data-id="' + row.id + '">' +
+	                             '삭제</button>';
+	                         }
+                      }
 
 			],
 			rowHeaders: ['rowNum'],
@@ -70,25 +87,56 @@
 			}
 
 		});
-		grid.on('click', (ev) => {
+		
+        grid.on('click', (ev) => {
+            const row = grid.getRow(ev.rowKey);
+            if (!row) return;
 
-		    if (ev.columnName === 'edit') {
-		        const row = grid.getRow(ev.rowKey);
-		        location.href = '/docs/form?id=' + row.id;
+            // [수정] 클릭 시 모달창 대기 없이 즉시 수정 페이지로 이동시킵니다.
+            if (ev.columnName === 'edit') {
+                location.href = '/project/docs/form?id=' + row.id;
+            }
+            
+            // [삭제] 기존에 잘 작동하던 삭제 모달 주소 주입 코드는 그대로 유지합니다.
+            if (ev.columnName === 'deleteBtn') {
+                const buttonEl = ev.nativeEvent.target;
+                const docId = buttonEl.getAttribute('data-id');
+                if (docId) {
+                    document.getElementById('confirmDeleteLink').setAttribute(
+                        'onclick', 
+                        "location.href='/project/docs/delete?id=" + docId + "'"
+                    );
+                }
+            }
+        });
 
-		    }
-		    
-		    if (ev.columnName === 'deleteBtn') {
-		        const row = grid.getRow(ev.rowKey);
-		        if (confirm("정말로 이 문서를 삭제하시겠습니까?")) {
-		            location.href = '/docs/delete?id=' + row.id;
-		        }
-		    }    
 
-		});
-	</script>
+</script>
+		<div class="d-flex justify-content-end my-3">
+			<a th:href="@{/project/docs/register}" class="btn btn-primary">등록</a>
+		</div>
 
-		<a href="/docs/register" class="btn btn-primary"> 등록 </a>
+		<div th:replace="~{project/docs/modal/delete :: deleteModal}"></div>
+
+		<div th:if="${msg != null}" id="successNotify"
+			class="alert alert-success shadow"
+			style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 12px 25px; border-radius: 8px; font-weight: 600; background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;">
+			<span th:text="${msg}">성공 메시지</span>
+		</div>
+
+		<script>
+			// 화면이 로드되고 2.5초 뒤에 알림창을 화면에서 부드럽게 지워버립니다.
+			document.addEventListener("DOMContentLoaded", function() {
+				const notify = document.getElementById("successNotify");
+				if (notify) {
+					setTimeout(function() {
+						notify.style.transition = "opacity 0.5s ease";
+						notify.style.opacity = "0";
+						setTimeout(function() { notify.remove(); }, 500); 
+					}, 2500);
+				}
+			});
+		</script>
 	</div>
 </body>
 </html>

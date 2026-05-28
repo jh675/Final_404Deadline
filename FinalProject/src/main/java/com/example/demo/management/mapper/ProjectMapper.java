@@ -1,5 +1,6 @@
 package com.example.demo.management.mapper;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -35,4 +36,10 @@ public interface ProjectMapper {
 	List<GroupDetailVO> listGroup(GroupDetailVO gvo);
 	List<MemberDetailVO> listMember(MemberDetailVO mvo);
 	int projectUpdate(ProjectVO vo);
+	
+	// 프로젝트명 조회용
+	ProjectVO findById(Long prjId);
+
+	// 프로젝트 상태 변경 감지용
+	List<ProjectVO> findByUpdatedOnAfter(Date date);
 } 

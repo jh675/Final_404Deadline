@@ -21,7 +21,7 @@ import com.example.demo.project.milestone.service.MilestoneVO;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
-@RequestMapping("/api/milestone")
+@RequestMapping("/project/milestone/api")
 public class MilestoneRestController {
 
 	@Autowired
@@ -106,5 +106,10 @@ public class MilestoneRestController {
 	@GetMapping("/avg/{id}")
 	public Long getAvg(@PathVariable("id") Long id) {
 		return service.getAvg(id);
+	}
+
+	@GetMapping("/expected/{id}")
+	public Long getExpectedProgress(@PathVariable("id") Long id) {
+		return service.getExpectedProgress(id);
 	}
 }

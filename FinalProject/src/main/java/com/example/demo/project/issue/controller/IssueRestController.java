@@ -1,5 +1,7 @@
 package com.example.demo.project.issue.controller;
 
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,8 +13,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.login.service.UserVO;
@@ -21,9 +26,10 @@ import com.example.demo.project.issue.service.CommentInputVO;
 import com.example.demo.project.issue.service.CommentOutputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
+import com.example.demo.project.issue.service.IssueVulkVO;
 
 @RestController
-@RequestMapping("/issue/api")
+@RequestMapping("/project/issue/api")
 public class IssueRestController {
 
 	@Autowired
@@ -99,5 +105,58 @@ public class IssueRestController {
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(Map.of("ok", true, "message", "댓글이 등록되었습니다."));
+	}
+	
+	@PutMapping("/start-date")
+	public ResponseEntity<Map<String, Object>> registerStartDate(@RequestBody IssueVulkVO vulkVO) {
+		
+		UserVO loginUser = getLoginUser();
+		if(loginUser == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(Map.of("ok", false, "message", "로그인이 필요합니다."));
+		}
+		vulkVO.setUpdater(loginUser.getId());
+		Long count = issueService.registerStartDate(vulkVO);
+		if(count == null) {
+			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
+		}
+//		int updated = issueService.updateIssueStartDate(id);
+//		if (updated <= 0) {
+//			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
+//		}
+//		Map<String, Object> body = new LinkedHashMap<>();
+//		body.put("ok", true);
+//		body.put("id", id);
+//		body.put("registeredAt", new Date());
+		return ResponseEntity.ok(Map.of("ok", true, "message", count+"개의 이슈의의 시작일이 등록되었습니다."));
+	}
+
+	@PutMapping("/closed-date")
+	public ResponseEntity<Map<String, Object>> registerClosedDate(@RequestBody IssueVulkVO vulkVO) {
+		UserVO loginUser = getLoginUser();
+		if(loginUser == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(Map.of("ok", false, "message", "로그인이 필요합니다."));
+		}
+		vulkVO.setUpdater(loginUser.getId());
+		Long count = issueService.registerClosedDate(vulkVO);
+		if(count == null) {
+			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
+		}
+		return ResponseEntity.ok(Map.of("ok", true, "message", count+"개의 이슈의 종료일이 등록되었습니다."));
+	}
+	@PutMapping("/bulk")
+	public ResponseEntity<Map<String, Object>> bulk(@RequestBody IssueVulkVO vulkVO){
+		UserVO loginUser = getLoginUser();
+		if(loginUser == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(Map.of("ok", false, "message", "로그인이 필요합니다."));
+		}
+		vulkVO.setUpdater(loginUser.getId());
+		Long count = issueService.updateVulk(vulkVO);
+		if(count == null) {
+			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
+		}
+		return ResponseEntity.ok(Map.of("ok", true, "message", count+"개의 이슈가 수정되었습니다."));
 	}
 }

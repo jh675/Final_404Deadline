@@ -270,14 +270,14 @@
                 <th:block th:if="${breadcrumb != null and !breadcrumb.isEmpty()}">
                     <th:block th:each="crumb, stat : ${breadcrumb}">
                         <a th:if="${!stat.last}"
-                           th:href="@{/wiki/view(id=${crumb.id})}"
+                           th:href="@{/project/wiki/view(id=${crumb.id})}"
                            th:text="${crumb.title}">상위위키명</a>
                         <span th:if="${!stat.last}" class="sep">&gt;</span>
                         <span th:if="${stat.last}" th:text="${crumb.title}">지금위키명</span>
                     </th:block>
                 </th:block>
                 <th:block th:if="${breadcrumb == null or breadcrumb.isEmpty()}">
-                    <a th:href="@{/wiki/view(id=1)}">Top-level Wiki</a>
+                    <a th:href="@{/project/wiki/view(id=1)}">Top-level Wiki</a>
                     <span class="sep">&gt;</span>
                     <span>지금위키명</span>
                 </th:block>
@@ -286,11 +286,11 @@
             <div class="wiki-header-row">
                 <h1 class="wiki-title" th:text="${page != null ? page.title : '지금위키명'}">지금위키명</h1>
                 <div class="wiki-actions">
-                    <a class="wiki-btn wiki-btn-create" th:href="@{/wiki/register}">작성</a>
+                    <a class="wiki-btn wiki-btn-create" th:href="@{/project/wiki/register}">작성</a>
                     <a class="wiki-btn wiki-btn-edit"
-                       th:href="@{/wiki/register(id=${page.id != null ? page.id : 0})}">편집</a>
+                       th:href="@{/project/wiki/register(id=${page.id != null ? page.id : 0})}">편집</a>
                     <a class="wiki-btn wiki-btn-history"
-                       th:href="@{/wiki/history/{name}(name=${page.title})}">역사</a>
+                       th:href="@{/project/wiki/history/{name}(name=${page.title})}">역사</a>
                     <button type="button" class="wiki-btn wiki-btn-delete"
                             th:disabled="${hasChildren == true}"
                             th:attr="data-wiki-id=${page != null ? page.id : 0}"
@@ -303,7 +303,7 @@
                 최신 버전은
                 <strong th:text="|r${latestVersion}|">r2</strong>
                 입니다.
-                <a th:href="@{/wiki/view/{name}(name=${page.title})}">최신 문서 보기</a>
+                <a th:href="@{/project/wiki/view/{name}(name=${page.title})}">최신 문서 보기</a>
             </div>
 
             <!-- 5. 본문 (마크다운 → TOAST UI Viewer 렌더) -->
@@ -337,10 +337,10 @@
             <h3>사이드바</h3>
             <div class="index-title">색인</div>
             <ul>
-                <li><a th:href="@{/wiki}">첫페이지</a></li>
-                <li><a th:href="@{/wiki/index(type='title')}">제목별</a></li>
-                <li><a th:href="@{/wiki/index(type='date')}">날짜별</a></li>
-                <li><a th:href="@{/wiki/history/{name}(name=${page.title})}">문서 역사</a></li>
+                <li><a th:href="@{/project/wiki}">첫페이지</a></li>
+                <li><a th:href="@{/project/wiki/index(type='title')}">제목별</a></li>
+                <li><a th:href="@{/project/wiki/index(type='date')}">날짜별</a></li>
+                <li><a th:href="@{/project/wiki/history/{name}(name=${page.title})}">문서 역사</a></li>
             </ul>
         </aside>
     </div>

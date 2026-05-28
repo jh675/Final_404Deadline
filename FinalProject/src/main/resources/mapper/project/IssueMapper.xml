@@ -244,16 +244,46 @@
 	<!-- ===================================================== -->
 	<!-- 목록에서 시작일·완료일 등록 (당일 SYSDATE)                  -->
 	<!-- ===================================================== -->
-	<update id="updateIssueStartDate" parameterType="long">
+	<update id="registerStartDate" parameterType="IssueVulkVO">
 		UPDATE ISSUE
-		SET (START_DATE, UPDATED_ON) = (SELECT SYSDATE, SYSDATE FROM DUAL)
-		WHERE ID = #{id}
+		SET (START_DATE, UPDATED_ON,last_updater) = (SELECT SYSDATE, SYSDATE,#{updater} FROM DUAL)
+		WHERE ID IN 
+		<foreach collection="ids" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
+		and start_date is null
 	</update>
 
-	<update id="updateIssueClosedDate" parameterType="long">
+	<update id="registerClosedDate" parameterType="IssueVulkVO">
 		UPDATE ISSUE
-		SET (CLOSED_DATE, UPDATED_ON,STATUS_CD ,DONE_RATIO) = (SELECT SYSDATE, SYSDATE,'04ISSUESTATUS',100 FROM DUAL)
-		WHERE ID = #{id}
+		SET (CLOSED_DATE, UPDATED_ON,STATUS_CD ,DONE_RATIO,last_updater) = (SELECT SYSDATE, SYSDATE,'04ISSUESTAT',100,#{updater} FROM DUAL)
+		WHERE ID IN <foreach collection="ids" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
+		and closed_date is null
+	</update>
+
+	<update id="updateVulk" parameterType="IssueVulkVO">
+		UPDATE ISSUE
+		<set>
+			<if test="statusCd != null">
+			STATUS_CD = #{statusCd},
+			DONE_RATIO = 
+			 	CASE
+					WHEN #{statusCd} = '01ISSUESTAT' THEN 0
+					WHEN #{statusCd} IN ('03ISSUESTAT','04ISSUESTAT') THEN 100
+					WHEN #{statusCd} = '02ISSUESTAT' THEN
+					LEAST(90, GREATEST(10, ROUND(NVL(DONE_RATIO,0)/10)*10))
+				END,
+			</if>
+			<if test="priorityCd != null">PRIORITY_CD = #{priorityCd},</if>
+			<if test="categoryCd != null">CATEGORY_CD = #{categoryCd},</if>
+			UPDATED_ON = SYSDATE,
+			last_updater = #{updater}
+		</set>
+		WHERE ID IN <foreach collection="ids" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
 	</update>
 
 	<!-- ===================================================== -->
@@ -479,4 +509,6 @@
 		)
 		ORDER BY mem_id
 	</select>
+	
+
 </mapper>

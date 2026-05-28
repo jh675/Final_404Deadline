@@ -29,6 +29,7 @@ import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.member.service.MemberListCriteria;
 import com.example.demo.project.member.service.MemberService;
+import com.example.demo.project.member.service.ProjectMemberRowVO;
 import com.example.demo.project.milestone.service.MilestoneService;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
@@ -67,8 +68,9 @@ public class IssueController {
 		return (Long) session.getAttribute("currentProjectId");
 	}
 
-	@GetMapping("/issue/list")
+	@GetMapping("/project/issue/list")
 	public String issueList(Model model, @ModelAttribute("filter") IssueInputVO issueVO, HttpSession session) {
+		session.setAttribute("currentMenu", "issue"); // 대소문자 주의
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
 			return "redirect:/management/project";
@@ -77,13 +79,15 @@ public class IssueController {
 		MemberListCriteria filter = new MemberListCriteria();
 		filter.setPrjId(projectId);
 		List<IssueOutputVO> issueList = issueService.selectIssueList(issueVO);
-		model.addAttribute("members", memberService.selectProjectMemberList(filter));
+		List<ProjectMemberRowVO> memList=memberService.selectProjectMemberList(filter);
+		System.out.println(memList);
+		model.addAttribute("members", memList);
 		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issueList", issueList);
 		return "project/issue/issueList";
 	}
 
-	@GetMapping("/issue/detail")
+	@GetMapping("/project/issue/detail")
 	public String issueDetail(Model model, @RequestParam("id") Long id, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
@@ -91,7 +95,7 @@ public class IssueController {
 		}
 		IssueOutputVO issue = issueService.selectIssue(id);
 		if (issue == null || issue.getId() == null || !projectId.equals(issue.getPrjId())) {
-			return "redirect:/issue/list";
+			return "redirect:/project/issue/list";
 		}
 		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issue", issue);
@@ -115,27 +119,27 @@ public class IssueController {
 		return "project/issue/issueDetail";
 	}
 
-	@PostMapping("/issue/comment")
+	@PostMapping("/project/issue/comment")
 	public String insertComment(@ModelAttribute CommentInputVO vo) {
 		if (vo.getIssueId() == null) {
-			return "redirect:/issue/list";
+			return "redirect:/project/issue/list";
 		}
 		if (vo.getContent() != null) {
 			vo.setContent(vo.getContent().trim());
 		}
 		if (vo.getContent() == null || vo.getContent().isEmpty()) {
-			return "redirect:/issue/detail?id=" + vo.getIssueId();
+			return "redirect:/project/issue/detail?id=" + vo.getIssueId();
 		}
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null && auth.getPrincipal() instanceof UserVO u) {
 			vo.setMemId(u.getId());
 		}
 		issueService.insertComment(vo);
-		return "redirect:/issue/detail?id=" + vo.getIssueId();
+		return "redirect:/project/issue/detail?id=" + vo.getIssueId();
 	}
 
 	
-	@GetMapping("/issue/register")
+	@GetMapping("/project/issue/register")
 	public String issueRegister(Model model, @RequestParam(value = "id", required = false) Long id, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
@@ -149,7 +153,7 @@ public class IssueController {
 			//만약 값이 없다면 잘못된 경로(임의로 id값을 집어넣은경우)이므로
 			if (issue == null || issue.getId() == null || !projectId.equals(issue.getPrjId())) {
 				//리스트쪽으로 돌려보낸다
-				return "redirect:/issue/list";
+				return "redirect:/project/issue/list";
 			}
 		} else {
 			//id값이 없는경우 빈vo를 만든다
@@ -169,7 +173,7 @@ public class IssueController {
 		return "project/issue/issueRegist";
 	}
 
-	@PostMapping(value = "/issue/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = "/project/issue/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String issueInsert(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments,
 			HttpSession session) {
@@ -191,10 +195,10 @@ public class IssueController {
 		if (hasFiles && issueId != null) {
 			attachService.saveAndInsertAttachments(issueId, attachments, "04MODULE", "ISSUE");
 		}
-		return "redirect:/issue/list";
+		return "redirect:/project/issue/list";
 	}
 
-	@PostMapping(value = "/issue/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = "/project/issue/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String issueUpdate(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments,
 			HttpSession session) {
@@ -208,7 +212,7 @@ public class IssueController {
 			return "redirect:/";
 		}
 		if (issueVO.getId() == null) {
-			return "redirect:/issue/list";
+			return "redirect:/project/issue/list";
 		}
 		issueVO.setPrjId(projectId);
 		issueVO.setLastUpdater(loginUser.getId());
@@ -216,40 +220,16 @@ public class IssueController {
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
 			attachService.saveAndInsertAttachments(issueVO.getId(), attachments, "04MODULE", "ISSUE");
+		}else {
+			issueVO.setIsAttachCd("02ISATTACH");
 		}
 		issueService.updateIssue(issueVO);
-		return "redirect:/issue/detail?id=" + issueVO.getId();
+		return "redirect:/project/issue/detail?id=" + issueVO.getId();
 	}
 
-	@PostMapping("/issue/register-start-date")
-	@ResponseBody
-	public ResponseEntity<Map<String, Object>> registerStartDate(@RequestParam("id") Long id) {
-		int updated = issueService.updateIssueStartDate(id);
-		if (updated <= 0) {
-			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
-		}
-		Map<String, Object> body = new LinkedHashMap<>();
-		body.put("ok", true);
-		body.put("id", id);
-		body.put("registeredAt", new Date());
-		return ResponseEntity.ok(body);
-	}
+	
 
-	@PostMapping("/issue/register-closed-date")
-	@ResponseBody
-	public ResponseEntity<Map<String, Object>> registerClosedDate(@RequestParam("id") Long id) {
-		int updated = issueService.updateIssueClosedDate(id);
-		if (updated <= 0) {
-			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
-		}
-		Map<String, Object> body = new LinkedHashMap<>();
-		body.put("ok", true);
-		body.put("id", id);
-		body.put("registeredAt", new Date());
-		return ResponseEntity.ok(body);
-	}
-
-	@GetMapping("/issue/pivot")
+	@GetMapping("/project/issue/pivot")
 	public String issuePivot(Model model, HttpSession session) {
 
 		Long projectId = getCurrentProjectId(session);

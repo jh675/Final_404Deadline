@@ -70,4 +70,18 @@
     WHERE id = #{id}
    </delete>
    
+
+
+<!-- 1시간 전 알림용 -->
+<select id="findByCalStartBetween" resultType="calenderVO">
+    SELECT
+        ID AS id,
+        CAL_TEXT AS calText,
+        get_sub_code_name(CAL_TYPE) AS calType,
+        get_sub_code_name(TYPE_CD) AS typeCd,
+        CAL_START AS calStart
+    FROM CALENDER
+    WHERE CAL_START BETWEEN #{start} AND #{end}
+</select>
+   
  </mapper>

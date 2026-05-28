@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +17,8 @@ import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
 import jakarta.servlet.http.HttpSession;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+@RequestMapping("/project")
 @Controller
 public class DocsController {
 
@@ -64,13 +66,14 @@ public class DocsController {
 	public String register(
 	        DocsVO vo,
 	        HttpSession session,
-	        @RequestParam("attachments") MultipartFile[] attachments) {
+	        @RequestParam("attachments") MultipartFile[] attachments,
+	        RedirectAttributes rttr) {
 
 	    vo.setPrjId((Long) session.getAttribute("currentProjectId"));
 	    
 	    vo.setMemId((Long) session.getAttribute("memId"));
 	    
-	    // [최소한의 추가] 시스템 관리자 테스트 시 memId가 null로 넘어와 발생하는 ORA-01400 에러 방어
+	    // 시스템 관리자 테스트 시 memId가 null로 넘어와 발생하는 ORA-01400 에러 방어
 	    if (vo.getMemId() == null) {
 	        vo.setMemId(1L); // 데이터베이스에 존재하는 테스트용 회원 ID 번호 지정
 	    }
@@ -86,7 +89,9 @@ public class DocsController {
 	            "DOCUMENT"
 	    );
 
-	    return "redirect:/docs/list";
+	    rttr.addFlashAttribute("msg", "새로운 문서가 성공적으로 등록되었습니다.");
+	    
+	    return "redirect:/project/docs/list";
 	}
 	
 	@PostMapping("/docs/update")
@@ -102,10 +107,8 @@ public class DocsController {
 	        vo.setMemId(1L); 
 	    }
 
-	    
 	    docsService.update(vo);
 
-	   
 	    attactchservice.saveAndInsertAttachments(
 	            vo.getId(),
 	            attachments,
@@ -113,17 +116,15 @@ public class DocsController {
 	            "DOCUMENT"
 	    );
 
-	    return "redirect:/docs/list";
+	    return "redirect:/project/docs/list";
 	}
 	
 	@GetMapping("/docs/delete")
 	public String delete(@RequestParam("id") Long id) {
 	    
-	    
 	    docsService.delete(id);
 	    
-	    
-	    return "redirect:/docs/list";
+	    return "redirect:/project/docs/list";
 	}
 
 }

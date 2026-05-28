@@ -48,6 +48,24 @@
 		  AND CONTAINER_ID = #{containerId}
 		ORDER BY ID ASC
 	</select>
+	
+	<select id="selectAttachListByContainer" resultType="AttachVO">
+		SELECT
+			ID,
+			TABLE_NAME,
+			CONTAINER_ID,
+			CONTAINER_TYPE,
+			FILENAME,
+			DISK_FILENAME,
+			FILESIZE,
+			CONTENT_TYPE,
+			CREATED_ON,
+			DISK_DIRECTORY
+		FROM ATTACHMENTS
+		WHERE CONTAINER_TYPE = #{containerType}
+		  AND CONTAINER_ID = #{containerId}
+		ORDER BY ID ASC
+	</select>
 
 	<select id="selectAttach" resultType="AttachVO">
 		SELECT

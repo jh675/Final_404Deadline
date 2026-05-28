@@ -224,7 +224,7 @@
 					setErr("마감일은 시작일 이후여야 합니다."); return;
 				}
 				var isEdit = payload.id != null;
-				var url = "/api/milestone/milestone";
+				var url = "/project/milestone/api/milestone";
 				var method = isEdit ? "PUT" : "POST";
 				console.log(payload);
 				saveBtn.disabled = true;
@@ -261,7 +261,7 @@
 					if (!idVal) { setErr("삭제할 마일스톤을 선택하세요."); return; }
 					if (!window.confirm("이 마일스톤을 삭제할까요?")) return;
 					deleteBtn.disabled = true;
-					fetch("/api/milestone/milestone/" + encodeURIComponent(idVal), {
+					fetch("/project/milestone/api/milestone/" + encodeURIComponent(idVal), {
 						method: "DELETE",
 						headers: getCsrfHeaders()
 					})

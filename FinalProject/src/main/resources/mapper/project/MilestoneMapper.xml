@@ -23,6 +23,12 @@
 		where prj_id=#{id}
 	</select>
 
+	<select id="selectMilestoneById" resultType="MilestoneVO">
+		select id, prj_id prjId, name, start_date startDate, end_date endDate
+		  from milestone
+		 where id = #{id}
+	</select>
+
 	<select id="selectMilestoneIssueList" resultMap="MilestoneIssueResultMap">
 		select i.id id,
 		i.milestone_id,

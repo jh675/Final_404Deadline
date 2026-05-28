@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorate="~{layout/defaultLayout}">
+<head>
+<meta charset="UTF-8">
+<title>마이페이지</title>
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+</head>
+<body>
+	<div layout:fragment="content">
+		<div class="container py-4">
+
+			<!-- ===== 개인 영역 ===== -->
+			<h4 class="fw-bold mb-4">마이페이지</h4>
+			<div class="card mb-4 p-3">
+				<div class="d-flex justify-content-between align-items-center">
+					<div class="d-flex align-items-center gap-4">
+
+						<!-- 이름 / 역할 / 상태 -->
+						<div class="d-flex align-items-center gap-2 flex-wrap">
+							<strong class="fs-5" sec:authentication="principal.name"></strong>
+							<span class="badge bg-secondary"
+								sec:authentication="principal.adminNm"></span> <span
+								class="badge bg-warning text-dark"
+								sec:authentication="principal.statusNm"></span> <span
+								class="text-muted small ms-2"> 📞 <span
+								th:text="${#authentication.principal.tel}"></span>
+							</span> <span class="text-muted small ms-2"> 📧 <span
+								th:text="${#authentication.principal.email}"></span>
+							</span>
+
+							<!-- 구분선 -->
+							<div class="vr mx-2"></div>
+
+							<!-- 소속 프로젝트 -->
+							<span class="text-muted small fw-bold me-1">소속 프로젝트</span> <span
+								th:if="${#lists.isEmpty(projectList)}" class="text-muted small">참여
+								중인 프로젝트 없음</span> <span th:each="p : ${projectList}"
+								class="badge bg-primary me-1" th:text="${p.prjName}"></span>
+						</div>
+
+					</div>
+
+					<!-- 정보 수정 버튼 -->
+					<button type="button" class="btn btn-outline-secondary btn-sm"
+						data-bs-toggle="modal" data-bs-target="#editInfoModal">
+						정보 수정</button>
+				</div>
+			</div>
+			<!-- ===== 캘린더 / 간트차트 영역 ===== -->
+			<h5 class="fw-bold mb-3">일정</h5>
+			<div class="card mb-4 p-3">
+
+				<!-- 탭 버튼 -->
+				<ul class="nav nav-tabs mb-3" id="scheduleTabs">
+					<li class="nav-item">
+						<button class="nav-link active" data-bs-toggle="tab"
+							data-bs-target="#calenderTab">캘린더</button>
+					</li>
+					<li class="nav-item">
+						<button class="nav-link" data-bs-toggle="tab"
+							data-bs-target="#ganttTab">간트차트</button>
+					</li>
+				</ul>
+
+				<!-- 탭 내용 -->
+				<div class="tab-content">
+
+					<!-- 캘린더 탭 -->
+					<div class="tab-pane fade show active" id="calenderTab">
+						<!-- 월/주/일 뷰 전환 + 이전/다음 버튼 -->
+						<div class="d-flex align-items-center gap-2 mb-3">
+							<div class="btn-group">
+								<button type="button"
+									class="btn btn-outline-primary btn-sm view-btn active"
+									onclick="changeView('month')">월간</button>
+								<button type="button"
+									class="btn btn-outline-primary btn-sm view-btn"
+									onclick="changeView('week')">주간</button>
+								<button type="button"
+									class="btn btn-outline-primary btn-sm view-btn"
+									onclick="changeView('day')">일일</button>
+							</div>
+							<div class="d-flex align-items-center gap-1">
+								<button type="button" class="btn btn-outline-secondary btn-sm"
+									onclick="mypageCalendar.prev(); updateDateLabel()">&lt;</button>
+								<span class="fw-bold px-2" id="currentDate"
+									style="min-width: 90px; font-size: 14px;"></span>
+								<button type="button" class="btn btn-outline-secondary btn-sm"
+									onclick="mypageCalendar.next(); updateDateLabel()">&gt;</button>
+							</div>
+							<!-- 일정 유형 필터 -->
+							<select class="form-select form-select-sm ms-auto"
+								id="mypageTypeCd" onchange="filterMypageEvents()"
+								style="width: 100px;">
+								<option value="">전체</option>
+								<option value="01CALTYPE">개인일정</option>
+								<option value="02CALTYPE">그룹일정</option>
+								<option value="03CALTYPE">회사일정</option>
+							</select>
+						</div>
+						<!-- 캘린더 렌더링 영역 -->
+						<div id="mypageCalendar" style="height: 500px;"></div>
+					</div>
+
+					<!-- 간트차트 탭 (추후 작업) -->
+					<div class="tab-pane fade" id="ganttTab">
+						<p class="text-muted">간트차트 영역 (추후 작업)</p>
+					</div>
+
+				</div>
+			</div>
+
+			<hr class="my-4">
+
+			<!-- ===== 참여 프로젝트 영역 ===== -->
+			<h5 class="fw-bold mb-3">참여 프로젝트</h5>
+			<div class="table-responsive mb-4">
+				<table
+					class="table table-bordered table-hover text-center align-middle"
+					style="font-size: 14px;">
+					<thead class="table-dark">
+						<tr>
+							<th>프로젝트명</th>
+							<th>설명</th>
+							<th>진행상태</th>
+							<th>시작일</th>
+							<th>종료일</th>
+							<th>생성일</th>
+							<th>참가인원</th>
+							<th>상세페이지</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:if="${#lists.isEmpty(projectList)}">
+							<td colspan="8" class="text-muted py-4">참가중인 프로젝트가 없습니다.</td>
+						</tr>
+						<tr th:each="p : ${projectList}">
+							<td th:text="${p.prjName}"></td>
+							<td class="text-truncate" style="max-width: 200px;"
+								th:text="${p.prjDesc != null ? p.prjDesc : '-'}"></td>
+							<td></td>
+							<td></td>
+							<td
+								th:text="${p.closedDate != null ? #dates.format(p.closedDate, 'yyyy-MM-dd') : '-'}"></td>
+							<td
+								th:text="${p.createdOn != null ? #dates.format(p.createdOn, 'yyyy-MM-dd') : '-'}"></td>
+							<td></td>
+							<td><a th:href="@{/project/{id}(id=${p.id})}"
+								class="btn btn-outline-primary btn-sm">이동하기</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- ===== 담당 이슈 영역 (추후 작업) ===== -->
+			<h5 class="fw-bold mb-3">내 담당 이슈</h5>
+			<div class="card mb-4 p-3">
+				<p class="text-muted mb-0">담당 이슈 영역 (추후 작업)</p>
+			</div>
+
+			<!-- ===== 전체 이슈 영역 (추후 작업) ===== -->
+			<h5 class="fw-bold mb-3">이번주 마감 전체이슈</h5>
+			<div class="card mb-4 p-3">
+				<p class="text-muted mb-0">전체 이슈 영역 (추후 작업)</p>
+			</div>
+
+		</div>
+
+		<!-- ===== 내 정보 수정 모달 ===== -->
+		<div class="modal fade" id="editInfoModal" tabindex="-1">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">내 정보 수정</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="row">
+
+							<!-- 왼쪽 폼 -->
+							<div class="col-md-8">
+
+								<!-- 아이디 (수정 불가) -->
+								<div class="row mb-3 align-items-center">
+									<label class="col-sm-3 col-form-label">아이디</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control bg-light"
+											th:value="${#authentication.principal.login}" disabled>
+									</div>
+								</div>
+
+								<!-- 기업번호 (수정 불가) -->
+								<div class="row mb-3 align-items-center">
+									<label class="col-sm-3 col-form-label">기업번호</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control bg-light"
+											th:value="${#authentication.principal.bizNo}" disabled>
+									</div>
+								</div>
+
+								<!-- 이름 (수정 불가) -->
+								<div class="row mb-3 align-items-center">
+									<label class="col-sm-3 col-form-label">이름</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control bg-light"
+											th:value="${#authentication.principal.name}" disabled>
+									</div>
+								</div>
+
+								<!-- 이메일 (수정 가능) -->
+								<div class="row mb-3 align-items-center">
+									<label class="col-sm-3 col-form-label"> 이메일 <span
+										class="text-danger">*</span>
+									</label>
+									<div class="col-sm-9">
+										<input type="email" class="form-control" id="modal-email"
+											th:value="${#authentication.principal.email}">
+									</div>
+								</div>
+
+								<!-- 전화번호 (수정 가능) -->
+								<div class="row mb-3 align-items-center">
+									<label class="col-sm-3 col-form-label">전화번호</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control" id="modal-tel"
+											th:value="${#authentication.principal.tel}">
+									</div>
+								</div>
+
+								<!-- 비밀번호 (수정 가능) -->
+								<div class="row mb-3 align-items-center">
+									<label class="col-sm-3 col-form-label">비밀번호</label>
+									<div class="col-sm-9">
+										<input type="password" class="form-control"
+											id="modal-password" placeholder="변경할 비밀번호 입력 (미입력시 유지)">
+									</div>
+								</div>
+
+								<!-- 역할 (수정 가능) -->
+								<div class="row mb-3 align-items-center">
+									<label class="col-sm-3 col-form-label">역할</label>
+									<div class="col-sm-9">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="adminCd"
+												id="role-leader" value="LEADER"
+												th:checked="${#authentication.principal.adminCd == 'LEADER'}">
+											<label class="form-check-label" for="role-leader">프로젝트
+												리더</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="adminCd"
+												id="role-member" value="MEMBER"
+												th:checked="${#authentication.principal.adminCd == 'MEMBER'}">
+											<label class="form-check-label" for="role-member">팀원</label>
+										</div>
+									</div>
+								</div>
+
+								<!-- 계정 상태 (수정 가능) -->
+								<div class="row mb-3 align-items-center">
+									<label class="col-sm-3 col-form-label">계정 상태</label>
+									<div class="col-sm-9">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="statusCd"
+												id="status-active" value="ACTIVE"
+												th:checked="${#authentication.principal.statusCd == 'ACTIVE'}">
+											<label class="form-check-label" for="status-active">활성</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="statusCd"
+												id="status-inactive" value="INACTIVE"
+												th:checked="${#authentication.principal.statusCd == 'INACTIVE'}">
+											<label class="form-check-label" for="status-inactive">비활성화</label>
+										</div>
+									</div>
+								</div>
+
+							</div>
+
+							<!-- 오른쪽 이미지 영역 (추후 작업) -->
+							<div
+								class="col-md-4 d-flex align-items-start justify-content-center pt-2">
+								<div
+									class="border d-flex align-items-center justify-content-center text-muted"
+									style="width: 120px; height: 160px;">이미지</div>
+							</div>
+
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" id="btnUpdateInfo">수정</button>
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">닫기</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<th:block layout:fragment="script">
+		<script th:src="@{/js/mypage/mypage.js}"></script>
+	</th:block>
+	
+	<script>
+	
+	// =============================================
+	// 1. 마이페이지 캘린더 (조회 전용)
+	// =============================================
+		
+		 const Calendar = tui.Calendar;
+	
+    const calendar = new Calendar('#calendar', {
+        defaultView: 'month',
+        language: 'ko',
+        useFormPopup: false,   
+        useDetailPopup: true,
+        
+        week: {
+		  dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+        },
+        month: {
+		  dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+		  visibleEventCount: 5,
+        },
+        calendars: [
+        	{ id: 'holiday', name: '공휴일', color: '#fff', backgroundColor: '#ff4d4d', borderColor: '#ff4d4d' },
+            { id: 'personal', name: '개인일정', color: '#fff', backgroundColor: '#ff6b6b', borderColor: '#ff6b6b' },
+            { id: 'group',    name: '그룹일정', color: '#fff', backgroundColor: '#51cf66', borderColor: '#51cf66' },
+            { id: 'company',  name: '회사일정', color: '#fff', backgroundColor: '#339af0', borderColor: '#339af0' },
+        ],
+        template: {
+            time(event) {
+                return `<span>${event.title}</span>`;
+            }     
+        }
+    });
+    
+ // =============================================
+	// 1) 캘린더 일정 불러오기
+	// =============================================
+    function loadcalenderEvents(typeCd = '') {
+    	fetch(`/calendar/listJson?typeCd=${typeCd}`, { 
+            headers: { 'X-Requested-With': 'XMLHttpRequest' } 
+        })
+        .then(res => res.json())
+        .then(data => {
+            calendar.clear(); // 캘린더 초기화 
+            
+            const events = data.map(item => ({
+                id: String(item.id),
+                calendarId: item.typeCd === '01CALTYPE' ? 'personal' 
+                          : item.typeCd === '02CALTYPE' ? 'group' 
+                          : item.typeCd === '03CALTYPE' ? 'company' : 'personal',
+                title: item.calText || '제목없음',
+                start: new Date(item.calStart),
+                end: new Date(item.calEnd),
+            	isReadOnly: true 
+            }));
+            mypagecalendar.createEvents(events);
+            
+            // 캘린더에 공휴일 불러오기 
+            loadMypageHoliday(mypageCalendar.getDate().getFullYear());
+        });
+    }
+	
+  //=========================================================================================
+    // 2. 공휴일 불러오기
+	//=========================================================================================	
+
+	  function loadMypageHoliday(year) {
+		
+    	fetch(`/calendar/holiday/list?year=${year}`, {
+    		 headers: { 'X-Requested-With': 'XMLHttpRequest' }   	
+    	})
+    	.then(res => res.json())
+    	.then(data => {
+
+		  const holiday = data.map(h => ({
+				id: 'holiday_' + h.id,
+				calendarId: 'holiday',
+				title: h.holidayName,
+				start: `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}`,
+	            end:   `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}`,
+	            isAllday:true,
+	            category: 'allday',
+	            isReadOnly: true,
+	            color: '#ff4d4d',            
+	            backgroundColor: 'transparent', 
+	            borderColor: 'transparent'   
+		  }));
+    		MypageCalendar.createEvents(holiday);
+    	});
+    	
+      }
+  
+	  // 날짜 표시 업데이트
+	    function updateDateLabel() {
+	        const date = calendar.getDate();
+	        const year = date.getFullYear();
+	        const month = date.getMonth() + 1;
+	        document.getElementById('currentDate').textContent = `${year}년 ${month}월`;
+	    }
+		
+  
+		
+    
+	
+	</script>
+
+
+</body>
+</html>
