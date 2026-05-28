@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.example.demo.project.calender.service.CalenderVO;
 
@@ -20,7 +21,7 @@ public interface CalenderMapper {
 List<CalenderVO> findByCreatedOnAfter(Date date);
 
 //1시간 전 알림용
-List<CalenderVO> findByCalStartBetween(Date start, Date end);
+List<CalenderVO> findByCalStartBetween(@Param("start") Date start, @Param("end") Date end);
  
 }
 
