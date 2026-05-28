@@ -42,6 +42,9 @@
 
 	<insert id="insert"
 		parameterType="com.example.demo.project.docs.service.DocsVO">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+        SELECT document_seq.nextval FROM DUAL
+    </selectKey>
 		INSERT INTO document (
 		id,
 		prj_id,
@@ -51,7 +54,7 @@
 		created_on
 		)
 		VALUES (
-		document_seq.NEXTVAL,
+		#{id},
 		#{prjId},
 		#{memId},
 		#{title},

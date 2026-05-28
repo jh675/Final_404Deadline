@@ -20,7 +20,7 @@
 
 		<script th:inline="javascript">
 		const docsData = /*[[${list}]]*/ [];
-		
+		 
 		const grid = new tui.Grid({
 			el: document.getElementById('grid'), 
 			autowidth: true,
@@ -49,17 +49,26 @@
 				    { header: '수정',
 				       name: 'edit',
 				       width: 100, align:'center', sortable: true, 
-				       formatter: function() {
-				            return '<button class="btn btn-secondary btn-sm">수정</button>';
-				        }
-	            },
-				    { header: '삭제',
-						   name: 'deleteBtn',
-						   width: 100, align:'center', sortable: true, 
-						   formatter: function() {
-						        return '<button class="btn btn-danger btn-sm">삭제</button>';
-						    }
-	            }
+				       formatter: () => {
+				           return '<button class="btn btn-secondary btn-sm" ' +
+				                  'data-bs-toggle="modal" ' +
+				                  'data-bs-target="#editModal">' +
+				                  '수정</button>';
+				            }
+	                  },
+	               { header: '삭제',
+	                  name: 'deleteBtn',
+	                  width: 100,
+	                  align:'center',
+	                  sortable: true,
+	                  formatter: ({ row }) => {
+	                      return '<button class="btn btn-danger btn-sm" ' +
+	                             'data-bs-toggle="modal" ' +
+	                             'data-bs-target="#deleteModal" ' +
+	                             'data-id="' + row.id + '">' +
+	                             '삭제</button>';
+	                         }
+                      }
 
 			],
 			rowHeaders: ['rowNum'],
@@ -70,25 +79,90 @@
 			}
 
 		});
-		grid.on('click', (ev) => {
+		
+		let editId = null;
 
-		    if (ev.columnName === 'edit') {
-		        const row = grid.getRow(ev.rowKey);
-		        location.href = '/docs/form?id=' + row.id;
+        grid.on('click', (ev) => {
+            const row = grid.getRow(ev.rowKey);
+            if (!row) return;
 
-		    }
-		    
-		    if (ev.columnName === 'deleteBtn') {
-		        const row = grid.getRow(ev.rowKey);
-		        if (confirm("정말로 이 문서를 삭제하시겠습니까?")) {
-		            location.href = '/docs/delete?id=' + row.id;
+            // 수정 버튼 클릭 시 대상 ID 저장
+            if (ev.columnName === 'edit') {
+                editId = row.id; 
+            }
+            
+            // 삭제 버튼 클릭 시 대상 ID를 모달 버튼에 다이렉트 주입 
+            if (ev.columnName === 'deleteBtn') {
+                const buttonEl = ev.nativeEvent.target;
+                const docId = buttonEl.getAttribute('data-id');
+                if (docId) {
+                    document.getElementById('confirmDeleteLink').setAttribute(
+                        'onclick', 
+                        "location.href='/docs/delete?id=" + docId + "'"
+                    );
+                }
+            }
+        });
+		
+		// 등록
+		document.addEventListener('click', function (e) {
+		    if (e.target && e.target.id === 'confirmRegBtn') {
+		        
+		        // 이동하기 직전에 등록 모달의 흔적을 완전히 소멸
+		        const modalEl = document.getElementById('registerModal');
+		        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+		        if (modalInstance) {
+		            modalInstance.hide(); // 메모리에서 모달을 완벽히 닫아 잔상 삭제
 		        }
-		    }    
-
+		        
+		    }
 		});
-	</script>
 
-		<a href="/docs/register" class="btn btn-primary"> 등록 </a>
+		document.addEventListener('click', function (e) {
+		    if (e.target && e.target.id === 'confirmEditBtn') {
+		        if (editId) {
+		            
+		            const modalEl = document.getElementById('editModal');
+		            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+		            if (modalInstance) {
+		                modalInstance.hide(); 
+		            }
+
+		            location.href = '/docs/form?id=' + editId;
+		        }
+		    }
+		});
+
+
+</script>
+		<div class="d-flex justify-content-end my-3">
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+				data-bs-target="#registerModal">등록</button>
+		</div>
+		<div th:replace="~{project/docs/modal/delete :: deleteModal}"></div>
+		<div th:replace="~{project/docs/modal/register :: registerModal}"></div>
+		<div th:replace="~{project/docs/modal/edit :: editModal}"></div>
+
+		<div th:if="${msg != null}" id="successNotify"
+			class="alert alert-success shadow"
+			style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 12px 25px; border-radius: 8px; font-weight: 600; background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;">
+			<span th:text="${msg}">성공 메시지</span>
+		</div>
+
+
+		<script>
+			// 화면이 로드되고 2.5초 뒤에 알림창을 화면에서 부드럽게 지워버립니다.
+			document.addEventListener("DOMContentLoaded", function() {
+				const notify = document.getElementById("successNotify");
+				if (notify) {
+					setTimeout(function() {
+						notify.style.transition = "opacity 0.5s ease";
+						notify.style.opacity = "0";
+						setTimeout(function() { notify.remove(); }, 500); 
+					}, 2500);
+				}
+			});
+		</script>
 	</div>
 </body>
 </html>
