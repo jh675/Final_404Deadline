@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     companyRequestForm.addEventListener('submit', function(e) {
         if (!isBizNoVerified) {
 			// 사업자 번호 중복체크를 하지 않은 경우
-            e.preventDefault(); // 제출 차단
+            e.preventDefault();
 			reqBizNoInput.classList.remove('is-valid');
             reqBizNoInput.classList.add('is-invalid');
             bizNoFeedback.className = 'small mt-1 text-danger';
