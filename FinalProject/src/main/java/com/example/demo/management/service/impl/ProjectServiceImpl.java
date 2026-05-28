@@ -3,9 +3,11 @@ package com.example.demo.management.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.alarm.event.NotificationEvent;
 import com.example.demo.login.service.UserVO;
 import com.example.demo.management.mapper.ProjectMapper;
 import com.example.demo.management.service.ModulesVO;
@@ -24,6 +26,9 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Autowired
 	ProjectMapper projectMapper;
+	
+	@Autowired
+	private ApplicationEventPublisher eventPublisher;
 
 	@Override
 	public List<ProjectVO> listProject(ProjectVO vo) {
@@ -63,7 +68,11 @@ public class ProjectServiceImpl implements ProjectService {
 	        throw new IllegalStateException("생성된 프로젝트 ID를 조회할 수 없습니다.");
 	    }
 	    vo.setId(projectId);
-
+	    
+	    eventPublisher.publishEvent(new NotificationEvent(
+	            this,
+	            "프로젝트가 생성되었습니다: " + vo.getPrjName()
+	        ));
 	    
 	}
 	
@@ -109,6 +118,15 @@ public class ProjectServiceImpl implements ProjectService {
 	    if (moduleList != null && !moduleList.isEmpty()) {
 	        vo.setEnaId(String.join(",", moduleList));
 	    }
+	    
+	    if (vo.getPrjStatusCd() != null) {
+	        eventPublisher.publishEvent(new NotificationEvent(
+	            this,
+	            "프로젝트 진행상태가 변경되었습니다: "
+	            + vo.getPrjName() + " → " + vo.getPrjStatusCd()
+	        ));
+	    }
+	    
 	    return projectMapper.projectUpdate(vo);
 	}
 }

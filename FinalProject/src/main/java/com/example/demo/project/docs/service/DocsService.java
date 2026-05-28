@@ -9,4 +9,5 @@ public interface DocsService {
 	int delete(Long id);
 	void update(DocsVO vo);
 	int insert(DocsVO vo);
+	
 }

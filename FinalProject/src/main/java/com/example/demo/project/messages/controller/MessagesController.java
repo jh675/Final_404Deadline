@@ -55,7 +55,7 @@ public class MessagesController {
     @PostMapping("/messages/insert")
     public String insert(MessagesVO messages, 
             @RequestPart(value="attachments", required = false) MultipartFile[] attachments) {
-        
+        System.out.println(messages);
         messagesService.insert(messages);
         
         boolean hasFiles = attachService.hasAttachmentFiles(attachments);
@@ -152,16 +152,6 @@ public class MessagesController {
             e.printStackTrace();
         }
 
-        // redirect: 경로 뒤에 /project를 명시해 줍니다.
         return "redirect:/project/messages/list?boardId=" + boardId;
-    }
-    
-    private Long parentId; 
-
-    public Long getParentId() {
-        return parentId;
-    }
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
     }
 }
