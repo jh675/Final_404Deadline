@@ -102,7 +102,7 @@
   <body>
   <div layout:fragment="content">
     <h2>프로젝트</h2>
-    <a th:if="${#authentication.principal.adminNm == '기업관리자'}"
+    <a th:if="${#authentication.principal.adminNm == '기업관리자' || #authentication.principal.statusCd == '01ACTIVE'}"
        href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
     
     <!-- 1. id와 onchange 이벤트 추가 -->

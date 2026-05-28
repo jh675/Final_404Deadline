@@ -7,8 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.alarm.event.NotificationEvent;
+import com.example.demo.management.mapper.ProjectMapper;
+import com.example.demo.management.service.ProjectVO;
 import com.example.demo.project.history.service.HistoryVO;
 import com.example.demo.project.issue.mapper.IssueMapper;
 import com.example.demo.project.issue.service.CommentInputVO;
@@ -28,7 +32,10 @@ public class IssueServiceImpl implements IssueService {
 
 	@Autowired
 	IssueMapper mapper;
-
+	@Autowired
+	ProjectMapper projectMapper;
+	@Autowired private ApplicationEventPublisher eventPublisher;
+	
 	@Override
 	public List<IssueOutputVO> selectIssueList(IssueInputVO issueVO) {
 
@@ -52,11 +59,31 @@ public class IssueServiceImpl implements IssueService {
 	@Override
 	public Long insertIssue(IssueInputVO issueVO) {
 		mapper.insertIssue(issueVO);
+		
+		 // 알림 이벤트 발행
+	    ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId()); // ← mapper 사용
+	    String prjName = project != null ? project.getPrjName() : "알 수 없음";
+	    eventPublisher.publishEvent(new NotificationEvent(
+	        this,
+	        "이슈가 등록되었습니다: [" + prjName + "] " + issueVO.getSubject()
+	    ));
+		
 		return issueVO.getId();
 	}
 
 	@Override
 	public int updateIssue(IssueInputVO issueVO) {
+		
+		if (issueVO.getStatusCd() != null) {
+	        ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId());
+	        String prjName = project != null ? project.getPrjName() : "알 수 없음";
+	        eventPublisher.publishEvent(new NotificationEvent(
+	            this,
+	            "이슈 상태가 변경되었습니다: [" + prjName + "] "
+	            + issueVO.getSubject() + " → " + issueVO.getStatusCd()
+	        ));
+	    }
+		
 		return mapper.updateIssue(issueVO);
 	}
 
@@ -238,4 +265,7 @@ public class IssueServiceImpl implements IssueService {
 	public Long updateVulk(IssueVulkVO vulkVO) {
 		return mapper.updateVulk(vulkVO);
 	}
+	
+	
+	
 }
