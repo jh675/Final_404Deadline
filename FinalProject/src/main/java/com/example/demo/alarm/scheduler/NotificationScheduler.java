@@ -29,7 +29,7 @@ public class NotificationScheduler {
     // lastChecked 제거! DB 시간 기준으로만 처리
 
     // ✅ 이슈 등록 감지 (10초마다)
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 1000000)
     public void checkNewIssue() {
         List<AlarmIssueVO> newIssues = issueMapper.findByCreatedOnAfter(null);
         System.out.println("=== 새 이슈 개수: " + newIssues.size());
@@ -44,7 +44,7 @@ public class NotificationScheduler {
     }
 
     // 나머지 메서드들도 동일하게 null 전달
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 1000000)
     public void checkIssueStatusChanged() {
         List<AlarmIssueVO> changedIssues = issueMapper.findByUpdatedOnAfter(null);
         changedIssues.forEach(issue -> {
@@ -58,7 +58,7 @@ public class NotificationScheduler {
         });
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 1000000)
     public void checkGroupJoined() {
         List<GroupDetailVO> joined = groupMapper.findByCreatedOnAfter(null);
         joined.forEach(group ->
@@ -69,7 +69,7 @@ public class NotificationScheduler {
         );
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 1000000)
     public void checkProjectStatusChanged() {
         List<ProjectVO> changed = projectMapper.findByUpdatedOnAfter(null);
         changed.forEach(project ->
@@ -81,7 +81,7 @@ public class NotificationScheduler {
         );
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 1000000)
     public void checkNewSchedule() {
         List<CalenderVO> newSchedules = calenderMapper.findByCreatedOnAfter(null);
         newSchedules.forEach(cal ->
@@ -91,7 +91,7 @@ public class NotificationScheduler {
         );
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 6000000)
     public void checkScheduleReminder() {
         Date oneHourLater    = new Date(System.currentTimeMillis() + 60 * 60 * 1000);
         Date oneHourLaterEnd = new Date(System.currentTimeMillis() + 61 * 60 * 1000);
