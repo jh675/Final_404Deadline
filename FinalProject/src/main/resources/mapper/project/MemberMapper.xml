@@ -110,7 +110,7 @@
       U.EMAIL AS email,
       U.TEL AS tel,
       U.LOGIN AS login,
-      NULL AS lastLoginOn,
+      U.LAST_LOG_ON AS lastLoginOn,
       U.PW_UPDATED_ON AS pwUpdatedOn,
       P.PRJ_NAME AS prjName,
       TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate,
@@ -129,30 +129,24 @@
 
   <select id="selectMemberIssues" resultType="com.example.demo.project.member.service.MemberIssueRowVO">
     SELECT
+      I.ID AS issueId,
       get_sub_code_name(I.PRIORITY_CD) AS priorityCd,
       I.SUBJECT AS subject,
       get_sub_code_name(I.CATEGORY_CD) AS categoryCd,
       get_sub_code_name(I.STATUS_CD) AS statusCd,
-      NULL AS requesterName,
-      GET_USERID_TO_NAME(I.MEM_ID) AS assigneeName,
+      RW.NAME AS requesterName,
+      AU.NAME AS assigneeName,
       I.EST_START_DATE AS estStartDate,
       I.DUE_DATE AS dueDate,
       I.START_DATE AS startDate,
       I.CLOSED_DATE AS closedDate,
       I.DONE_RATIO AS doneRatio
     FROM ISSUE I
+    LEFT JOIN USERS AU ON AU.ID = I.MEM_ID
+    LEFT JOIN USERS RW ON RW.ID = I.WRITER
     WHERE I.PRJ_ID = #{prjId}
-      AND I.MEM_ID = (
-        SELECT M.ID
-        FROM MEMBER M
-        JOIN GRP G ON G.ID = M.GRP_ID
-        WHERE G.PRJ_ID = #{prjId}
-          AND M.USER_ID = #{userId}
-          AND M.GRP_ID = #{grpId}
-          AND M.PRJ_END_DATE IS NULL
-          AND G.STATUS_CD = '01ACTIVE'
-      )
-    ORDER BY I.PRIORITY_CD DESC, I.ID
+      AND I.MEM_ID = #{userId}
+    ORDER BY I.PRIORITY_CD ASC, I.DONE_RATIO ASC
   </select>
 
   <select id="countGrpInProject" resultType="int">
@@ -226,11 +220,12 @@
     END;
   </insert>
 
-  <!-- 구성원 수정 — 종료일·소속 그룹 (투입 시작일 변경 없음) -->
+  <!-- 구성원 수정 — 투입기간·소속 그룹 -->
   <update id="updateMember" parameterType="com.example.demo.project.member.service.MemberUpdateParam">
     UPDATE MEMBER M
     SET
       M.GRP_ID = #{grpId},
+      M.PRJ_START_DATE = TO_DATE(#{prjStartDate}, 'YYYY-MM-DD'),
       M.PRJ_END_DATE =
       <choose>
         <when test="prjEndDate != null and prjEndDate != ''">
@@ -242,7 +237,6 @@
       </choose>
     WHERE M.USER_ID = #{userId}
       AND M.GRP_ID = #{oldGrpId}
-      AND M.PRJ_END_DATE IS NULL
       AND EXISTS (
         SELECT 1
         FROM GRP G

@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 public class MemberInfoCriteria {
 
+    /** 목록 그리드 링크용(선택) — 조회는 세션 currentProjectId 기준 */
     private Long prjId;
     private Long userId;
     private Long grpId;

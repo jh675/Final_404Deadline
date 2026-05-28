@@ -10,9 +10,13 @@
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
     <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
     <title th:text="${editMode} ? '구성원 수정' : '구성원 상세'">구성원 상세</title>
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css" />
+    <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+    <script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.js"></script>
     <style>
       .mem-detail-form {
-        --mem-label-w: 9.75rem;
+        --mem-label-w: 7rem;
         --mem-input-w: 16rem;
         --mem-font-size: 0.8125rem;
         --mem-input-bg: #f5f5f5;
@@ -85,13 +89,14 @@
       }
       .mem-basic-layout {
         display: flex;
-        gap: 1.5rem;
+        gap: 0.45rem;
         align-items: flex-start;
       }
       .mem-profile-slot {
         flex: 0 0 9.5rem;
         width: 9.5rem;
-        height: 9.5rem;
+        height: 12rem;
+        margin-left: 0.6rem;
         border: 1px solid #d0d0d0;
         border-radius: 4px;
         background: #f5f5f5;
@@ -200,36 +205,15 @@
         white-space: nowrap;
         text-align: right;
       }
-      .mem-data-table-wrap {
-        overflow-x: auto;
+      .mem-section[aria-labelledby="mem-account-heading"] .mem-section__body,
+      .mem-section[aria-labelledby="mem-project-heading"] .mem-section__body {
+        padding-left: 1rem;
+      }
+      .mem-issue-grid {
         border: 1px solid #cfcfcf;
         border-radius: 4px;
+        overflow: hidden;
         background: #fff;
-      }
-      .mem-data-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.8125rem;
-        min-width: 72rem;
-      }
-      .mem-data-table th,
-      .mem-data-table td {
-        border: 1px solid #d8d8d8;
-        padding: 0.45rem 0.5rem;
-        text-align: center;
-        vertical-align: middle;
-        color: #333;
-        white-space: nowrap;
-      }
-      .mem-data-table thead th {
-        background: #f0f0f0;
-        font-weight: 600;
-      }
-      .mem-data-table tbody tr:nth-child(even) {
-        background: #fafafa;
-      }
-      .mem-data-table tbody td.empty {
-        color: #999;
       }
       .mem-empty-msg {
         margin: 0.5rem 0 0;
@@ -403,7 +387,15 @@
           <h2 class="mem-section__title" id="mem-basic-heading">기본정보</h2>
           <div class="mem-section__body">
             <div class="mem-basic-layout">
-              <div class="mem-profile-slot" aria-hidden="true" title="프로필 이미지 영역">이미지</div>
+              <div class="mem-profile-slot" title="프로필 이미지 영역">
+                <img
+                  th:if="${profileImageAttachId != null}"
+                  th:src="@{/download/{id}(id=${profileImageAttachId})}"
+                  alt="프로필 이미지"
+                  style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px"
+                />
+                <span th:if="${profileImageAttachId == null}" aria-hidden="true">이미지</span>
+              </div>
               <div class="mem-basic-fields mem-detail-form">
                 <div class="mem-field-row">
                   <label for="detailUserName">이름 <span class="req">*</span></label>
@@ -501,7 +493,8 @@
                   <input
                     type="date"
                     id="detailPrjStart"
-                    readonly
+                    th:readonly="${viewMode}"
+                    th:classappend="${editMode} ? 'mem-input--editable' : ''"
                     placeholder="연도-월-일"
                     th:value="${detail.prjStartDate}"
                   />
@@ -536,55 +529,10 @@
         <section th:if="${viewMode}" class="mem-section" aria-labelledby="mem-issues-heading">
           <h2 class="mem-section__title" id="mem-issues-heading">담당 이슈 정보</h2>
           <div class="mem-section__body">
-            <div class="mem-data-table-wrap">
-              <table class="mem-data-table" aria-label="담당 이슈 목록">
-                <thead>
-                  <tr>
-                    <th scope="col">우선순위</th>
-                    <th scope="col">이슈명</th>
-                    <th scope="col">이슈 타입</th>
-                    <th scope="col">이슈 상태</th>
-                    <th scope="col">이슈 신청자</th>
-                    <th scope="col">이슈 담당자</th>
-                    <th scope="col">시작예정일</th>
-                    <th scope="col">마감희망일</th>
-                    <th scope="col">시작일</th>
-                    <th scope="col">마감일</th>
-                    <th scope="col">진척율(%)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr th:each="issue, stat : ${issues}">
-                    <td th:text="${issue.priorityCd} ?: '-'">-</td>
-                    <td th:text="${issue.subject} ?: '-'">-</td>
-                    <td th:text="${issue.categoryCd} ?: '-'">-</td>
-                    <td th:text="${issue.statusCd} ?: '-'">-</td>
-                    <td th:text="${issue.requesterName != null and !#strings.isEmpty(issue.requesterName)} ? issue.requesterName : '-'">
-                      -
-                    </td>
-                    <td th:text="${issue.assigneeName} ?: '-'">-</td>
-                    <td th:text="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : '-'}">
-                      -
-                    </td>
-                    <td th:text="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : '-'}">
-                      -
-                    </td>
-                    <td th:text="${issue.startDate != null ? #dates.format(issue.startDate, 'yyyy-MM-dd') : '-'}">
-                      -
-                    </td>
-                    <td th:text="${issue.closedDate != null ? #dates.format(issue.closedDate, 'yyyy-MM-dd') : '-'}">
-                      -
-                    </td>
-                    <td th:text="${issue.doneRatio != null ? issue.doneRatio : '-'}">
-                      -
-                    </td>
-                  </tr>
-                  <tr th:if="${issues == null or issues.isEmpty()}">
-                    <td colspan="11" class="empty">담당 이슈가 없습니다.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <div id="memberIssueGrid" class="mem-issue-grid" aria-label="담당 이슈 목록"></div>
+            <script th:inline="javascript">
+              window.memberIssueGridRows = /*[[${issues}]]*/ [];
+            </script>
           </div>
         </section>
 
@@ -599,438 +547,11 @@
           th:if="${editMode}"
           id="memPageConfig"
           style="display: none"
-          th:attr="data-prj-id=${prjId},data-user-id=${userId},data-old-grp-id=${grpId},data-initial-end=${detail != null ? detail.prjEndDate : ''},data-initial-grp-id=${detail != null ? detail.grpId : ''},data-prj-start=${detail != null ? detail.prjStartDate : ''},data-prj-closed=${prjClosedDate}"
+          th:attr="data-prj-id=${prjId},data-user-id=${userId},data-old-grp-id=${grpId},data-initial-end=${detail != null ? detail.prjEndDate : ''},data-initial-grp-id=${detail != null ? detail.grpId : ''},data-initial-start=${detail != null ? detail.prjStartDate : ''},data-hire-date=${detail != null ? detail.hireDate : ''},data-prj-open=${session.project != null && session.project.startDate != null ? #dates.format(session.project.startDate, 'yyyy-MM-dd') : ''},data-prj-closed=${prjClosedDate != null ? prjClosedDate : (session.project != null && session.project.closedDate != null ? #dates.format(session.project.closedDate, 'yyyy-MM-dd') : '')}"
         ></div>
 
-        <script th:if="${editMode}">
-          (function () {
-            const cfg = document.getElementById("memPageConfig");
-            if (!cfg) return;
-
-            const prjId = Number(cfg.dataset.prjId || 0);
-            const pageUserId = cfg.dataset.userId
-              ? Number(cfg.dataset.userId)
-              : null;
-            const pageOldGrpId = cfg.dataset.oldGrpId
-              ? Number(cfg.dataset.oldGrpId)
-              : null;
-            const prjStartYmd = String(cfg.dataset.prjStart || "");
-            const prjClosedYmd = String(cfg.dataset.prjClosed || "");
-
-            function mountPickerOverlay(el) {
-              if (el && el.parentElement !== document.body) {
-                document.body.appendChild(el);
-              }
-            }
-
-            function attachPickerOpen(inputEl, openFn) {
-              if (!inputEl || typeof openFn !== "function") return;
-              inputEl.addEventListener("click", function (e) {
-                e.preventDefault();
-                openFn();
-              });
-            }
-
-            const prjStartInput = document.getElementById("detailPrjStart");
-            const prjEndInput = document.getElementById("detailPrjEnd");
-            const grpInput = document.getElementById("detailGrpName");
-            const grpIdInput = document.getElementById("detailSelectedGrpId");
-            let groupOverlay = document.getElementById("memGroupPickOverlay");
-            const groupPickList = document.getElementById("memGroupPickList");
-            const groupPickCancel = document.getElementById("btnGroupPickCancel");
-
-            mountPickerOverlay(groupOverlay);
-            const groupSearchType = document.getElementById("memGroupSearchType");
-            const groupSearchKeyword = document.getElementById(
-              "memGroupSearchKeyword",
-            );
-            let allGroups = [];
-
-            function includesKeyword(value, keyword) {
-              if (!keyword) return true;
-              const text =
-                value == null ? "" : String(value).trim().toLowerCase();
-              return text.indexOf(keyword) !== -1;
-            }
-
-            function filterGroups(rows) {
-              const type = groupSearchType ? groupSearchType.value : "grpName";
-              const keyword = groupSearchKeyword
-                ? groupSearchKeyword.value.trim().toLowerCase()
-                : "";
-              if (!keyword) return rows;
-              return rows.filter(function (r) {
-                if (type === "id") {
-                  return includesKeyword(r.id, keyword);
-                }
-                return includesKeyword(r.grpName, keyword);
-              });
-            }
-
-            function resetGroupSearch() {
-              if (groupSearchType) groupSearchType.value = "grpName";
-              if (groupSearchKeyword) groupSearchKeyword.value = "";
-            }
-
-            function normalizeYmd(value) {
-              if (value == null) return "";
-              const s = String(value).trim();
-              if (!s) return "";
-              if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-              const d = new Date(s);
-              if (isNaN(d.getTime())) return "";
-              const y = d.getFullYear();
-              const m = String(d.getMonth() + 1).padStart(2, "0");
-              const day = String(d.getDate()).padStart(2, "0");
-              return y + "-" + m + "-" + day;
-            }
-
-            const initialPrjEndYmd = normalizeYmd(cfg.dataset.initialEnd || "");
-            const initialGrpId = cfg.dataset.initialGrpId
-              ? Number(cfg.dataset.initialGrpId)
-              : null;
-
-            function syncPrjEndConstraints() {
-              if (!prjEndInput) return;
-              const start = prjStartInput
-                ? normalizeYmd(prjStartInput.value)
-                : normalizeYmd(prjStartYmd);
-              if (start) {
-                prjEndInput.min = start;
-              } else {
-                prjEndInput.removeAttribute("min");
-              }
-              if (prjClosedYmd) {
-                prjEndInput.max = prjClosedYmd;
-              } else {
-                prjEndInput.removeAttribute("max");
-              }
-              let end = normalizeYmd(prjEndInput.value);
-              if (start && end && end < start) {
-                end = start;
-                prjEndInput.value = end;
-              }
-              if (prjClosedYmd && end && end > prjClosedYmd) {
-                prjEndInput.value = prjClosedYmd;
-              }
-            }
-
-            function resolveGroupId(row) {
-              if (!row) return null;
-              const raw =
-                row.id != null && row.id !== ""
-                  ? row.id
-                  : row.grpId != null && row.grpId !== ""
-                    ? row.grpId
-                    : null;
-              if (raw == null) return null;
-              const n = Number(raw);
-              return isNaN(n) ? null : n;
-            }
-
-            function applyGroup(row) {
-              if (!row) return;
-              const gid = resolveGroupId(row);
-              if (grpInput) {
-                grpInput.value = row.grpName != null ? String(row.grpName) : "";
-              }
-              if (grpIdInput) {
-                grpIdInput.value = gid != null ? String(gid) : "";
-              }
-            }
-
-            /* ----- 프로젝트 내 그룹 선택 ----- */
-            function closeGroupPicker() {
-              if (!groupOverlay) return;
-              groupOverlay.classList.remove("is-open");
-              groupOverlay.setAttribute("aria-hidden", "true");
-            }
-
-            function renderGroupList(rows, emptyMessage) {
-              if (!groupPickList) return;
-              groupPickList.innerHTML = "";
-              if (!rows.length) {
-                const p = document.createElement("p");
-                p.className = "mem-picker__empty";
-                p.textContent = emptyMessage || "선택할 그룹이 없습니다.";
-                groupPickList.appendChild(p);
-                return;
-              }
-              let rendered = 0;
-              rows.forEach(function (r) {
-                const gid = resolveGroupId(r);
-                if (gid == null) return;
-                rendered += 1;
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = "mem-picker__item";
-                btn.dataset.grpId = String(gid);
-                btn.dataset.grpName = r.grpName || "";
-                const main = document.createElement("span");
-                main.textContent = r.grpName || "(이름 없음)";
-                btn.appendChild(main);
-                const sub = document.createElement("span");
-                sub.className = "mem-picker__item-sub";
-                sub.textContent = "그룹 ID: " + String(gid);
-                btn.appendChild(sub);
-                btn.addEventListener("click", function () {
-                  applyGroup(r);
-                  closeGroupPicker();
-                });
-                groupPickList.appendChild(btn);
-              });
-              if (rendered === 0) {
-                const p = document.createElement("p");
-                p.className = "mem-picker__empty";
-                p.textContent = "표시할 그룹 정보가 없습니다.";
-                groupPickList.appendChild(p);
-              }
-            }
-
-            function refreshGroupListView() {
-              const filtered = filterGroups(allGroups);
-              renderGroupList(
-                filtered,
-                allGroups.length
-                  ? "검색 결과가 없습니다."
-                  : "선택할 그룹이 없습니다.",
-              );
-            }
-
-            async function openGroupPicker() {
-			 
-              if (!groupOverlay || !groupPickList) return;
-              const pid = Number(prjId);
-              if (isNaN(pid)) return;
-              resetGroupSearch();
-              groupPickList.innerHTML = "불러오는 중…";
-              groupOverlay.classList.add("is-open");
-              groupOverlay.setAttribute("aria-hidden", "false");
-              try {
-                const res = await fetch(
-                  "/project/member/projectGroups",
-                  { credentials: "same-origin" },
-                );
-                const data = await res.json().catch(function () {
-                  return {};
-                });
-                allGroups =
-                  data && Array.isArray(data.content) ? data.content : [];
-                refreshGroupListView();
-              } catch (e) {
-                allGroups = [];
-                groupPickList.innerHTML = "";
-                const p = document.createElement("p");
-                p.className = "mem-picker__empty";
-                p.textContent = "그룹 목록을 불러오지 못했습니다.";
-                groupPickList.appendChild(p);
-              }
-            }
-
-            if (groupSearchType) {
-              groupSearchType.addEventListener("change", refreshGroupListView);
-            }
-            if (groupSearchKeyword) {
-              groupSearchKeyword.addEventListener("input", refreshGroupListView);
-            }
-
-            if (groupPickList) {
-              attachPickerOpen(grpInput, openGroupPicker);
-            }
-
-            if (groupPickCancel) {
-              groupPickCancel.addEventListener("click", closeGroupPicker);
-            }
-
-            if (groupOverlay) {
-              groupOverlay.addEventListener("click", function (e) {
-                if (e.target === groupOverlay) {
-                  closeGroupPicker();
-                }
-              });
-            }
-
-            if (prjEndInput) {
-              prjEndInput.addEventListener("change", syncPrjEndConstraints);
-              prjEndInput.addEventListener("input", syncPrjEndConstraints);
-            }
-            syncPrjEndConstraints();
-
-            function buildCsrfHeaders() {
-              const headers = { "Content-Type": "application/json" };
-              const tokenMeta = document.querySelector('meta[name="_csrf"]');
-              const headerMeta = document.querySelector(
-                'meta[name="_csrf_header"]',
-              );
-              if (
-                tokenMeta &&
-                headerMeta &&
-                tokenMeta.content &&
-                headerMeta.content
-              ) {
-                headers[headerMeta.content] = tokenMeta.content;
-              }
-              return headers;
-            }
-
-            function alertMsg(msg, title) {
-              if (window.MemberQuestionModal && window.MemberQuestionModal.alert) {
-                return window.MemberQuestionModal.alert(msg, title || "알림");
-              }
-              return Promise.resolve();
-            }
-
-            function confirmMsg(msg, title) {
-              if (window.MemberQuestionModal && window.MemberQuestionModal.confirm) {
-                return window.MemberQuestionModal.confirm(msg, title || "확인");
-              }
-              return Promise.resolve(false);
-            }
-
-            function isEditEndChanged(currentEndYmd) {
-              return normalizeYmd(currentEndYmd) !== normalizeYmd(initialPrjEndYmd);
-            }
-
-            function isEditGrpChanged(currentGrpId) {
-              const init =
-                initialGrpId != null && initialGrpId !== ""
-                  ? Number(initialGrpId)
-                  : NaN;
-              const cur = Number(currentGrpId);
-              if (isNaN(init) || isNaN(cur)) {
-                return false;
-              }
-              return init !== cur;
-            }
-
-            function buildEditConfirmMessage(endYmd, grpName, endChanged, grpChanged) {
-              const lines = ["변경사항은 다음과 같습니다."];
-              if (endChanged) {
-                const display = endYmd ? endYmd : "(없음)";
-                lines.push("- 종료일자: " + display);
-              }
-              if (grpChanged) {
-                const name =
-                  grpName && String(grpName).trim()
-                    ? String(grpName).trim()
-                    : "(이름 없음)";
-                lines.push("- 소속그룹: " + name);
-              }
-              return lines.join("\n");
-            }
-
-            const saveBtn = document.getElementById("btnMemberSave");
-            if (saveBtn) {
-              saveBtn.addEventListener("click", async function () {
-                const pid = Number(prjId);
-                const uid = Number(pageUserId);
-                const oldGid = Number(pageOldGrpId);
-                const gidRaw = grpIdInput && grpIdInput.value
-                  ? grpIdInput.value.trim()
-                  : "";
-                const gid = gidRaw ? Number(gidRaw) : NaN;
-                const start = prjStartInput
-                  ? normalizeYmd(prjStartInput.value)
-                  : "";
-                const end = prjEndInput
-                  ? normalizeYmd(prjEndInput.value)
-                  : "";
-
-                if (isNaN(pid)) {
-                  await alertMsg("프로젝트 ID가 올바르지 않습니다.", "알림");
-                  return;
-                }
-                if (isNaN(uid)) {
-                  await alertMsg("구성원 정보가 올바르지 않습니다.", "알림");
-                  return;
-                }
-                if (isNaN(oldGid)) {
-                  await alertMsg("기존 그룹 정보가 올바르지 않습니다.", "알림");
-                  return;
-                }
-                if (!gidRaw || isNaN(gid)) {
-                  await alertMsg("소속 그룹을 선택하세요.", "알림");
-                  return;
-                }
-                if (!start) {
-                  await alertMsg("프로젝트 투입 시작일 정보가 없습니다.", "알림");
-                  return;
-                }
-                if (end && end < start) {
-                  await alertMsg(
-                    "프로젝트 종료일은 투입 시작일 이후여야 합니다.",
-                    "알림",
-                  );
-                  return;
-                }
-                if (prjClosedYmd && end && end > prjClosedYmd) {
-                  await alertMsg(
-                    "프로젝트 종료일은 " + prjClosedYmd + " 이전이어야 합니다.",
-                    "알림",
-                  );
-                  return;
-                }
-
-                const grpName = grpInput
-                  ? String(grpInput.value || "").trim()
-                  : "";
-                const endChanged = isEditEndChanged(end);
-                const grpChanged = isEditGrpChanged(gid);
-                if (!endChanged && !grpChanged) {
-                  await alertMsg("변경된 내용이 없습니다.", "알림");
-                  return;
-                }
-
-                const confirmed = await confirmMsg(
-                  buildEditConfirmMessage(end, grpName, endChanged, grpChanged),
-                  "확인",
-                );
-                if (!confirmed) {
-                  return;
-                }
-
-                const payload = {
-                  userId: uid,
-                  oldGrpId: oldGid,
-                  grpId: gid,
-                  prjEndDate: end || null,
-                };
-
-                saveBtn.disabled = true;
-                try {
-                  const res = await fetch("/project/member/updateMember", {
-                    method: "POST",
-                    headers: buildCsrfHeaders(),
-                    credentials: "same-origin",
-                    body: JSON.stringify(payload),
-                  });
-                  const data = await res.json().catch(function () {
-                    return {};
-                  });
-                  if (!res.ok || !data || data.ok !== true) {
-                    const errText =
-                      (data && data.message) ||
-                      (res.status === 403
-                        ? "권한이 없거나 보안 토큰이 만료되었습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요."
-                        : "구성원 수정 중 오류가 발생했습니다.");
-                    await alertMsg(errText, "오류");
-                    return;
-                  }
-                  await alertMsg("구성원 정보가 수정되었습니다.", "알림");
-                  window.location.href =
-                    "/project/member/info?userId=" +
-                    encodeURIComponent(String(uid)) +
-                    "&grpId=" +
-                    encodeURIComponent(String(gid));
-                } catch (e) {
-                  await alertMsg("구성원 수정 중 오류가 발생했습니다.", "오류");
-                } finally {
-                  saveBtn.disabled = false;
-                }
-              });
-            }
-          })();
-        </script>
+        <script th:if="${editMode}" th:src="@{/js/member/memberManagementInfo.js}"></script>
+        <script th:if="${viewMode}" th:src="@{/js/member/memberIssueGrid.js}"></script>
       </th:block>
     </div>
   </body>

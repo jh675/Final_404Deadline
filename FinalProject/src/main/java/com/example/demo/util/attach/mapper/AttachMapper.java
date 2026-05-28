@@ -14,6 +14,10 @@ public interface AttachMapper {
     int insertAttach(AttachVO attachVO);
 
     List<AttachVO> selectAttachList(@Param("tableName") String tableName, @Param("containerId") Long containerId);
+    
+    List<AttachVO> selectAttachListByContainer(
+            @Param("containerType") String containerType,
+            @Param("containerId") Long containerId);
 
     int deleteAttach(@Param("id") Long id);
     
