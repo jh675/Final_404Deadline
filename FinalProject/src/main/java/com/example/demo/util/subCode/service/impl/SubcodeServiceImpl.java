@@ -20,4 +20,9 @@ public class SubcodeServiceImpl implements SubcodeService {
 	public List<SubcodeVO> getSubCodeList(String mCode) {
 		return subCodeMapper.getSubCodeList(mCode);
 	}
+	
+	@Override
+	public String selectScodeNm(String sCode) {
+		return subCodeMapper.selectScodeNm(sCode);
+	}
 }
