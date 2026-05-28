@@ -130,7 +130,16 @@
  	where id = #{id}
  </select>
  
- 
+ <!-- 프로젝트 상태 변경 감지용 -->
+<select id="findByUpdatedOnAfter" parameterType="java.util.Date" resultType="ProjectVO">
+    SELECT
+        ID AS id,
+        PRJ_NAME AS prjName,
+        get_sub_code_name(PRJ_STATUS_CD) AS prjStatusCd,
+        UPDATED_ON AS updatedOn
+    FROM PROJECT
+    WHERE UPDATED_ON > #{date}
+</select>
  
  
  </mapper>

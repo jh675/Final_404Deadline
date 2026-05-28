@@ -1,11 +1,13 @@
 package com.example.demo.project.issue.mapper;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.example.demo.alarm.service.AlarmIssueVO;
 import com.example.demo.project.history.service.HistoryVO;
 import com.example.demo.project.issue.service.CommentInputVO;
 import com.example.demo.project.issue.service.CommentOutputVO;
@@ -47,4 +49,10 @@ public interface IssueMapper {
     List<Map<String, Object>> getPivotStatus(@Param("prjId") Long prjId);
     List<Map<String, Object>> getPivotPriority(@Param("prjId") Long prjId);
     List<Map<String, Object>> getPivotCategory(@Param("prjId") Long prjId);
+    
+ // 새 이슈 감지용
+    List<AlarmIssueVO> findByCreatedOnAfter(Date date);
+
+    // 이슈 상태 변경 감지용
+    List<AlarmIssueVO> findByUpdatedOnAfter(Date date);
 }

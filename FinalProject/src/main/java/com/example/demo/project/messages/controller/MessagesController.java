@@ -22,73 +22,80 @@ import jakarta.servlet.http.HttpSession;
 public class MessagesController {
     
     @Autowired
-    private MessagesService messagesService; // 메시지 관리 서비스
+    private MessagesService messagesService;
     
     @Autowired
-    private BoardsService boardsService;     // 게시판 관리 서비스 
+    private BoardsService boardsService;
     
     @Autowired
-    private AttachService attachService;     // 첨부파일 관리 서비스
+    private AttachService attachService;
     
     //메시지 등록화면
     @GetMapping("/messages/register")
-    public String insertForm(Model model, @RequestParam("boardId") Long boardId) {
+    public String insertForm(Model model, 
+                             @RequestParam("boardId") Long boardId,
+                             @RequestParam(value = "parentId", required = false) Long parentId) {
         MessagesVO message = new MessagesVO();
         message.setBoardId(boardId); 
+        
+        if (parentId != null) {
+            MessagesVO parentMessage = messagesService.selectOne(parentId);
+            if (parentMessage != null) {
+                message.setTitle("[RE] " + parentMessage.getTitle());
+            }
+            model.addAttribute("parentId", parentId);
+        }
         
         model.addAttribute("boardId", boardId);
         model.addAttribute("message", message);
         return "project/messages/messagesRegister";
     }
     
-    //메시지 실제 등록처리
+    //메시지 실제 등록처리 (리다이렉트 주소 수정완료)
     @PostMapping("/messages/insert")
     public String insert(MessagesVO messages, 
             @RequestPart(value="attachments", required = false) MultipartFile[] attachments) {
         
-        // 새 메시지 db에 등록
         messagesService.insert(messages);
         
-        // 첨부파일 db에 등록
         boolean hasFiles = attachService.hasAttachmentFiles(attachments);
         if (hasFiles && messages.getId() != null) {
             attachService.saveAndInsertAttachments((long)messages.getId(), attachments, "01MODULE", "notice");
         }
         
-        // 토픽수 증가
         try {
-            // 현재 메시지가 등록된 게시판 정보 조회
             com.example.demo.project.boards.service.BoardsVO board = boardsService.selectOne(messages.getBoardId());
             if (board != null) {
-                Long currentCount = board.getTopicsCount(); // 기존 토픽 수 가져오기
+                Long currentCount = board.getTopicsCount();
                 
                 if (currentCount == null) {
-                    currentCount = 0L; // 값이 없으면 0으로 세팅
+                    currentCount = 0L;
                 }
                 
-                board.setTopicsCount(currentCount + 1L); // 기존수의 +1
-                boardsService.update(board);             // 변경된 정보 db저장
+                board.setTopicsCount(currentCount + 1L);
+                boardsService.update(board);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         
-        return "redirect:/messages/list?boardId=" + messages.getBoardId();
+        // redirect: 경로 뒤에 /project를 명시해 줍니다.
+        return "redirect:/project/messages/list?boardId=" + messages.getBoardId();
     }
     
-    // 메시지 목록 조회 및 하단 상세 내용/댓글 로드 매핑 (오류 수정 완료)
+    // 메시지 목록 조회 및 하단 상세 내용/댓글 로드 매핑
     @GetMapping("/messages/list")
     public String messagesList(Model model, 
                                @RequestParam("boardId") Long boardId, 
                                @RequestParam(value = "id", required = false) Long id, 
                                MessagesVO messages , 
                                HttpSession session) {
-    	session.setAttribute("currentMenu", "messages");
+        session.setAttribute("currentMenu", "messages");
         messages.setBoardId(boardId);
         
-        model.addAttribute("list", messagesService.selectAll(messages)); // 메시지 목록 데이터
+        model.addAttribute("list", messagesService.selectAll(messages));
         model.addAttribute("boardId", boardId);
-        model.addAttribute("board", boardsService.selectOne(boardId));   // 게시판 정보 
+        model.addAttribute("board", boardsService.selectOne(boardId));
         
         if (id != null) {
             model.addAttribute("message", messagesService.selectOne(id)); 
@@ -100,7 +107,7 @@ public class MessagesController {
     // 메시지 상세보기 화면 이동
     @GetMapping("/messages/detail")
     public String messagesDetail(Model model, @RequestParam("id") Long id) {
-        model.addAttribute("message", messagesService.selectOne(id)); // 특정메시지 조회
+        model.addAttribute("message", messagesService.selectOne(id));
         return "project/messages/messagesDetail";
     }
     
@@ -115,28 +122,27 @@ public class MessagesController {
         return "project/messages/messagesRegister"; 
     }
     
-    // 메세지 수정
+    // 메세지 수정 (리다이렉트 주소 수정완료)
     @PostMapping("/messages/update")
     public String modify(MessagesVO messages) {
-        messagesService.update(messages); // 메시지 데이터 내용 수정
-        return "redirect:/messages/list?boardId=" + messages.getBoardId();
+        messagesService.update(messages);
+        // redirect: 경로 뒤에 /project를 명시해 줍니다.
+        return "redirect:/project/messages/list?boardId=" + messages.getBoardId();
     }
 
-    // 메시지 삭제
+    // 메시지 삭제 (리다이렉트 주소 수정완료)
     @GetMapping("/messages/delete")
     public String delete(@RequestParam("id") Long id, @RequestParam("boardId") Long boardId) {
         
-        // 데이터를 db에서 삭제
         messagesService.delete(id);
         
         try {
-            // 메시지가 삭제된 게시판 정보 조회
             com.example.demo.project.boards.service.BoardsVO board = boardsService.selectOne(boardId);
             if (board != null) {
-                Long currentCount = board.getTopicsCount(); // 기존 토픽 수 가져오기
+                Long currentCount = board.getTopicsCount();
                 
                 if (currentCount != null && currentCount > 0L) {
-                    board.setTopicsCount(currentCount - 1L); // 기존 수에서 -1
+                    board.setTopicsCount(currentCount - 1L);
                 } else {
                     board.setTopicsCount(0L);
                 }
@@ -146,6 +152,16 @@ public class MessagesController {
             e.printStackTrace();
         }
 
-        return "redirect:/messages/list?boardId=" + boardId;
+        // redirect: 경로 뒤에 /project를 명시해 줍니다.
+        return "redirect:/project/messages/list?boardId=" + boardId;
+    }
+    
+    private Long parentId; 
+
+    public Long getParentId() {
+        return parentId;
+    }
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 }
