@@ -112,7 +112,7 @@
 
 			function loadIssues(milestoneId) {
 				selectEl.innerHTML = '<option value="">불러오는 중…</option>';
-				return fetch("/api/milestone/list/" + encodeURIComponent(milestoneId), {
+				return fetch("/project/milestone/api/list/" + encodeURIComponent(milestoneId), {
 					headers: { Accept: "application/json" },
 				})
 					.then(function (r) { return r.ok ? r.json() : []; })
@@ -163,7 +163,7 @@
 				if (!payload.typeCd)          { setErr("유형을 선택하세요."); return; }
 
 				saveBtn.disabled = true;
-				fetch("/api/milestone/timeline", {
+				fetch("/project/milestone/api/timeline", {
 					method: "POST",
 					headers: getApiJsonHeaders(),
 					body: JSON.stringify(payload),

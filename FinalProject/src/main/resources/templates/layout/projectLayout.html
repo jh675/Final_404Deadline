@@ -83,18 +83,18 @@
 
                     <a th:if="${mod1.enaNameCd == '06MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${session.currentMenu == 'wiki' ? 'active fw-bold' : ''}" 
-                       th:href="@{/wiki}">위키</a>
+                       th:classappend="${currentMenu == 'wiki' ? 'active fw-bold' : ''}" 
+                       th:href="@{/project/wiki}">위키</a>
 
                     <a th:if="${mod1.enaNameCd == '04MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${session.currentMenu == 'issue' ? 'active fw-bold' : ''}" 
-                       th:href="@{/issue/list}">이슈</a>
+                       th:classappend="${currentMenu == 'issue' ? 'active fw-bold' : ''}" 
+                       th:href="@{/project/issue/list}">이슈</a>
 
                     <a th:if="${mod1.enaNameCd == '05MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${session.currentMenu == 'milestone' ? 'active fw-bold' : ''}" 
-                       th:href="@{/milestone}">마일스톤</a>
+                       th:classappend="${currentMenu == 'milestone' ? 'active fw-bold' : ''}" 
+                       th:href="@{/project/milestone}">마일스톤</a>
                     
                     <a th:if="${mod1.enaNameCd == '08MODULE'}" 
                        class="nav-link" 

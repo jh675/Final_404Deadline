@@ -326,7 +326,7 @@
                 th:unless="${page != null and page.id != null}">위키 작성</h4>
 
             <form id="wikiForm" class="wiki-form-card" method="post" enctype="multipart/form-data"
-                  th:action="${page != null and page.id != null} ? @{/wiki/update} : @{/wiki/save}">
+                  th:action="${page != null and page.id != null} ? @{/project/wiki/update} : @{/project/wiki/save}">
                 <input type="hidden" name="id" th:value="${page != null ? page.id : ''}">
                 <input type="hidden" name="pageId" th:if="${page != null and page.pageId != null}"
                        th:value="${page.pageId}">
@@ -416,8 +416,8 @@
 
                 <!-- 7·8. 작성 / 취소 -->
                 <div class="wiki-form-actions">
-                    <a class="btn-cancel" th:if="${page != null and page.id != null}" th:href="@{/wiki/view(id=${page.id})}">취소</a>
-                    <a class="btn-cancel" th:unless="${page != null and page.id != null}" th:href="@{/wiki/view}">취소</a>
+                    <a class="btn-cancel" th:if="${page != null and page.id != null}" th:href="@{/project/wiki/view(id=${page.id})}">취소</a>
+                    <a class="btn-cancel" th:unless="${page != null and page.id != null}" th:href="@{/project/wiki/view}">취소</a>
                     <button type="submit" class="btn-submit"
                             th:text="${page != null and page.id != null} ? '수정' : '작성'">작성</button>
                 </div>
@@ -428,9 +428,9 @@
             <h3>사이드바</h3>
             <div class="index-title">색인</div>
             <ul>
-                <li><a th:href="@{/wiki/view(start=true)}">첫페이지</a></li>
-                <li><a th:href="@{/wiki/index(type='title')}">제목별</a></li>
-                <li><a th:href="@{/wiki/index(type='date')}">날짜별</a></li>
+                <li><a th:href="@{/project/wiki/view(start=true)}">첫페이지</a></li>
+                <li><a th:href="@{/project/wiki/index(type='title')}">제목별</a></li>
+                <li><a th:href="@{/project/wiki/index(type='date')}">날짜별</a></li>
             </ul>
         </aside>
     </div>
@@ -520,7 +520,7 @@
                     btnTitleCheck.disabled = true;
                     setTitleMsg('확인 중...', null);
 
-                    fetch('/wiki/check?name=' + encodeURIComponent(title))
+                    fetch('/project/wiki/check?name=' + encodeURIComponent(title))
                         .then(function (res) {
                             if (res.ok) {
                                 titleChecked = true;

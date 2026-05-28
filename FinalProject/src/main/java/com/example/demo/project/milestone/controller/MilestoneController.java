@@ -10,11 +10,12 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class MilestoneController {
 
-	@GetMapping("/milestone")
+	@GetMapping("/project/milestone")
 	public String viewMilestone(
 			@RequestParam(value = "prjId", required = false) Long prjId,
 			HttpSession session,
 			Model model) {
+		session.setAttribute("currentMenu", "milestone");
 		if (prjId == null) {
 			prjId = (Long) session.getAttribute("currentProjectId");
 		}
@@ -27,7 +28,7 @@ public class MilestoneController {
 	}
 
 	/** 통합 UI 미리보기 — 더미 데이터 (API 미연동) */
-	@GetMapping("/milestone/demo")
+	@GetMapping("/project/milestone/demo")
 	public String viewMilestoneDemo(
 			@RequestParam(value = "prjId", required = false) Long prjId,
 			Model model) {

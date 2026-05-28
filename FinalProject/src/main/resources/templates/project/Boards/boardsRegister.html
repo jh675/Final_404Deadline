@@ -32,7 +32,7 @@
     </div>
 
     <div class="card form-card-mini p-4">
-        <form th:action="${boards.id == null or boards.id == 0} ? @{/boards/insert} : @{/boards/modify}" th:object="${boards}" method="post">
+        <form th:action="${boards.id == null or boards.id == 0} ? @{/project/board/insert} : @{/project/board/modify}" th:object="${boards}" method="post">
             
             <input type="hidden" name="prjId" value="4" />
             <input type="hidden" th:field="*{id}" />
@@ -48,7 +48,7 @@
             </div>
 
             <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                <button type="button" class="btn btn-light border btn-cancel-sm" onclick="location.href='/boards/list'">취소</button>
+                <button type="button" class="btn btn-light border btn-cancel-sm" onclick="location.href='/project/board/list'">취소</button>
                 <button type="submit" class="btn btn-green-sm shadow-sm" 
                         th:text="${boards.id == null or boards.id == 0} ? '등록' : '수정'">등록</button>
             </div>
