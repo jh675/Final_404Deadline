@@ -353,7 +353,7 @@
 	// 1) 캘린더 일정 불러오기
 	// =============================================
     function loadcalenderEvents(typeCd = '') {
-    	csrfFetch(`/calender/listJson?typeCd=${typeCd}`, { 
+    	fetch(`/calendar/listJson?typeCd=${typeCd}`, { 
             headers: { 'X-Requested-With': 'XMLHttpRequest' } 
         })
         .then(res => res.json())
@@ -383,7 +383,7 @@
 
 	  function loadMypageHoliday(year) {
 		
-    	csrfFetch(`/holiday/list?year=${year}`, {
+    	fetch(`/calendar/holiday/list?year=${year}`, {
     		 headers: { 'X-Requested-With': 'XMLHttpRequest' }   	
     	})
     	.then(res => res.json())

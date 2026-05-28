@@ -4,13 +4,23 @@
 <mapper
 	namespace="com.example.demo.project.docs.mapper.DocsMapper">
 
-	<select id="selectAll">
-		SELECT *
+		<select id="selectAll" resultType="com.example.demo.project.docs.service.DocsVO">
+		SELECT 
+			id,
+			prj_id AS prjId,
+			mem_id AS memId,
+			title,
+			description,
+			created_on AS createdOn,
+			(SELECT COUNT(*) 
+			 FROM ATTACHMENTS 
+			 WHERE TABLE_NAME = '07MODULE' 
+			   AND CONTAINER_ID = document.id) AS file_count
 		FROM document
-		where prj_id = #{prjId}
-		ORDER BY
-		id desc
+		WHERE prj_id = #{prjId}
+		ORDER BY id DESC
 	</select>
+
 
 	<select id="selectOne" parameterType="long"
 		resultType="com.example.demo.project.docs.service.DocsVO">

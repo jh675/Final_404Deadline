@@ -25,8 +25,9 @@ public class AiSearchServiceImpl {
 	private final IssueMapper issueMapper;
 	private final ProjectMapper projectMapper;
 	private final CalenderMapper calenderMapper;
-	private final GeminiApiClient geminiApiClient;
+//	private final GptApiClient gptApiClient;
 	private final SubcodeService subcodeService;
+	private final GeminiApiClient geminiApiClient;
 
 	public String processIntelligentSearch(String userMessage, Long userId, Long prjId) {
 
@@ -183,6 +184,7 @@ public class AiSearchServiceImpl {
 	            today, contextData.toString(), userMessage
 	        );
 
+//		return gptApiClient.callGpt(finalPrompt);
 		return geminiApiClient.callGemini(finalPrompt);
 	}
 
@@ -194,6 +196,7 @@ public class AiSearchServiceImpl {
 				+ "- 둘 다 묻거나, '오늘 뭐해야돼?', '요약해줘' 같이 포괄적으로 물어보면: ALL\n\n" + "사용자 질문: \"%s\"\n\n" + "대답:", userMessage);
 
 		try {
+//			String intent = gptApiClient.callGpt(prompt).trim().toUpperCase();
 			String intent = geminiApiClient.callGemini(prompt).trim().toUpperCase();
 
 			// 안전장치 (AI의 의도파악이 정확하지 않을 경우를 대비)

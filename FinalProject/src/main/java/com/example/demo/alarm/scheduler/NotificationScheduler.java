@@ -29,7 +29,7 @@ public class NotificationScheduler {
    
     
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 6000000)
     public void checkScheduleReminder() {
         Date oneHourLater    = new Date(System.currentTimeMillis() + 60 * 60 * 1000);
         Date oneHourLaterEnd = new Date(System.currentTimeMillis() + 61 * 60 * 1000);

@@ -29,6 +29,7 @@ import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.member.service.MemberListCriteria;
 import com.example.demo.project.member.service.MemberService;
+import com.example.demo.project.member.service.ProjectMemberRowVO;
 import com.example.demo.project.milestone.service.MilestoneService;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
@@ -78,7 +79,9 @@ public class IssueController {
 		MemberListCriteria filter = new MemberListCriteria();
 		filter.setPrjId(projectId);
 		List<IssueOutputVO> issueList = issueService.selectIssueList(issueVO);
-		model.addAttribute("members", memberService.selectProjectMemberList(filter));
+		List<ProjectMemberRowVO> memList=memberService.selectProjectMemberList(filter);
+		System.out.println(memList);
+		model.addAttribute("members", memList);
 		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issueList", issueList);
 		return "project/issue/issueList";
