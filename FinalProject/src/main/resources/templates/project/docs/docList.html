@@ -98,7 +98,7 @@
                 if (docId) {
                     document.getElementById('confirmDeleteLink').setAttribute(
                         'onclick', 
-                        "location.href='/docs/delete?id=" + docId + "'"
+                        "location.href='/project/docs/delete?id=" + docId + "'"
                     );
                 }
             }
@@ -128,7 +128,7 @@
 		                modalInstance.hide(); 
 		            }
 
-		            location.href = '/docs/form?id=' + editId;
+		            location.href = '/project/docs/form?id=' + editId;
 		        }
 		    }
 		});
