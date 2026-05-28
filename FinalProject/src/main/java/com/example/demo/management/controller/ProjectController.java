@@ -235,7 +235,7 @@ public class ProjectController {
 		if (count == null) {
 	        count = new IssueCountVO();
 	    }
-		model.addAttribute("currentMenu", "dashboard");
+		session.setAttribute("currentMenu", "dashboard");
 		model.addAttribute("project", vo);
 		model.addAttribute("issuelist",issuelist);
 		model.addAttribute("count",count);
