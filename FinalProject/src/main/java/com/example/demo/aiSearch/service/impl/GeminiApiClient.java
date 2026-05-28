@@ -21,8 +21,10 @@ public class GeminiApiClient {
 
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
 
+    // RestTemplate을 1번만 생성하고 계속 재사용
+    private final RestTemplate restTemplate = new RestTemplate();
+
     public String callGemini(String prompt) {
-        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
