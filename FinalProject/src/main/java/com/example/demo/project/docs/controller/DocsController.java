@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +18,7 @@ import com.example.demo.util.attach.service.AttachVO;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+@RequestMapping("/project")
 @Controller
 public class DocsController {
 
@@ -90,7 +91,7 @@ public class DocsController {
 
 	    rttr.addFlashAttribute("msg", "새로운 문서가 성공적으로 등록되었습니다.");
 	    
-	    return "redirect:/docs/list";
+	    return "redirect:/project/docs/list";
 	}
 	
 	@PostMapping("/docs/update")
@@ -115,7 +116,7 @@ public class DocsController {
 	            "DOCUMENT"
 	    );
 
-	    return "redirect:/docs/list";
+	    return "redirect:/project/docs/list";
 	}
 	
 	@GetMapping("/docs/delete")
@@ -123,7 +124,7 @@ public class DocsController {
 	    
 	    docsService.delete(id);
 	    
-	    return "redirect:/docs/list";
+	    return "redirect:/project/docs/list";
 	}
 
 }
