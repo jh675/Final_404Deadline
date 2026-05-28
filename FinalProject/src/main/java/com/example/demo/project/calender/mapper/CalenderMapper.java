@@ -29,5 +29,3 @@ public interface CalenderMapper {
 List<CalenderVO> findByCalStartBetween(@Param("start") Date start, @Param("end") Date end);
  
 }
-
-}
