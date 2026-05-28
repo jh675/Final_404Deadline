@@ -1,26 +1,36 @@
 package com.example.demo.company.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.company.service.CompanyService;
 import com.example.demo.company.service.CompanyVO;
 import com.example.demo.management.userManage.service.UserManageVO;
+import com.example.demo.util.subCode.service.SubcodeService;
+import com.example.demo.util.subCode.service.SubcodeVO;
 
 @Controller
+@RequestMapping("/admin")
 public class CompanyController {
 
 	@Autowired
 	CompanyService companyService;
+	@Autowired
+	SubcodeService subCodeService;
 
 	@GetMapping("/company/list")
 	public String companylist(Model model, @ModelAttribute("company") CompanyVO company) {
 
+		List<SubcodeVO> activeCodeList = subCodeService.getSubCodeList("00ACTIVE");
+		model.addAttribute("activeCodeList", activeCodeList);
 		model.addAttribute( "companyList", companyService.selectAll(company));
 		return "company/list";
 	}
@@ -58,7 +68,7 @@ public class CompanyController {
 	        companyService.updateCompanyWithAdmin(company, user);
 	    }
 	    
-	    return "redirect:/company/list";
+	    return "redirect:/admin/company/list";
 	}
 	
 

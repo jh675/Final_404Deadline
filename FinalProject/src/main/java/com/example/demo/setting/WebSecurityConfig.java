@@ -26,7 +26,7 @@ class WebSecurityConfig {
 		// @formatter:off
 		http
 			.authorizeHttpRequests((requests) -> requests
-				.requestMatchers("/login/**", "/css/**", "/js/**", "/").permitAll()
+				.requestMatchers("/login/**", "/email/**", "/css/**", "/js/**", "/").permitAll()
 				.requestMatchers("/api/notifications/**").permitAll()
 				.requestMatchers("/admin/**").hasAnyRole("ADMIN") // 시스템관리자 01ROLE
 				.requestMatchers("/cadmin/**").hasAnyRole("CADMIN") // 기업관리자 02ROLE

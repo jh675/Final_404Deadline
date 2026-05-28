@@ -142,16 +142,22 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 	@Override
 	public void requestCompanyRegistration(CompanyVO company, UserManageVO user) {
 	    
-	    // 1. 기업 상태: '03ACTIVE' (승인 요청/대기) 강제 세팅
+		// DB에 이미 해당 기업이 존재하는지 체크
+	    String existingStatus = loginMapper.selectCompanyStatus(company.getBizNo());
+	    if (existingStatus != null) {
+	        throw new IllegalArgumentException("이미 등록된 사업자번호입니다.");
+	    }
+	    
+	    // 기업 상태: '03ACTIVE' (승인 요청/대기) 강제 세팅
 	    company.setIsActiveCd("03ACTIVE");
 	    companyMapper.insert(company);
 	    
-	    // 2. 기업 관리자 계정 초기값 세팅
+	    // 기업 관리자 계정 초기값 세팅
 	    user.setBizNo(company.getBizNo());
 	    user.setPassword(passwordEncoder.encode(user.getLogin())); 
 	    user.setAdminCd("02ROLE"); // 기업관리자 권한
 	    
-	    // 🚨 계정 상태: '02ACTIVE' (비활성) 강제 세팅
+	    // 계정 상태: '02ACTIVE' (비활성) 강제 세팅
 	    user.setStatusCd("02ACTIVE"); 
 	    
 	    user.setPrjManagerCd("01ACTIVE"); 
