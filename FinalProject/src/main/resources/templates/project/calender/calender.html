@@ -443,6 +443,7 @@
 
         // 부트스트랩 모달 인스턴스 생성 및 표시
         openModal('insertModalOverlay');
+        
     });
 
     
@@ -486,7 +487,8 @@
         const endDate = document.getElementById('ins_endDate').value;
         const startTime = document.getElementById('ins_calStart').value || '09:00:00';
         const endTime = document.getElementById('ins_calEnd').value || '18:00:00';
-		const sharingCd = document.querySelector('input[name="sharingCd"]').value;
+		const checkedRadio = document.querySelector('input[name="sharingCd"]:checked').value;
+        const sharingCd = checkedRadio ? checkedRadio.value : '02CALSHARE';
         // 등록 시 시간 표시 (선택한 날짜 + 시간)
         const calStart = `${startDate} ${startTime}`;
         const calEnd = `${endDate} ${endTime}`;
@@ -918,9 +920,7 @@
     	});
     	
       }
-		
-		
-	
+
 	//=========================================================================================
 	//9. 기타 함수 
 	//=========================================================================================	
