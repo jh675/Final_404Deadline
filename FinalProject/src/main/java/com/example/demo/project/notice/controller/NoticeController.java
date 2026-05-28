@@ -33,52 +33,42 @@ public class NoticeController {
 	@Autowired
 	AttachService attachService;
 
-	// 등록페이지
 	@GetMapping("/notice/register")
 	public String insertForm(Model model) {
 		model.addAttribute("notice", new NoticeVO());
 		return "project/notice/noticeRegister";
 	}
 
-	// getmapping로 첨부파일 조회
 	@GetMapping("/notice/attach")
 	@ResponseBody
 	public List<AttachVO> attach(@RequestParam("id") Long id) {
 		return attachService.selectAttachList("01MODULE", id);
 	}
 
-	// 등록처리
 	@PostMapping("/notice/insert")
 	public String insert(NoticeVO notice, HttpSession session,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments) {
 
-		// 세션에서 프로젝트 ID를 꺼냅니다.
 		Long projectId = (Long) session.getAttribute("currentProjectId");
 		notice.setPrjId(projectId);
 
-		// 로그인id 읽기
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		UserVO user = (UserVO) auth.getPrincipal();
-		System.out.println(user + "==================\n");
 		notice.setMemId(user.getId());
 
-		// 공지사항 등록
 		noticeService.insert(notice);
 
-		// 첨부파일 등록
 		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles && notice.getId() != null) {
 			attachService.saveAndInsertAttachments((long) notice.getId(), attachments, "01MODULE", "notice");
 		}
 
-		return "redirect:/notice/list";
+		return "redirect:/project/notice/list";
 	}
 
-	// 목록페이지
 	@GetMapping("/notice/list")
 	public String noticeList(HttpSession session, Model model, NoticeVO notice) {
 		session.setAttribute("currentMenu", "notice");
-		// 세션에서 프로젝트 ID를 꺼냅니다.
 		Long projectId = (Long) session.getAttribute("currentProjectId");
 		notice.setPrjId(projectId);
 
@@ -86,25 +76,28 @@ public class NoticeController {
 		return "project/notice/noticeList";
 	}
 
-	// 수정페이지 이동
 	@GetMapping("/notice/modify")
 	public String modifyForm(Model model, @RequestParam("id") Long id) {
 		model.addAttribute("notice", noticeService.selectOne(id));
 		return "project/notice/noticeRegister";
+		
+
 	}
 
-	// 수정처리
 	@PostMapping("/notice/modify")
-	public String modify(NoticeVO notice) {
+	public String modify(HttpSession session,NoticeVO notice) {
+		Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+		UserVO user = (UserVO) auth.getPrincipal();
+		notice.setMemId(user.getId());
 		noticeService.update(notice);
-		return "redirect:/notice/list";
+		return "redirect:/project/notice/list";
 	}
 
-	// 삭제처리
 	@GetMapping("/notice/delete")
 	public String delete(@RequestParam("id") Long id) {
 		noticeService.delete(id);
-		return "redirect:/notice/list";
+		return "redirect:/project/notice/list";
 	}
-
 }

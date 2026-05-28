@@ -76,5 +76,19 @@
 		DELETE FROM messages
 		WHERE id = #{id}
 	</delete>
+	
+	<update id="increaseRepliesCount">
+		UPDATE messages
+		SET replies_count = replies_count + 1
+		WHERE id = #{fieldparentId}
+	</update>
+
+	<select id="selectListWithReplies" resultType="com.example.demo.project.messages.service.MessagesVO">
+		SELECT * FROM messages
+		WHERE board_id = #{boardId}
+		START WITH Fieldparent_id IS NULL
+		CONNECT BY PRIOR id = Fieldparent_id
+		ORDER SIBLINGS BY id DESC
+	</select>
 
 </mapper>

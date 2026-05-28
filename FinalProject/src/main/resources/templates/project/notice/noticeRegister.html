@@ -29,7 +29,7 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body p-3">
-            <form th:action="${notice.id != null} ? @{/notice/modify} : @{/notice/insert}" 
+            <form th:action="${notice.id != null} ? @{/project/notice/modify} : @{/project/notice/insert}" 
                   method="post" 
                   enctype="multipart/form-data">
                 
