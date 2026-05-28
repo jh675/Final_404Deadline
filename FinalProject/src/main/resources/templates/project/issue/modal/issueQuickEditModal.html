@@ -265,11 +265,6 @@
 					else if (action === 'category') body.categoryCd = code;
 
 					const label = modalValue.options[modalValue.selectedIndex].text;
-					if (!confirm('선택한 ' + modalTargetIds.length + '건의 '
-						+ (action === 'status' ? '상태' : action === 'priority' ? '우선순위' : '카테고리')
-						+ '를 "' + label + '"(으)로 변경하시겠습니까?\n(진행중 등 상태 변경 시 진척률은 서버에서 자동 보정)')) {
-						return;
-					}
 
 					fetch('/project/issue/api/bulk', {
 						method: 'PUT',
