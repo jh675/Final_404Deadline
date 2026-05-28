@@ -123,12 +123,12 @@ layout:decorate="~{layout/projectLayout}">
             <label style="font-weight: bold; color: #2e7d32; margin-bottom: 12px; display: block; font-size: 15px;">이 게시글에 답글 쓰기</label>
             <form th:action="@{/project/messages/insert}" method="post">
                 <input type="hidden" name="boardId" th:value="${boardId}" />
-                <input type="hidden" name="parentId" th:value="${message.id}" />
+                <input type="hidden" name="fieldparentId" th:value="${message.id}" />
 
                 <input type="text" class="answer-title-input" th:value="${message.title}" disabled />
                 <input type="hidden" name="title" th:value="${message.title}" />
 
-                <textarea name="content" class="answer-content-input" placeholder="답글 내용을 상세히 입력하세요." required></textarea>
+                <textarea name="content" class="answer-content-input" placeholder="답	." required></textarea>
                 
                 <div style="width: 100%; display: inline-block;">
                     <button type="submit" class="answer-submit-btn">답글등록</button>

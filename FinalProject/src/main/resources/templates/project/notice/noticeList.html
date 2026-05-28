@@ -119,7 +119,7 @@
 
 			<div class="card border-0 shadow-sm mb-3">
 				<div class="card-body p-2">
-					<form th:action="@{/projcet/notice/list}" method="get" class="row g-2">
+					<form th:action="@{/project/notice/list}" method="get" class="row g-2">
 						<div class="col-auto">
 							<div class="input-group input-group-sm">
 								<input type="text" name="keyword"
@@ -177,7 +177,7 @@
 										<button type="button" class="btn btn-outline-success"
 											th:onclick="|location.href='@{/project/notice/modify(id=${notice.id})}'|">수정</button>
 										<button type="button" class="btn btn-outline-danger"
-											th:onclick="|if(confirm('정말로 삭제하시겠습니까?')) location.href='@{/projcet/notice/delete(id=${notice.id})}'|">삭제</button>
+											th:onclick="|if(confirm('정말로 삭제하시겠습니까?')) location.href='@{/project/notice/delete(id=${notice.id})}'|">삭제</button>
 									</div>
 								</td>
 							</tr>
@@ -276,7 +276,7 @@
             const container = document.getElementById("fileListContainer");
             container.innerHTML = '<li class="text-muted small">첨부파일을 불러오는 중입니다</li>';
 
-            fetch(`/notice/attach?id=${id}`)
+            fetch(`/project/notice/attach?id=${id}`)
             .then(response => response.json())
             .then(data => {
                 container.innerHTML = '';
