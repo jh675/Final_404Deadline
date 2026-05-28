@@ -479,4 +479,33 @@
 		)
 		ORDER BY mem_id
 	</select>
+	
+	<!-- 새 이슈 감지용 -->
+	<select id="findByCreatedOnAfter" parameterType="java.util.Date"
+	        resultType="com.example.demo.alarm.service.AlarmIssueVO">
+	    SELECT
+	        ID AS id,
+	        PRJ_ID AS prjId,
+	        SUBJECT AS subject,
+	        get_sub_code_name(STATUS_CD) AS statusCd,
+	        CREATED_ON AS createdOn,
+	        UPDATED_ON AS updatedOn
+	    FROM ISSUE
+	    WHERE CREATED_ON > SYSDATE - INTERVAL '10' SECOND
+	</select>
+	
+	<!-- 이슈 상태 변경 감지용 -->
+	<select id="findByUpdatedOnAfter" parameterType="java.util.Date"
+	        resultType="com.example.demo.alarm.service.AlarmIssueVO">
+	    SELECT
+	        ID AS id,
+	        PRJ_ID AS prjId,
+	        SUBJECT AS subject,
+	        get_sub_code_name(STATUS_CD) AS statusCd,
+	        CREATED_ON AS createdOn,
+	        UPDATED_ON AS updatedOn
+	    FROM ISSUE
+	    WHERE UPDATED_ON > SYSDATE - INTERVAL '10' SECOND
+	    AND CREATED_ON != UPDATED_ON
+	</select>
 </mapper>
