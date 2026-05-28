@@ -509,7 +509,7 @@ table.data-table tbody td {
 <div class="issue-shell">
 <div class="issue-inner">
 	<div class="back-row">
-		<a th:href="@{/issue/list}">← 이슈 목록</a>
+		<a th:href="@{/project/issue/list}">← 이슈 목록</a>
 	</div>
 
 	<p th:if="${issue == null}" style="padding:24px 0;color:#666;">이슈를 찾을 수 없습니다.</p>
@@ -517,7 +517,7 @@ table.data-table tbody td {
 	<th:block th:if="${issue != null}">
 	<div class="page-title-row">
 		<h1 class="page-title" th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
-		<a class="issue-register-btn" th:href="@{/issue/register(id=${issue.id})}">이슈 수정</a>
+		<a class="issue-register-btn" th:href="@{/project/issue/register(id=${issue.id})}">이슈 수정</a>
 	</div>
 
 	<div class="meta-grid">
@@ -528,7 +528,7 @@ table.data-table tbody td {
 		<div class="meta-item">
 			<label>상위 이슈</label>
 			<th:block th:if="${ParentIssue != null and ParentIssue.id != null}">
-				<a class="parent-issue-link" th:href="@{/issue/detail(id=${ParentIssue.id})}"
+				<a class="parent-issue-link" th:href="@{/project/issue/detail(id=${ParentIssue.id})}"
 					th:text="${ParentIssue.subject != null and !#strings.isEmpty(ParentIssue.subject)} ? ${ParentIssue.subject} : '제목 없음'">상위 이슈</a>
 			</th:block>
 			<span class="meta-empty" th:unless="${ParentIssue != null and ParentIssue.id != null}">—</span>
@@ -785,7 +785,7 @@ table.data-table tbody td {
 			var status = escapeHtml(issue.statusCd || '—');
 			var memName = escapeHtml(issue.memName || '—');
 			var subjectCell = id != null
-				? '<a href="/issue/detail?id=' + encodeURIComponent(id) + '">' + subject + '</a>'
+				? '<a href="/project/issue/detail?id=' + encodeURIComponent(id) + '">' + subject + '</a>'
 				: subject;
 
 			return '<tr>'
@@ -826,7 +826,7 @@ table.data-table tbody td {
 
 		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">연관 이슈를 불러오는 중입니다.</td></tr>';
 
-		fetch('/issue/api/' + encodeURIComponent(issueId) + '/relIssue', {
+		fetch('/project/issue/api/' + encodeURIComponent(issueId) + '/relIssue', {
 			method: 'GET',
 			headers: getCsrfHeaders()
 		})
@@ -1003,7 +1003,7 @@ table.data-table tbody td {
 
 		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">히스토리를 불러오는 중입니다.</td></tr>';
 
-		fetch('/issue/api/' + encodeURIComponent(issueId) + '/history', {
+		fetch('/project/issue/api/' + encodeURIComponent(issueId) + '/history', {
 			method: 'GET',
 			headers: getCsrfHeaders()
 		})
@@ -1180,7 +1180,7 @@ table.data-table tbody td {
 
 		threadScroll.innerHTML = '<p style="font-size:13px;color:#666;padding:8px 0;">댓글을 불러오는 중입니다.</p>';
 
-		return fetch('/issue/api/' + encodeURIComponent(issueId) + '/comments', {
+		return fetch('/project/issue/api/' + encodeURIComponent(issueId) + '/comments', {
 			method: 'GET',
 			headers: getCsrfHeaders()
 		})
@@ -1225,7 +1225,7 @@ table.data-table tbody td {
 		var headers = getCsrfHeaders();
 		headers['Content-Type'] = 'application/json';
 
-		fetch('/issue/api/' + encodeURIComponent(issueId) + '/comments', {
+		fetch('/project/issue/api/' + encodeURIComponent(issueId) + '/comments', {
 			method: 'POST',
 			headers: headers,
 			body: JSON.stringify({
@@ -1417,7 +1417,7 @@ table.data-table tbody td {
 					var value = props.value;
 					var id = row == null ? '' : row.id;
 					var text = value == null ? '' : String(value);
-					return '<a href="/issue/detail?id=' + id + '">' + text + '</a>';
+					return '<a href="/project/issue/detail?id=' + id + '">' + text + '</a>';
 				}
 			},
 			{

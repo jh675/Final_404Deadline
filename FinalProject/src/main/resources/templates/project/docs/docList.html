@@ -38,7 +38,7 @@
 					  formatter: ({ row, value }) => {
 
 							return `
-								<a href="/docs/form?id=${row.id}">
+								<a href="/project/docs/form?id=${row.id}">
 									${value}
 								</a>
 							`;
@@ -74,21 +74,21 @@
 
 		    if (ev.columnName === 'edit') {
 		        const row = grid.getRow(ev.rowKey);
-		        location.href = '/docs/form?id=' + row.id;
+		        location.href = '/project/docs/form?id=' + row.id;
 
 		    }
 		    
 		    if (ev.columnName === 'deleteBtn') {
 		        const row = grid.getRow(ev.rowKey);
 		        if (confirm("정말로 이 문서를 삭제하시겠습니까?")) {
-		            location.href = '/docs/delete?id=' + row.id;
+		            location.href = '/project/docs/delete?id=' + row.id;
 		        }
 		    }    
 
 		});
 	</script>
 
-		<a href="/docs/register" class="btn btn-primary"> 등록 </a>
+		<a href="/project/docs/register" class="btn btn-primary"> 등록 </a>
 	</div>
 </body>
 </html>

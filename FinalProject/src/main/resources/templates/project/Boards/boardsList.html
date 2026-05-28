@@ -43,7 +43,7 @@ layout:decorate="~{layout/projectLayout}">
     <h5 class="fw-bold text-dark mb-3">프로젝트 게시판 목록</h5>
     
     <div class="d-flex justify-content-end mb-2">
-        <button type="button" class="btn btn-green-sm shadow-sm" onclick="location.href='/boards/register'">게시판 등록</button>
+        <button type="button" class="btn btn-green-sm shadow-sm" onclick="location.href='/project/board/register'">게시판 등록</button>
     </div>
 
     <div class="table-card overflow-hidden">
@@ -71,7 +71,7 @@ layout:decorate="~{layout/projectLayout}">
                             <td class="text-muted" th:text="${stat.index + 1}">1</td>
                             
                             <td class="text-start text-dark text-truncate" style="max-width: 350px;">
-                                <a th:href="@{/messages/list(boardId=${board.id})}" th:text="${board.name}" style="color: inherit; text-decoration: none;">게시판 제목 위치</a>
+                                <a th:href="@{/project/board/message/list(boardId=${board.id})}" th:text="${board.name}" style="color: inherit; text-decoration: none;">게시판 제목 위치</a>
                             </td>
                             
                             <td>관리자</td>
@@ -88,8 +88,8 @@ layout:decorate="~{layout/projectLayout}">
                             </td>
                             <td>
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <button type="button" class="btn-action-modify" th:onclick="|location.href='@{/boards/modify(id=${board.id})}'|">수정</button>
-                                    <button type="button" class="btn-action-delete" th:onclick="|if(confirm('이 게시판을 삭제하시겠습니까?')) { location.href='@{/boards/delete(id=${board.id})}' }|">삭제</button>
+                                    <button type="button" class="btn-action-modify" th:onclick="|location.href='@{/project/board/modify(id=${board.id})}'|">수정</button>
+                                    <button type="button" class="btn-action-delete" th:onclick="|if(confirm('이 게시판을 삭제하시겠습니까?')) { location.href='@{/project/board/delete(id=${board.id})}' }|">삭제</button>
                                 </div>
                             </td>
                         </tr>
@@ -108,16 +108,16 @@ layout:decorate="~{layout/projectLayout}">
         totalItems=${#lists.size(list)},
         totalPages=${totalItems % 10 == 0 ? totalItems / 10 : (totalItems / 10) + 1}
     ">
-        <button type="button" class="btn-page btn-nav" th:onclick="|location.href='@{/boards/list(pageNo=${currentPage - 1})}'|" th:disabled="${currentPage <= 1}"><</button>
+        <button type="button" class="btn-page btn-nav" th:onclick="|location.href='@{/project/board/list(pageNo=${currentPage - 1})}'|" th:disabled="${currentPage <= 1}"><</button>
 
         <th:block th:if="${totalPages > 0}" th:each="i : ${#numbers.sequence(1, totalPages)}">
-            <button type="button" class="btn-page" th:text="${i}" th:onclick="|location.href='@{/boards/list(pageNo=${i})}'|" th:classappend="${i == currentPage} ? 'active' : ''">1</button>
+            <button type="button" class="btn-page" th:text="${i}" th:onclick="|location.href='@{/project/board/list(pageNo=${i})}'|" th:classappend="${i == currentPage} ? 'active' : ''">1</button>
         </th:block>
         <th:block th:if="${totalPages == 0}">
             <button type="button" class="btn-page active">1</button>
         </th:block>
 
-        <button type="button" class="btn-page btn-nav" th:onclick="|location.href='@{/boards/list(pageNo=${currentPage + 1})}'|" th:disabled="${currentPage >= totalPages or totalPages == 0}">></button>
+        <button type="button" class="btn-page btn-nav" th:onclick="|location.href='@{/project/board/list(pageNo=${currentPage + 1})}'|" th:disabled="${currentPage >= totalPages or totalPages == 0}">></button>
     </div>
 </div>	
 </div>

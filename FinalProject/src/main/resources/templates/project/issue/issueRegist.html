@@ -803,7 +803,7 @@
 		if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
 			headers[headerMeta.content] = tokenMeta.content;
 		}
-		var saveUrl = /*[[${issue != null and issue.id != null} ? @{/issue/update} : @{/issue/insert}]]*/ '/issue/insert';
+		var saveUrl = /*[[${issue != null and issue.id != null} ? @{/project/issue/update} : @{/project/issue/insert}]]*/ '/project/issue/insert';
 		fetch(saveUrl, {
 			method: 'POST',
 			headers: headers,
@@ -814,7 +814,7 @@
 				return;
 			}
 			if (res.ok) {
-				window.location.href = /*[[@{/issue/list}]]*/ '/issue/list';
+				window.location.href = /*[[@{/project/issue/list}]]*/ '/project/issue/list';
 				return;
 			}
 			alert('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');

@@ -17,6 +17,7 @@ import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.issue.service.IssueSummaryVO;
+import com.example.demo.project.issue.service.IssueVulkVO;
 
 @Service
 public class IssueServiceImpl implements IssueService {
@@ -59,21 +60,7 @@ public class IssueServiceImpl implements IssueService {
 		return mapper.updateIssue(issueVO);
 	}
 
-	@Override
-	public int updateIssueStartDate(Long id) {
-		if (id == null) {
-			return 0;
-		}
-		return mapper.updateIssueStartDate(id);
-	}
 
-	@Override
-	public int updateIssueClosedDate(Long id) {
-		if (id == null) {
-			return 0;
-		}
-		return mapper.updateIssueClosedDate(id);
-	}
 
 	@Override
 	public int deleteIssue(Long id) {
@@ -237,4 +224,18 @@ public class IssueServiceImpl implements IssueService {
 		}
 	}
 
+	@Override
+	public Long registerStartDate(IssueVulkVO vulkVO) {
+		return mapper.registerStartDate(vulkVO);
+	}
+
+	@Override
+	public Long registerClosedDate(IssueVulkVO vulkVO) {
+		return mapper.registerClosedDate(vulkVO);
+	}
+
+	@Override
+	public Long updateVulk(IssueVulkVO vulkVO) {
+		return mapper.updateVulk(vulkVO);
+	}
 }

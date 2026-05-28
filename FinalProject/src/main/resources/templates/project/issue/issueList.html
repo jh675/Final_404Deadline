@@ -125,6 +125,9 @@
 .issue-register-actions {
 	margin-top: 18px;
 	text-align: right;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
 }
 
 .issue-register-btn {
@@ -143,6 +146,27 @@
 .issue-register-btn:hover {
 	background-color: #4956d8;
 	color: #fff;
+}
+
+.issue-pivot-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 18px;
+	background-color: #fff;
+	color: #444;
+	border: 1px solid #c8cce8;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 700;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.issue-pivot-btn:hover {
+	background-color: #f5f6ff;
+	border-color: #5b6cff;
+	color: #3d44a8;
 }
 
 .issue-date-actions {
@@ -184,6 +208,315 @@
 	border-color: #ddd;
 	color: #999;
 }
+
+/* 일괄 선택 · 빠른수정 */
+.issue-bulk-bar {
+	display: none;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin: 12px 0 8px;
+	padding: 10px 14px;
+	background: #eef0ff;
+	border: 1px solid #d8dcff;
+	border-radius: 6px;
+	font-size: 13px;
+	color: #333;
+}
+
+.issue-bulk-bar.is-visible {
+	display: flex;
+}
+
+.issue-bulk-bar .bulk-count {
+	font-weight: 700;
+	color: #3d44a8;
+}
+
+.issue-bulk-btn {
+	height: 32px;
+	padding: 0 16px;
+	border: none;
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.issue-bulk-btn-primary {
+	background: #5b6cff;
+	color: #fff;
+}
+
+.issue-bulk-btn-primary:hover:not(:disabled) {
+	background: #4956d8;
+}
+
+.issue-bulk-btn-primary:disabled {
+	background: #b8bdf5;
+	cursor: not-allowed;
+}
+
+.issue-bulk-btn-ghost {
+	background: #fff;
+	color: #555;
+	border: 1px solid #ccc;
+}
+
+.issue-bulk-btn-ghost:hover {
+	background: #f5f5f5;
+}
+
+.issue-quick-btn {
+	height: 26px;
+	padding: 0 10px;
+	border: 1px solid #c8cce8;
+	border-radius: 4px;
+	background: #fff;
+	color: #4a5080;
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.issue-quick-btn:hover {
+	background: #f5f6ff;
+	border-color: #5b6cff;
+	color: #3d44a8;
+}
+
+.issue-row-check {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	accent-color: #5b6cff;
+}
+
+/* 빠른수정 모달 */
+.issue-quick-modal-backdrop {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 1200;
+	background: rgba(0, 0, 0, 0.4);
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+}
+
+.issue-quick-modal-backdrop.is-open {
+	display: flex;
+}
+
+.issue-quick-modal {
+	width: 100%;
+	max-width: 440px;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+	overflow: hidden;
+}
+
+.issue-quick-modal-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid #eee;
+}
+
+.issue-quick-modal-head h2 {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 700;
+	color: #222;
+}
+
+.issue-quick-modal-close {
+	border: none;
+	background: transparent;
+	font-size: 22px;
+	line-height: 1;
+	color: #888;
+	cursor: pointer;
+	padding: 0 4px;
+}
+
+.issue-quick-modal-close:hover {
+	color: #333;
+}
+
+.issue-quick-modal-body {
+	padding: 18px 20px 8px;
+}
+
+.issue-quick-field {
+	margin-bottom: 14px;
+}
+
+.issue-quick-field label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	color: #555;
+	margin-bottom: 6px;
+}
+
+.issue-quick-field select {
+	width: 100%;
+	height: 36px;
+	padding: 0 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 13px;
+	background: #fff;
+}
+
+.issue-quick-hint {
+	font-size: 12px;
+	color: #666;
+	line-height: 1.5;
+	margin: 0 0 12px;
+	padding: 10px 12px;
+	background: #f7f8fc;
+	border-radius: 4px;
+	border: 1px solid #e8e9ef;
+}
+
+.issue-quick-hint.is-warn {
+	background: #fff8e6;
+	border-color: #f0e0b0;
+	color: #7a5c00;
+}
+
+.issue-quick-target-block {
+	margin-bottom: 16px;
+	padding: 12px 14px;
+	background: #f7f8fc;
+	border: 1px solid #e8e9ef;
+	border-radius: 6px;
+}
+
+.issue-quick-target-head {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #555;
+}
+
+.issue-quick-target-count {
+	color: #3d44a8;
+	font-weight: 700;
+}
+
+.issue-quick-target-list {
+	margin: 0;
+	padding: 0 0 0 18px;
+	max-height: 140px;
+	overflow-y: auto;
+	font-size: 13px;
+	color: #333;
+	line-height: 1.55;
+}
+
+.issue-quick-target-list li {
+	margin-bottom: 4px;
+	word-break: break-all;
+}
+
+.issue-quick-target-list li:last-child {
+	margin-bottom: 0;
+}
+
+.issue-quick-date-panel {
+	margin-bottom: 14px;
+	padding: 12px 14px;
+	background: #fff8e6;
+	border: 1px solid #f0e0b0;
+	border-radius: 6px;
+	font-size: 12px;
+	color: #444;
+}
+
+.issue-quick-date-summary {
+	font-weight: 700;
+	color: #7a5c00;
+	margin-bottom: 10px;
+}
+
+.issue-quick-date-section {
+	margin-top: 8px;
+}
+
+.issue-quick-date-section-title {
+	font-weight: 600;
+	font-size: 12px;
+	color: #555;
+	margin-bottom: 4px;
+}
+
+.issue-quick-date-section-title.is-ok {
+	color: #2e7d32;
+}
+
+.issue-quick-date-section-title.is-skip {
+	color: #c62828;
+}
+
+.issue-quick-date-detail-list {
+	margin: 0;
+	padding: 0 0 0 16px;
+	max-height: 100px;
+	overflow-y: auto;
+	line-height: 1.5;
+}
+
+.issue-quick-date-detail-list li {
+	margin-bottom: 6px;
+	word-break: break-all;
+}
+
+.issue-quick-date-detail-list li.issue-quick-date-excluded-item {
+	list-style: none;
+	margin-left: -16px;
+	padding-left: 0;
+}
+
+.issue-quick-date-issue {
+	display: block;
+	font-size: 13px;
+	color: #333;
+}
+
+.issue-quick-date-reason {
+	display: block;
+	font-size: 11px;
+	color: #c62828;
+	margin-top: 2px;
+}
+
+.issue-quick-date-empty {
+	list-style: none;
+	margin-left: -16px;
+	color: #888;
+	font-size: 12px;
+}
+
+.issue-quick-modal-foot {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	padding: 12px 20px 18px;
+}
+
+.issue-quick-modal-foot .issue-bulk-btn {
+	min-width: 72px;
+}
 </style>
 </th:block>
 </head>
@@ -192,7 +525,7 @@
 	<div class="issue-shell">
 	<div class="issue-inner">
 		<!-- 1. 검색 영역 (form 으로 감싸서 GET submit) -->
-		<form id="searchForm" th:action="@{/issue/list}" method="get"
+		<form id="searchForm" th:action="@{/project/issue/list}" method="get"
 			th:object="${filter}" class="search-area">
 			<div class="search-item">
 				<label for="categoryCd">유형</label>
@@ -249,16 +582,31 @@
 				</label>
 
 				<button type="submit" class="search-btn">검색</button>
-				<a th:href="@{/issue/list}" class="search-cancel-btn">취소</a>
+				<a th:href="@{/project/issue/list}" class="search-cancel-btn">취소</a>
 			</div>
 		</form>
-		
+
+		<!-- 1건 이상 선택 시 표시 · 일괄 빠른수정 -->
+		<div id="issueBulkBar" class="issue-bulk-bar" aria-live="polite"
+			th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
+			<span class="bulk-count" id="issueBulkCount">0건 선택</span>
+			<button type="button" class="issue-bulk-btn issue-bulk-btn-primary" id="issueBulkQuickBtn" disabled>
+				빠른수정
+			</button>
+			<button type="button" class="issue-bulk-btn issue-bulk-btn-ghost" id="issueBulkClearBtn">
+				선택 해제
+			</button>
+		</div>
+
 		<div id="grid"></div>
 		<div class="issue-register-actions">
-			<a th:href="@{/issue/register}" class="issue-register-btn">이슈 등록</a>
+			<a th:href="@{/project/issue/pivot}" class="issue-pivot-btn">통계</a>
+			<a th:href="@{/project/issue/register}" class="issue-register-btn" th:if="${@prjAuth.hasRole('ROLE_ISSUE_CREATE')}">이슈 등록</a>
 		</div>
 	</div>
 	</div>
+
+	<div th:replace="~{project/issue/modal/issueQuickEditModal :: issueQuickEditModal}"></div>
 
 	<!-- ====================================================
 	     서버 데이터를 JS 로 주입 (Thymeleaf inline javascript)
@@ -271,6 +619,7 @@
 		/*<![CDATA[*/
 		const issueData = /*[[${issueList}]]*/ [];
 		const LOGIN_MEM_ID = /*[[${(#authentication.principal instanceof T(com.example.demo.login.service.UserVO)) ? #strings.toString(#authentication.principal.id) : ''}]]*/ '';
+		const canEdit = /*[[${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}]]*/ false;
 		/*]]>*/
 	</script>
 
@@ -334,11 +683,223 @@
 				return priorityRank(valueA) - priorityRank(valueB);
 			}
 
+			const QUICK_VALUE_OPTIONS = {
+				status: [
+					{ code: '01ISSUESTAT', label: '신규' },
+					{ code: '02ISSUESTAT', label: '진행중' },
+					{ code: '03ISSUESTAT', label: '검토' },
+					{ code: '04ISSUESTAT', label: '완료' }
+				],
+				priority: [
+					{ code: '01ISSUEPRI', label: '최상' },
+					{ code: '02ISSUEPRI', label: '상' },
+					{ code: '03ISSUEPRI', label: '중' },
+					{ code: '04ISSUEPRI', label: '하' }
+				],
+				category: [
+					{ code: '01ISSUECATE', label: '버그' },
+					{ code: '02ISSUECATE', label: '기능' },
+					{ code: '03ISSUECATE', label: '작업' },
+					{ code: '04ISSUECATE', label: '개선' }
+				]
+			};
+
+			const GRID_PER_PAGE = 10;
+			const selectedIds = new Set();
+			let grid;
+
+			const bulkBar = document.getElementById('issueBulkBar');
+			const bulkCountEl = document.getElementById('issueBulkCount');
+			const bulkQuickBtn = document.getElementById('issueBulkQuickBtn');
+			const bulkClearBtn = document.getElementById('issueBulkClearBtn');
+
+			function syncBulkBar() {
+				const n = selectedIds.size;
+				bulkBar.classList.toggle('is-visible', n > 0);
+				bulkCountEl.textContent = n + '건 선택';
+				bulkQuickBtn.disabled = n === 0;
+			}
+
+			function refreshSelectColumn() {
+				if (!grid) return;
+				const currentData = grid.getData();
+				const pagination = grid.getPagination();
+				const currentPage = pagination ? pagination.getCurrentPage() : 1;
+				grid.resetData(currentData, {
+					pageState: {
+						page: currentPage
+					}
+				});
+			}
+
+			function getCurrentPageRows() {
+				if (!grid) return [];
+				const all = grid.getData();
+				const pagination = grid.getPagination();
+				if (!pagination) return all;
+				const page = pagination.getCurrentPage();
+				const start = (page - 1) * GRID_PER_PAGE;
+				return all.slice(start, start + GRID_PER_PAGE);
+			}
+
+			function isCurrentPageAllSelected() {
+				const pageRows = getCurrentPageRows().filter(function (row) {
+					return row.id != null;
+				});
+				return pageRows.length > 0 && pageRows.every(function (row) {
+					return selectedIds.has(row.id);
+				});
+			}
+
+			function bindSelectHeaderClick() {
+				const selectHeaderCell = gridEl.querySelector('th[data-column-name="_select"]');
+				if (!selectHeaderCell || selectHeaderCell.dataset.boundClick === 'Y') return;
+				selectHeaderCell.style.cursor = 'pointer';
+				selectHeaderCell.title = '클릭 시 현재 페이지 전체선택/해제';
+				selectHeaderCell.dataset.boundClick = 'Y';
+			}
+
+			function getRowByIssueId(id) {
+				const rows = grid.getData();
+				for (let i = 0; i < rows.length; i++) {
+					if (rows[i].id === id) return rows[i];
+				}
+				return null;
+			}
+
+			function formatIssueLabel(id) {
+				const row = getRowByIssueId(id);
+				const subject = row && row.subject != null && String(row.subject).trim() !== ''
+					? String(row.subject).trim()
+					: '제목 없음';
+				return subject + ' #' + id;
+			}
+
 			/**
 			 * tui.Grid 인스턴스 생성
 			 * - new tui.Grid({ ...옵션 }) 한 번 호출로 그리드가 그려짐
 			 */
-			const grid = new tui.Grid({
+			const gridColumns = [
+				canEdit ? {
+					header: '선택',
+					name: '_select',
+					width: 44,
+					align: 'center',
+					sortable: false,
+					formatter: function (props) {
+						const row = props.row;
+						const id = row == null ? null : row.id;
+						if (id == null) return '';
+						const checked = selectedIds.has(id) ? ' checked' : '';
+						return '<input type="checkbox" class="issue-row-check" data-id="' + id + '"'
+							+ checked + ' aria-label="이슈 선택" />';
+					}
+				} : null,
+				{
+					// 제목 컬럼: 클릭 시 상세 페이지로 이동하도록 <a> 태그를 직접 렌더링
+					header: '이슈명',
+					name: 'subject',
+					sortable: true,
+					formatter: ({ row, value }) => {
+						const id = row.id;                              // 같은 행의 id 값 참조
+						const text = value == null ? '' : value + "#" + id;
+						return '<a href="/project/issue/detail?id=' + id + '">' + text + '</a>';
+					}
+				},
+				{
+					header: '유형',
+					name: 'categoryCd',
+					width: 72,
+					align: 'center',
+					sortable: true
+				},
+				{
+					header: '담당자',
+					name: 'memName',
+					width: 100,
+					align: 'center',
+					sortable: true
+				},
+				{
+					header: '상태',
+					name: 'statusCd',
+					width: 100,
+					align: 'center',
+					sortable: true
+				},
+				{
+					header: '우선순위',
+					name: 'priorityCd',
+					width: 100,
+					align: 'center',
+					sortable: true,
+					comparator: priorityComparator
+				},
+				{
+					header: '예상시작일',
+					name: 'estStartDate',
+					width: 120,
+					align: 'center',
+					sortable: true,
+					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
+				},
+				{
+					header: '마감일',
+					name: 'dueDate',
+					width: 120,
+					align: 'center',
+					sortable: true,
+					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
+				},
+				{
+					header: '시작일',
+					name: 'startDate',
+					width: 120,
+					align: 'center',
+					sortable: true,
+					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
+				},
+				{
+					header: '종료일',
+					name: 'closedDate',
+					width: 120,
+					align: 'center',
+					sortable: true,
+					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
+				},
+				{
+					// 수정일: 공통 dateUtils.format 으로 yyyy-MM-dd HH:mm 포맷 출력
+					header: '수정일',
+					name: 'updatedOn',
+					width: 160,
+					align: 'center',
+					sortable: true,
+					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm')
+				},
+				{
+					// 진척도: 숫자 뒤에 % 자동 추가
+					header: '진척도',
+					name: 'doneRatio',
+					width: 100,
+					align: 'center',
+					sortable: true,
+					formatter: ({ value }) => (value == null ? '' : value + '%')
+				},
+				canEdit ? {
+					header: '수정',
+					name: 'quickActions',
+					width: 88,
+					align: 'center',
+					sortable: false,
+					formatter: function (props) {
+						const id = props.row == null ? '' : props.row.id;
+						if (id == null || id === '') return '';
+						return '<button type="button" class="issue-quick-btn" data-id="' + id + '">빠른수정</button>';
+					}
+				} : null
+			].filter(Boolean);
+
+			grid = new tui.Grid({
 				// ── 기본 설정 ──────────────────────────────────────────
 				el: document.getElementById('grid'), // 그리드를 그릴 DOM 요소 (필수)
 				data: issueData,                     // 그리드에 표시할 데이터 배열 (위에서 주입한 issueData)
@@ -363,86 +924,7 @@
 				//              - value  : 해당 셀의 원본 값
 				//              - row    : 해당 행 전체 객체 (다른 컬럼 값 접근 가능)
 				//            return 문자열(또는 HTML)이 셀에 그대로 렌더링됨
-				columns: [
-					{
-						// 제목 컬럼: 클릭 시 상세 페이지로 이동하도록 <a> 태그를 직접 렌더링
-						header: '이슈명',
-						name: 'subject',
-						sortable: true,
-						formatter: ({ row, value }) => {
-							const id = row.id;                              // 같은 행의 id 값 참조
-							const text = value == null ? '' : value +"#"+id;
-							return '<a href="/issue/detail?id=' + id + '">' + text + '</a>';
-						}
-					},
-					{
-						header: '담당자',
-						name: 'memName',
-						width: 100,
-						align: 'center',
-						sortable: true
-					},
-					{
-						header: '상태',
-						name: 'statusCd',
-						width: 100,
-						align: 'center',
-						sortable: true
-					},
-					{
-						header: '우선순위',
-						name: 'priorityCd',
-						width: 100,
-						align: 'center',
-						sortable: true,
-						comparator: priorityComparator
-					},
-					{
-						// 수정일: 공통 dateUtils.format 으로 yyyy-MM-dd HH:mm 포맷 출력
-						header: '수정일',
-						name: 'updatedOn',
-						width: 160,
-						align: 'center',
-						sortable: true,
-						formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm')
-					},
-					{
-						// 진척도: 숫자 뒤에 % 자동 추가
-						header: '진척도',
-						name: 'doneRatio',
-						width: 100,
-						align: 'center',
-						sortable: true,
-						formatter: ({ value }) => (value == null ? '' : value + '%')
-					},
-					{
-						header: '수정',
-						name: 'dateActions',
-						width: 150,
-						align: 'right',
-						sortable: false,
-						formatter: ({ row }) => {
-							const id = row.id;
-							if (id == null) return '';
-							const hasStart = hasIssueDate(row.startDate);
-							const hasClosed = hasIssueDate(row.closedDate);
-							const startDisabled = hasStart ? 'disabled' : '';
-							const closedDisabled = hasClosed || !hasStart ? 'disabled' : '';
-							const startTitle = hasStart
-								? '시작일이 이미 등록되어 있습니다'
-								: '오늘 날짜로 시작일 등록';
-							const closedTitle = hasClosed
-								? '완료일이 이미 등록되어 있습니다'
-								: '오늘 날짜로 완료일 등록';
-							return '<div class="issue-date-actions">'
-								+ '<button type="button" class="issue-date-btn issue-date-btn-start"'
-								+ ' data-action="start" data-id="' + id + '" title="' + startTitle + '"' + startDisabled + '>시작</button>'
-								+ '<button type="button" class="issue-date-btn issue-date-btn-closed"'
-								+ ' data-action="closed" data-id="' + id + '" title="' + closedTitle + '"' + closedDisabled + '>완료</button>'
-								+ '</div>';
-						}
-					}
-				],
+				columns: gridColumns,
 
 				// ═══════════════════════════════════════════════════════════
 				// 페이지네이션 (그리드 하단의 페이지 번호 영역 = tui-pagination)
@@ -456,7 +938,7 @@
 				// ═══════════════════════════════════════════════════════════
 				pageOptions: {
 					useClient: true,
-					perPage: 10
+					perPage: GRID_PER_PAGE
 
 					// ---- 아래는 pageOptions 에서 지원하지만 여기서는 쓰지 않는 옵션 예시 ----
 					// page: 1,
@@ -481,76 +963,91 @@
 			// grid.on('beforePageMove', (ev) => { /* 페이지 이동 직전 */ });
 			// grid.on('afterPageMove', (ev) => { /* 페이지 이동 직후 */ });
 
-			const tokenMeta = document.querySelector('meta[name="_csrf"]');
-			const headerMeta = document.querySelector('meta[name="_csrf_header"]');
+			const gridEl = document.getElementById('grid');
+			const quickModalApi = window.IssueQuickEditModal
+				? window.IssueQuickEditModal.init({
+					getRowByIssueId: getRowByIssueId,
+					formatIssueLabel: formatIssueLabel,
+					hasIssueDate: hasIssueDate,
+					quickValueOptions: QUICK_VALUE_OPTIONS
+				})
+				: null;
 
-			function postIssueDate(url, id) {
-				const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
-				if (tokenMeta && headerMeta) {
-					headers[headerMeta.content] = tokenMeta.content;
-				}
-				const body = 'id=' + encodeURIComponent(id);
-				return fetch(url, { method: 'POST', headers: headers, body: body })
-					.then(function (res) {
-						return res.json().then(function (data) {
-							if (!res.ok || !data.ok) {
-								throw new Error((data && data.message) || '등록에 실패했습니다.');
-							}
-							return data;
-						});
-					});
+			function togglePageSelectAll(checked) {
+				getCurrentPageRows().forEach(function (row) {
+					if (row.id != null) {
+						if (checked) selectedIds.add(row.id);
+						else selectedIds.delete(row.id);
+					}
+				});
+				refreshSelectColumn();
+				syncBulkBar();
 			}
 
-			function registerIssueDate(rowKey, action) {
-				const row = grid.getRow(rowKey);
-				if (!row || row.id == null) return;
+			if (canEdit) {
+				gridEl.addEventListener('click', function (e) {
+				const headerCell = e.target && e.target.closest
+					? e.target.closest('th[data-column-name="_select"]')
+					: null;
+				if (headerCell) {
+					togglePageSelectAll(!isCurrentPageAllSelected());
+				}
+			});
 
-				if (action === 'start' && hasIssueDate(row.startDate)) return;
-				if (action === 'closed' && hasIssueDate(row.closedDate)) return;
+				gridEl.addEventListener('change', function (e) {
+				const target = e.target;
+				if (target.classList.contains('issue-row-check') && target.dataset.id) {
+					const id = Number(target.dataset.id);
+					if (target.checked) selectedIds.add(id);
+					else selectedIds.delete(id);
+					syncBulkBar();
+				}
+			});
 
-				const url = action === 'start'
-					? '/issue/register-start-date'
-					: '/issue/register-closed-date';
-				const label = action === 'start' ? '시작일' : '완료일';
+				bulkQuickBtn.addEventListener('click', function () {
+				if (selectedIds.size === 0) return;
+				if (quickModalApi && typeof quickModalApi.open === 'function') {
+					quickModalApi.open(Array.from(selectedIds));
+				}
+			});
+				bulkClearBtn.addEventListener('click', function () {
+				selectedIds.clear();
+				refreshSelectColumn();
+				syncBulkBar();
+			});
+			}
 
-				postIssueDate(url, row.id)
-					.then(function (data) {
-						const updated = Object.assign({}, row);
-						const registeredAt = data.registeredAt ? new Date(data.registeredAt) : new Date();
-						updated.updatedOn = registeredAt;
-						if (action === 'start') {
-							updated.startDate = registeredAt;
-						} else {
-							updated.closedDate = registeredAt;
-						}
-						grid.setRow(rowKey, updated);
-						alert(label + '이 등록되었습니다.');
-					})
-					.catch(function (err) {
-						alert(err.message || (label + ' 등록에 실패했습니다.'));
-					});
+			if (canEdit) {
+				grid.on('afterPageMove', function () {
+					refreshSelectColumn();
+					bindSelectHeaderClick();
+				});
 			}
 
 			/**
-			 * 행 클릭 이벤트
-			 * - grid.on('click', callback) : 그리드 내부에서 클릭이 발생했을 때 호출
-			 * - ev 객체에는 rowKey(행 인덱스), columnName(컬럼 이름) 등이 들어있음
-			 * - 제목(subject) 컬럼은 자체 <a> 링크가 있으니 중복 이동 방지
-			 * - 일정(dateActions) 컬럼은 시작일·완료일 등록 버튼 처리
-			 * - 그 외 셀을 클릭하면 해당 행의 상세 페이지로 이동
+			 * 행 클릭: 선택/빠른수정 컬럼은 상세 이동 안 함
 			 */
 			grid.on('click', (ev) => {
 				if (ev.rowKey == null) return;
 
-				if (ev.columnName === 'dateActions') {
-					const target = ev.nativeEvent && ev.nativeEvent.target;
-					const btn = target && target.closest
-						? target.closest('.issue-date-btn')
+				const nativeTarget = ev.nativeEvent && ev.nativeEvent.target;
+
+				if (ev.columnName === '_select') {
+					return;
+				}
+
+				if (ev.columnName === 'quickActions') {
+					const btn = nativeTarget && nativeTarget.closest
+						? nativeTarget.closest('.issue-quick-btn')
 						: null;
-					if (btn && !btn.disabled) {
-						const action = btn.getAttribute('data-action');
-						if (action === 'start' || action === 'closed') {
-							registerIssueDate(ev.rowKey, action);
+					if (btn && btn.dataset.id) {
+						const rowId = Number(btn.dataset.id);
+						/* 체크된 항목이 있으면 선택 목록 전체, 없으면 해당 행만 */
+						const ids = selectedIds.size > 0
+							? Array.from(selectedIds)
+							: [rowId];
+						if (quickModalApi && typeof quickModalApi.open === 'function') {
+							quickModalApi.open(ids);
 						}
 					}
 					return;
@@ -560,9 +1057,13 @@
 
 				const row = grid.getRow(ev.rowKey);
 				if (row && row.id) {
-					location.href = '/issue/detail?id=' + row.id;
+					location.href = '/project/issue/detail?id=' + row.id;
 				}
 			});
+
+			if (canEdit) {
+				bindSelectHeaderClick();
+			}
 		});
 	</script>
 </div>

@@ -116,7 +116,7 @@
 				if (!window.confirm("\"" + label + "\" 이슈를 해제할까요?")) return;
 
 				deleteBtn.disabled = true;
-				fetch("/api/milestone/issue/" + encodeURIComponent(miId), {
+				fetch("/project/milestone/api/issue/" + encodeURIComponent(miId), {
 					method: "DELETE",
 					headers: Object.assign({ Accept: "application/json" }, getCsrfHeaders()),
 				})

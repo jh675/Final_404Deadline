@@ -17,9 +17,7 @@ public interface IssueService {
 
     int updateIssue(IssueInputVO issueVO);
 
-    int updateIssueStartDate(Long id);
 
-    int updateIssueClosedDate(Long id);
 
     int deleteIssue(Long id);
 
@@ -39,4 +37,8 @@ public interface IssueService {
     List<Map<String, Object>> getPivotStatus(Long prjId);
     List<Map<String, Object>> getPivotPriority(Long prjId);
     List<Map<String, Object>> getPivotCategory(Long prjId);
+
+    Long registerStartDate(IssueVulkVO vulkVO);
+    Long registerClosedDate(IssueVulkVO vulkVO);
+    Long updateVulk(IssueVulkVO vulkVO);
 }

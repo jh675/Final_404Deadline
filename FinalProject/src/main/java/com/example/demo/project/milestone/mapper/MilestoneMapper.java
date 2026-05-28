@@ -13,6 +13,7 @@ import com.example.demo.project.milestone.service.MilestoneTimelineVO;
 @Mapper
 public interface MilestoneMapper {
 	List<MilestoneVO> selectMilestoneList(Long id);
+	MilestoneVO selectMilestoneById(Long id);
 	List<MilestoneIssueVO> selectMilestoneIssueList(Long id);
 	List<MilestoneTimelineVO> selectTimelineList(Long id);
 	Long insertMilestone(MilestoneVO milestoneVO);

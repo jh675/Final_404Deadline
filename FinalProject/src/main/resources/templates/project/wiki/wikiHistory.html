@@ -333,9 +333,9 @@
                     </p>
                 </div>
                 <div class="wiki-history-actions">
-                    <a class="wiki-btn" th:href="@{/wiki/view/{name}(name=${page.title})}">문서 보기</a>
+                    <a class="wiki-btn" th:href="@{/project/wiki/view/{name}(name=${page.title})}">문서 보기</a>
                     <a class="wiki-btn wiki-btn-primary"
-                       th:href="@{/wiki/register(id=${page.pageId != null ? page.pageId : page.id})}">편집</a>
+                       th:href="@{/project/wiki/register(id=${page.pageId != null ? page.pageId : page.id})}">편집</a>
                 </div>
             </div>
 
@@ -376,8 +376,8 @@
                                     <span class="wiki-revision-time"
                                           th:text="${revision.updatedOn != null ? #dates.format(revision.updatedOn, 'yyyy-MM-dd HH:mm:ss') : '날짜 미상'}">2026-05-11 11:28:55</span>
                                     <span class="wiki-revision-links">
-                                        <a th:href="@{/wiki/view/{name}(name=${page.title},version=${revision.version})}">보기</a>
-                                        <a th:href="@{/wiki/view/{name}(name=${page.title},version=${revision.version})}" target="_blank" rel="noopener">새 창</a>
+                                        <a th:href="@{/project/wiki/view/{name}(name=${page.title},version=${revision.version})}">보기</a>
+                                        <a th:href="@{/project/wiki/view/{name}(name=${page.title},version=${revision.version})}" target="_blank" rel="noopener">새 창</a>
                                     </span>
                                     <span class="wiki-revision-tag"
                                           th:text="${revision.version != null ? 'r' + revision.version : 'r?'}">r74</span>
@@ -408,10 +408,10 @@
             <h3>사이드바</h3>
             <div class="index-title">색인</div>
             <ul>
-                <li><a th:href="@{/wiki}">첫페이지</a></li>
-                <li><a th:href="@{/wiki/index(type='title')}">제목별</a></li>
-                <li><a th:href="@{/wiki/index(type='date')}">날짜별</a></li>
-                <li><a class="is-active" th:href="@{/wiki/history/{name}(name=${page.title})}">문서 역사</a></li>
+                <li><a th:href="@{/project/wiki}">첫페이지</a></li>
+                <li><a th:href="@{/project/wiki/index(type='title')}">제목별</a></li>
+                <li><a th:href="@{/project/wiki/index(type='date')}">날짜별</a></li>
+                <li><a class="is-active" th:href="@{/project/wiki/history/{name}(name=${page.title})}">문서 역사</a></li>
             </ul>
         </aside>
     </div>

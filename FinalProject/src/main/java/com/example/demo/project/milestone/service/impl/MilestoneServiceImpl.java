@@ -1,13 +1,18 @@
 package com.example.demo.project.milestone.service.impl;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.example.demo.project.calender.mapper.HolidayMapper;
+import com.example.demo.project.calender.service.HolidayVO;
 import com.example.demo.project.issue.service.IssueSummaryVO;
 import com.example.demo.project.milestone.mapper.MilestoneMapper;
+import com.example.demo.project.milestone.service.MilestoneExpectedProgressCalculator;
 import com.example.demo.project.milestone.service.MilestoneIssueVO;
 import com.example.demo.project.milestone.service.MilestoneService;
 import com.example.demo.project.milestone.service.MilestoneTimelineVO;
@@ -18,6 +23,9 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 	@Autowired
 	private MilestoneMapper mapper;
+
+	@Autowired
+	private HolidayMapper holidayMapper;
 	
 	@Override
 	public List<MilestoneVO> selectMilestoneList(Long id) {
@@ -85,6 +93,22 @@ public class MilestoneServiceImpl implements MilestoneService {
 	@Override
 	public Long getAvg(Long id) {
 		return mapper.getAvg(id);
+	}
+
+	@Override
+	public Long getExpectedProgress(Long id) {
+		MilestoneVO milestone = mapper.selectMilestoneById(id);
+		if (milestone == null || milestone.getStartDate() == null || milestone.getEndDate() == null) {
+			return null;
+		}
+
+		LocalDate start = milestone.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate end = milestone.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		List<HolidayVO> holidays = holidayMapper.getHolidaysByYearRange(start.getYear(), end.getYear());
+		return MilestoneExpectedProgressCalculator.calculate(
+				milestone.getStartDate(),
+				milestone.getEndDate(),
+				holidays);
 	}
 
 }

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="issueQuickEditModal">
+	<!-- 빠른수정 모달 (행 단건 · 다건 공용) -->
+	<div id="issueQuickModalBackdrop" class="issue-quick-modal-backdrop" role="dialog"
+		aria-modal="true" aria-labelledby="issueQuickModalTitle" hidden>
+		<div class="issue-quick-modal">
+			<div class="issue-quick-modal-head">
+				<h2 id="issueQuickModalTitle">빠른수정</h2>
+				<button type="button" class="issue-quick-modal-close" id="issueQuickModalClose"
+					aria-label="닫기">&times;</button>
+			</div>
+			<div class="issue-quick-modal-body">
+				<div class="issue-quick-target-block">
+					<div class="issue-quick-target-head">
+						<span class="issue-quick-target-label">선택된 이슈</span>
+						<span class="issue-quick-target-count" id="issueQuickTargetCount">0</span><span>건</span>
+					</div>
+					<ul class="issue-quick-target-list" id="issueQuickTargetList"></ul>
+				</div>
+				<div class="issue-quick-field">
+					<label for="issueQuickAction">변경 항목</label>
+					<select id="issueQuickAction">
+						<option value="">선택하세요</option>
+						<option value="status">상태</option>
+						<option value="priority">우선순위</option>
+						<option value="category">카테고리(유형)</option>
+						<option value="start">시작일 등록</option>
+						<option value="closed">완료일 등록</option>
+					</select>
+				</div>
+				<div class="issue-quick-field" id="issueQuickValueWrap">
+					<label for="issueQuickValue" id="issueQuickValueLabel">새 값</label>
+					<select id="issueQuickValue"></select>
+				</div>
+				<div id="issueQuickDatePanel" class="issue-quick-date-panel" hidden>
+					<p class="issue-quick-date-summary" id="issueQuickDateSummary"></p>
+					<div class="issue-quick-date-section">
+						<div class="issue-quick-date-section-title is-ok" id="issueQuickDateEligibleTitle">등록 대상</div>
+						<ul class="issue-quick-date-detail-list" id="issueQuickDateEligibleList"></ul>
+					</div>
+					<div class="issue-quick-date-section" id="issueQuickDateExcludedBlock" hidden>
+						<div class="issue-quick-date-section-title is-skip">제외</div>
+						<ul class="issue-quick-date-detail-list" id="issueQuickDateExcludedList"></ul>
+					</div>
+				</div>
+			</div>
+			<div class="issue-quick-modal-foot">
+				<button type="button" class="issue-bulk-btn issue-bulk-btn-ghost" id="issueQuickCancelBtn">취소</button>
+				<button type="button" class="issue-bulk-btn issue-bulk-btn-primary" id="issueQuickApplyBtn" disabled>적용</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			function createModalApi(options) {
+				const modalBackdrop = document.getElementById('issueQuickModalBackdrop');
+				const modalAction = document.getElementById('issueQuickAction');
+				const modalValueWrap = document.getElementById('issueQuickValueWrap');
+				const modalValue = document.getElementById('issueQuickValue');
+				const modalValueLabel = document.getElementById('issueQuickValueLabel');
+				const modalTargetCount = document.getElementById('issueQuickTargetCount');
+				const modalTargetList = document.getElementById('issueQuickTargetList');
+				const modalDatePanel = document.getElementById('issueQuickDatePanel');
+				const modalDateSummary = document.getElementById('issueQuickDateSummary');
+				const modalDateEligibleTitle = document.getElementById('issueQuickDateEligibleTitle');
+				const modalDateEligibleList = document.getElementById('issueQuickDateEligibleList');
+				const modalDateExcludedBlock = document.getElementById('issueQuickDateExcludedBlock');
+				const modalDateExcludedList = document.getElementById('issueQuickDateExcludedList');
+				const modalApplyBtn = document.getElementById('issueQuickApplyBtn');
+				const closeBtn = document.getElementById('issueQuickModalClose');
+				const cancelBtn = document.getElementById('issueQuickCancelBtn');
+				let modalTargetIds = [];
+
+				if (!modalBackdrop || !modalAction || !modalValue || !modalApplyBtn) {
+					return null;
+				}
+
+				function getStartDateSkipReason(row) {
+					if (!row) return '이슈를 찾을 수 없음';
+					if (options.hasIssueDate(row.startDate)) return '이미 시작일 등록됨';
+					return null;
+				}
+
+				function getClosedDateSkipReason(row) {
+					if (!row) return '이슈를 찾을 수 없음';
+					if (options.hasIssueDate(row.closedDate)) return '이미 완료일 등록됨';
+					if (!options.hasIssueDate(row.startDate)) return '시작일 없음';
+					return null;
+				}
+
+				function classifyDateAction(ids, action) {
+					const eligible = [];
+					const excluded = [];
+					ids.forEach(function (id) {
+						const row = options.getRowByIssueId(id);
+						const label = options.formatIssueLabel(id);
+						const reason = action === 'start'
+							? getStartDateSkipReason(row)
+							: getClosedDateSkipReason(row);
+						if (reason) excluded.push({ id: id, label: label, reason: reason });
+						else eligible.push({ id: id, label: label });
+					});
+					return { eligible: eligible, excluded: excluded };
+				}
+
+				function hideDateActionPanel() {
+					modalDatePanel.hidden = true;
+				}
+
+				function renderDateActionPanel(action) {
+					const result = classifyDateAction(modalTargetIds, action);
+					const dateLabel = action === 'start' ? '시작일' : '완료일';
+					modalDateSummary.textContent = dateLabel + ' 등록 — 적용 '
+						+ result.eligible.length + '건'
+						+ (result.excluded.length > 0 ? ' · 제외 ' + result.excluded.length + '건' : '');
+					modalDateEligibleTitle.textContent = '등록 대상 (' + result.eligible.length + '건)';
+
+					modalDateEligibleList.innerHTML = '';
+					if (result.eligible.length === 0) {
+						const li = document.createElement('li');
+						li.className = 'issue-quick-date-empty';
+						li.textContent = '등록 가능한 이슈가 없습니다.';
+						modalDateEligibleList.appendChild(li);
+					} else {
+						result.eligible.forEach(function (item) {
+							const li = document.createElement('li');
+							li.textContent = item.label;
+							modalDateEligibleList.appendChild(li);
+						});
+					}
+
+					modalDateExcludedList.innerHTML = '';
+					if (result.excluded.length === 0) {
+						modalDateExcludedBlock.hidden = true;
+					} else {
+						modalDateExcludedBlock.hidden = false;
+						result.excluded.forEach(function (item) {
+							const li = document.createElement('li');
+							li.className = 'issue-quick-date-excluded-item';
+							const issueSpan = document.createElement('span');
+							issueSpan.className = 'issue-quick-date-issue';
+							issueSpan.textContent = item.label;
+							const reasonSpan = document.createElement('span');
+							reasonSpan.className = 'issue-quick-date-reason';
+							reasonSpan.textContent = item.reason;
+							li.appendChild(issueSpan);
+							li.appendChild(reasonSpan);
+							modalDateExcludedList.appendChild(li);
+						});
+					}
+
+					modalDatePanel.hidden = false;
+					modalApplyBtn.disabled = result.eligible.length === 0;
+				}
+
+				function renderModalTargetList(ids) {
+					modalTargetCount.textContent = String(ids.length);
+					modalTargetList.innerHTML = '';
+					ids.forEach(function (id) {
+						const li = document.createElement('li');
+						li.textContent = options.formatIssueLabel(id);
+						modalTargetList.appendChild(li);
+					});
+				}
+
+				function open(ids) {
+					if (!ids || !ids.length) return;
+					modalTargetIds = ids.slice();
+					renderModalTargetList(modalTargetIds);
+					modalAction.value = '';
+					modalValue.innerHTML = '<option value="">선택하세요</option>';
+					modalValueWrap.hidden = false;
+					hideDateActionPanel();
+					modalApplyBtn.disabled = true;
+					modalBackdrop.hidden = false;
+					modalBackdrop.classList.add('is-open');
+				}
+
+				function close() {
+					modalBackdrop.classList.remove('is-open');
+					modalBackdrop.hidden = true;
+					modalTargetIds = [];
+				}
+
+				function onQuickActionChange() {
+					const action = modalAction.value;
+					hideDateActionPanel();
+					modalApplyBtn.disabled = true;
+
+					if (!action) {
+						modalValueWrap.hidden = true;
+						return;
+					}
+					if (action === 'start' || action === 'closed') {
+						modalValueWrap.hidden = true;
+						renderDateActionPanel(action);
+						return;
+					}
+
+					modalValueWrap.hidden = false;
+					const labels = { status: '상태', priority: '우선순위', category: '카테고리' };
+					modalValueLabel.textContent = labels[action] || '새 값';
+					modalValue.innerHTML = '<option value="">선택하세요</option>';
+					(options.quickValueOptions[action] || []).forEach(function (opt) {
+						const o = document.createElement('option');
+						o.value = opt.code;
+						o.textContent = opt.label;
+						modalValue.appendChild(o);
+					});
+				}
+
+				function onQuickValueChange() {
+					const action = modalAction.value;
+					if (action === 'start' || action === 'closed') return;
+					modalApplyBtn.disabled = !modalValue.value;
+				}
+
+				function buildAuthHeaders(json) {
+					const headers = json ? { 'Content-Type': 'application/json' } : {};
+					const tokenMeta = document.querySelector('meta[name="_csrf"]');
+					const headerMeta = document.querySelector('meta[name="_csrf_header"]');
+					if (tokenMeta && headerMeta) headers[headerMeta.content] = tokenMeta.content;
+					return headers;
+				}
+
+				function applyQuickEdit() {
+					const action = modalAction.value;
+					if (!action || !modalTargetIds.length) return;
+
+					if (action === 'start' || action === 'closed') {
+						const result = classifyDateAction(modalTargetIds, action);
+						const eligible = result.eligible.map(function (item) { return item.id; });
+						if (!eligible.length) return;
+						const url = action === 'start' ? '/project/issue/api/start-date' : '/project/issue/api/closed-date';
+						const label = action === 'start' ? '시작일' : '완료일';
+						if (!confirm(label + '을(를) ' + eligible.length + '건에 등록하시겠습니까?')) return;
+
+						fetch(url, {
+							method: 'PUT',
+							headers: buildAuthHeaders(true),
+							body: JSON.stringify({ ids: eligible })
+						})
+							.then(function (res) { return res.json(); })
+							.then(function (data) {
+								if (!data || !data.ok) throw new Error((data && data.message) || '등록에 실패했습니다.');
+								const ok = data.success != null ? data.success : eligible.length;
+								const skipped = data.skipped != null ? data.skipped : (modalTargetIds.length - ok);
+								alert(label + ' ' + ok + '건 등록' + (skipped > 0 ? ' · 제외 ' + skipped + '건' : ''));
+								location.reload();
+							})
+							.catch(function (err) {
+								alert(err.message || (label + ' 등록 API를 확인해 주세요.'));
+							});
+						return;
+					}
+
+					const code = modalValue.value;
+					if (!code) return;
+					const body = { ids: modalTargetIds };
+					if (action === 'status') body.statusCd = code;
+					else if (action === 'priority') body.priorityCd = code;
+					else if (action === 'category') body.categoryCd = code;
+
+					const label = modalValue.options[modalValue.selectedIndex].text;
+					if (!confirm('선택한 ' + modalTargetIds.length + '건의 '
+						+ (action === 'status' ? '상태' : action === 'priority' ? '우선순위' : '카테고리')
+						+ '를 "' + label + '"(으)로 변경하시겠습니까?\n(진행중 등 상태 변경 시 진척률은 서버에서 자동 보정)')) {
+						return;
+					}
+
+					fetch('/project/issue/api/bulk', {
+						method: 'PUT',
+						headers: buildAuthHeaders(true),
+						body: JSON.stringify(body)
+					})
+						.then(function (res) { return res.json(); })
+						.then(function (data) {
+							if (!data || !data.ok) throw new Error((data && data.message) || '변경에 실패했습니다.');
+							alert('변경이 완료되었습니다.');
+							location.reload();
+						})
+						.catch(function (err) {
+							alert(err.message || '일괄 변경 API(/project/issue/api/bulk)를 확인해 주세요.');
+						});
+				}
+
+				modalAction.addEventListener('change', onQuickActionChange);
+				modalValue.addEventListener('change', onQuickValueChange);
+				if (closeBtn) closeBtn.addEventListener('click', close);
+				if (cancelBtn) cancelBtn.addEventListener('click', close);
+				modalBackdrop.addEventListener('click', function (e) {
+					if (e.target === modalBackdrop) close();
+				});
+				modalApplyBtn.addEventListener('click', applyQuickEdit);
+
+				return { open: open, close: close };
+			}
+
+			window.IssueQuickEditModal = {
+				init: function (options) {
+					if (!options || typeof options.getRowByIssueId !== 'function'
+						|| typeof options.formatIssueLabel !== 'function'
+						|| typeof options.hasIssueDate !== 'function') {
+						return null;
+					}
+					return createModalApi(options);
+				}
+			};
+		})();
+	</script>
+</div>
+</body>
+</html>

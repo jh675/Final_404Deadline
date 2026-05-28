@@ -12,6 +12,7 @@ import com.example.demo.project.issue.service.CommentOutputVO;
 import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueSummaryVO;
+import com.example.demo.project.issue.service.IssueVulkVO;
 
 @Mapper
 public interface IssueMapper {
@@ -27,9 +28,6 @@ public interface IssueMapper {
     //수정
     int updateIssue(IssueInputVO issueVO);
 
-    int updateIssueStartDate(Long id);
-
-    int updateIssueClosedDate(Long id);
     //삭제
     int deleteIssue(Long id);
     //하위 이슈 조회
@@ -47,4 +45,9 @@ public interface IssueMapper {
     List<Map<String, Object>> getPivotStatus(@Param("prjId") Long prjId);
     List<Map<String, Object>> getPivotPriority(@Param("prjId") Long prjId);
     List<Map<String, Object>> getPivotCategory(@Param("prjId") Long prjId);
+
+    Long registerStartDate(IssueVulkVO vulkVO);
+    Long registerClosedDate(IssueVulkVO vulkVO);
+    Long updateVulk(IssueVulkVO vulkVO);
+
 }

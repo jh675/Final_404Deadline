@@ -73,7 +73,7 @@
 
 				
 				<form
-					th:action="${docs.id == null or docs.id == 0} ? @{/docs/register} : @{/docs/update}"
+					th:action="${docs.id == null or docs.id == 0} ? @{/project/docs/register} : @{/project/docs/update}"
 					method="post" th:object="${docs}" enctype="multipart/form-data">
 
 					<input type="hidden" th:field="*{id}"> <input type="hidden"

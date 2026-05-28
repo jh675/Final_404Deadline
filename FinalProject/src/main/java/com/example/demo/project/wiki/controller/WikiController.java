@@ -53,7 +53,7 @@ public class WikiController {
 		return null;
 	}
 
-	@GetMapping("/wiki/register")
+	@GetMapping("/project/wiki/register")
 	public String wikiWrite(Model model, @RequestParam(value = "id", required = false) Long id, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
@@ -75,7 +75,7 @@ public class WikiController {
 		return "project/wiki/wikiWrite";
 	}
 	
-	@PostMapping(path = "/wiki/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(path = "/project/wiki/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String wikiWrite(@ModelAttribute WikiContentVO wikiContentVO,
 			@RequestParam(value = "files", required = false) MultipartFile[] files,
 			HttpSession session) {
@@ -97,10 +97,10 @@ public class WikiController {
 		service.insertWikiContent(wikiContentVO);
 		String encodedTitle = UriUtils.encodePathSegment(
 				wikiContentVO.getTitle(), StandardCharsets.UTF_8);
-		return "redirect:/wiki/view/" + encodedTitle;
+		return "redirect:/project/wiki/view/" + encodedTitle;
 	}
 	
-	@PostMapping(path = "/wiki/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(path = "/project/wiki/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String wikiUpdate(@ModelAttribute WikiContentVO wikiContentVO,
 			@RequestParam(value = "files", required = false) MultipartFile[] files,
 			HttpSession session) {
@@ -120,10 +120,10 @@ public class WikiController {
 		service.updateWikiContent(wikiContentVO);
 		String encodedTitle = UriUtils.encodePathSegment(
 				wikiContentVO.getTitle(), StandardCharsets.UTF_8);
-		return "redirect:/wiki/view/" + encodedTitle;
+		return "redirect:/project/wiki/view/" + encodedTitle;
 	}
 	
-	@GetMapping("/wiki/check")
+	@GetMapping("/project/wiki/check")
 	public ResponseEntity<Void> nameCheck(@RequestParam(name = "name") String name, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
@@ -137,7 +137,7 @@ public class WikiController {
 
 	}
 	
-	@GetMapping("wiki/index/tree")
+	@GetMapping("/project/wiki/index/tree")
 	public String wikiTree(Model model, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
@@ -149,7 +149,7 @@ public class WikiController {
 		return "project/wiki/wikiIndex";
 	}
 
-	@GetMapping("/wiki/index")
+	@GetMapping("/project/wiki/index")
 	public String wikiIndex(@RequestParam(value = "type", defaultValue = "title") String type,
 			Model model, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
@@ -169,17 +169,18 @@ public class WikiController {
 	}
 	
 	
-	@GetMapping({"/wiki","/wiki/view/{name}"})
+	@GetMapping({"/project/wiki", "/project/wiki/view/{name}"})
 	public String wikiView(@PathVariable(required = false,name = "name") String name,
 			@RequestParam(value = "version", required = false) Long version,
 			Model model, HttpSession session) {
+		session.setAttribute("currentMenu", "wiki");
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
 			return "redirect:/management/project";
 		}
 		WikiContentVO latestPage = service.selectWikiContentLastVerByTitle(projectId,name);
 		if (latestPage == null) {
-			return "redirect:/wiki";
+			return "redirect:/project/wiki";
 		}
 		WikiContentVO pageToShow = latestPage;
 		if (version != null && latestPage.getPageId() != null) {
@@ -199,7 +200,7 @@ public class WikiController {
 		return "project/wiki/wikiView";
 	}
 
-	@GetMapping("/wiki/history/{name}")
+	@GetMapping("/project/wiki/history/{name}")
 	public String wikiHistory(@PathVariable("name") String name, Model model, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
@@ -208,7 +209,7 @@ public class WikiController {
 
 		WikiContentVO page = service.selectWikiContentLastVerByTitle(projectId, name);
 		if (page == null || page.getPageId() == null) {
-			return "redirect:/wiki";
+			return "redirect:/project/wiki";
 		}
 
 		model.addAttribute("currentMenu", "wiki");

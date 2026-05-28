@@ -23,7 +23,7 @@ layout:decorate="~{layout/projectLayout}">
 <div id="wrapper">
     <h2 th:text="${message?.id != null} ? '프로젝트 게시판 수정' : '프로젝트 게시판 등록'">게시판 관리</h2>
     
-    <form th:action="${message?.id != null} ? @{/messages/update} : @{/messages/insert}" 
+    <form th:action="${message?.id != null} ? @{/project/board/message/update} : @{/project/board/message/insert}" 
            method="post" 
            enctype="multipart/form-data">
            
@@ -46,7 +46,7 @@ layout:decorate="~{layout/projectLayout}">
         </div>
         
         <div class="btn-group">
-            <button type="button" class="btn" th:onclick="|location.href='/messages/list?boardId=' + ${boardId}|">취소</button>
+            <button type="button" class="btn" th:onclick="|location.href='/project/board/message/list?boardId=' + ${boardId}|">취소</button>
             <button type="submit" class="btn btn-submit" th:text="${message?.id != null} ? '수정' : '등록'">확인</button>
         </div>
     </form>

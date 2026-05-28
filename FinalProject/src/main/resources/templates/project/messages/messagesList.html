@@ -48,8 +48,8 @@ layout:decorate="~{layout/projectLayout}">
     <h2> <span th:text="${board.name}">0</span> </h2>
     <div th:text="${board.description}"></div>
     <div style="margin-bottom: 15px;">
-        <button type="button" class="btn" onclick="location.href='/boards/list'">뒤로가기</button>
-        <button type="button" class="btn" th:onclick="|location.href='/messages/register?boardId=' + ${boardId}|">메시지 등록</button>
+        <button type="button" class="btn" onclick="location.href='/project/board/list'">뒤로가기</button>
+        <button type="button" class="btn" th:onclick="|location.href='/project/board/message/register?boardId=' + ${boardId}|">메시지 등록</button>
     </div>
 
     <table class="list-table">
@@ -65,14 +65,14 @@ layout:decorate="~{layout/projectLayout}">
             <tr th:each="msg : ${list}">
                 <td th:text="${msg.id}">1</td>
                 <td style="text-align: left; padding-left: 20px;">
-                    <a th:href="@{/messages/list(boardId=${boardId}, id=${msg.id})}" th:text="${msg.title}" style="color: inherit; text-decoration: none; font-weight: 500;">등록된 제목</a>
+                    <a th:href="@{/project/board/message/list(boardId=${boardId}, id=${msg.id})}" th:text="${msg.title}" style="color: inherit; text-decoration: none; font-weight: 500;">등록된 제목</a>
                 </td>
                 <td th:text="${#dates.format(msg.createdOn, 'yyyy-MM-dd')}">2026-05-19</td>
                 <td>
                     <div class="d-flex gap-1 justify-content-center">
-                        <button type="button" class="btn-action-view" th:onclick="|location.href='@{/messages/list(boardId=${boardId}, id=${msg.id})}'|">상세</button>
-                        <button type="button" class="btn-action-modify" th:onclick="|location.href='@{/messages/modify(id=${msg.id})}'|">수정</button>
-                        <button type="button" class="btn-action-delete" th:onclick="|if(confirm('정말 삭제하시겠습니까?')) { location.href='/messages/delete?id=' + ${msg.id} + '&boardId=' + ${boardId} }|">삭제</button>
+                        <button type="button" class="btn-action-view" th:onclick="|location.href='@{/project/board/message/list(boardId=${boardId}, id=${msg.id})}'|">상세</button>
+                        <button type="button" class="btn-action-modify" th:onclick="|location.href='@{/project/board/message/modify(id=${msg.id})}'|">수정</button>
+                        <button type="button" class="btn-action-delete" th:onclick="|if(confirm('정말 삭제하시겠습니까?')) { location.href='/project/board/message/delete?id=' + ${msg.id} + '&boardId=' + ${boardId} }|">삭제</button>
                     </div>
                 </td>
             </tr>
@@ -85,7 +85,7 @@ layout:decorate="~{layout/projectLayout}">
     <div th:if="${message != null}" class="detail-container">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 10px;">
             <h2 style="margin: 0; border: none; padding: 0;">프로젝트 게시글 상세 보기</h2>
-            <button type="button" class="btn" th:onclick="|location.href='/messages/list?boardId=' + ${boardId}|" style="padding: 4px 12px; font-size: 14px;">상세 닫기</button>
+            <button type="button" class="btn" th:onclick="|location.href='/project/board/message/list?boardId=' + ${boardId}|" style="padding: 4px 12px; font-size: 14px;">상세 닫기</button>
         </div>
         
         <div class="info-header">

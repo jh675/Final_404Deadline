@@ -140,7 +140,7 @@
       position: relative;
       flex-shrink: 0;
       padding: 12px 16px;
-      padding-right: 228px;
+      padding-right: 400px;
       border-bottom: 1px solid #ebecf0;
     }
     .timeline-header-main {
@@ -152,26 +152,66 @@
     .timeline-header-text {
       min-width: 0;
     }
-    .milestone-avg-progress {
+    .milestone-progress-panel {
       position: absolute;
       top: 12px;
       right: 16px;
-      width: 200px;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 8px;
+      width: auto;
+      max-width: calc(100% - 32px);
+    }
+    .milestone-avg-progress {
+      flex: 0 0 188px;
+      width: 188px;
       padding: 10px 12px;
       background: #f4f5f7;
       border: 1px solid #ebecf0;
       border-radius: 6px;
+      box-sizing: border-box;
+    }
+    .milestone-avg-progress.expected .avg-value {
+      color: #5e6c84;
+    }
+    .milestone-avg-progress.expected .progress-bar {
+      background: #c1c7d0;
+    }
+    .milestone-avg-progress.compare-below .avg-value {
+      color: #de350b;
+    }
+    .milestone-avg-progress.compare-below .progress-bar {
+      background: #de350b;
+    }
+    .milestone-avg-progress.compare-above .avg-value {
+      color: #0747a6;
+    }
+    .milestone-avg-progress.compare-above .progress-bar {
+      background: linear-gradient(90deg, #4c9aff, #0747a6);
+    }
+    .milestone-avg-progress.compare-equal .avg-value {
+      color: #172b4d;
+    }
+    .milestone-avg-progress.compare-equal .progress-bar {
+      background: #172b4d;
     }
     @media (max-width: 720px) {
       .timeline-header {
         padding-right: 16px;
-        padding-top: 118px;
+        padding-top: 130px;
       }
-      .milestone-avg-progress {
+      .milestone-progress-panel {
         top: 12px;
         left: 16px;
         right: 16px;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .milestone-avg-progress {
+        flex: 1 1 140px;
         width: auto;
+        min-width: 140px;
       }
     }
     .milestone-avg-progress .avg-label {
@@ -193,8 +233,9 @@
     .milestone-avg-progress .avg-value {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #0747a6;
+      color: #5e6c84;
       line-height: 1.2;
+      transition: color 0.2s ease;
     }
     .milestone-avg-progress .avg-hint {
       font-size: 0.7rem;
@@ -209,9 +250,9 @@
     }
     .milestone-avg-progress .progress-bar {
       height: 100%;
-      background: linear-gradient(90deg, #4c9aff, #0747a6);
+      background: #c1c7d0;
       border-radius: 999px;
-      transition: width 0.25s ease;
+      transition: width 0.25s ease, background 0.2s ease;
     }
     .milestone-avg-progress.is-loading .avg-value {
       color: #97a0af;
@@ -367,15 +408,28 @@
     </aside>
     <section class="timeline-panel">
       <div class="timeline-header">
-        <div class="milestone-avg-progress" id="milestoneAvgProgress" aria-live="polite">
-          <span class="avg-label">평균 진척도</span>
-          <div class="avg-value-row">
-            <strong class="avg-value" id="avgProgressValue">—</strong>
-            <span class="avg-hint" id="avgProgressHint">마일스톤 선택 시 표시</span>
+        <div class="milestone-progress-panel" aria-live="polite">
+          <div class="milestone-avg-progress" id="milestoneAvgProgress">
+            <span class="avg-label">평균 진척도</span>
+            <div class="avg-value-row">
+              <strong class="avg-value" id="avgProgressValue">—</strong>
+              <span class="avg-hint" id="avgProgressHint">마일스톤 선택 시 표시</span>
+            </div>
+            <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                 aria-valuenow="0" id="avgProgressBarWrap">
+              <div class="progress-bar" id="avgProgressBar" style="width: 0%"></div>
+            </div>
           </div>
-          <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"
-               aria-valuenow="0" id="avgProgressBarWrap">
-            <div class="progress-bar" id="avgProgressBar" style="width: 0%"></div>
+          <div class="milestone-avg-progress expected" id="milestoneExpectedProgress">
+            <span class="avg-label">예상 진척도</span>
+            <div class="avg-value-row">
+              <strong class="avg-value" id="expectedProgressValue">—</strong>
+              <span class="avg-hint" id="expectedProgressHint">기간·공휴일 기준</span>
+            </div>
+            <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                 aria-valuenow="0" id="expectedProgressBarWrap">
+              <div class="progress-bar" id="expectedProgressBar" style="width: 0%"></div>
+            </div>
           </div>
         </div>
         <div class="timeline-header-main">
@@ -431,6 +485,11 @@
       var avgProgressHintEl = document.getElementById("avgProgressHint");
       var avgProgressBarEl = document.getElementById("avgProgressBar");
       var avgProgressBarWrapEl = document.getElementById("avgProgressBarWrap");
+      var expectedProgressEl = document.getElementById("milestoneExpectedProgress");
+      var expectedProgressValueEl = document.getElementById("expectedProgressValue");
+      var expectedProgressHintEl = document.getElementById("expectedProgressHint");
+      var expectedProgressBarEl = document.getElementById("expectedProgressBar");
+      var expectedProgressBarWrapEl = document.getElementById("expectedProgressBarWrap");
       var container = document.getElementById("timeline");
       var emptyHint = document.getElementById("emptyHint");
       var statusEl = document.getElementById("timelineStatus");
@@ -438,6 +497,7 @@
       var milestones = [];
       var selectedMilestoneId = null;
       var currentIssues = [];
+      var progressValues = { avg: null, expected: null, avgLoading: false, expectedLoading: false };
       var timeline = null;
       var groups = new vis.DataSet([]);
       var items = new vis.DataSet([]);
@@ -525,7 +585,7 @@
       }
 
       function fetchIssues(milestoneId) {
-        return fetch("/api/milestone/list/" + encodeURIComponent(milestoneId), {
+        return fetch("/project/milestone/api/list/" + encodeURIComponent(milestoneId), {
           headers: { Accept: "application/json" },
         })
           .then(function (res) {
@@ -712,7 +772,9 @@
         headerTextEl.innerHTML =
           "<h3>프로젝트를 지정해 주세요</h3>" +
           "<p>프로젝트를 먼저 선택한 뒤 이 화면에 들어와 주세요.</p>";
+        resetProgressValues();
         setAvgProgress(null, "—");
+        setExpectedProgress(null, "—");
         sidebarEl.innerHTML =
           '<li class="milestone-list-empty">프로젝트 ID가 없어 마일스톤을 불러올 수 없습니다.</li>';
         setStatus("프로젝트를 선택한 뒤 페이지를 다시 열어 주세요.");
@@ -724,37 +786,112 @@
         return Math.max(0, Math.min(100, Math.round(n)));
       }
 
-      function setAvgProgress(percent, hint) {
-        if (!avgProgressEl) return;
+      function applyProgressBlock(el, valueEl, hintEl, barEl, barWrapEl, percent, hint, defaultHint) {
+        if (!el) return;
         var pct = clampPercent(percent);
         var loading = percent === "…";
-        avgProgressEl.classList.toggle("is-loading", loading);
+        el.classList.toggle("is-loading", loading);
 
         if (loading) {
-          if (avgProgressValueEl) avgProgressValueEl.textContent = "…";
-          if (avgProgressHintEl) avgProgressHintEl.textContent = hint || "불러오는 중";
-          if (avgProgressBarEl) avgProgressBarEl.style.width = "0%";
-          if (avgProgressBarWrapEl) avgProgressBarWrapEl.setAttribute("aria-valuenow", "0");
+          if (valueEl) valueEl.textContent = "…";
+          if (hintEl) hintEl.textContent = hint || "불러오는 중";
+          if (barEl) barEl.style.width = "0%";
+          if (barWrapEl) barWrapEl.setAttribute("aria-valuenow", "0");
           return;
         }
 
         if (pct == null) {
-          if (avgProgressValueEl) avgProgressValueEl.textContent = "—";
-          if (avgProgressHintEl) avgProgressHintEl.textContent = hint || "데이터 없음";
-          if (avgProgressBarEl) avgProgressBarEl.style.width = "0%";
-          if (avgProgressBarWrapEl) avgProgressBarWrapEl.setAttribute("aria-valuenow", "0");
+          if (valueEl) valueEl.textContent = "—";
+          if (hintEl) hintEl.textContent = hint || "데이터 없음";
+          if (barEl) barEl.style.width = "0%";
+          if (barWrapEl) barWrapEl.setAttribute("aria-valuenow", "0");
           return;
         }
 
-        if (avgProgressValueEl) avgProgressValueEl.textContent = pct + "%";
-        if (avgProgressHintEl) avgProgressHintEl.textContent = hint || "등록 이슈 기준";
-        if (avgProgressBarEl) avgProgressBarEl.style.width = pct + "%";
-        if (avgProgressBarWrapEl) avgProgressBarWrapEl.setAttribute("aria-valuenow", String(pct));
+        if (valueEl) valueEl.textContent = pct + "%";
+        if (hintEl) hintEl.textContent = hint || defaultHint;
+        if (barEl) barEl.style.width = pct + "%";
+        if (barWrapEl) barWrapEl.setAttribute("aria-valuenow", String(pct));
+      }
+
+      function updateAvgCompareStyle() {
+        if (!avgProgressEl) return;
+        avgProgressEl.classList.remove("compare-below", "compare-above", "compare-equal");
+        if (progressValues.avgLoading || progressValues.expectedLoading) return;
+        var avg = progressValues.avg;
+        var expected = progressValues.expected;
+        if (avg == null || expected == null) return;
+        if (avg < expected) {
+          avgProgressEl.classList.add("compare-below");
+        } else if (avg > expected) {
+          avgProgressEl.classList.add("compare-above");
+        } else {
+          avgProgressEl.classList.add("compare-equal");
+        }
+      }
+
+      function resetProgressValues() {
+        progressValues.avg = null;
+        progressValues.expected = null;
+        progressValues.avgLoading = false;
+        progressValues.expectedLoading = false;
+        updateAvgCompareStyle();
+      }
+
+      function setAvgProgress(percent, hint) {
+        if (percent === "…") {
+          progressValues.avgLoading = true;
+          progressValues.avg = null;
+        } else {
+          progressValues.avgLoading = false;
+          progressValues.avg = clampPercent(percent);
+        }
+        applyProgressBlock(
+          avgProgressEl, avgProgressValueEl, avgProgressHintEl,
+          avgProgressBarEl, avgProgressBarWrapEl,
+          percent, hint, "등록 이슈 기준"
+        );
+        updateAvgCompareStyle();
+      }
+
+      function setExpectedProgress(percent, hint) {
+        if (percent === "…") {
+          progressValues.expectedLoading = true;
+          progressValues.expected = null;
+        } else {
+          progressValues.expectedLoading = false;
+          progressValues.expected = clampPercent(percent);
+        }
+        applyProgressBlock(
+          expectedProgressEl, expectedProgressValueEl, expectedProgressHintEl,
+          expectedProgressBarEl, expectedProgressBarWrapEl,
+          percent, hint, "기간·공휴일 기준"
+        );
+        updateAvgCompareStyle();
+      }
+
+      function fetchExpectedProgress(milestoneId) {
+        setExpectedProgress("…");
+        return fetch("/project/milestone/api/expected/" + encodeURIComponent(milestoneId), {
+          headers: { Accept: "application/json" },
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            var value = data;
+            if (data && typeof data === "object" && data.expected != null) value = data.expected;
+            setExpectedProgress(value);
+          })
+          .catch(function () {
+            setExpectedProgress(null, "조회 실패");
+          });
       }
 
       function fetchAvgProgress(milestoneId) {
         setAvgProgress("…");
-        return fetch("/api/milestone/avg/" + encodeURIComponent(milestoneId), {
+        return fetch("/project/milestone/api/avg/" + encodeURIComponent(milestoneId), {
           headers: { Accept: "application/json" },
         })
           .then(function (res) {
@@ -785,6 +922,7 @@
         setActiveSidebar(id);
         setHeader(ms, "…");
         fetchAvgProgress(id);
+        fetchExpectedProgress(id);
         setStatus("이슈 목록을 불러오는 중…");
 
         fetchIssues(id).then(function (issues) {
@@ -807,7 +945,9 @@
           headerTextEl.innerHTML =
             "<h3>마일스톤 없음</h3>" +
             "<p>마일스톤을 추가하면 이슈 타임라인을 확인할 수 있습니다.</p>";
+          resetProgressValues();
           setAvgProgress(null, "—");
+          setExpectedProgress(null, "—");
           setStatus("마일스톤을 추가해 주세요.");
           return;
         }
@@ -834,7 +974,7 @@
       }
 
       function fetchMilestones() {
-        return fetch("/api/milestone/" + encodeURIComponent(prjId), {
+        return fetch("/project/milestone/api/" + encodeURIComponent(prjId), {
           headers: { Accept: "application/json" },
         })
           .then(function (res) {
@@ -915,6 +1055,14 @@
         },
         refreshAvgProgress: function () {
           if (selectedMilestoneId != null) fetchAvgProgress(selectedMilestoneId);
+        },
+        refreshExpectedProgress: function () {
+          if (selectedMilestoneId != null) fetchExpectedProgress(selectedMilestoneId);
+        },
+        refreshProgress: function () {
+          if (selectedMilestoneId == null) return;
+          fetchAvgProgress(selectedMilestoneId);
+          fetchExpectedProgress(selectedMilestoneId);
         },
       };
     })();
