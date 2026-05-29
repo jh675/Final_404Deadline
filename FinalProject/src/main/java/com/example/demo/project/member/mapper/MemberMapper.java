@@ -45,4 +45,6 @@ public interface MemberMapper {
     int insertMembers(@Param("userIds") List<Long> userIds, @Param("grpId") Long grpId);
 
     int updateMember(MemberUpdateParam param);
+    
+    String findLoginById(Long userId);
 }

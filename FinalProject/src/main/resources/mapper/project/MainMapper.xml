@@ -6,50 +6,50 @@
  <select id="issueCount" resultType="com.example.demo.project.main.service.IssueCountVO">
  	SELECT
     SUM(CASE
-            WHEN STATUS_CD = '01ISSUESTAT'
-             AND PRIORITY_CD != '04ISSUEPRI'
+            WHEN CATEGORY_CD = '01ISSUECATE'
+             AND STATUS_CD != '04ISSUESTAT'
             THEN 1 ELSE 0
         END) AS bGoCount,
 
     SUM(CASE
-            WHEN STATUS_CD = '01ISSUESTAT'
-             AND PRIORITY_CD = '04ISSUEPRI'
+            WHEN CATEGORY_CD = '01ISSUECATE'
+             AND STATUS_CD = '04ISSUESTAT'
             THEN 1 ELSE 0
         END) AS bEndCount,
 
     SUM(CASE
-            WHEN STATUS_CD = '02ISSUESTAT'
-             AND PRIORITY_CD != '04ISSUEPRI'
+            WHEN CATEGORY_CD = '02ISSUECATE'
+             AND STATUS_CD != '04ISSUESTAT'
             THEN 1 ELSE 0
         END) AS fGoCount,
 
     SUM(CASE
-            WHEN STATUS_CD = '02ISSUESTAT'
-             AND PRIORITY_CD = '04ISSUEPRI'
+            WHEN CATEGORY_CD = '02ISSUECATE'
+             AND STATUS_CD = '04ISSUESTAT'
             THEN 1 ELSE 0
         END) AS fEndCount,
 
     SUM(CASE
-            WHEN STATUS_CD = '03ISSUESTAT'
-             AND PRIORITY_CD != '04ISSUEPRI'
+            WHEN CATEGORY_CD = '03ISSUECATE'
+             AND STATUS_CD != '04ISSUESTAT'
             THEN 1 ELSE 0
         END) AS wGoCount,
 
     SUM(CASE
-            WHEN STATUS_CD = '03ISSUESTAT'
-             AND PRIORITY_CD = '04ISSUEPRI'
+            WHEN CATEGORY_CD = '03ISSUECATE'
+             AND STATUS_CD = '04ISSUESTAT'
             THEN 1 ELSE 0
         END) AS wEndCount,
 
     SUM(CASE
-            WHEN STATUS_CD = '04ISSUESTAT'
-             AND PRIORITY_CD != '04ISSUEPRI'
+            WHEN CATEGORY_CD = '04ISSUECATE'
+             AND STATUS_CD != '04ISSUESTAT'
             THEN 1 ELSE 0
         END) AS iGoCount,
 
     SUM(CASE
-            WHEN STATUS_CD = '04ISSUESTAT'
-             AND PRIORITY_CD = '04ISSUEPRI'
+            WHEN CATEGORY_CD = '04ISSUECATE'
+             AND STATUS_CD = '04ISSUESTAT'
             THEN 1 ELSE 0
         END) AS iEndCount
 
@@ -57,29 +57,7 @@
 	WHERE prj_id = #{prjId}
  </select>
  
-  <select id="selectCalender" resultType="com.example.demo.management.service.ProjectVO">
   
-  SELECT 
-	    c.id AS Cid,
-	    c.place AS place,
-	    c.cal_text AS calText,
-	    c.cal_start AS calStart,
-	    c.cal_end AS calEnd,
-	    cc.name AS calType, 
-	    m.user_id AS userId,
-	    g.name AS gname
-	FROM project p
-	INNER JOIN grp g       ON p.id = g.prj_id
-	INNER JOIN member m    ON g.id = m.grp_id
-	INNER JOIN calender c  ON m.id = c.mem_id
-	-- 💡 공통코드 테이블 조인 추가
-	LEFT OUTER JOIN sub_code cc ON c.cal_type = cc.s_code
-	                              AND cc.m_code = '00CALDETAIL'
-	WHERE p.id = #{id}
-	  AND TRUNC(SYSDATE) + 1 > c.cal_start 
-	  AND c.cal_end >= TRUNC(SYSDATE)       
-	ORDER BY c.cal_start ASC
-  </select>
   <select id="selectNotice" resultType="com.example.demo.project.notice.service.NoticeVO">
   	select prj_id,title,created_on
   	from notice 
@@ -89,7 +67,7 @@
  
    <select id="selectgroup" resultType="com.example.demo.project.group.service.GroupDetailVO">
    	SELECT 
-	    g.id,
+	    g.id as grpId,
 	    g.name  as grpName,
 	    COUNT(m.user_id) as count
 	FROM grp g
