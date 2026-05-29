@@ -30,6 +30,9 @@ import com.example.demo.project.calender.service.CalenderService;
 import com.example.demo.project.calender.service.CalenderVO;
 import com.example.demo.project.calender.service.HolidayService;
 import com.example.demo.project.calender.service.HolidayVO;
+import com.example.demo.project.issue.mapper.IssueMapper;
+import com.example.demo.project.issue.service.IssueInputVO;
+import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
@@ -60,6 +63,10 @@ public class mypageController {
 	// 유저 정보 업데이트를 위한 서비스 추가
 	@Autowired
 	UserManageService userManageService;
+	
+	// 마이페이지 - 간트차트 조회 추가
+	@Autowired
+	IssueMapper issueMapper;
 
 	// 로그인한 유저 정보 가져오기
 	private UserVO getLoginUser() {
@@ -92,7 +99,20 @@ public class mypageController {
 
 		return "mypage/myPage";
 	}
-	// 마이페이지 내 정보 수정 (사용 안함)
+	
+	// 마이페이지 일정 탭 - 간트차트 조회 
+	
+	@GetMapping("/mypage/gantt/list")
+	@ResponseBody
+	public List<IssueOutputVO> myPageGantt() {
+		long memId = getLoginUser().getId().longValue();
+		IssueInputVO vo = new IssueInputVO();
+		vo.setMemId(memId);
+		return issueMapper.selectIssueList(vo);
+	}
+	
+	
+	// 마이페이지 내 정보 수정 
 	@PostMapping("/mypage/update")
 	@ResponseBody
 	public String updateInfo(@RequestBody UserVO update) {
@@ -235,6 +255,13 @@ public class mypageController {
 			}
 		}
 		return ResponseEntity.ok().body("SUCCESS");
+	}
+	
+	// 이번주 그룹 전체 마감이슈 
+	@GetMapping("/mypage/issue/week")
+	@ResponseBody
+	public List<IssueOutputVO> weekIssueList(IssueInputVO vo) {
+		return issueMapper.selectIssueList(vo);
 	}
 
 }

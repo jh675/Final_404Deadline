@@ -370,7 +370,7 @@
 		
 		}
 		function loadEvents(typeCd = '') {
-    	csrfFetch(`/calender/listJson?typeCd=${typeCd}`, { 
+    	csrfFetch(`/calendar/listJson?typeCd=${typeCd}`, { 
             headers: { 'X-Requested-With': 'XMLHttpRequest' } 
         })
         .then(res => res.json())
@@ -531,7 +531,7 @@
             + `&calEnd=${encodeURIComponent(calEnd)}`
             + `&sharingCd=${sharingCd}`;
 
-            csrfFetch('/calender/insert', {
+            csrfFetch('/calendar/insert', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: sendParams
@@ -613,7 +613,7 @@
         // 모달 열기
         openModal('updateModalOverlay');        
         
-        fetch(`/calender/detail?id=${id}`, {
+        fetch(`/calendar/detail?id=${id}`, {
             method: 'GET',
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
@@ -696,7 +696,7 @@
         const calStart = `${startDate} ${finalStart}`;  
         const calEnd = `${endDate} ${finalEnd}`;
     
-        csrfFetch('/calender/update', {
+        csrfFetch('/calendar/update', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `id=${id}&place=${encodeURIComponent(place)}&calText=${encodeURIComponent(calText)}&typeCd=${typeCd}&calType=${calType}&calStart=${encodeURIComponent(calStart)}&calEnd=${encodeURIComponent(calEnd)}&sharingCd=${sharingCd}`
@@ -726,14 +726,14 @@
 		        return;
 		    }
 		
-		    csrfFetch('/calender/delete', {
+		    csrfFetch('/calendar/delete', {
 		        method: 'DELETE',
 		        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 		        body: `id=${id}`
 		    })
 		    .then(res => {
 		        if(!res.ok) {
-		            return csrfFetch('/calender/delete', {
+		            return csrfFetch('/calendar/delete', {
 		                method: 'POST',
 		                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 		                body: `id=${id}`
@@ -779,7 +779,7 @@
 			 return;
 		}
         
-        csrfFetch(`/calender/search?keyword=${keyword}&typeCd=${typeCd}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        csrfFetch(`/calendar/search?keyword=${keyword}&typeCd=${typeCd}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(res => res.json())
         .then(data => {
           	console.log('검색 결과:', data);

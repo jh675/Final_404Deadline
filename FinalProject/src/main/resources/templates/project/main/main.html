@@ -14,7 +14,7 @@
 
 <body>
 <div layout:fragment="content">
-
+	<div id="issuetable">
 	<table>	
 		<thead>
 			<tr>
@@ -26,42 +26,29 @@
 		<tbody>
 			<tr>
 				<th>버그</th>
-				<td th:text="${count.bGoCount}"></td>
-				<td th:text="${count.bEndCount}"></td>
+				<td><a th:text="${count.bGoCount}" th:href="@{/project/issue/list(categoryCd='01ISSUECATE', priorityCd='', statusCd='', memId='', subject='')}"></a></td>
+				<td><a th:text="${count.bEndCount}" th:href="@{/project/issue/list(categoryCd='01ISSUECATE', priorityCd='', statusCd='04ISSUESTAT', memId='', subject='')}"></a></td>
 			</tr>
 			<tr>
 				<th>기능</th>
-				<td th:text="${count.fGoCount}"></td>
-				<td th:text="${count.fEndCount}"> </td>
+				<td><a  th:text="${count.fGoCount}" th:href="@{/project/issue/list(categoryCd='02ISSUECATE', priorityCd='', statusCd='', memId='', subject='')}"></a></td>
+				<td><a th:text="${count.fEndCount}" th:href="@{/project/issue/list(categoryCd='02ISSUECATE', priorityCd='', statusCd='04ISSUESTAT', memId='', subject='')}"></a></td>
 			</tr>
 			<tr>
 				<th>작업</th>
-				<td th:text="${count.wGoCount}"></td>
-				<td th:text="${count.wEndCount}"></td>
+				<td><a th:text="${count.wGoCount}" th:href="@{/project/issue/list(categoryCd='03ISSUECATE', priorityCd='', statusCd='', memId='', subject='')}"></a></td>
+				<td><a th:text="${count.wEndCount}" th:href="@{/project/issue/list(categoryCd='03ISSUECATE', priorityCd='', statusCd='04ISSUESTAT', memId='', subject='')}"></a></td>
 			</tr>
 			<tr>
 				<th>개선</th>
-				<td th:text="${count.iGoCount}"></td>
-				<td th:text="${count.iEndCount}"></td>
+				<td><a th:text="${count.iGoCount}" th:href="@{/project/issue/list(categoryCd='04ISSUECATE', priorityCd='', statusCd='', memId='', subject='')}"></a></td>
+				<td><a th:text="${count.iEndCount}" th:href="@{/project/issue/list(categoryCd='04ISSUECATE', priorityCd='', statusCd='04ISSUESTAT', memId='', subject='')}"></a></td>
 			</tr>
 		</tbody>
 	</table>
-	<table>
-		<thead>
-			<tr>
-				<th></th>			
-				<th>오늘의 일정</th>
-				<th>시간</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr th:each= "ca : ${calender}">
-				<th th:text="${ca.calType}"></th>
-				<td th:text="${ca.place}"></td>
-				<td th:text="${#dates.format(ca.calStart,'HH:mm')}"></td>
-			</tr>
-		</tbody>
-	</table>
+		<a th:href="@{/project/issue/list}">모든 이슈 보기</a>
+		<a th:href="@{/project/issue/pivot}">이슈 통계 보기</a>
+	</div>
 	<table>
 		<thead>
 			<tr>
@@ -73,7 +60,7 @@
 		<tbody>
 			<tr th:each=" nt, stat : ${notice}" th:if="${stat.index < 3}">
 				<th th:text="${stat.count}"></th>
-				<td th:text="${nt.title}"></td>
+				<td ><a th:text="${nt.title}" th:href="@{/project/notice/list}"></a></td>
 				<td th:text="${#dates.format(nt.createdOn,'yyyy-MM-dd')}"></td>
 			</tr>
 		</tbody>
@@ -87,7 +74,7 @@
 		</thead>
 		<tbody>
 			<tr th:each=" g : ${selectgroup}">
-				<th th:text="${g.grpName}"></th>
+				<th><a th:text="${g.grpName}" th:href="@{/project/group/info(grpId=${g.grpId})}"></a></th>
 				<td th:text="${g.count}"></td>
 			</tr>
 		</tbody>

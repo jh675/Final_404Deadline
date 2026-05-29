@@ -2,7 +2,8 @@ let myPendingProfileFile = null;
 let myIsProfileDeleted = false;
 let myCropper = null;
 
-let isEmailVerified = true; 
+// 이메일 인증 상태 플래그
+let isEmailVerified = true;
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -147,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 emailInput.classList.remove('is-invalid');
                 document.getElementById('emailFeedback').className = 'small mt-1 text-success fw-bold';
                 document.getElementById('emailFeedback').textContent = '이메일 인증이 완료되었습니다.';
-                
+
                 isEmailVerified = true;
                 
                 // 인증 완료 후 다시 안전하게 잠금 (수정하려면 다시 수정버튼을 누르게 유도)
@@ -225,7 +226,8 @@ document.addEventListener('DOMContentLoaded', function() {
             email: currentEmailVal,
             tel: tel.value.trim()
         };
-        if (currentPwd.value) {
+
+      if (currentPwd.value) {
             payload.currentPassword = currentPwd.value;
             payload.newPassword = newPwd.value;
         }
@@ -285,13 +287,13 @@ document.addEventListener('DOMContentLoaded', function() {
             new bootstrap.Modal(document.getElementById('myCropModal')).show();
         };
         reader.readAsDataURL(file);
-        this.value = ''; 
+        this.value = '';
     });
 
-    document.getElementById('myCropModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById('myCropModal').addEventListener('shown.bs.modal', function() {
         const image = document.getElementById('myImageToCrop');
         if (myCropper) myCropper.destroy();
-        
+
         myCropper = new Cropper(image, {
             aspectRatio: 3 / 4,
             viewMode: 1,
@@ -303,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnApplyCrop').addEventListener('click', function() {
         if (!myCropper) return;
         const canvas = myCropper.getCroppedCanvas({ width: 300, height: 400 });
-        
+
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
         const previewImg = document.getElementById("myProfilePreview");
         previewImg.src = dataUrl;
@@ -324,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('myProfilePreview').classList.add("d-none");
         document.getElementById('myEmptyImageText').style.display = "";
     });
-    
+
     // 입력창 타이핑 시 빨간 에러 CSS 삭제
     document.querySelectorAll('#mypageForm input').forEach(input => {
         input.addEventListener('input', function() {
@@ -337,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadMyProfileImage() {
     const img = document.getElementById("myProfilePreview");
     const emptyText = document.getElementById("myEmptyImageText");
-    
+
     myPendingProfileFile = null;
     myIsProfileDeleted = false;
 
@@ -356,7 +358,7 @@ async function loadMyProfileImage() {
             }
         }
     } catch (e) {}
-    
+
     // 실패 시 초기화
     img.src = "";
     img.classList.add("d-none");

@@ -98,7 +98,7 @@
 				<ul class="nav nav-tabs mb-3" id="scheduleTabs">
 					<li class="nav-item">
 						<button class="nav-link active" data-bs-toggle="tab"
-							data-bs-target="#calenderTab">캘린더</button>
+							data-bs-target="#calendarTab">캘린더</button>
 					</li>
 					<li class="nav-item">
 						<button class="nav-link" data-bs-toggle="tab"
@@ -110,29 +110,16 @@
 				<div class="tab-content">
 
 					<!-- 캘린더 탭 -->
-					<div class="tab-pane fade show active" id="calenderTab">
-						<!-- 월/주/일 뷰 전환 + 이전/다음 버튼 -->
+					<div class="tab-pane fade show active" id="calendarTab">
 						<div class="d-flex align-items-center gap-2 mb-3">
 							<div class="btn-group">
 								<button type="button"
 									class="btn btn-outline-primary btn-sm view-btn active"
-									onclick="changeView('month')">월간</button>
+									onclick="showSchedule('week')">이번주</button>
 								<button type="button"
 									class="btn btn-outline-primary btn-sm view-btn"
-									onclick="changeView('week')">주간</button>
-								<button type="button"
-									class="btn btn-outline-primary btn-sm view-btn"
-									onclick="changeView('day')">일일</button>
+									onclick="showSchedule('day')">오늘</button>
 							</div>
-							<div class="d-flex align-items-center gap-1">
-								<button type="button" class="btn btn-outline-secondary btn-sm"
-									onclick="mypageCalendar.prev(); updateDateLabel()">&lt;</button>
-								<span class="fw-bold px-2" id="currentDate"
-									style="min-width: 90px; font-size: 14px;"></span>
-								<button type="button" class="btn btn-outline-secondary btn-sm"
-									onclick="mypageCalendar.next(); updateDateLabel()">&gt;</button>
-							</div>
-							<!-- 일정 유형 필터 -->
 							<select class="form-select form-select-sm ms-auto"
 								id="mypageTypeCd" onchange="filterMypageEvents()"
 								style="width: 100px;">
@@ -142,8 +129,8 @@
 								<option value="03CALTYPE">회사일정</option>
 							</select>
 						</div>
-						<!-- 캘린더 렌더링 영역 -->
-						<div id="mypageCalendar" style="height: 500px;"></div>
+						<!-- 일정 목록 렌더링 영역 -->
+						<div id="scheduleList"></div>
 					</div>
 
 					<!-- 간트차트 탭 -->
@@ -209,128 +196,212 @@
 				</table>
 			</div>
 
-			<!-- ===== 담당 이슈 영역 (추후 작업) ===== -->
+			<!-- ===== 담당 이슈 영역 ===== -->
 			<h5 class="fw-bold mb-3">내 담당 이슈</h5>
 			<div class="card mb-4 p-3">
-				<p class="text-muted mb-0">담당 이슈 영역 (추후 작업)</p>
+				<div class="table-responsive">
+					<table
+						class="table table-bordered table-hover text-center align-middle"
+						style="font-size: 14px;">
+						<thead class="table-dark">
+							<tr>
+								<th>이슈명</th>
+								<th>상태</th>
+								<th>우선순위</th>
+								<th>시작예정일</th>
+								<th>마감일</th>
+								<th>진척도</th>
+							</tr>
+						</thead>
+						<tbody id="myIssueList">
+							<tr>
+								<td colspan="6" class="text-muted py-3">로딩 중...</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 
 			<!-- ===== 전체 이슈 영역 (추후 작업) ===== -->
 			<h5 class="fw-bold mb-3">이번주 마감 전체이슈</h5>
-			<div class="card mb-4 p-3">
-				<p class="text-muted mb-0">전체 이슈 영역 (추후 작업)</p>
-			</div>
+			<div class="table-responsive">
+					<table
+						class="table table-bordered table-hover text-center align-middle"
+						style="font-size: 14px;">
+						<thead class="table-dark">
+							<tr>
+								<th>이슈명</th>
+								<th>담당자</th>
+								<th>상태</th>
+								<th>우선순위</th>
+								<th>마감일</th>
+								<th>진척도</th>
+							</tr>
+						</thead>
+						<tbody id="weekWeeklyIssueList">
+							<tr>
+								<td colspan="6" class="text-muted py-3">로딩 중...</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
 		</div>
 
 		<!-- ===== 내 정보 수정 모달 ===== -->
 		<div th:replace="~{mypage/modal/mypageUserEdit :: mypageEditModal}"></div>
-
-<script th:src="@{/js/mypage/mypage.js}"></script>
+		<script th:src="@{/js/mypage/mypage.js}"></script>
 		<script>
 	
 	// =============================================
 	// 1. 마이페이지 캘린더 (조회 전용)
 	// =============================================
-		
-	const Calendar = tui.Calendar;
-	
-    const calendar = new Calendar('#mypagecalendar', {
-        defaultView: 'month',
-        language: 'ko',
-        useFormPopup: false,   
-        useDetailPopup: true,
-        
-        week: {
-		  dayNames: ['일', '월', '화', '수', '목', '금', '토'],
-        },
-        month: {
-		  dayNames: ['일', '월', '화', '수', '목', '금', '토'],
-		  visibleEventCount: 5,
-        },
-        calendars: [
-        	{ id: 'holiday', name: '공휴일', color: '#fff', backgroundColor: '#ff4d4d', borderColor: '#ff4d4d' },
-            { id: 'personal', name: '개인일정', color: '#fff', backgroundColor: '#ff6b6b', borderColor: '#ff6b6b' },
-            { id: 'group',    name: '그룹일정', color: '#fff', backgroundColor: '#51cf66', borderColor: '#51cf66' },
-            { id: 'company',  name: '회사일정', color: '#fff', backgroundColor: '#339af0', borderColor: '#339af0' },
-        ],
-        template: {
-            time(event) {
-                return `<span>${event.title}</span>`;
-            }     
-        }
-    });
-    
- // =============================================
-	// 1) 캘린더 일정 불러오기
-	// =============================================
-    function loadcalenderEvents(typeCd = '') {
-    	fetch(`/calendar/listJson?typeCd=${typeCd}`, { 
-            headers: { 'X-Requested-With': 'XMLHttpRequest' } 
-        })
-        .then(res => res.json())
-        .then(data => {
-            calendar.clear(); // 캘린더 초기화 
-            
-            const events = data.map(item => ({
-                id: String(item.id),
-                calendarId: item.typeCd === '01CALTYPE' ? 'personal' 
-                          : item.typeCd === '02CALTYPE' ? 'group' 
-                          : item.typeCd === '03CALTYPE' ? 'company' : 'personal',
-                title: item.calText || '제목없음',
-                start: new Date(item.calStart),
-                end: new Date(item.calEnd),
-            	isReadOnly: true 
-            }));
-            mypagecalendar.createEvents(events);
-            
-            // 캘린더에 공휴일 불러오기 
-            loadMypageHoliday(mypageCalendar.getDate().getFullYear());
-        });
-    }
-	
-    //=========================================================================================
-    // 2. 공휴일 불러오기
-	//=========================================================================================	
 
-	  function loadMypageHoliday(year) {
-		
-    	fetch(`/calendar/holiday/list?year=${year}`, {
-    		 headers: { 'X-Requested-With': 'XMLHttpRequest' }   	
-    	})
-    	.then(res => res.json())
-    	.then(data => {
+	let allEvents = [];
 
-		  const holiday = data.map(h => ({
-				id: 'holiday_' + h.id,
-				calendarId: 'holiday',
-				title: h.holidayName,
-				start: `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}`,
-	            end:   `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}`,
-	            isAllday:true,
-	            category: 'allday',
-	            isReadOnly: true,
-	            color: '#ff4d4d',            
-	            backgroundColor: 'transparent', 
-	            borderColor: 'transparent'   
-		  }));
-    		MypageCalendar.createEvents(holiday);
-    	});
-    	
-      }
-  
-	  // 날짜 표시 업데이트
-	    function updateDateLabel() {
-	        const date = calendar.getDate();
-	        const year = date.getFullYear();
-	        const month = date.getMonth() + 1;
-	        document.getElementById('currentDate').textContent = `${year}년 ${month}월`;
+	function loadcalendarEvents(typeCd = '') {
+	    fetch(`/calendar/listJson?typeCd=${typeCd}`, {
+	        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+	    })
+	    .then(res => res.json())
+	    .then(data => {
+	        if (!Array.isArray(data)) return;
+
+	        const year = new Date().getFullYear();
+	        fetch(`/holiday/list?year=${year}`, {
+	            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+	        })
+	        .then(res => res.json())
+	        .then(holidays => {
+	            const holidayEvents = holidays.map(h => ({
+	                calStart: `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}T00:00:00`,
+	                calEnd:   `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}T23:59:00`,
+	                calText: h.holidayName,
+	                place: '',
+	                typeCd: 'holiday'
+	            }));
+
+	            // 전체 선택 시 공휴일 보이는 설정 
+	            if (typeCd === '') {
+	                allEvents = [...data, ...holidayEvents]; // 전체: 공휴일 포함
+	            } else {
+	                allEvents = [...data]; // 특정 유형 선택: 공휴일 제외
+	            }
+	            showSchedule('week');
+	        });
+	    });
+	}
+
+	function showSchedule(mode) {
+	    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+	    const btnIndex = mode === 'week' ? 0 : 1;
+	    document.querySelectorAll('.view-btn')[btnIndex].classList.add('active');
+
+	    const today = new Date();
+	    today.setHours(0, 0, 0, 0);
+
+	    const dayOfWeek = today.getDay();
+	    const weekStart = new Date(today);
+	    weekStart.setDate(today.getDate() - dayOfWeek);
+	    const weekEnd = new Date(weekStart);
+	    weekEnd.setDate(weekStart.getDate() + 6);
+	    weekEnd.setHours(23, 59, 59, 999);
+
+	    let filtered = [];
+	    if (mode === 'day') {
+	        filtered = allEvents.filter(item => {
+	            const start = new Date(item.calStart);
+	            return start.getFullYear() === today.getFullYear() &&
+	                   start.getMonth() === today.getMonth() &&
+	                   start.getDate() === today.getDate();
+	        });
+	    } else {
+	        filtered = allEvents.filter(item => {
+	            const start = new Date(item.calStart);
+	            return start >= weekStart && start <= weekEnd;
+	        });
 	    }
-	
-	  
-	  
+
+	    filtered.sort((a, b) => new Date(a.calStart) - new Date(b.calStart));
+	    renderScheduleList(filtered, mode);
+	}
+
+	function renderScheduleList(events, mode) {
+	    const container = document.getElementById('scheduleList');
+
+	    if (events.length === 0) {
+	        container.innerHTML = `
+	            <div class="text-center text-muted py-5">
+	                <div style="font-size: 40px;">📅</div>
+	                <p class="mt-2">${mode === 'day' ? '오늘' : '이번주'} 일정이 없습니다.</p>
+	            </div>`;
+	        return;
+	    }
+
+	    // 날짜별 그룹핑 (누락된 push 추가)
+	    const grouped = {};
+	    events.forEach(item => {
+	        const startObj = new Date(item.calStart);
+	        const dateKey = `${startObj.getFullYear()}-${String(startObj.getMonth()+1).padStart(2,'0')}-${String(startObj.getDate()).padStart(2,'0')}`;
+	        if (!grouped[dateKey]) grouped[dateKey] = [];
+	        grouped[dateKey].push(item);  // ← 이게 빠져있었음!
+	    });
+
+	    let html = '';
+	    Object.keys(grouped).forEach(dateKey => {
+	        const dateObj = new Date(dateKey);
+	        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+	        const isToday = dateObj.getFullYear() === new Date().getFullYear() &&
+	                        dateObj.getMonth() === new Date().getMonth() &&
+	                        dateObj.getDate() === new Date().getDate();
+	        const dateLabel = `${dateObj.getMonth() + 1}월 ${dateObj.getDate()}일 (${dayNames[dateObj.getDay()]})`;
+
+	        html += `
+	            <div class="mb-3">
+	                <div class="fw-bold mb-2" style="font-size:14px; color: ${isToday ? '#185FA5' : '#333'};">
+	                    ${isToday ? '📌 ' : ''}${dateLabel}
+	                    ${isToday ? '<span class="badge bg-primary ms-1" style="font-size:11px;">오늘</span>' : ''}
+	                </div>`;
+
+	        grouped[dateKey].forEach(item => {
+	            const startObj2 = new Date(item.calStart);
+	            const endObj2 = new Date(item.calEnd);
+	            const startTime = `${String(startObj2.getHours()).padStart(2,'0')}:${String(startObj2.getMinutes()).padStart(2,'0')}`;
+	            const endTime = `${String(endObj2.getHours()).padStart(2,'0')}:${String(endObj2.getMinutes()).padStart(2,'0')}`;
+
+	            let typeLabel = '개인';
+	            let typeColor = '#ff6b6b';
+
+	            if (item.typeCd === 'holiday') {
+	                typeLabel = '공휴일'; typeColor = '#ff4d4d';
+	            } else if (item.typeCd === '01CALTYPE') {
+	                typeLabel = '개인'; typeColor = '#ff6b6b';
+	            } else if (item.typeCd === '02CALTYPE') {
+	                typeLabel = '그룹'; typeColor = '#51cf66';
+	            } else if (item.typeCd === '03CALTYPE') {
+	                typeLabel = '회사'; typeColor = '#339af0';
+	            }
+
+	            html += `
+	                <div class="p-2 mb-1 rounded"
+	                     style="background:#f8f9fa; border-left: 4px solid ${typeColor};">
+	                    <div class="d-flex align-items-center gap-2">
+	                        <span style="font-size: 13px; color: #555;">🕐 ${startTime} ~ ${endTime}</span>
+	                        <span class="fw-bold" style="font-size: 14px;">${item.calText || '제목없음'}</span>
+	                        <span class="badge ms-1" style="background-color:${typeColor}; font-size:11px;">${typeLabel}</span>
+	                    </div>
+	                    ${item.place ? `<div class="text-muted ms-4" style="font-size: 12px;">📍 ${item.place}</div>` : ''}
+	                </div>`;
+	        });
+
+	        html += `</div>`;
+	    });
+
+	    container.innerHTML = html;
+	}
+
 	    //=========================================================================================
-	    // 3. 간트차트 불러오기
+	    // 2. 간트차트 불러오기
 		//=========================================================================================	
 		
 	    let mypageGantt = false;
@@ -376,7 +447,7 @@
 		
 		// 내 담당 이슈 가져오기 
 		
-		fetch(`/project/gantt/listget?filter=my`)
+		fetch(`/mypage/gantt/list`)
 		 .then(res => res.json())
 		 .then(data => {
 				allTasks = data
@@ -389,6 +460,7 @@
 					if(isNaN(start.getTime())|| isNaN(end.getTime())) return false;
 					if(start.getFullYear() === 1970) return false; 
 					if(end <= start) return false;
+					if(issue.statusCd == '완료') return false;
 					return true;
 				
 				})
@@ -414,7 +486,7 @@
 	};
 	
 	// 날짜 포멧데이터 
-	 function formatMypageDate(dateStr) {
+	 function formatDate(dateStr) {
 			const day = new Date(dateStr);
 			const dd = String(day.getDate()).padStart(2, '0'); 
 			const month = String (day.getMonth() +1) .padStart(2, '0');
@@ -426,12 +498,70 @@
 	 document.querySelector('[data-bs-target="#ganttTab"]')
 			 .addEventListener('click', function() {
 			  setTimeout(loadMypageGantt, 300);
-
 	 });
+	
+	function filterMypageEvents() {
+		const typeCd = document.getElementById('mypageTypeCd').value;
+		loadcalendarEvents(typeCd);
+	}
+
+		//=========================================================================================
+	    // 3. 내 담당 이슈 불러오기
+		//=========================================================================================	
+
+			function loadMyIssues() {
+				fetch(`/mypage/gantt/list`)
+				.then(res => res.json())
+				.then(data => {
+					const tbody = document.getElementById('myIssueList');
+					if(!Array.isArray(data) || data.length === 0) {
+						tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-3">담당 이슈가 없습니다.</td></tr>';
+						return;
+					}
+					
+					const statusColor = {
+					   '신규': 'primary', '진행중': 'warning',
+					   '검토': 'secondary', '완료': 'success'
+					};
+					
+					 const priorityColor = {
+					            '최상': 'danger', '상': 'warning',
+					            '중': 'info', '하': 'secondary'
+					        };
+
+					        tbody.innerHTML = data
+					        
+					        .filter(issue => issue.statusCd != '완료')
+					        .map(issue => {
+					            const estStart = issue.estStartDate ? new Date(issue.estStartDate).toLocaleDateString('ko-KR') : '-';
+					            const dueDate = issue.dueDate ? new Date(issue.dueDate).toLocaleDateString('ko-KR') : '-';
+					            const status = issue.statusCd || '-';
+					            const priority = issue.priorityCd || '-';
+					            const doneRatio = issue.doneRatio ?? 0;
+
+					            return `
+					                <tr>
+					                    <td class="text-start">${issue.subject || '-'}</td>
+					                    <td><span class="badge bg-${statusColor[status] || 'secondary'}">${status}</span></td>
+					                    <td><span class="badge bg-${priorityColor[priority] || 'secondary'}">${priority}</span></td>
+					                    <td>${estStart}</td>
+					                    <td>${dueDate}</td>
+					                    <td>
+					                        <div class="progress" style="height: 16px;">
+					                            <div class="progress-bar" style="width:${doneRatio}%">${doneRatio}%</div>
+					                        </div>
+					                    </td>
+					                </tr>`;
+					        }).join('');
+				})
 		
-
+		}
+		
+			document.addEventListener('DOMContentLoaded', function() {
+			    loadcalendarEvents();
+			    loadMyIssues();  // ← 추가
+			});
 	</script>
-
 	</div>
 </body>
 </html>

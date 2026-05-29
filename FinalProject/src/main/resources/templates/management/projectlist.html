@@ -162,9 +162,9 @@
         th:attr="data-prj-name=${pro.prjName}, data-biz-no=${pro.bizNo}, data-par-id=${pro.prjParId}, data-prj-id=${pro.id}">
       <td class="row-index"></td>
       <td>
-          <span th:if="${pro.prjParId != null}" style="margin-left: 20px;">↳ </span>
-          <a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a>
-      </td>
+	      <span th:if="${pro.prjParId != null}" class="prj-indent"></span>
+	      <a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a>
+	  </td>
       <td th:text="${pro.prjIdentifier}"></td>
       <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
           <th:block th:each="c : ${companyList}">
@@ -218,6 +218,45 @@
     function editProject(el) {
         const id = el.getAttribute('data-id');
         location.href = '/management/projectupdate?id=' + id;
+    }
+    
+    function calcDepthAndIndent() {
+        const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-id]");
+        
+        // id → depth 맵 구성
+        const depthMap = {};
+        rows.forEach(row => {
+            const prjId = row.getAttribute("data-prj-id");
+            const parId = row.getAttribute("data-par-id");
+            if (!parId) {
+                depthMap[prjId] = 0;
+            }
+        });
+
+        // 부모 depth 기반으로 자식 depth 계산 (반복)
+        let changed = true;
+        while (changed) {
+            changed = false;
+            rows.forEach(row => {
+                const prjId = row.getAttribute("data-prj-id");
+                const parId = row.getAttribute("data-par-id");
+                if (parId && depthMap[parId] !== undefined && depthMap[prjId] === undefined) {
+                    depthMap[prjId] = depthMap[parId] + 1;
+                    changed = true;
+                }
+            });
+        }
+
+        // depth에 따라 들여쓰기 적용
+        rows.forEach(row => {
+            const prjId = row.getAttribute("data-prj-id");
+            const depth = depthMap[prjId] || 0;
+            const indent = row.querySelector('.prj-indent');
+            if (indent && depth > 0) {
+                indent.textContent = '↳ ';
+                indent.style.marginLeft = (depth * 20) + 'px';
+            }
+        });
     }
     </script>
     
@@ -406,7 +445,8 @@
     	}
       document.addEventListener('DOMContentLoaded', function() {
         loadSearchData();
-
+        calcDepthAndIndent();
+        
         const companySearch = document.getElementById('companySearch');
         const companyDropdown = document.getElementById('companyDropdown');
         const selectedBizNoInput = document.getElementById('selectedBizNo');
