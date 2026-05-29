@@ -39,8 +39,6 @@ public interface MemberMapper {
 
     int countActiveMember(@Param("userId") Long userId, @Param("grpId") Long grpId);
 
-    int insertMember(MemberRegisterParam param);
-
     /** 동일 그룹으로 N건 INSERT */
     int insertMembers(@Param("userIds") List<Long> userIds, @Param("grpId") Long grpId);
 

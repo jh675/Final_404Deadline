@@ -152,34 +152,7 @@ public class MemberController {
         }
     }
 
-    @PostMapping("/registerMember")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> registerMember(
-            @RequestBody(required = false) MemberRegisterRequest body, HttpSession session) {
-        Long prjId = (Long) session.getAttribute("currentProjectId");
-        if (prjId == null) {
-            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
-        }
-        try {
-            if (body == null) {
-                return badRequest("요청이 올바르지 않습니다.");
-            }
-            Long memberId = memberService.registerMember(prjId, body.userId(), body.grpId());
-            Map<String, Object> ok = new LinkedHashMap<>();
-            ok.put("ok", true);
-            ok.put("memberId", memberId);
-            ok.put("userId", body.userId());
-            ok.put("grpId", body.grpId());
-            ok.put("prjId", prjId);
-            return ResponseEntity.ok(ok);
-        } catch (IllegalArgumentException e) {
-            return badRequest(e.getMessage());
-        } catch (Exception e) {
-            return serverError("구성원 등록 중 오류가 발생했습니다.");
-        }
-    }
-
-    /** 다중 직원 일괄 등록 — 동일 그룹·기간으로 N건 INSERT (트랜잭션) */
+    /** 다중 직원 일괄 등록 */
     @PostMapping("/registerMembers")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> registerMembers(
@@ -262,8 +235,6 @@ public class MemberController {
     }
 
     public record MemberUpdateRequest(Long userId, Long oldGrpId, Long grpId) {}
-
-    public record MemberRegisterRequest(Long userId, Long grpId) {}
 
     public record MemberBulkRegisterRequest(List<Long> userIds, Long grpId) {}
 

@@ -147,7 +147,7 @@ public class GroupServiceImpl implements GroupService {
         GroupUpdateProcParam param = new GroupUpdateProcParam();
         param.setPrjId(prjId);
         param.setGrpId(grpId);
-        param.setMemIds(joinUserIds(userIds));
+        param.setMemIds(joinUserIdsForUpdate(userIds));
         groupMapper.callProcGrpUpdate(param);
 
         String msg = param.getResultMsg();
@@ -240,16 +240,32 @@ public class GroupServiceImpl implements GroupService {
         }
     }
 
+    /** 등록·INSERT — 빈 목록이면 memIds 미전달(null) */
     private static String joinUserIds(List<Long> userIds) {
-        if (userIds == null || userIds.isEmpty()) {
+        return joinUserIdsCsv(userIds, true);
+    }
+
+    /** 수정·UPDATE — 빈 목록이면 ''(그룹 구성원 전원 제거) */
+    private static String joinUserIdsForUpdate(List<Long> userIds) {
+        if (userIds == null) {
             return null;
+        }
+        return joinUserIdsCsv(userIds, false);
+    }
+
+    private static String joinUserIdsCsv(List<Long> userIds, boolean nullWhenEmpty) {
+        if (userIds == null) {
+            return null;
+        }
+        if (userIds.isEmpty()) {
+            return nullWhenEmpty ? null : "";
         }
         String joined = userIds.stream()
                 .filter(Objects::nonNull)
                 .distinct()
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
-        return joined.isEmpty() ? null : joined;
+        return joined.isEmpty() ? (nullWhenEmpty ? null : "") : joined;
     }
 
     /** 프로젝트 소속 확인 후 그룹마다 PROC_GRP_DELETE 호출 */

@@ -36,8 +36,8 @@ public interface GroupService {
     void insertGroup(Long prjId, String grpName, List<Long> userIds, List<Long> roleCds);
 
     /**
-     * 그룹 구성원 수정 — Oracle {@code PROC_GRP_UPDATE}.
-     * {@code userIds}가 null이거나 비어 있으면 프로시저에 memIds를 넘기지 않음(null).
+     * 그룹 구성원 수정 — Oracle {@code PROC_GRP_UPDATE} (목록과 동기화·제거 포함).
+     * {@code userIds}가 빈 목록이면 해당 그룹 구성원을 모두 제거한다.
      */
     void updateGroup(Long prjId, Long grpId, List<Long> userIds);
 
