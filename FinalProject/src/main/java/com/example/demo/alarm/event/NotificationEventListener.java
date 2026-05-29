@@ -13,9 +13,15 @@ public class NotificationEventListener {
 	@Autowired
     private AlarmService alarmService;
 
-    @Async
-    @EventListener
-    public void handleNotification(NotificationEvent event) {
-        alarmService.sendToAll(event.getMessage());
-    }
+	@Async
+	@EventListener
+	public void handleNotification(NotificationEvent event) {
+	    if (event.getTargetUserId() != null) {
+	        // 특정 유저에게만 전송
+	        alarmService.sendToUser(event.getTargetUserId(), event.getMessage());
+	    } else {
+	        // 전체 전송
+	        alarmService.sendToAll(event.getMessage());
+	    }
+	}
 }

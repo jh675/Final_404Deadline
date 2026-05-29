@@ -22,6 +22,7 @@ import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.issue.service.IssueSummaryVO;
 import com.example.demo.project.issue.service.IssueVulkVO;
+import com.example.demo.util.subCode.mapper.SubcodeMapper;
 
 @Service
 public class IssueServiceImpl implements IssueService {
@@ -34,6 +35,9 @@ public class IssueServiceImpl implements IssueService {
 	IssueMapper mapper;
 	@Autowired
 	ProjectMapper projectMapper;
+	@Autowired
+	SubcodeMapper subcodeMapper;
+	
 	@Autowired private ApplicationEventPublisher eventPublisher;
 	
 	@Override
@@ -60,12 +64,14 @@ public class IssueServiceImpl implements IssueService {
 	public Long insertIssue(IssueInputVO issueVO) {
 		mapper.insertIssue(issueVO);
 		
+		
+//		System.out.println(issueVO.getSubject());
 		 // 알림 이벤트 발행
 	    ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId()); // ← mapper 사용
 	    String prjName = project != null ? project.getPrjName() : "알 수 없음";
 	    eventPublisher.publishEvent(new NotificationEvent(
 	        this,
-	        "이슈가 등록되었습니다: [" + prjName + "] " + issueVO.getSubject()
+	        "이슈가 등록되었습니다: [" + prjName + "] " + subcodeMapper.selectScodeNm(issueVO.getSubject())         
 	    ));
 		
 		return issueVO.getId();
@@ -77,10 +83,11 @@ public class IssueServiceImpl implements IssueService {
 		if (issueVO.getStatusCd() != null) {
 	        ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId());
 	        String prjName = project != null ? project.getPrjName() : "알 수 없음";
+	        
 	        eventPublisher.publishEvent(new NotificationEvent(
 	            this,
 	            "이슈 상태가 변경되었습니다: [" + prjName + "] "
-	            + issueVO.getSubject() + " → " + issueVO.getStatusCd()
+	            + issueVO.getSubject() + " → " + subcodeMapper.selectScodeNm(issueVO.getStatusCd())
 	        ));
 	    }
 		
