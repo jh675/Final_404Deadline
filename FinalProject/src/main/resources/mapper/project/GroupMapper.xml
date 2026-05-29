@@ -43,6 +43,15 @@
     WHERE P.ID = #{prjId}
   </select>
 
+  <!-- 그룹 등록 직후 — PRJ_ID + NAME으로 ID 조회 -->
+  <select id="selectGrpIdByPrjIdAndName" resultType="long">
+    SELECT G.ID
+    FROM GRP G
+    WHERE G.PRJ_ID = #{prjId}
+      AND G.NAME = #{grpName}
+      AND G.STATUS_CD = '01ACTIVE'
+  </select>
+
   <!-- 그룹명 중복 — PRJ_ID + NAME 일치 (활성 그룹) -->
   <select id="countGrpByPrjIdAndName" resultType="int">
     SELECT COUNT(*)

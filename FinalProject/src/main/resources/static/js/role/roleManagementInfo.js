@@ -600,6 +600,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 name: "grpName",
                 align: "center",
                 sortable: true,
+                escapeHTML: false,
+                formatter: function (ctx) {
+                  var row = ctx.row;
+                  var text =
+                    ctx.value == null || ctx.value === ""
+                      ? ""
+                      : String(ctx.value);
+                  var gid =
+                    row && row.id != null && row.id !== "" ? row.id : null;
+                  if (gid == null || !text) {
+                    return text || "-";
+                  }
+                  var q = "grpId=" + encodeURIComponent(String(gid));
+                  return (
+                    '<a href="/project/group/info?' +
+                    q +
+                    '">' +
+                    text +
+                    "</a>"
+                  );
+                },
               },
               {
                 header: "그룹인원",
@@ -995,7 +1016,21 @@ document.addEventListener("DOMContentLoaded", function () {
           async function onRoleGroupsGridClick(ev) {
             if (isRegisterMode) return;
             if (roleEditMode) return;
-            if (!roleGroupsGrid || ev.columnName !== "revoke") return;
+            if (!roleGroupsGrid) return;
+            if (ev.columnName === "grpName") {
+              var navRow = roleGroupsGrid.getRow(ev.rowKey);
+              var navGid =
+                navRow && navRow.id != null && navRow.id !== ""
+                  ? navRow.id
+                  : null;
+              if (navGid != null) {
+                location.href =
+                  "/project/group/info?grpId=" +
+                  encodeURIComponent(String(navGid));
+              }
+              return;
+            }
+            if (ev.columnName !== "revoke") return;
             var row = roleGroupsGrid.getRow(ev.rowKey);
             if (!row || row.id == null) return;
 

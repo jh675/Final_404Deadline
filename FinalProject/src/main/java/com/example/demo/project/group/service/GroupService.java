@@ -33,7 +33,7 @@ public interface GroupService {
      * 그룹 등록 — Oracle {@code PROC_GRP_INSERT}.
      * {@code userIds}가 null이거나 비어 있으면 프로시저에 memIds를 넘기지 않음(null).
      */
-    void insertGroup(Long prjId, String grpName, List<Long> userIds);
+    void insertGroup(Long prjId, String grpName, List<Long> userIds, List<Long> roleCds);
 
     /**
      * 그룹 구성원 수정 — Oracle {@code PROC_GRP_UPDATE}.

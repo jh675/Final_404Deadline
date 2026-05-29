@@ -10,7 +10,7 @@ public interface MemberService {
 
     /**
      * 프로젝트 수행 기업 소속 사용자 목록 (STATUS_CD=01ACTIVE).
-     * {@code excludeRegistered=true} 이면 MEMBER.USER_ID에 없는 사용자만.
+     * {@code excludeRegistered=true} 이면 현재 프로젝트(prjId)에 미등록된 사용자만.
      */
     List<CompanyMemberRowVO> selectCompanyMembersByPrjId(Long prjId, boolean excludeRegistered);
 
