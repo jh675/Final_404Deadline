@@ -3,22 +3,22 @@ let myIsProfileDeleted = false;
 let myCropper = null;
 
 // 이메일 인증 상태 플래그
-let isEmailVerified = true; 
+let isEmailVerified = true;
 
 document.addEventListener('DOMContentLoaded', function() {
 
     const editInfoModalEl = document.getElementById('mypageEditModal');
-    
+
     // ?모달이 열릴 때 기존 프로필 이미지 조회
-    if(editInfoModalEl) {
-        editInfoModalEl.addEventListener('show.bs.modal', function () {
+    if (editInfoModalEl) {
+        editInfoModalEl.addEventListener('show.bs.modal', function() {
             loadMyProfileImage();
-            
+
             // 비밀번호 칸 초기화
             document.getElementById('currentPassword').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('newPasswordConfirm').value = '';
-            
+
             // 모든 에러 CSS 초기화
             document.querySelectorAll('#mypageForm .is-invalid').forEach(el => el.classList.remove('is-invalid'));
             document.getElementById('emailFeedback').textContent = '';
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const emailInput = document.getElementById('myEmail');
     emailInput.addEventListener('input', function() {
         const originalEmail = this.getAttribute('data-original');
-        
+
         if (this.value.trim() === originalEmail) {
             // 원래 이메일로 되돌린 경우 인증 불필요
             isEmailVerified = true;
@@ -109,11 +109,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 verifyInputEl.classList.remove('is-invalid');
                 verifyInputEl.classList.add('is-valid');
                 document.getElementById('verifyCodeArea').classList.add('d-none');
-                
+
                 emailInput.classList.add('is-valid');
                 document.getElementById('emailFeedback').className = 'small mt-1 text-success fw-bold';
                 document.getElementById('emailFeedback').textContent = '이메일 인증이 완료되었습니다.';
-                
+
                 isEmailVerified = true;
             } else {
                 verifyInputEl.classList.add('is-invalid');
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const name = document.getElementById('myName');
         const tel = document.getElementById('myTel');
         const email = document.getElementById('myEmail');
-        
+
         const currentPwd = document.getElementById('currentPassword');
         const newPwd = document.getElementById('newPassword');
         const newPwdConfirm = document.getElementById('newPasswordConfirm');
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
             email: email.value.trim(),
             tel: tel.value.trim()
         };
-        
+
         if (currentPwd.value) {
             payload.currentPassword = currentPwd.value;
             payload.newPassword = newPwd.value;
@@ -225,13 +225,13 @@ document.addEventListener('DOMContentLoaded', function() {
             new bootstrap.Modal(document.getElementById('myCropModal')).show();
         };
         reader.readAsDataURL(file);
-        this.value = ''; 
+        this.value = '';
     });
 
-    document.getElementById('myCropModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById('myCropModal').addEventListener('shown.bs.modal', function() {
         const image = document.getElementById('myImageToCrop');
         if (myCropper) myCropper.destroy();
-        
+
         myCropper = new Cropper(image, {
             aspectRatio: 3 / 4,
             viewMode: 1,
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnApplyCrop').addEventListener('click', function() {
         if (!myCropper) return;
         const canvas = myCropper.getCroppedCanvas({ width: 300, height: 400 });
-        
+
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
         const previewImg = document.getElementById("myProfilePreview");
         previewImg.src = dataUrl;
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('myProfilePreview').classList.add("d-none");
         document.getElementById('myEmptyImageText').style.display = "";
     });
-    
+
     // 입력창 타이핑 시 빨간 에러 CSS 삭제
     document.querySelectorAll('#mypageForm input').forEach(input => {
         input.addEventListener('input', function() {
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadMyProfileImage() {
     const img = document.getElementById("myProfilePreview");
     const emptyText = document.getElementById("myEmptyImageText");
-    
+
     myPendingProfileFile = null;
     myIsProfileDeleted = false;
 
@@ -296,7 +296,7 @@ async function loadMyProfileImage() {
             }
         }
     } catch (e) {}
-    
+
     // 실패 시 초기화
     img.src = "";
     img.classList.add("d-none");
