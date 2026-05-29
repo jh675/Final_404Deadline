@@ -6,37 +6,26 @@ layout:decorate="~{layout/projectLayout}">
     <meta charset="UTF-8">
     <title>메시지 목록 및 상세</title>
     <style>
-
-        
         .list-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         .list-table th, .list-table td { border: 1px solid #eee; padding: 12px; text-align: center; }
         .list-table th { background-color: #f9f9f9; }
-        
         .btn-action-view { font-size: 0.8rem; padding: 2px 8px; border: 1px solid #0d6efd; color: #0d6efd; background-color: transparent; border-radius: 4px; cursor: pointer; }
         .btn-action-view:hover { background-color: #0d6efd; color: white; }
-        
         .btn-action-modify { font-size: 0.8rem; padding: 2px 8px; border: 1px solid #198754; color: #198754; background-color: transparent; border-radius: 4px; cursor: pointer; }
         .btn-action-modify:hover { background-color: #198754; color: white; }
-        
         .btn-action-delete { font-size: 0.8rem; padding: 2px 8px; border: 1px solid #dc3545; color: #dc3545; background-color: transparent; border-radius: 4px; cursor: pointer; }
         .btn-action-delete:hover { background-color: #dc3545; color: white; }
-        
         .detail-container { max-width: 800px; margin-top: 50px; background: #fff; padding: 30px; border: 1px solid #e1e1e1; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .detail-container h2 { margin-bottom: 25px; font-size: 22px; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; }
-        
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: bold; color: #2e7d32; margin-bottom: 8px; font-size: 15px; }
-        
         .view-control { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background-color: #fafafa; min-height: 45px; }
         .view-textarea { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background-color: #fafafa; min-height: 180px; white-space: pre-wrap; }
-        
         .info-header { display: flex; gap: 40px; font-size: 13px; color: #666; margin: -10px 0 20px 0; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
-        
         .reply-section { margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
         .reply-item { border: 1px solid #e2e8f0; border-radius: 25px; padding: 10px 20px; margin-bottom: 10px; background-color: #fff; font-size: 14px; }
         .reply-input-field { width: 100%; border: 1px solid #cbd5e1; border-radius: 25px; padding: 12px 20px; box-sizing: border-box; font-size: 14px; outline: none; }
         .reply-submit-btn { width: 100%; background-color: #7cb1cd; color: white; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 8px; }
-
         .answer-section { margin-top: 30px; border-top: 1px dashed #7cb1cd; padding-top: 25px; background-color: #fcfdfd; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: none; }
         .answer-title-input { width: 100%; padding: 10px 15px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background-color: #f5f5f5; color: #555; cursor: not-allowed; margin-bottom: 12px; }
         .answer-content-input { width: 100%; padding: 12px 15px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 100px; }
@@ -61,7 +50,7 @@ layout:decorate="~{layout/projectLayout}">
     <h2> <span th:text="${board.name}">0</span> </h2>
     <div th:text="${board.description}"></div>
     <div style="margin-bottom: 15px;">
-        <button type="button" class="btn" onclick="location.href='/boards/list'">뒤로가기</button>
+        <button type="button" class="btn" onclick="window.history.back();">뒤로가기</button>
         <button type="button" class="btn" th:onclick="|location.href='/project/messages/register?boardId=' + ${boardId}|">메시지 등록</button>
     </div>
 
@@ -123,12 +112,12 @@ layout:decorate="~{layout/projectLayout}">
             <label style="font-weight: bold; color: #2e7d32; margin-bottom: 12px; display: block; font-size: 15px;">이 게시글에 답글 쓰기</label>
             <form th:action="@{/project/messages/insert}" method="post">
                 <input type="hidden" name="boardId" th:value="${boardId}" />
-                <input type="hidden" name="fieldparentId" th:value="${message.id}" />
+                <input type="hidden" name="FIELDPARENT_ID" th:value="${message.id}" />
 
                 <input type="text" class="answer-title-input" th:value="${message.title}" disabled />
                 <input type="hidden" name="title" th:value="${message.title}" />
 
-                <textarea name="content" class="answer-content-input" placeholder="답	." required></textarea>
+                <textarea name="content" class="answer-content-input" placeholder="답글을 입력하세요." required></textarea>
                 
                 <div style="width: 100%; display: inline-block;">
                     <button type="submit" class="answer-submit-btn">답글등록</button>
@@ -147,7 +136,7 @@ layout:decorate="~{layout/projectLayout}">
                 <div style="font-size: 14px; color: #1e293b; white-space: pre-wrap;" th:text="${ans.content}">답글 내용</div>
             </div>
             <div th:if="${#lists.isEmpty(answerList)}" style="text-align: center; color: #94a3b8; padding: 20px; font-size: 14px; border: 1px dashed #cbd5e1; border-radius: 8px;">
-                작성된 답글이 없습니다. 첫 답글을 남겨보세요!
+                작성된 답글이 없습니다.
             </div>
         </div>
 
@@ -157,10 +146,6 @@ layout:decorate="~{layout/projectLayout}">
                 <span th:text="${reply.userId}" style="font-weight: bold; color: #444;">작성자</span> : 
                 <span th:text="${reply.content}" style="color: #333; margin-left: 5px;">댓글 내용</span>
             </div>
-            <div th:if="${#lists.isEmpty(replyList)}" class="reply-item" style="text-align: center; color: #aaa;">
-                등록된 댓글이 없습니다. 첫 댓글을 남겨보세요!
-            </div>
-
             <form action="/replies/register" method="post" style="margin-top: 15px;">
                 <input type="hidden" name="messageId" th:value="${message.id}" />
                 <input type="hidden" name="boardId" th:value="${boardId}" />
