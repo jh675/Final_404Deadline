@@ -38,52 +38,22 @@ public class AlarmServiceImpl implements AlarmService {
         return emitter;
     }
 
-    private void removeEmitter(String userId, SseEmitter emitter) {
-        Set<SseEmitter> userEmitters = emitters.get(userId);
-        if (userEmitters == null) {
-            return;
-        }
-        userEmitters.remove(emitter);
-        if (userEmitters.isEmpty()) {
-            emitters.remove(userId, userEmitters);
-        }
-    }
-
-    private void completeEmitter(String userId, SseEmitter emitter) {
-        removeEmitter(userId, emitter);
-        try {
-            emitter.complete();
-        } catch (Exception ignored) {
-        }
-    }
-
-    @Scheduled(fixedRate = 30000)
-    public void sendHeartbeat() {
-        emitters.forEach((userId, userEmitters) -> {
-            for (SseEmitter emitter : userEmitters) {
-                try {
-                    emitter.send(SseEmitter.event().comment("heartbeat"));
-                } catch (IOException e) {
-                    completeEmitter(userId, emitter);
-                }
-            }
-        });
-    }
-
+    // 전체 사용자에게 알림 전송
+    @Override
     public void sendToAll(String message) {
-        emitters.forEach((userId, userEmitters) -> {
-            for (SseEmitter emitter : userEmitters) {
-                try {
-                    emitter.send(SseEmitter.event()
-                            .name("notification")
-                            .data(message));
-                } catch (IOException e) {
-                    completeEmitter(userId, emitter);
-                }
+        emitters.forEach((userId, emitter) -> {
+            try {
+                emitter.send(SseEmitter.event()
+                    .name("notification")
+                    .data(message));
+            } catch (IOException e) {
+                emitters.remove(userId, emitter);
             }
         });
     }
 
+    // 특정 사용자에게만 알림 전송
+    @Override
     public void sendToUser(String userId, String message) {
         Set<SseEmitter> userEmitters = emitters.get(userId);
         if (userEmitters == null || userEmitters.isEmpty()) {
@@ -95,8 +65,33 @@ public class AlarmServiceImpl implements AlarmService {
                         .name("notification")
                         .data(message));
             } catch (IOException e) {
-                completeEmitter(userId, emitter);
+                emitters.remove(userId, emitter);
             }
+        }
+    }
+
+    // 30초마다 heartbeat 전송
+    @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS)
+    public void broadcastHeartbeat() {
+        emitters.forEach((userId, emitter) -> {
+            try {
+                emitter.send(SseEmitter.event()
+                    .name("heartbeat")
+                    .data("ping"));
+            } catch (IOException e) {
+                emitters.remove(userId, emitter);
+            }
+        });
+    }
+
+    // 단일 사용자 heartbeat 전송
+    private void sendHeartbeat(String userId, SseEmitter emitter) {
+        try {
+            emitter.send(SseEmitter.event()
+                .name("heartbeat")
+                .data("ping"));
+        } catch (IOException e) {
+            emitters.remove(userId, emitter);
         }
     }
 }
