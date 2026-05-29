@@ -61,6 +61,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
     // 폼 기본 제출 동작 막기
     e.preventDefault();
 
+	const loginType = document.getElementById('loginType').value;
     const companyNameInput = document.getElementById('companyNameInput');
     const bizNoInput = document.getElementById('bizNo');
     const username = document.getElementById('username');
@@ -74,11 +75,14 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 
     // 기초 유효성 검사 (빈칸 체크)
     let isValid = true;
-    if (!companyNameInput.value.trim()) {
+	
+	// 일반 회원일 때만 기업명 체크
+	if (loginType === 'USER' && !companyNameInput.value.trim()) {
         companyNameInput.classList.add('is-invalid');
         feedbackDiv.textContent = "기업명을 입력해주세요.";
         isValid = false;
     }
+		
     if (!username.value.trim()) { 
 		username.classList.add('is-invalid'); 
 		isValid = false; 
@@ -90,6 +94,12 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 
     if (!isValid) return; // 빈칸이 있으면 여기서 중단
 
+	// 시스템 관리자 로그인인 경우 기업 검증 생략
+	if (loginType === 'ADMIN') {
+        this.submit();
+        return;
+    }
+		
     // bizNo가 채워져 있는 경우 
     if (bizNoInput.value.trim()) {
         this.submit(); // this.submit()은 이벤트를 다시 발생시키지 않고 순수하게 폼만 제출합니다.
@@ -150,3 +160,36 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 });
+
+function changeLoginType(type) {
+    document.getElementById('loginType').value = type;
+    const companyArea = document.getElementById('companyInputArea');
+    
+    // 활성화된 탭 디자인 변경
+    document.getElementById('user-tab').classList.toggle('active', type === 'USER');
+    document.getElementById('admin-tab').classList.toggle('active', type === 'ADMIN');
+    
+    // 초기화
+    document.getElementById('companyNameInput').value = '미래소프트웨어'; 
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    
+    // 에러 표시 모두 제거
+    ['companyNameInput', 'username', 'password'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.remove('is-invalid');
+    });
+    
+    // 혹시 열려있는 기업 검색 드롭다운이 있다면 닫기
+    const companyDropdown = document.getElementById('companyDropdown');
+    if (companyDropdown) {
+        companyDropdown.style.display = 'none';
+        companyDropdown.innerHTML = '';
+    }
+
+    if (type === 'ADMIN') {
+        companyArea.style.display = 'none'; // 시스템 관리자는 기업 입력 숨김
+    } else {
+        companyArea.style.display = 'block'; // 일반 회원은 기업 입력 표시
+    }
+}

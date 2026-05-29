@@ -26,7 +26,18 @@
 		  id="loginForm"
 		  novalidate>
 
-		<div class="mb-3 position-relative">
+		<input type="hidden" id="loginType" name="loginType" value="USER">
+
+		<ul class="nav nav-tabs mb-4" id="loginTab" role="tablist">
+		    <li class="nav-item" role="presentation">
+		        <button class="nav-link active" id="user-tab" type="button" onclick="changeLoginType('USER')">회원</button>
+		    </li>
+		    <li class="nav-item" role="presentation">
+		        <button class="nav-link" id="admin-tab" type="button" onclick="changeLoginType('ADMIN')">시스템 관리자</button>
+		    </li>
+		</ul>
+
+		<div class="mb-3 position-relative" id="companyInputArea">
 	        <label for="companyNameInput" class="form-label">소속 기업명</label>
 	        <input type="text" id="companyNameInput" class="form-control" placeholder="기업명을 입력하세요" autocomplete="off" value='미래소프트웨어'>
 	        
@@ -80,9 +91,7 @@
 		</div>
 		
 		<div class="mb-3">
-		admin(시스템관리자) 기업명 : 알에스오토메이션
-		<br>
-		그 외 기업명 : 미래소프트웨어
+		기업명 : 미래소프트웨어
 		<br>
 		시스템 관리자 : admin
 		<br>

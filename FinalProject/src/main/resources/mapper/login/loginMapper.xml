@@ -43,6 +43,7 @@
 	          ,COMPANY_NAME
 	    FROM   COMPANY
 	    WHERE  IS_ACTIVE_CD = '01ACTIVE'
+	    AND    BIZ_NO != '124-87-03358'
 	    AND    COMPANY_NAME LIKE '%' || #{keyword} || '%'
 	    ORDER BY COMPANY_NAME ASC
 	</select>
@@ -64,4 +65,31 @@
 	    FROM COMPANY
 	    WHERE BIZ_NO = #{bizNo}
 	</select>
+	
+	<select id="selectSystemAdmin">
+	    SELECT ID
+	          ,BIZ_NO
+	          ,LOGIN
+	          ,PASSWORD
+	          ,NAME
+	          ,TEL
+	          ,EMAIL
+	          ,HIRE_DATE
+	          ,GENDER_CD
+	          ,get_sub_code_name(GENDER_CD)"GENDER_NM"
+	          ,ADMIN_CD
+	          ,get_sub_code_name(ADMIN_CD) as "ADMIN_NM"
+	          ,STATUS_CD
+	          ,get_sub_code_name(STATUS_CD) "STATUS_NM"
+	          ,CREATED_ON
+	          ,PW_UPDATED_ON
+	          ,PRJ_MANAGER_CD
+	          ,get_sub_code_name(PRJ_MANAGER_CD) "PRJ_MANAGER_NM"
+	          ,MCP_CD
+	          ,get_sub_code_name(MCP_CD) "MCP_NM"
+	    FROM   users
+	    WHERE  login = #{login}
+	    AND    admin_cd = '01ROLE'
+	</select>
+
 </mapper>

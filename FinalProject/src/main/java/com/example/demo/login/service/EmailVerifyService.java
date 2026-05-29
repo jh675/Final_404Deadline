@@ -7,5 +7,9 @@ public interface EmailVerifyService {
 	// 인증코드 일치 확인
 	EmailVerifyVO verifyCode(EmailVerifyVO vo);
 	
+	// 비밀번호 변경
 	String resetPassword(UserVO user);
+	
+	// 마이페이지 이메일 수정할 때 인증
+	UserVO verifyMypageUser(UserVO user);
 }

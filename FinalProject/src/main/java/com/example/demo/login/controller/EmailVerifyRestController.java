@@ -39,4 +39,12 @@ public class EmailVerifyRestController {
 
 	    return verifyService.resetPassword(user);
 	}
+	
+	@PostMapping("/send-mypage")
+	public String sendMypageVerifyCode(@RequestBody UserVO user) {
+
+		UserVO resultUser = verifyService.verifyMypageUser(user);
+
+		return resultUser.getResult();
+	}
 }

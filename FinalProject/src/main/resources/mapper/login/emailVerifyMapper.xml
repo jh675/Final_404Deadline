@@ -34,4 +34,17 @@
 	        )
 	    }
 	</update>
+	
+	<update id="sendMypageVerifyCode" 
+        	statementType="CALLABLE">
+	    {
+	        CALL PROC_EMAIL_NEW_VERIFY(
+	            #{bizNo, mode=IN, jdbcType=VARCHAR},
+	            #{login, mode=IN, jdbcType=VARCHAR},
+	            #{email, mode=IN, jdbcType=VARCHAR},
+	            #{result, mode=OUT, jdbcType=VARCHAR},
+	            #{verifyNum, mode=OUT, jdbcType=VARCHAR}
+	        )
+	    }	
+	</update>
 </mapper>
