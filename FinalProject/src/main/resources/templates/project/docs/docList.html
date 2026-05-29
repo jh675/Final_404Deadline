@@ -58,11 +58,29 @@
 
 				    { header: '작성자', name: 'memId', width: 150, align:'center', sortable: true },
 				    { header: '작성일', name: 'createdOn', width: 150, align:'left', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') },
-				    { header: '수정',
-					       name: 'edit',
-					       width: 100, align:'center', sortable: true, 
-					       formatter: () => '<button class="btn btn-secondary btn-sm">수정</button>'
-		                  },
+				    { 
+				    	header: '수정',
+				    	name: 'edit',
+				    	width: 100,
+				    	align:'center',
+				    	sortable: true,
+
+				    	formatter: ({ row }) => {
+
+				    		return `
+				    			<button
+				    				class="btn btn-secondary btn-sm"
+				    				data-bs-toggle="modal"
+				    				data-bs-target="#editModal"
+				    				data-id="${row.id}"
+				    				data-title="${row.title}"
+				    				data-description="${row.description}"
+				    				data-prjid="${row.prjId}">
+				    				수정
+				    			</button>
+				    		`;
+				    	}
+				    },
 
 	               { header: '삭제',
 	                  name: 'deleteBtn',
@@ -92,11 +110,6 @@
             const row = grid.getRow(ev.rowKey);
             if (!row) return;
 
-            // [수정] 클릭 시 모달창 대기 없이 즉시 수정 페이지로 이동시킵니다.
-            if (ev.columnName === 'edit') {
-                location.href = '/project/docs/form?id=' + row.id;
-            }
-            
             // [삭제] 기존에 잘 작동하던 삭제 모달 주소 주입 코드는 그대로 유지합니다.
             if (ev.columnName === 'deleteBtn') {
                 const buttonEl = ev.nativeEvent.target;
@@ -113,10 +126,15 @@
 
 </script>
 		<div class="d-flex justify-content-end my-3">
-			<a th:href="@{/project/docs/register}" class="btn btn-primary">등록</a>
+
+			<button class="btn btn-primary" data-bs-toggle="modal"
+				data-bs-target="#registerModal">등록</button>
+
 		</div>
 
 		<div th:replace="~{project/docs/modal/delete :: deleteModal}"></div>
+		<div th:replace="~{project/docs/modal/register :: registerModal}"></div>
+		<div th:replace="~{project/docs/modal/edit :: editModal}"></div>
 
 		<div th:if="${msg != null}" id="successNotify"
 			class="alert alert-success shadow"
@@ -125,6 +143,7 @@
 		</div>
 
 		<script>
+		
 			// 화면이 로드되고 2.5초 뒤에 알림창을 화면에서 부드럽게 지워버립니다.
 			document.addEventListener("DOMContentLoaded", function() {
 				const notify = document.getElementById("successNotify");
@@ -137,6 +156,83 @@
 				}
 			});
 		</script>
+
+		<script>
+
+			const editModal = document.getElementById('editModal');
+
+				editModal.addEventListener('show.bs.modal', function(event) {
+
+			const button = event.relatedTarget;
+
+				document.getElementById('edit-id').value =
+				button.getAttribute('data-id');
+
+				document.getElementById('edit-title').value =
+				button.getAttribute('data-title');
+
+				const docId = button.getAttribute('data-id');
+
+				fetch('/project/docs/files?id=' + docId)
+					.then(response => response.json())
+					.then(files => {
+
+						const fileArea =
+							document.getElementById('existing-files');
+
+						fileArea.innerHTML = '';
+
+						if(files.length > 0){
+
+							files.forEach(file => {
+
+								fileArea.innerHTML += `
+									<div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+
+										<a href="/download/${file.id}">
+											${file.fileName}
+										</a>
+
+										<button
+											type="button"
+											class="btn btn-sm btn-outline-danger delete-file-btn"
+											data-file-id="${file.id}">
+											삭제
+										</button>
+
+									</div>
+								`;
+							});
+						}
+
+			});
+				document.getElementById('edit-prjid').value =
+				button.getAttribute('data-prjid');
+				});
+			
+				document.addEventListener('click', function(e){
+
+					if(e.target.classList.contains('delete-file-btn')){
+
+						const fileId =
+							e.target.getAttribute('data-file-id');
+
+						if(confirm('첨부파일을 삭제하시겠습니까?')){
+
+							fetch('/project/attach/delete?id=' + fileId)
+								.then(response => response.text())
+								.then(result => {
+
+									if(result === 'success'){
+
+										e.target.closest('.d-flex').remove();
+									}
+								});
+						}
+					}
+				});
+
+</script>
 	</div>
 </body>
 </html>
