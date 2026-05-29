@@ -25,9 +25,9 @@ public class AiSearchServiceImpl {
 	private final IssueMapper issueMapper;
 	private final ProjectMapper projectMapper;
 	private final CalenderMapper calenderMapper;
-//	private final GptApiClient gptApiClient;
 	private final SubcodeService subcodeService;
 	private final GeminiApiClient geminiApiClient;
+//	private final GptApiClient gptApiClient;
 
 	public String processIntelligentSearch(String userMessage, Long userId, Long prjId) {
 

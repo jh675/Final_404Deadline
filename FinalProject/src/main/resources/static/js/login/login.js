@@ -170,8 +170,7 @@ function changeLoginType(type) {
     document.getElementById('admin-tab').classList.toggle('active', type === 'ADMIN');
     
     // 초기화
-    document.getElementById('companyNameInput').value = ''; 
-    document.getElementById('bizNo').value = '';
+    document.getElementById('companyNameInput').value = '미래소프트웨어'; 
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
     
