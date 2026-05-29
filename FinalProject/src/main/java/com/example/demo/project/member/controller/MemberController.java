@@ -44,8 +44,6 @@ public class MemberController {
         model.addAttribute("rows", memberService.selectProjectMemberList(criteria));
         model.addAttribute("memberName", criteria.getMemberName());
         model.addAttribute("grpName", criteria.getGrpName());
-        model.addAttribute("prjStartFrom", criteria.getPrjStartFrom());
-        model.addAttribute("prjStartTo", criteria.getPrjStartTo());
         session.setAttribute("currentMenu", "member");
         return "project/member/memberManagement";
     }
@@ -89,10 +87,6 @@ public class MemberController {
         model.addAttribute("profileImageAttachId", profileImageAttachId);
         model.addAttribute("pwUpdatedOnYmd", formatDateYmd(detail.getPwUpdatedOn()));
         model.addAttribute("lastLoginOnYmd", formatDateYmd(detail.getLastLoginOn()));
-        if (editMode) {
-            ProjectPeriodVO period = memberService.selectProjectPeriod(prjId);
-            model.addAttribute("prjClosedDate", period != null ? period.getClosedDate() : null);
-        }
         model.addAttribute(
                 "issues",
                 editMode
@@ -144,13 +138,7 @@ public class MemberController {
             if (body == null) {
                 return badRequest("요청이 올바르지 않습니다.");
             }
-            memberService.updateMember(
-                    prjId,
-                    body.userId(),
-                    body.oldGrpId(),
-                    body.grpId(),
-                    body.prjStartDate(),
-                    body.prjEndDate());
+            memberService.updateMember(prjId, body.userId(), body.oldGrpId(), body.grpId());
             Map<String, Object> ok = new LinkedHashMap<>();
             ok.put("ok", true);
             ok.put("prjId", prjId);
@@ -176,12 +164,7 @@ public class MemberController {
             if (body == null) {
                 return badRequest("요청이 올바르지 않습니다.");
             }
-            Long memberId = memberService.registerMember(
-                    prjId,
-                    body.userId(),
-                    body.grpId(),
-                    body.prjStartDate(),
-                    body.prjEndDate());
+            Long memberId = memberService.registerMember(prjId, body.userId(), body.grpId());
             Map<String, Object> ok = new LinkedHashMap<>();
             ok.put("ok", true);
             ok.put("memberId", memberId);
@@ -209,12 +192,7 @@ public class MemberController {
             if (body == null) {
                 return badRequest("요청이 올바르지 않습니다.");
             }
-            int registered = memberService.registerMembers(
-                    prjId,
-                    body.userIds(),
-                    body.grpId(),
-                    body.prjStartDate(),
-                    body.prjEndDate());
+            int registered = memberService.registerMembers(prjId, body.userIds(), body.grpId());
             Map<String, Object> ok = new LinkedHashMap<>();
             ok.put("ok", true);
             ok.put("registered", registered);
@@ -283,14 +261,11 @@ public class MemberController {
         return new SimpleDateFormat("yyyy-MM-dd").format(dt);
     }
 
-    public record MemberUpdateRequest(
-            Long userId, Long oldGrpId, Long grpId, String prjStartDate, String prjEndDate) {}
+    public record MemberUpdateRequest(Long userId, Long oldGrpId, Long grpId) {}
 
-    public record MemberRegisterRequest(
-            Long userId, Long grpId, String prjStartDate, String prjEndDate) {}
+    public record MemberRegisterRequest(Long userId, Long grpId) {}
 
-    public record MemberBulkRegisterRequest(
-            List<Long> userIds, Long grpId, String prjStartDate, String prjEndDate) {}
+    public record MemberBulkRegisterRequest(List<Long> userIds, Long grpId) {}
 
     public record MemberDeleteRequest(List<MemberKey> members) {}
 

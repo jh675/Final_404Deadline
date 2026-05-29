@@ -367,15 +367,29 @@
 			    }
 			
 			    // SSE 연결
-			    const eventSource = new EventSource(`/api/notifications/subscribe?userId=${userId}`);
+			    let sseClosing = false;
+			    const eventSource = new EventSource(
+			        `/api/notifications/subscribe?userId=${encodeURIComponent(userId)}`
+			    );
 			
 			    eventSource.addEventListener('notification', function (event) {
 			        addNotification(event.data);
 			    });
 			
 			    eventSource.onerror = function () {
+			        if (sseClosing) return;
 			        console.warn('SSE 연결이 끊겼습니다. 재연결 시도 중...');
 			    };
+			
+			    function closeEventSource() {
+			        sseClosing = true;
+			        if (eventSource.readyState !== EventSource.CLOSED) {
+			            eventSource.close();
+			        }
+			    }
+			
+			    window.addEventListener('pagehide', closeEventSource);
+			    window.addEventListener('beforeunload', closeEventSource);
 			});
 			</script>
 		</div>

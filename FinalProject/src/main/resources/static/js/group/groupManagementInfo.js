@@ -133,7 +133,6 @@
                 tel: m.tel || "-",
                 email: m.email || "-",
                 grpName: m.grpName || "-",
-                prjStartDate: m.prjStartDate || "-",
               };
             });
           }
@@ -149,7 +148,6 @@
                 tel: m.tel || "-",
                 email: m.email || "-",
                 grpName: m.grpName || "-",
-                prjStartDate: m.prjStartDate || "-",
               });
             });
             serverMemberIds = sortedIdList(
@@ -233,12 +231,6 @@
                 {
                   header: "이메일",
                   name: "email",
-                  align: "center",
-                  sortable: true,
-                },
-                {
-                  header: "프로젝트 투입일",
-                  name: "prjStartDate",
                   align: "center",
                   sortable: true,
                 },
@@ -467,7 +459,6 @@
               tel: row.tel || "",
               email: row.email || "",
               grpName: row.grpName || "",
-              prjStartDate: row.prjStartDate || "",
             };
           }
 

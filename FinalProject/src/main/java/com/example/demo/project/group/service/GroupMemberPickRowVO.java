@@ -22,6 +22,4 @@ public class GroupMemberPickRowVO {
     private String tel;
     private String email;
     private String grpName;
-    /** {@code yyyy-MM-dd} */
-    private String prjStartDate;
 }
