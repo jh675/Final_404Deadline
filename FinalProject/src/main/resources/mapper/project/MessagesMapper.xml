@@ -3,7 +3,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.project.messages.mapper.MessagesMapper">
 
-	<select id="selectAll" resultType="com.example.demo.project.messages.service.MessagesVO">
+    <select id="selectAll" resultType="com.example.demo.project.messages.service.MessagesVO">
         SELECT 
             id,
             board_id AS boardId,
@@ -17,7 +17,7 @@
             updated_on AS updatedOn
         FROM messages
         WHERE board_id = #{boardId}
-        AND (FIELDPARENT_ID IS NULL OR FIELDPARENT_ID = 0)
+        AND FIELDPARENT_ID IS NULL
         ORDER BY id DESC
     </select>
 
