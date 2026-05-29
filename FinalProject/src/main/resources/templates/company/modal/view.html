@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="companyViewModal">
+
+	<div class="modal fade" id="companyViewModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<h5 class="modal-title">기업 상세보기</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+
+				<div class="modal-body">
+
+					<div class="mb-3 row">
+						<label class="col-sm-3 col-form-label text-end fw-semibold">사업자번호</label>
+						<div class="col-sm-9">
+							<div id="view-bizNo" class="form-control bg-light"></div>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-3 col-form-label text-end fw-semibold">기업명</label>
+						<div class="col-sm-9">
+							<div id="view-companyName" class="form-control bg-light"></div>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-3 col-form-label text-end fw-semibold">전화번호</label>
+						<div class="col-sm-9">
+							<div id="view-tel" class="form-control bg-light"></div>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-3 col-form-label text-end fw-semibold">주소</label>
+						<div class="col-sm-9">
+							<div id="view-address" class="form-control bg-light"></div>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-3 col-form-label text-end fw-semibold">관리자ID</label>
+						<div class="col-sm-9">
+							<div id="view-login" class="form-control bg-light"></div>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-3 col-form-label text-end fw-semibold">이메일</label>
+						<div class="col-sm-9">
+							<div id="view-email" class="form-control bg-light"></div>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-3 col-form-label text-end fw-semibold">활성여부</label>
+						<div class="col-sm-9">
+							<div id="view-isActive" class="form-control bg-light"></div>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-3 col-form-label text-end fw-semibold">생성일</label>
+						<div class="col-sm-9">
+							<div id="view-createdOn" class="form-control bg-light"></div>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+</div>
+
+</html>
