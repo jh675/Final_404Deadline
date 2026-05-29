@@ -92,7 +92,7 @@ public class mypageController {
 
 		return "mypage/myPage";
 	}
-	// 마이페이지 내 정보 수정 
+	// 마이페이지 내 정보 수정 (사용 안함)
 	@PostMapping("/mypage/update")
 	@ResponseBody
 	public String updateInfo(@RequestBody UserVO update) {
@@ -145,7 +145,7 @@ public class mypageController {
 		// UserManageVO에 데이터 셋팅
 		UserManageVO updateVo = new UserManageVO();
 		updateVo.setId(loginUser.getId());
-		updateVo.setBizNo(loginUser.getBizNo()); // 아이디 중복 체크용(checkUpdateIdDuplicate)으로 필수!
+		updateVo.setBizNo(loginUser.getBizNo()); // 아이디 중복 체크용
 		updateVo.setLogin(payload.get("login"));
 		updateVo.setName(payload.get("name"));
 		updateVo.setEmail(payload.get("email"));
@@ -160,7 +160,7 @@ public class mypageController {
 		String updateStatus = userManageService.updateMyInfo(updateVo);
 		result.put("status", updateStatus); // SUCCESS, DUPLICATE_LOGIN, FAIL 반환
 
-		// 성공 시 세션 정보 즉시 갱신 (화면 새로고침 시 적용되도록)
+		// 성공 시 세션 정보 갱신 
 		if ("SUCCESS".equals(updateStatus)) {
 			loginUser.setLogin(updateVo.getLogin());
 			loginUser.setName(updateVo.getName());

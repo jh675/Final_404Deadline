@@ -2,91 +2,125 @@ let myPendingProfileFile = null;
 let myIsProfileDeleted = false;
 let myCropper = null;
 
-// 이메일 인증 상태 플래그
 let isEmailVerified = true; 
 
 document.addEventListener('DOMContentLoaded', function() {
 
     const editInfoModalEl = document.getElementById('mypageEditModal');
+    const emailInput = document.getElementById('myEmail');
+    const btnEmailAction = document.getElementById('btnEmailAction');
+    const generalFeedback = document.getElementById('generalFeedback');
     
-    // ?모달이 열릴 때 기존 프로필 이미지 조회
+    // 모달 초기화
     if(editInfoModalEl) {
         editInfoModalEl.addEventListener('show.bs.modal', function () {
             loadMyProfileImage();
             
-            // 비밀번호 칸 초기화
+            // 이메일 영역 완전 초기화 (잠금 상태로 복구)
+            emailInput.value = emailInput.getAttribute('data-original');
+            emailInput.setAttribute('readonly', true);
+            emailInput.classList.add('bg-light');
+			btnEmailAction.disabled = false;
+            btnEmailAction.textContent = '수정';
+            btnEmailAction.className = 'btn btn-outline-secondary';
+			document.getElementById('btnConfirmVerify').disabled = false;
+			
+            isEmailVerified = true;
+            
             document.getElementById('currentPassword').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('newPasswordConfirm').value = '';
             
-            // 모든 에러 CSS 초기화
             document.querySelectorAll('#mypageForm .is-invalid').forEach(el => el.classList.remove('is-invalid'));
             document.getElementById('emailFeedback').textContent = '';
             document.getElementById('verifyCodeArea').classList.add('d-none');
             document.getElementById('verifyCodeInput').value = '';
+            generalFeedback.textContent = '';
         });
     }
 
-    // 💡 2. 이메일 변경 감지 로직
-    const emailInput = document.getElementById('myEmail');
-    emailInput.addEventListener('input', function() {
-        const originalEmail = this.getAttribute('data-original');
-        
-        if (this.value.trim() === originalEmail) {
-            // 원래 이메일로 되돌린 경우 인증 불필요
-            isEmailVerified = true;
-            document.getElementById('emailFeedback').textContent = '';
-            this.classList.remove('is-valid', 'is-invalid');
-            document.getElementById('verifyCodeArea').classList.add('d-none');
-        } else {
-            // 이메일이 한 글자라도 바뀐 경우 인증 필수
-            isEmailVerified = false;
-            this.classList.remove('is-valid');
-            document.getElementById('emailFeedback').className = 'small mt-1 text-danger';
-            document.getElementById('emailFeedback').textContent = '이메일이 변경되었습니다. 인증을 진행해주세요.';
-        }
-    });
-
-    // 💡 3. 이메일 인증 발송 (/email/send)
-    document.getElementById('btnSendVerify').addEventListener('click', async function() {
-        const email = emailInput.value.trim();
-        const loginId = document.getElementById('myLoginId').value;
-        const bizNo = document.getElementById('myBizNo').value;
-
-        if (!email) {
-            emailInput.classList.add('is-invalid');
-            return;
-        }
-
-        this.disabled = true;
-        this.textContent = '발송중...';
-
-        try {
-            const res = await csrfFetch('/email/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email, login: loginId, bizNo: bizNo })
-            });
-            const resultText = await res.text();
-
-            if (resultText === 'success') {
-                document.getElementById('emailFeedback').className = 'small mt-1 text-success';
-                document.getElementById('emailFeedback').textContent = '인증번호가 발송되었습니다. 3분 안에 입력해주세요.';
-                document.getElementById('verifyCodeArea').classList.remove('d-none');
-            } else {
-                document.getElementById('emailFeedback').className = 'small mt-1 text-danger';
-                document.getElementById('emailFeedback').textContent = '인증번호 발송에 실패했습니다.';
-            }
-        } catch (e) {
-            console.error(e);
-            alert("서버 통신 오류가 발생했습니다.");
-        } finally {
-            this.disabled = false;
+    // 토글 버튼 이벤트
+    btnEmailAction.addEventListener('click', async function() {
+        // '수정' 버튼 상태인 경우 -> 수정 모드로 개방
+        if (emailInput.hasAttribute('readonly')) {
+            emailInput.removeAttribute('readonly');
+            emailInput.classList.remove('bg-light');
+            emailInput.focus();
+            
             this.textContent = '인증발송';
+            this.className = 'btn btn-outline-primary';
+			this.disabled = false;
+			
+            document.getElementById('emailFeedback').className = 'small mt-1 text-primary';
+            document.getElementById('emailFeedback').textContent = '변경할 이메일을 입력 후 인증발송을 눌러주세요.';
+            isEmailVerified = false;
+        } 
+        // '인증발송' 버튼 상태인 경우 -> 발송 로직 처리
+        else {
+            const email = emailInput.value.trim();
+            const originalEmail = emailInput.getAttribute('data-original');
+
+            // 변경사항이 없이 원래 이메일과 똑같다면 원상복구
+            if (email === originalEmail) {
+                emailInput.setAttribute('readonly', true);
+                emailInput.classList.add('bg-light');
+                this.textContent = '수정';
+                this.className = 'btn btn-outline-secondary';
+                document.getElementById('emailFeedback').textContent = '';
+                isEmailVerified = true;
+                return;
+            }
+
+            if (!email) {
+                emailInput.classList.add('is-invalid');
+                return;
+            }
+
+            // 인증 메일 발송 API 호출
+            this.disabled = true;
+            this.textContent = '발송중...';
+
+            try {
+                const loginId = document.getElementById('myLoginId').value;
+                const bizNo = document.getElementById('myBizNo').value;
+                
+                const res = await csrfFetch('/email/send-mypage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, login: loginId, bizNo: bizNo })
+                });
+                const resultText = await res.text();
+
+                if (resultText === 'success') {
+					// 발송 성공시
+	                this.textContent = '발송완료';
+	                this.className = 'btn btn-secondary';
+					
+                    document.getElementById('emailFeedback').className = 'small mt-1 text-success';
+                    document.getElementById('emailFeedback').textContent = '인증번호가 발송되었습니다. 3분 안에 입력해주세요.';
+					document.getElementById('verifyCodeArea').classList.remove('d-none');
+	                document.getElementById('btnConfirmVerify').disabled = false;
+	                document.getElementById('verifyCodeInput').value = '';
+	                document.getElementById('verifyCodeInput').classList.remove('is-invalid');
+                } else {
+					// 발송 실패 시 다시 누를 수 있도록 복구
+	                this.disabled = false;
+	                this.textContent = '재인증';
+	                this.className = 'btn btn-outline-primary';
+					
+                    document.getElementById('emailFeedback').className = 'small mt-1 text-danger';
+                    document.getElementById('emailFeedback').textContent = '인증번호 발송에 실패했습니다.';
+                }
+            } catch (e) {
+				this.disabled = false;
+	            this.textContent = '재인증';
+	            document.getElementById('emailFeedback').className = 'small mt-1 text-danger';
+	            document.getElementById('emailFeedback').textContent = '서버 통신 오류가 발생했습니다.';
+            }
         }
     });
 
-    // 💡 4. 이메일 인증 확인 (/email/verify)
+    // 이메일 인증 확인
     document.getElementById('btnConfirmVerify').addEventListener('click', async function() {
         const email = emailInput.value.trim();
         const verifyNum = document.getElementById('verifyCodeInput').value.trim();
@@ -106,53 +140,74 @@ document.addEventListener('DOMContentLoaded', function() {
             const resultText = await res.text();
 
             if (resultText === 'success') {
+				
                 verifyInputEl.classList.remove('is-invalid');
-                verifyInputEl.classList.add('is-valid');
                 document.getElementById('verifyCodeArea').classList.add('d-none');
                 
-                emailInput.classList.add('is-valid');
+                emailInput.classList.remove('is-invalid');
                 document.getElementById('emailFeedback').className = 'small mt-1 text-success fw-bold';
                 document.getElementById('emailFeedback').textContent = '이메일 인증이 완료되었습니다.';
                 
                 isEmailVerified = true;
+                
+                // 인증 완료 후 다시 안전하게 잠금 (수정하려면 다시 수정버튼을 누르게 유도)
+                emailInput.setAttribute('readonly', true);
+                emailInput.classList.add('bg-light');
+                // 인증 성공한 이메일을 새로운 오리지널로 임시 지정하여 저장 시 통과되도록 함
+                emailInput.setAttribute('data-original', email);
+				btnEmailAction.disabled = false;
+                btnEmailAction.textContent = '수정';
+                btnEmailAction.className = 'btn btn-outline-secondary';
+                
             } else {
-                verifyInputEl.classList.add('is-invalid');
+				// 실패 처리 
+	            verifyInputEl.classList.add('is-invalid');
+	            document.getElementById('verifyCodeError').textContent = '인증번호가 일치하지 않거나 3분이 초과되었습니다.';
+	            
+	            // 현재 확인 버튼 잠금 & 재인증 유도
+	            this.disabled = true; 
+	            
+	            btnEmailAction.disabled = false;
+	            btnEmailAction.textContent = '재인증';
+	            btnEmailAction.className = 'btn btn-outline-primary';
+	            
+	            document.getElementById('emailFeedback').className = 'small mt-1 text-danger fw-bold';
+	            document.getElementById('emailFeedback').textContent = '인증에 실패했습니다. 재인증을 진행해주세요.';
             }
         } catch (e) {
             console.error(e);
         }
     });
 
-    // 💡 5. 저장(수정) 버튼 클릭 검증 로직
+    // 저장 버튼 검증
     document.getElementById('btnSaveMyInfo').addEventListener('click', async function() {
-        // 기존 에러 지우기
         document.querySelectorAll('#mypageForm .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        generalFeedback.textContent = '';
         let isValid = true;
 
-        const userId = document.getElementById('myUserId').value;
         const loginId = document.getElementById('myLoginId');
         const name = document.getElementById('myName');
         const tel = document.getElementById('myTel');
-        const email = document.getElementById('myEmail');
         
         const currentPwd = document.getElementById('currentPassword');
         const newPwd = document.getElementById('newPassword');
         const newPwdConfirm = document.getElementById('newPasswordConfirm');
 
-        // 빈값 체크
         if (!loginId.value.trim()) { loginId.classList.add('is-invalid'); isValid = false; }
         if (!name.value.trim()) { name.classList.add('is-invalid'); isValid = false; }
-        if (!email.value.trim()) { email.classList.add('is-invalid'); isValid = false; }
+        if (!emailInput.value.trim()) { emailInput.classList.add('is-invalid'); isValid = false; }
 
-        // 이메일 인증 체크
-        if (!isEmailVerified) {
-            email.classList.add('is-invalid');
-            document.getElementById('emailFeedback').className = 'small mt-1 text-danger';
-            document.getElementById('emailFeedback').textContent = '이메일 인증을 먼저 완료해주세요.';
+        const currentEmailVal = emailInput.value.trim();
+        const originalEmailVal = emailInput.getAttribute('data-original');
+        
+        // input의 값이 변경되었는데 isEmailVerified가 false인 경우 
+        if (currentEmailVal !== originalEmailVal || !isEmailVerified) {
+            emailInput.classList.add('is-invalid');
+            document.getElementById('emailFeedback').className = 'small mt-1 text-danger fw-bold';
+            document.getElementById('emailFeedback').textContent = '변경된 이메일에 대한 인증을 완료해주세요.';
             isValid = false;
         }
 
-        // 비밀번호 변경 체크 (하나라도 입력했다면 검증 수행)
         if (currentPwd.value || newPwd.value || newPwdConfirm.value) {
             if (!currentPwd.value) { currentPwd.classList.add('is-invalid'); isValid = false; }
             if (!newPwd.value) { newPwd.classList.add('is-invalid'); isValid = false; }
@@ -164,19 +219,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!isValid) return;
 
-        // 서버로 보낼 Payload
         const payload = {
-            id: userId,
             login: loginId.value.trim(),
             name: name.value.trim(),
-            email: email.value.trim(),
+            email: currentEmailVal,
             tel: tel.value.trim()
         };
-        
         if (currentPwd.value) {
             payload.currentPassword = currentPwd.value;
             payload.newPassword = newPwd.value;
         }
+
+        this.disabled = true;
+        this.textContent = '저장 중...';
 
         try {
             const res = await csrfFetch('/mypage/update', {
@@ -189,28 +244,33 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.status === 'PWD_ERROR') {
                 currentPwd.classList.add('is-invalid');
                 document.getElementById('currentPasswordError').textContent = '현재 비밀번호가 일치하지 않습니다.';
-                return;
-            } else if (result.status === 'DUPLICATE_ID') {
+            } else if (result.status === 'DUPLICATE_LOGIN') {
                 loginId.classList.add('is-invalid');
-                document.getElementById('myLoginIdError').textContent = '이미 사용 중인 아이디입니다.';
-                return;
+                document.getElementById('myLoginIdError').textContent = '해당 기업에 이미 사용 중인 아이디입니다.';
             } else if (result.status === 'SUCCESS') {
-                // 정보 저장이 성공하면 프로필 이미지 처리
-                await handleMyProfileUpload();
-                alert("내 정보가 성공적으로 수정되었습니다.");
-                location.reload();
+                await handleMyProfileUpload(); 
+                
+                generalFeedback.className = 'small fw-bold text-success';
+                generalFeedback.textContent = '내 정보가 성공적으로 수정되었습니다.';
+                
+                // 1.5초 뒤 페이지 새로고침하여 적용된 정보 보여주기
+                setTimeout(() => location.reload(), 1500);
+                return; // 성공 시 여기서 멈춤 (버튼 활성화 복구 안함)
             } else {
-                alert("수정 중 오류가 발생했습니다.");
+                generalFeedback.className = 'small fw-bold text-danger';
+                generalFeedback.textContent = '수정 중 오류가 발생했습니다.';
             }
         } catch (e) {
-            console.error(e);
-            alert("서버 통신 중 오류가 발생했습니다.");
+            generalFeedback.className = 'small fw-bold text-danger';
+            generalFeedback.textContent = '서버 통신 중 오류가 발생했습니다.';
         }
+        
+        // 에러 발생 시 버튼 원상복구
+        this.disabled = false;
+        this.textContent = '저장';
     });
 
-    // ==========================================
-    // 💡 6. 프로필 이미지 로직 (Cropper.js 연동)
-    // ==========================================
+    // 프로필 이미지 로직 (Cropper.js 연동)
     document.getElementById('btnUploadProfile').addEventListener('click', () => {
         document.getElementById('myProfileImage').click();
     });
@@ -303,13 +363,12 @@ async function loadMyProfileImage() {
     emptyText.style.display = "";
 }
 
-// 정보 저장 후 이미지 서버 전송 로직 (/admin/user/profile 재활용 가능)
+// 정보 저장 후 이미지 서버 전송 로직 
 async function handleMyProfileUpload() {
     if (myIsProfileDeleted) {
         await csrfFetch(`/mypage/profile`, { method: "DELETE" });
     } else if (myPendingProfileFile) {
         const formData = new FormData();
-        formData.append("userId", userId);
         formData.append("file", myPendingProfileFile);
         await csrfFetch("/mypage/profile", { method: "POST", body: formData });
     }

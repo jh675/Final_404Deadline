@@ -105,12 +105,12 @@ public class UserManageServiceImpl implements UserManageService {
 
 	@Override
 	public String updateMyInfo(UserManageVO vo) {
-		// 1. 이미 만들어둔 매퍼 재활용 (아이디 중복 검사)
+		// 아이디 중복 검사
 		if (userManageMapper.checkUpdateIdDuplicate(vo) > 0) {
 			return "DUPLICATE_LOGIN";
 		}
 		
-		// 2. 정보 업데이트 (비밀번호 변경 포함)
+		// 정보 업데이트 (비밀번호 변경 포함)
 		int result = userManageMapper.updateMyInfo(vo);
 		
 		return result > 0 ? "SUCCESS" : "FAIL";
