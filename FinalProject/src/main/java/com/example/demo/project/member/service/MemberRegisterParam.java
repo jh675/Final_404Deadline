@@ -11,6 +11,4 @@ public class MemberRegisterParam {
     private Long memberId;
     private Long userId;
     private Long grpId;
-    private String prjStartDate;
-    private String prjEndDate;
 }

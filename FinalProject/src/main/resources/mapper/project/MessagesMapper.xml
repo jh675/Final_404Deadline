@@ -4,91 +4,92 @@
 <mapper namespace="com.example.demo.project.messages.mapper.MessagesMapper">
 
 	<select id="selectAll" resultType="com.example.demo.project.messages.service.MessagesVO">
-		SELECT 
-			id,
-			board_id AS boardId,
-			Fieldparent_id AS fieldparentId,
-			title,
-			content,
-			user_id AS userId,
-			replies_count AS repliesCount,
-			last_reply_id AS lastReplyId,
-			created_on AS createdOn,
-			updated_on AS updatedOn
-		FROM messages
-		WHERE board_id = #{boardId}
-		ORDER BY id DESC
-	</select>
+        SELECT 
+            id,
+            board_id AS boardId,
+            FIELDPARENT_ID AS fieldparentId,
+            title,
+            content,
+            user_id AS userId,
+            replies_count AS repliesCount,
+            last_reply_id AS lastReplyId,
+            created_on AS createdOn,
+            updated_on AS updatedOn
+        FROM messages
+        WHERE board_id = #{boardId}
+        AND (FIELDPARENT_ID IS NULL OR FIELDPARENT_ID = 0)
+        ORDER BY id DESC
+    </select>
 
-	<insert id="insert">
-	<selectKey keyProperty="id" resultType="long" order="BEFORE">
+    <insert id="insert">
+    <selectKey keyProperty="id" resultType="long" order="BEFORE">
         SELECT msg_seq.nextval FROM DUAL
     </selectKey>
-		INSERT INTO messages (
-			id, 
-			board_id, 
-			Fieldparent_id, 
-			title,
-			content, 
-			user_id, 
-			replies_count, 
-			last_reply_id, 
-			created_on
-		) VALUES (
-			#{id}, 
-			#{boardId}, 
-			#{fieldparentId}, 
-			#{title},
-			#{content}, 
-			#{userId},
-			0,
-			NULL,
-			SYSDATE )
-	</insert>
+        INSERT INTO messages (
+            id, 
+            board_id, 
+            FIELDPARENT_ID, 
+            title,
+            content, 
+            user_id, 
+            replies_count, 
+            last_reply_id, 
+            created_on
+        ) VALUES (
+            #{id}, 
+            #{boardId}, 
+            #{fieldparentId}, 
+            #{title},
+            #{content}, 
+            #{userId},
+            0,
+            NULL,
+            SYSDATE )
+    </insert>
 
-	<select id="selectOne" resultType="com.example.demo.project.messages.service.MessagesVO">
-		SELECT 
-			id,
-			board_id AS boardId,
-			Fieldparent_id AS fieldparentId,
-			title,
-			content,
-			user_id AS userId,
-			replies_count AS repliesCount,
-			last_reply_id AS lastReplyId,
-			created_on AS createdOn,
-			updated_on AS updatedOn
-		FROM messages
-		WHERE id = #{id}
-	</select>
+    <select id="selectOne" resultType="com.example.demo.project.messages.service.MessagesVO">
+        SELECT 
+            id,
+            board_id AS boardId,
+            FIELDPARENT_ID AS fieldparentId,
+            title,
+            content,
+            user_id AS userId,
+            replies_count AS repliesCount,
+            last_reply_id AS lastReplyId,
+            created_on AS createdOn,
+            updated_on AS updatedOn
+        FROM messages
+        WHERE id = #{id}
+    </select>
 
-	<update id="update">
-		UPDATE messages
-		SET 
-			Fieldparent_id = #{fieldparentId}, 
-			title = #{title},
-			content = #{content}, 
-			user_id = #{userId},
-			updated_on = SYSDATE WHERE id = #{id}
-	</update>
+    <update id="update">
+        UPDATE messages
+        SET 
+            FIELDPARENT_ID = #{fieldparentId}, 
+            title = #{title},
+            content = #{content}, 
+            user_id = #{userId},
+            updated_on = SYSDATE WHERE id = #{id}
+    </update>
 
-	<delete id="delete">
-		DELETE FROM messages
-		WHERE id = #{id}
-	</delete>
-	
-	<update id="increaseRepliesCount">
-		UPDATE messages
-		SET replies_count = replies_count + 1
-		WHERE id = #{fieldparentId}
-	</update>
+    <delete id="delete">
+        DELETE FROM messages
+        WHERE id = #{id}
+    </delete>
+    
+    <update id="increaseRepliesCount">
+        UPDATE messages
+        SET replies_count = replies_count + 1
+        WHERE id = #{fieldparentId}
+    </update>
 
-	<select id="selectListWithReplies" resultType="com.example.demo.project.messages.service.MessagesVO">
-		SELECT * FROM messages
-		WHERE board_id = #{boardId}
-		START WITH Fieldparent_id IS NULL
-		CONNECT BY PRIOR id = Fieldparent_id
-		ORDER SIBLINGS BY id DESC
-	</select>
+    <select id="selectListWithReplies" resultType="com.example.demo.project.messages.service.MessagesVO">
+        SELECT * FROM messages
+        WHERE board_id = #{boardId}
+        START WITH FIELDPARENT_ID IS NULL
+        CONNECT BY PRIOR id = FIELDPARENT_ID
+        ORDER SIBLINGS BY id DESC
+    </select>
 
 </mapper>

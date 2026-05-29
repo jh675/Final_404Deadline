@@ -1,14 +1,9 @@
 (function () {
           const prjId = Number(memJoinPrjId);
-          const prjStartDateYmd = String(memJoinPrjStartDate || "");
-          const prjClosedDateYmd = String(memJoinPrjClosedDate || "");
 
           const gridEl = document.getElementById("memJoinMemberGrid");
           const searchType = document.getElementById("memJoinSearchType");
           const searchKeyword = document.getElementById("memJoinSearchKeyword");
-          const startInput = document.getElementById("memJoinPrjStart");
-          const endInput = document.getElementById("memJoinPrjEnd");
-          const periodHint = document.getElementById("memJoinPeriodHint");
           const grpInput = document.getElementById("memJoinGrpName");
           const grpIdInput = document.getElementById("memJoinSelectedGrpId");
           const groupOverlay = document.getElementById("memJoinGroupOverlay");
@@ -39,145 +34,6 @@
               return window.MemberQuestionModal.alert(msg, title || "알림");
             }
             return Promise.resolve();
-          }
-
-          function todayYmd() {
-            const d = new Date();
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, "0");
-            const day = String(d.getDate()).padStart(2, "0");
-            return y + "-" + m + "-" + day;
-          }
-
-          function normalizeYmd(value) {
-            if (value == null) return "";
-            const s = String(value).trim();
-            if (!s) return "";
-            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-            const d = new Date(s);
-            if (isNaN(d.getTime())) return "";
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, "0");
-            const day = String(d.getDate()).padStart(2, "0");
-            return y + "-" + m + "-" + day;
-          }
-
-          function maxYmd(a, b) {
-            if (!a) return b || "";
-            if (!b) return a;
-            return a >= b ? a : b;
-          }
-
-          function getSelectedMembers() {
-            if (selectedUserIds.size === 0) return [];
-            return allMembers.filter(function (m) {
-              return selectedUserIds.has(Number(m.userId));
-            });
-          }
-
-          /** 선택된 직원들 중 가장 늦은 입사일 (없으면 빈 문자열) */
-          function getSelectedMaxHireYmd() {
-            let max = "";
-            getSelectedMembers().forEach(function (m) {
-              const ymd = m && m.hireDate ? normalizeYmd(m.hireDate) : "";
-              if (ymd && (!max || ymd > max)) {
-                max = ymd;
-              }
-            });
-            return max;
-          }
-
-          function renderPeriodHint() {
-            if (!periodHint) return;
-            const hireYmd = getSelectedMaxHireYmd();
-            const minStart = maxYmd(hireYmd, prjStartDateYmd);
-            const lines = [];
-            const count = selectedUserIds.size;
-            if (count === 0) {
-              lines.push("직원을 선택하면 투입일 가능 범위가 갱신됩니다.");
-            } else {
-              if (count > 1) {
-                lines.push("선택된 직원 " + count + "명을 일괄 등록합니다.");
-              }
-              if (minStart) {
-                lines.push("투입일은 " + minStart + " 이후로 지정할 수 있습니다.");
-              }
-            }
-            if (prjClosedDateYmd) {
-              lines.push("종료일은 " + prjClosedDateYmd + " 이전이어야 합니다.");
-            }
-            periodHint.textContent = lines.join(" ");
-            periodHint.classList.toggle("mem-join-hint--warn", count === 0);
-          }
-
-          function applyDateConstraints() {
-            const hireYmd = getSelectedMaxHireYmd();
-            const minStart = maxYmd(hireYmd, prjStartDateYmd);
-
-            if (minStart) {
-              startInput.min = minStart;
-            } else {
-              startInput.removeAttribute("min");
-            }
-            if (prjClosedDateYmd) {
-              startInput.max = prjClosedDateYmd;
-            } else {
-              startInput.removeAttribute("max");
-            }
-
-            let curStart = normalizeYmd(startInput.value);
-            if (curStart && minStart && curStart < minStart) {
-              curStart = minStart;
-              startInput.value = curStart;
-            }
-            if (curStart && prjClosedDateYmd && curStart > prjClosedDateYmd) {
-              curStart = prjClosedDateYmd;
-              startInput.value = curStart;
-            }
-
-            if (curStart) {
-              endInput.min = curStart;
-            } else if (minStart) {
-              endInput.min = minStart;
-            } else {
-              endInput.removeAttribute("min");
-            }
-            if (prjClosedDateYmd) {
-              endInput.max = prjClosedDateYmd;
-            } else {
-              endInput.removeAttribute("max");
-            }
-
-            let curEnd = normalizeYmd(endInput.value);
-            if (curEnd && curStart && curEnd < curStart) {
-              curEnd = curStart;
-              endInput.value = curEnd;
-            }
-            if (curEnd && prjClosedDateYmd && curEnd > prjClosedDateYmd) {
-              endInput.value = prjClosedDateYmd;
-            }
-          }
-
-          function initDefaultStartDate() {
-            const hireYmd = getSelectedMaxHireYmd();
-            const minStart = maxYmd(hireYmd, prjStartDateYmd);
-            const today = todayYmd();
-            let initStart = startInput.value ? normalizeYmd(startInput.value) : "";
-            if (!initStart) {
-              initStart = maxYmd(minStart, today);
-              if (prjClosedDateYmd && initStart > prjClosedDateYmd) {
-                initStart = prjClosedDateYmd;
-              }
-              if (initStart) startInput.value = initStart;
-            }
-          }
-
-          function initDefaultEndDate() {
-            if (!endInput) return;
-            let initEnd = normalizeYmd(endInput.value);
-            if (!initEnd && prjClosedDateYmd) {
-              endInput.value = prjClosedDateYmd;
-            }
           }
 
           function includesKeyword(value, keyword) {
@@ -244,11 +100,6 @@
             }
           }
 
-          function onSelectionChanged() {
-            applyDateConstraints();
-            renderPeriodHint();
-          }
-
           function createGrid() {
             if (!gridEl || typeof tui === "undefined" || !tui.Grid) return;
             if (grid) {
@@ -283,14 +134,12 @@
               const row = grid.getRow(ev.rowKey);
               if (!row || row.userId == null) return;
               selectedUserIds.add(Number(row.userId));
-              onSelectionChanged();
             });
             grid.on("uncheck", function (ev) {
               if (isSyncingCheck) return;
               const row = grid.getRow(ev.rowKey);
               if (!row || row.userId == null) return;
               selectedUserIds.delete(Number(row.userId));
-              onSelectionChanged();
             });
             grid.on("checkAll", function () {
               if (isSyncingCheck) return;
@@ -300,7 +149,6 @@
                   selectedUserIds.add(Number(row.userId));
                 }
               });
-              onSelectionChanged();
             });
             grid.on("uncheckAll", function () {
               if (isSyncingCheck) return;
@@ -310,7 +158,6 @@
                   selectedUserIds.delete(Number(row.userId));
                 }
               });
-              onSelectionChanged();
             });
             applyCheckedRowFromSelected();
           }
@@ -328,7 +175,6 @@
               allMembers = [];
             }
             createGrid();
-            renderPeriodHint();
           }
 
           function resetGroupSearch() {
@@ -440,15 +286,6 @@
             searchKeyword.addEventListener("input", refreshGridData);
           }
 
-          if (startInput) {
-            startInput.addEventListener("change", applyDateConstraints);
-            startInput.addEventListener("input", applyDateConstraints);
-          }
-          if (endInput) {
-            endInput.addEventListener("change", applyDateConstraints);
-            endInput.addEventListener("input", applyDateConstraints);
-          }
-
           if (grpInput) {
             grpInput.addEventListener("click", openGroupPicker);
           }
@@ -479,45 +316,6 @@
                 await alertMsg("등록할 직원을 선택하세요.");
                 return;
               }
-              const start = normalizeYmd(startInput.value);
-              const end = normalizeYmd(endInput.value);
-              if (!start) {
-                await alertMsg("프로젝트 투입일을 입력하세요.");
-                return;
-              }
-
-              const hireYmd = getSelectedMaxHireYmd();
-              const minStart = maxYmd(hireYmd, prjStartDateYmd);
-              if (minStart && start < minStart) {
-                await alertMsg(
-                  "프로젝트 투입일은 " + minStart + " 이후로만 지정할 수 있습니다.",
-                );
-                return;
-              }
-              if (prjClosedDateYmd && start > prjClosedDateYmd) {
-                await alertMsg(
-                  "프로젝트 투입 시작일은 프로젝트 종료일(" +
-                    prjClosedDateYmd +
-                    ") 이전이어야 합니다.",
-                );
-                return;
-              }
-              if (!end && prjClosedDateYmd) {
-                end = prjClosedDateYmd;
-                endInput.value = end;
-              }
-              if (prjClosedDateYmd && end && end > prjClosedDateYmd) {
-                await alertMsg(
-                  "투입 종료일은 프로젝트 종료일(" +
-                    prjClosedDateYmd +
-                    ") 이후로 지정할 수 없습니다.",
-                );
-                return;
-              }
-              if (end && start && end < start) {
-                await alertMsg("투입 종료일은 투입 시작일 이후여야 합니다.");
-                return;
-              }
 
               const gidRaw = grpIdInput && grpIdInput.value ? grpIdInput.value.trim() : "";
               if (!gidRaw) {
@@ -534,8 +332,6 @@
               const payload = {
                 userIds: userIds,
                 grpId: gid,
-                prjStartDate: start,
-                prjEndDate: end || null,
               };
 
               registerBtn.disabled = true;
@@ -571,9 +367,5 @@
             });
           }
 
-          initDefaultStartDate();
-          initDefaultEndDate();
-          applyDateConstraints();
-          renderPeriodHint();
           loadMembers();
         })();

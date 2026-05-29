@@ -472,7 +472,7 @@
 
         <section class="mem-section" aria-labelledby="mem-project-heading">
           <div class="mem-section__head-row">
-            <h2 class="mem-section__title" id="mem-project-heading">프로젝트 정보</h2>
+            <h2 class="mem-section__title" id="mem-project-heading">소속 정보</h2>
             <div class="mem-section__head-actions" th:if="${viewMode}">
               <a class="mem-actions__btn" th:href="@{/project/member/info(userId=${userId}, grpId=${grpId}, edit=true)}">수정</a>
             </div>
@@ -483,32 +483,6 @@
           </div>
           <div class="mem-section__body">
             <div class="mem-basic-fields mem-detail-form">
-              <div class="mem-field-row">
-                <label for="detailPrjName">프로젝트명 <span class="req">*</span></label>
-                <input type="text" id="detailPrjName" readonly th:value="${detail.prjName}" />
-              </div>
-              <div class="mem-field-row">
-                <label for="detailPrjStart">프로젝트 투입기간 <span class="req">*</span></label>
-                <div class="mem-period-inputs">
-                  <input
-                    type="date"
-                    id="detailPrjStart"
-                    th:readonly="${viewMode}"
-                    th:classappend="${editMode} ? 'mem-input--editable' : ''"
-                    placeholder="연도-월-일"
-                    th:value="${detail.prjStartDate}"
-                  />
-                  <span class="mem-period-tilde" aria-hidden="true">~</span>
-                  <input
-                    type="date"
-                    id="detailPrjEnd"
-                    th:readonly="${viewMode}"
-                    th:classappend="${editMode} ? 'mem-input--editable' : ''"
-                    placeholder="연도-월-일"
-                    th:value="${detail.prjEndDate}"
-                  />
-                </div>
-              </div>
               <div class="mem-field-row">
                 <label for="detailGrpName">소속 그룹 <span class="req">*</span></label>
                 <input
@@ -547,7 +521,7 @@
           th:if="${editMode}"
           id="memPageConfig"
           style="display: none"
-          th:attr="data-prj-id=${prjId},data-user-id=${userId},data-old-grp-id=${grpId},data-initial-end=${detail != null ? detail.prjEndDate : ''},data-initial-grp-id=${detail != null ? detail.grpId : ''},data-initial-start=${detail != null ? detail.prjStartDate : ''},data-hire-date=${detail != null ? detail.hireDate : ''},data-prj-open=${session.project != null && session.project.startDate != null ? #dates.format(session.project.startDate, 'yyyy-MM-dd') : ''},data-prj-closed=${prjClosedDate != null ? prjClosedDate : (session.project != null && session.project.closedDate != null ? #dates.format(session.project.closedDate, 'yyyy-MM-dd') : '')}"
+          th:attr="data-prj-id=${prjId},data-user-id=${userId},data-old-grp-id=${grpId},data-initial-grp-id=${detail != null ? detail.grpId : ''}"
         ></div>
 
         <script th:if="${editMode}" th:src="@{/js/member/memberManagementInfo.js}"></script>

@@ -26,7 +26,7 @@ class WebSecurityConfig {
 		// @formatter:off
 		http
 			.authorizeHttpRequests((requests) -> requests
-				.requestMatchers("/login/**", "/email/**", "/css/**", "/js/**", "/").permitAll()
+				.requestMatchers("/login/**", "/email/**", "/css/**", "/js/**", "/", "/logout/**").permitAll()
 				.requestMatchers("/api/notifications/**").permitAll()
 				.requestMatchers("/admin/**").hasAnyRole("ADMIN") // 시스템관리자 01ROLE
 				.requestMatchers("/cadmin/**").hasAnyRole("CADMIN") // 기업관리자 02ROLE
@@ -38,14 +38,13 @@ class WebSecurityConfig {
 					"/project/history/**",
 					"/project/notice/**",
 					"/project/gantt/**",
-					"/project/calendar/**",
 					"/project/milestone/**",
 					"/project/wiki/**",
 					"/project/docs/**",
-					"/project/board/**",
+					"/project/boards/**",
 					"/project/role/**",
 					"/project/timeline/**",
-					"/project/board/message/**"
+					"/project/messages/**"
 				).access(projectAuthorizationManager)
 				.requestMatchers("/user/**").hasAnyRole("USER") // 일반 이용자 03ROLE
 				.anyRequest().authenticated()

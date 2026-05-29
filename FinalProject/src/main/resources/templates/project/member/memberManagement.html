@@ -209,12 +209,6 @@ const prjId = /*[[${session.currentProjectId}]]*/ "";
                 <label for="grpName">소속</label>
                 <input type="text" id="grpName" name="grpName" th:value="${grpName}" placeholder="소속 그룹명" autocomplete="off"/>
               </div>
-              <div class="role-search__inline role-search__inline--date-range">
-                <label for="prjStartFrom">프로젝트 투입일</label>
-                <input type="date" id="prjStartFrom" name="prjStartFrom" th:value="${prjStartFrom}"/>
-                <span class="role-search__tilde">~</span>
-                <input type="date" id="prjStartTo" name="prjStartTo" th:value="${prjStartTo}" aria-label="프로젝트 투입일 종료"/>
-              </div>
               <div class="role-search__actions">
                 <button type="submit">검색</button>
               </div>

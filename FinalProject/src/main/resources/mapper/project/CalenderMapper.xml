@@ -70,6 +70,27 @@
     WHERE id = #{id}
    </delete>
    
+<select id="getList" resultType="calenderVO">
+
+	select * from calender
+
+	<where>
+		and mem_id = #{memId}
+		<if test="typeCd != null and typeCd != ''">
+			and type_cd = #{typeCd}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			and (
+			place like '%' || #{keyword} || '%'
+			or cal_text like '%' || #{keyword} || '%'
+			)
+
+		</if>
+
+	</where>
+
+</select>
+   
 
 
 <!-- 1시간 전 알림용 -->

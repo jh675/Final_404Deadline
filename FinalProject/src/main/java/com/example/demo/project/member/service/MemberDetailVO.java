@@ -33,8 +33,5 @@ public class MemberDetailVO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date pwUpdatedOn;
 
-    private String prjName;
-    private String prjStartDate;
-    private String prjEndDate;
     private String grpName;
 }

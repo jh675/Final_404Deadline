@@ -151,4 +151,19 @@
 	    WHERE BIZ_NO = #{bizNo} 
 	</select>	
 	
+	<update id="updateMyInfo">
+	    UPDATE USERS
+	    <set>
+	        LOGIN = #{login},
+	        NAME = #{name},
+	        TEL = #{tel},
+	        EMAIL = #{email}
+	        
+	        <if test="password != null and password != ''">
+	            , PASSWORD = #{password}
+	            , PW_UPDATED_ON = SYSDATE
+	        </if>
+	    </set>
+	    WHERE ID = #{id}
+	</update>
 </mapper>
