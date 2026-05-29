@@ -12,4 +12,5 @@ public interface UserManageService {
 	UserManageVO selectOne(Long id);
 	List<CompanyVO> selectCompanyList();
 	int bulkUpdateUsers(Map<String, Object> payload);
+	String updateMyInfo(UserManageVO updateVo);
 }
