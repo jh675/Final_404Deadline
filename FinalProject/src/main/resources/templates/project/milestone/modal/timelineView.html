@@ -24,14 +24,18 @@
 						<table class="table table-sm align-middle mb-0">
 							<thead class="table-light">
 								<tr>
-									<th class="text-center" style="width: 60px">#</th>
-									<th style="width: 140px">유형</th>
+									<th class="text-center" style="width: 48px">#</th>
+									<th style="width: 100px">유형</th>
 									<th>설명</th>
+									<th style="width: 150px">일시</th>
+									<th class="text-center" style="width: 120px"
+									    th:if="${@prjAuth.hasRole('ROLE_TIMELINE_UPDATE') or @prjAuth.hasRole('ROLE_TIMELINE_DELETE')}">관리</th>
 								</tr>
 							</thead>
 							<tbody data-tv-list></tbody>
 						</table>
 					</div>
+					<small class="text-danger d-none mt-2 d-block" data-tv-err></small>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
@@ -39,6 +43,203 @@
 			</div>
 		</div>
 	</div>
+
+	<script th:inline="javascript">
+		(function () {
+			var modalEl = document.getElementById("timelineViewModal");
+			if (!modalEl) return;
+
+			var canTimelineUpdate = /*[[${@prjAuth.hasRole('ROLE_TIMELINE_UPDATE')}]]*/ false;
+			var canTimelineDelete = /*[[${@prjAuth.hasRole('ROLE_TIMELINE_DELETE')}]]*/ false;
+			var hasManageCol = canTimelineUpdate || canTimelineDelete;
+
+			var whenEl = modalEl.querySelector("[data-tv-when]");
+			var issueEl = modalEl.querySelector("[data-tv-issue]");
+			var listEl = modalEl.querySelector("[data-tv-list]");
+			var errEl = modalEl.querySelector("[data-tv-err]");
+
+			var TYPE_LABELS = {
+				"01TIMELINE": "기능",
+				"02TIMELINE": "개선",
+				"03TIMELINE": "관리",
+			};
+
+			function getCsrfHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getCsrfHeaders) {
+					return window.MilestoneTimeline.getCsrfHeaders();
+				}
+				var headers = {};
+				var tokenMeta = document.querySelector('meta[name="_csrf"]');
+				var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+				if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
+					headers[headerMeta.content] = tokenMeta.content;
+				}
+				return headers;
+			}
+
+			function getApiJsonHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getApiJsonHeaders) {
+					return window.MilestoneTimeline.getApiJsonHeaders();
+				}
+				return Object.assign(
+					{ "Content-Type": "application/json", Accept: "application/json" },
+					getCsrfHeaders()
+				);
+			}
+
+			function setErr(msg) {
+				if (!errEl) return;
+				if (msg) { errEl.textContent = msg; errEl.classList.remove("d-none"); }
+				else     { errEl.textContent = ""; errEl.classList.add("d-none"); }
+			}
+
+			function escapeHtml(text) {
+				return (text || "").toString().replace(/[&<>]/g, function (c) {
+					return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+				});
+			}
+
+			function toDate(value) {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.parseWallClockDate) {
+					return window.MilestoneTimeline.parseWallClockDate(value);
+				}
+				return value ? new Date(value) : null;
+			}
+
+			function formatType(typeCd) {
+				return TYPE_LABELS[typeCd] || typeCd || "-";
+			}
+
+			function formatWhen(d) {
+				return d ? d.toLocaleString("ko-KR") : "-";
+			}
+
+			function deleteTimeline(id) {
+				return fetch("/project/milestone/api/timeline/" + encodeURIComponent(id), {
+					method: "DELETE",
+					headers: Object.assign({ Accept: "application/json" }, getCsrfHeaders()),
+				}).then(function (res) {
+					if (!res.ok) throw new Error("HTTP " + res.status);
+				});
+			}
+
+			function renderRows(events) {
+				if (!listEl) return;
+				listEl.innerHTML = "";
+				(events || []).forEach(function (e, i) {
+					var tr = document.createElement("tr");
+					var at = toDate(e.entryDate || e.start);
+					var desc = escapeHtml(e.contents || e.content || "이벤트");
+					var cols =
+						'<td class="text-center">' + (i + 1) + '</td>' +
+						'<td>' + escapeHtml(formatType(e.typeCd)) + '</td>' +
+						'<td>' + desc + '</td>' +
+						'<td class="text-nowrap small text-muted">' + formatWhen(at) + '</td>';
+
+					if (hasManageCol) {
+						var actions = '<td class="text-center text-nowrap">';
+						if (canTimelineUpdate) {
+							actions += '<button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 me-1" data-tv-edit>수정</button>';
+						}
+						if (canTimelineDelete) {
+							actions += '<button type="button" class="btn btn-outline-danger btn-sm py-0 px-2" data-tv-delete>삭제</button>';
+						}
+						if (!canTimelineUpdate && !canTimelineDelete) {
+							actions += '<span class="text-muted small">-</span>';
+						}
+						actions += '</td>';
+						cols += actions;
+					}
+
+					tr.innerHTML = cols;
+					tr._eventData = e;
+
+					var editBtn = tr.querySelector("[data-tv-edit]");
+					if (editBtn) {
+						editBtn.addEventListener("click", function () {
+							if (window.MilestoneTimelineEdit && typeof window.MilestoneTimelineEdit.open === "function") {
+								window.MilestoneTimelineEdit.open(tr._eventData);
+							}
+						});
+					}
+
+					var delBtn = tr.querySelector("[data-tv-delete]");
+					if (delBtn) {
+						delBtn.addEventListener("click", function () {
+							if (e.id == null) { setErr("삭제할 이벤트 ID가 없습니다."); return; }
+							if (!window.confirm("이 타임라인 이벤트를 삭제할까요?")) return;
+							delBtn.disabled = true;
+							setErr("");
+							deleteTimeline(e.id)
+								.then(function () {
+									if (window.MilestoneTimelineView && window.MilestoneTimelineView._viewContext) {
+										var ctx = window.MilestoneTimelineView._viewContext;
+										ctx.events = (ctx.events || []).filter(function (ev) {
+											return String(ev.id) !== String(e.id);
+										});
+										renderRows(ctx.events);
+										if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
+									}
+								})
+								.catch(function (err) {
+									setErr("삭제 실패: " + (err && err.message ? err.message : err));
+								})
+								.finally(function () { delBtn.disabled = false; });
+						});
+					}
+
+					listEl.appendChild(tr);
+				});
+			}
+
+			window.MilestoneTimelineView = {
+				_viewContext: null,
+
+				open: function (it) {
+					if (!it) return;
+					setErr("");
+					var when = toDate(it.start);
+					var events = Array.isArray(it._events) ? it._events.slice() : [];
+					this._viewContext = {
+						issueLabel: it._issueLabel || "",
+						when: when,
+						events: events,
+						visItemId: it.id != null ? it.id : null,
+					};
+
+					if (whenEl) whenEl.textContent = formatWhen(when);
+					if (issueEl) issueEl.textContent = this._viewContext.issueLabel || "-";
+					renderRows(events);
+					bootstrap.Modal.getOrCreateInstance(modalEl).show();
+				},
+
+				/** vis·API 갱신 후 조회 모달 내용 전체 교체 */
+				replaceAfterEdit: function (editedEventId) {
+					if (!this._viewContext) return;
+					var it = null;
+					if (window.MilestoneTimeline) {
+						if (typeof window.MilestoneTimeline.findVisItemByEventId === "function") {
+							it = window.MilestoneTimeline.findVisItemByEventId(editedEventId);
+						}
+						if (!it && this._viewContext.visItemId
+								&& typeof window.MilestoneTimeline.getVisItem === "function") {
+							it = window.MilestoneTimeline.getVisItem(this._viewContext.visItemId);
+						}
+					}
+					if (it && Array.isArray(it._events) && it._events.length) {
+						this.open(it);
+						return;
+					}
+					this.refreshList();
+				},
+
+				refreshList: function () {
+					if (!this._viewContext) return;
+					renderRows(this._viewContext.events);
+				},
+			};
+		})();
+	</script>
 </div>
 </body>
 </html>

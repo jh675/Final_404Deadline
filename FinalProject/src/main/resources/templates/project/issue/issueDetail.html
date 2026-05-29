@@ -517,7 +517,8 @@ table.data-table tbody td {
 	<th:block th:if="${issue != null}">
 	<div class="page-title-row">
 		<h1 class="page-title" th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
-		<a class="issue-register-btn" th:href="@{/project/issue/register(id=${issue.id})}">이슈 수정</a>
+		<a class="issue-register-btn" th:href="@{/project/issue/register(id=${issue.id})}"
+			th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">이슈 수정</a>
 	</div>
 
 	<div class="meta-grid">
@@ -588,6 +589,7 @@ table.data-table tbody td {
 					<span class="attach-item-actions">
 						<a th:href="@{/download/{id}(id=${a.id})}" title="다운로드">⬇</a>
 						<button type="button" class="attach-delete-btn" title="삭제" aria-label="첨부 삭제"
+							th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}"
 							th:attr="data-attach-id=${a.id}">&times;</button>
 					</span>
 				</span>
@@ -610,7 +612,7 @@ table.data-table tbody td {
 			댓글 <span class="badge-count" id="commentCountBadge">0</span>
 		</button>
 		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="related">연관된 이슈</button>
-		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="history">히스토리</button>
+		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="history" th:if="${@prjAuth.hasRole('ROLE_HISTORY_VIEW')}">히스토리</button>
 	</div>
 
 	<div class="tab-panel-wrap" id="tabPanels">
@@ -655,7 +657,7 @@ table.data-table tbody td {
 			</table>
 		</div>
 
-		<div class="tab-panel" id="panel-history" role="tabpanel" data-panel="history" hidden>
+		<div class="tab-panel" id="panel-history" role="tabpanel" data-panel="history" hidden th:if="${@prjAuth.hasRole('ROLE_HISTORY_VIEW')}">
 			<div class="inner-table-title">
 				<span>히스토리</span>
 				<span class="badge-count" id="historyCountBadge">0</span>

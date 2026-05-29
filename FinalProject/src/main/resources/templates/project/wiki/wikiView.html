@@ -270,28 +270,32 @@
                 <th:block th:if="${breadcrumb != null and !breadcrumb.isEmpty()}">
                     <th:block th:each="crumb, stat : ${breadcrumb}">
                         <a th:if="${!stat.last}"
-                           th:href="@{/project/wiki/view(id=${crumb.id})}"
+                           th:href="@{/project/wiki/view/{name}(name=${crumb.title})}"
                            th:text="${crumb.title}">상위위키명</a>
                         <span th:if="${!stat.last}" class="sep">&gt;</span>
                         <span th:if="${stat.last}" th:text="${crumb.title}">지금위키명</span>
                     </th:block>
                 </th:block>
                 <th:block th:if="${breadcrumb == null or breadcrumb.isEmpty()}">
-                    <a th:href="@{/project/wiki/view(id=1)}">Top-level Wiki</a>
+                    <a th:href="@{/project/wiki}">위키</a>
                     <span class="sep">&gt;</span>
-                    <span>지금위키명</span>
+                    <span th:text="${page != null ? page.title : ''}">지금위키명</span>
                 </th:block>
             </nav>
 
             <div class="wiki-header-row">
                 <h1 class="wiki-title" th:text="${page != null ? page.title : '지금위키명'}">지금위키명</h1>
                 <div class="wiki-actions">
-                    <a class="wiki-btn wiki-btn-create" th:href="@{/project/wiki/register}">작성</a>
+                    <a class="wiki-btn wiki-btn-create" th:href="@{/project/wiki/register}"
+                       th:if="${@prjAuth.hasRole('ROLE_WIKI_CREATE')}">작성</a>
                     <a class="wiki-btn wiki-btn-edit"
+                       th:if="${@prjAuth.hasRole('ROLE_WIKI_UPDATE')}"
                        th:href="@{/project/wiki/register(id=${page.id != null ? page.id : 0})}">편집</a>
                     <a class="wiki-btn wiki-btn-history"
+                       th:if="${@prjAuth.hasRole('ROLE_WIKI_VIEW')}"
                        th:href="@{/project/wiki/history/{name}(name=${page.title})}">역사</a>
                     <button type="button" class="wiki-btn wiki-btn-delete"
+                            th:if="${@prjAuth.hasRole('ROLE_WIKI_DELETE')}"
                             th:disabled="${hasChildren == true}"
                             th:attr="data-wiki-id=${page != null ? page.id : 0}"
                             onclick="confirmDelete(this)">삭제</button>
@@ -340,12 +344,15 @@
                 <li><a th:href="@{/project/wiki}">첫페이지</a></li>
                 <li><a th:href="@{/project/wiki/index(type='title')}">제목별</a></li>
                 <li><a th:href="@{/project/wiki/index(type='date')}">날짜별</a></li>
-                <li><a th:href="@{/project/wiki/history/{name}(name=${page.title})}">문서 역사</a></li>
+                <li th:if="${@prjAuth.hasRole('ROLE_WIKI_VIEW')}">
+                    <a th:href="@{/project/wiki/history/{name}(name=${page.title})}">문서 역사</a>
+                </li>
             </ul>
         </aside>
     </div>
 
     <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.js"></script>
+    <script th:src="@{/js/wiki/wiki-link-autocomplete.js}"></script>
     <script th:inline="javascript">
         function initWikiViewer() {
             var markdown = /*[[${page != null && page.content != null ? page.content : ''}]]*/ '';
@@ -354,11 +361,29 @@
             var el = document.querySelector('#wikiViewer');
             if (!el) return;
 
+            if (window.WikiLinkAutocomplete && typeof WikiLinkAutocomplete.expandInternalLinks === 'function') {
+                markdown = WikiLinkAutocomplete.expandInternalLinks(markdown);
+            }
+
             new toastui.Editor({
                 el: el,
                 viewer: true,
                 height: 'auto',
-                initialValue: markdown
+                initialValue: markdown,
+                customHTMLRenderer: {
+                    link(node, context) {
+                        var result = context.origin();
+                        if (context.entering && node && node.destination) {
+                            var dest = node.destination;
+                            if (dest.indexOf('/project/wiki/view/') === 0) {
+                                result.attributes.class = 'wiki-link';
+                            } else if (dest.indexOf('/project/issue/detail') === 0) {
+                                result.attributes.class = 'external-link issue-link';
+                            }
+                        }
+                        return result;
+                    }
+                }
             });
         }
 

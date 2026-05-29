@@ -6,161 +6,244 @@
 <head>
 <meta charset="UTF-8">
 <title>기업정보</title>
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
-<link rel="stylesheet"
-	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">	
-<script
-	src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-
-
-<style>
+<th:block layout:fragment="head-content">
+	<link rel="stylesheet"
+		href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+	<link rel="stylesheet"
+		href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+	<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">
+	<script
+		src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+	<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+	<style>
 #grid {
 	width: 100%;
+	min-height: 200px;
+}
+
+.tui-grid-cell.company-biz-no-cell {
+	cursor: pointer;
+	color: #0d6efd;
+	font-weight: 500;
+}
+
+.tui-grid-cell.company-biz-no-cell:hover {
+	text-decoration: underline;
 }
 </style>
-
+</th:block>
 </head>
 
 <body>
 	<div layout:fragment="content">
-	 <div id="wrapper">
-		<h2>기업리스트</h2>
-		<div class="d-flex justify-content-end mb-3">
+		<div id="wrapper">
+			<h2>기업리스트</h2>
+			<div class="d-flex justify-content-end mb-3">
+				<form class="d-flex align-items-center gap-2" th:action="@{/admin/company/list}"
+					method="get" th:object="${company}">
 
-			<form class="d-flex" th:action="@{/admin/company/list}" method="get">
+					<select class="form-select" th:field="*{isActiveCd}" style="width: 160px;">
+						<option value="">활성여부 전체</option>
+						<th:block th:each="code : ${activeCodeList}">
+							<option th:value="${code.sCode}" th:text="${code.name}"></option>
+						</th:block>
+					</select>
 
-				<!-- 검색조건 -->
-				<select class="form-select me-2" name="searchType"
-					style="width: 150px;">
+					<select class="form-select" th:field="*{searchType}" style="width: 150px;">
+						<option value="">모두</option>
+						<option value="bizNo">사업자번호</option>
+						<option value="companyName">기업명</option>
+						<option value="tel">전화번호</option>
+						<option value="address">주소</option>
+					</select>
 
-					<option value="" th:selected="${company.searchType == null}">
-						모두</option>
+					<input class="form-control" type="search" th:field="*{keyword}"
+						placeholder="검색" style="width: 200px;">
 
-					<option value="bizNo"
-						th:selected="${company.searchType == 'bizNo'}">사업자번호</option>
+					<button class="btn btn-success text-nowrap" type="submit">검색</button>
+				</form>
+			</div>
 
-					<option value="companyName"
-						th:selected="${company.searchType == 'companyName'}">기업명
-					</option>
+			<div id="grid"></div>
 
-					<option value="tel" th:selected="${company.searchType == 'tel'}">
-						전화번호</option>
 
-					<option value="address"
-						th:selected="${company.searchType == 'address'}">주소</option>
+			<div class="d-flex justify-content-end my-3">
+				<button class="btn btn-primary" data-bs-toggle="modal"
+					data-bs-target="#registerModal">등록</button>
+			</div>
 
-				</select> <input class="form-control me-2" type="search" name="keyword"
-					placeholder="검색">
+			<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
 
-				<button class="btn btn-success text-nowrap" type="submit">검색</button>
-
-			</form>
-
-		</div>
-
-		<div id="grid"></div>
-
-		<div class="d-flex justify-content-end">
-			<a class="btn btn-info text-nowrap" th:href="@{/admin/company/form}"
-				type="submit">등록</a>
-		</div>
-		<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-
-		<script src="https://uicdn.toast.com/tui-grid/latest/tui-grid.js"></script>
-
-		<script th:inline="javascript">
-	const companyData = /*[[${companyList}]]*/ [];	
+			<script th:inline="javascript">
 	const activeCodeList = /*[[${activeCodeList}]]*/ [];
-	 // Map 변환
-    const activeCodeMap = activeCodeList.reduce((acc, code) => {
-        const key = code.sCode;
-        acc[key] = code.name;
-        return acc;
-    }, {});
+	const activeCodeMap = (activeCodeList || []).reduce((acc, code) => {
+		if (!code || !code.sCode) return acc;
+		acc[code.sCode] = code.name;
+		return acc;
+	}, {});
 
-	console.log(companyData);
-    
-	const grid = new tui.Grid({
-		el: document.getElementById('grid'), 
-		autowidth: true,
-		scrollX: false,        // 가로 스크롤바 숨김
-		scrollY: false,        // 세로 스크롤바 숨김 (rowHeight × 행수 만큼 자동 확장)
-	    bodyHeight: 'auto',
-	    rowHeight: 40,
-	    columnOptions: {
-	        resizable: true
-	    },
-		minBodyHeight: 100,    // 데이터 0건일 때 최소 높이(px)
+	function getCsrfHeaders() {
+		const headerElement = document.querySelector('meta[name="_csrf_header"]');
+		const tokenElement = document.querySelector('meta[name="_csrf"]');
+		const csrfHeader = headerElement ? headerElement.getAttribute('content') : 'X-CSRF-TOKEN';
+		const csrfToken = tokenElement ? tokenElement.getAttribute('content') : '';
+		return { [csrfHeader]: csrfToken };
+	}
 
-		data: companyData,
-		columns: [
-			 { header: '사업자번호', name: 'bizNo',  align:'center',  sortable:true },
-			    { header: '기업명', name: 'companyName',  align:'center', sortable: true },
-			    { header: '전화번호', name: 'tel',  align:'center', sortable: true },
-			    { header: '주소', name: 'address', minWidth: 250, align:'left', sortable: true },
-			    { header: '관리자ID', name: 'login',  align:'center', sortable: true },
-			    { header: '이메일', name: 'email',  align:'center', sortable: true },
-			    { header: '활성여부',
-			       name: 'isActiveCd',
-			       align:'center', sortable: true, 
-			       formatter: ({ value }) => {
-			    	   return activeCodeMap[value] || value;
-			    	   }
-			        },
-			    { header: '생성일',
-			       name: 'createdOn',
-			       align:'center', sortable: true, 
-			       formatter: ({ value }) => {
-			            if (!value) return '';
-			            return dayjs(value).format('YYYY.MM.DD');
-			            } },
-			    { header: '수정',
-			       name: 'edit',
-			        align:'center', sortable: true, 
-			       formatter: function() {
-			            return '<button class="btn btn-secondary btn-sm">수정</button>';
-			        }
-            }
+	function fetchCompanyDetail(bizNo) {
+		return fetch('/admin/company/detail?bizNo=' + encodeURIComponent(bizNo), {
+			method: 'POST',
+			headers: getCsrfHeaders()
+		}).then(response => {
+			if (!response.ok) throw new Error('서버 응답 실패 (상태코드: ' + response.status + ')');
+			return response.json();
+		});
+	}
 
-		],
-		rowHeaders: ['rowNum'],
-		
-		pageOptions: {
-			useClient: true,
-			perPage: 10
+	function fillEditModal(data) {
+		document.getElementById('edit-bizNo').value = data.bizNo || '';
+		document.getElementById('edit-companyName').value = data.companyName || '';
+		document.getElementById('edit-tel').value = data.tel || '';
+		document.getElementById('edit-address').value = data.address || '';
+		document.getElementById('edit-login').value = data.login || '';
+		document.getElementById('edit-email').value = data.email || '';
+		if (data.isActiveCd === '01ACTIVE') {
+			document.getElementById('editActiveY').checked = true;
+		} else {
+			document.getElementById('editActiveN').checked = true;
+		}
+	}
 
-			// ---- 아래는 pageOptions 에서 지원하지만 여기서는 쓰지 않는 옵션 예시 ----
-			// page: 1,
-			//   초기 활성 페이지 번호(1부터). 생략 시 1.
-			// visiblePages: 10,
-			//   페이지 번호 버튼을 한 번에 최대 몇 개까지 보일지 (Grid v4.14.0 이상).
-			// position: 'bottom',
-			//   페이징 바 위치. 'bottom'(기본값) | 'top'(그리드 상단).
+	function fillViewModal(data) {
+		document.getElementById('view-bizNo').textContent = data.bizNo || '';
+		document.getElementById('view-companyName').textContent = data.companyName || '';
+		document.getElementById('view-tel').textContent = data.tel || '-';
+		document.getElementById('view-address').textContent = data.address || '-';
+		document.getElementById('view-login').textContent = data.login || '-';
+		document.getElementById('view-email').textContent = data.email || '-';
+		document.getElementById('view-isActive').textContent =
+			activeCodeMap[data.isActiveCd] || data.isActiveCd || '-';
+		document.getElementById('view-createdOn').textContent = data.createdOn
+			? dayjs(data.createdOn).format('YYYY.MM.DD')
+			: '-';
+	}
+
+	const gridColumns = [
+		{ header: '사업자번호', name: 'bizNo', align: 'center', sortable: true,
+			className: 'company-biz-no-cell'
+		},
+		{ header: '기업명', name: 'companyName', align: 'center', sortable: true },
+		{ header: '전화번호', name: 'tel', align: 'center', sortable: true },
+		{ header: '주소', name: 'address', minWidth: 250, align: 'left', sortable: true },
+		{ header: '관리자ID', name: 'login', align: 'center', sortable: true },
+		{ header: '이메일', name: 'email', align: 'center', sortable: true },
+		{ header: '활성여부', name: 'isActiveCd', align: 'center', sortable: true,
+			formatter: ({ value }) => activeCodeMap[value] || value || ''
+		},
+		{ header: '생성일', name: 'createdOn', align: 'center', sortable: true,
+			formatter: ({ value }) => {
+				if (!value) return '';
+				return dayjs(value).format('YYYY.MM.DD');
+			}
+		},
+		{ header: '수정', name: 'edit', align: 'center', sortable: false,
+			formatter: () => '<button type="button" class="btn btn-secondary btn-sm">수정</button>'
+		}
+	];
+
+	let grid;
+
+	function bindGridClick() {
+		grid.on('click', (ev) => {
+		if (ev.rowKey == null) return;
+
+		// 사업자번호 클릭 → 상세보기 모달
+		if (ev.columnName === 'bizNo') {
+			const row = grid.getRow(ev.rowKey);
+			const bizNo = row && row.bizNo;
+			if (!bizNo) return;
+
+			const viewModalEl = document.getElementById('companyViewModal');
+			if (!viewModalEl) {
+				alert('상세보기 모달을 찾을 수 없습니다. 페이지를 새로고침해 주세요.');
+				return;
+			}
+
+			fetchCompanyDetail(bizNo)
+				.then(data => {
+					fillViewModal(data);
+					bootstrap.Modal.getOrCreateInstance(viewModalEl).show();
+				})
+				.catch(err => {
+					console.error('기업 상세조회 실패:', err);
+					alert('데이터를 불러오지 못했습니다.');
+				});
+			return;
 		}
 
-	});
-	grid.on('click', (ev) => {
-	    if (ev.rowKey == null) return;
-	    
-	    if (ev.columnName === 'edit') {
-	        const isButton = ev.nativeEvent && ev.nativeEvent.target.closest('button');
-	        
-	        if (isButton) {
-	            const row = grid.getRow(ev.rowKey); 
-	            if (row && row.bizNo) {
-	                location.href = '/admin/company/form?bizNo=' + row.bizNo;
-	            }
-	        }
-	    }
-	});
+		// 수정 버튼 클릭 → 수정 모달
+		if (ev.columnName === 'edit') {
+			const isButton = ev.nativeEvent && ev.nativeEvent.target.closest('button');
+			if (!isButton) return;
 
+			const row = grid.getRow(ev.rowKey);
+			if (!row || !row.bizNo) return;
 
+			const editModalEl = document.getElementById('editModal');
+			if (!editModalEl) {
+				alert('수정 모달을 찾을 수 없습니다. 페이지를 새로고침해 주세요.');
+				return;
+			}
+
+			fetchCompanyDetail(row.bizNo)
+				.then(data => {
+					fillEditModal(data);
+					bootstrap.Modal.getOrCreateInstance(editModalEl).show();
+				})
+				.catch(err => {
+					console.error('기업 상세조회 실패:', err);
+					alert('데이터를 불러오지 못했습니다.');
+				});
+		}
+		});
+	}
+
+	const listDataUrl = /*[[@{/admin/company/list-data}]]*/ '/admin/company/list-data';
+	fetch(listDataUrl + window.location.search)
+		.then(response => {
+			if (!response.ok) throw new Error('목록 조회 실패: ' + response.status);
+			return response.json();
+		})
+		.then(companyData => {
+			const gridEl = document.getElementById('grid');
+			if (!gridEl) return;
+
+			grid = new tui.Grid({
+				el: gridEl,
+				autowidth: true,
+				scrollX: false,
+				scrollY: false,
+				bodyHeight: 'auto',
+				rowHeight: 40,
+				columnOptions: { resizable: true },
+				minBodyHeight: 100,
+				data: Array.isArray(companyData) ? companyData : [],
+				columns: gridColumns,
+				rowHeaders: ['rowNum'],
+				pageOptions: { useClient: true, perPage: 10 }
+			});
+			bindGridClick();
+		})
+		.catch(err => {
+			console.error('기업 목록 로드 실패:', err);
+			alert('기업 목록을 불러오지 못했습니다. 서버 로그를 확인해 주세요.');
+		});
 
 </script>
-	</div>
+		</div>
+		<div th:replace="~{company/modal/register :: registerModal}"></div>
+		<div th:replace="~{company/modal/edit :: editModal}"></div>
+		<div th:replace="~{company/modal/view :: companyViewModal}"></div>
 	</div>
 </body>
 </html>

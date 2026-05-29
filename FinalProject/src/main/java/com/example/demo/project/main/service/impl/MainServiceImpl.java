@@ -27,10 +27,7 @@ public class MainServiceImpl implements MainService {
 		return mainMapper.issueCount(vo);
 	}
 	
-	@Override
-	public List<CalenderVO> selectCalender(ProjectVO vo){
-		return mainMapper.selectCalender(vo);
-	}
+
 	
 	@Override
 	public List<NoticeVO> selectNotice(NoticeVO nvo) {

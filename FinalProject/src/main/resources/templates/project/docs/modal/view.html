@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="viewModal">
+
+	<div class="modal fade" id="viewModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<h5 class="modal-title">문서 상세보기</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+
+				<div class="modal-body">
+
+					<input type="hidden" id="view-id">
+
+					<div class="mb-3">
+						<label class="form-label">제목</label>
+						<div id="view-title" class="form-control"></div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">내용</label>
+						<div id="view-description" class="form-control" style="min-height:120px;"></div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">작성자</label>
+						<div id="view-memId" class="form-control"></div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">작성일</label>
+						<div id="view-createdOn" class="form-control"></div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">첨부파일</label>
+						<ul id="view-files" class="list-unstyled mb-0">
+							<li class="text-muted small">첨부파일을 불러오는 중입니다.</li>
+						</ul>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+</div>
+
+</html>

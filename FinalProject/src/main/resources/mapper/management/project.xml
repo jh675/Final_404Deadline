@@ -7,7 +7,7 @@
  	SELECT p.*, c.company_name as companyName
     FROM project p
     LEFT JOIN company c ON p.biz_no = c.biz_no
-    ORDER BY p.prj_lft
+    ORDER BY p.prj_root_id, p.prj_lft
  </select>
  
 

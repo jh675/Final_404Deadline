@@ -58,4 +58,6 @@ public interface IssueMapper {
 
     // 이슈 상태 변경 감지용
     List<AlarmIssueVO> findByUpdatedOnAfter(Date date);
+
+    List<IssueOutputVO> searchIssuesForLink(@Param("prjId") Long prjId, @Param("q") String q);
 }

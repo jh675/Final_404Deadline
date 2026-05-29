@@ -111,12 +111,14 @@
                        th:classappend="${session.currentMenu == 'docs' ? 'active fw-bold' : ''}" 
                        th:href="@{/project/docs/list}">문서</a> 
                 </li> 
+               
             </ul> 
         </div>
         <!-- 실제 본문(이슈, 위키 등)이 들어갈 영역 -->
         <div layout:fragment="content">
         </div>
 	<div th:replace="~{layout/fragments/footer :: yedam}"></div>
+	<th:block th:replace="~{layout/fragments/modal/aiModal :: aiModalFragment}"></th:block>
   </div>
 </body>
 </html>

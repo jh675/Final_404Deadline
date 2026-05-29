@@ -6,55 +6,65 @@
 
 		<select id="selectAll" resultType="com.example.demo.project.docs.service.DocsVO">
 		SELECT 
-			id,
-			prj_id AS prjId,
-			mem_id AS memId,
-			title,
-			description,
-			created_on AS createdOn,
+			d.id,
+			d.prj_id AS prjId,
+			d.mem_id AS memId,
+			
+			<!-- ⭕ [수정] 오라클 문자열 결합(||)을 이용해 '홍길동(user01)' 형태로 가공해서 memName에 담습니다. -->
+			u.name || '(' || u.login || ')' AS memName,
+			
+			d.title,
+			d.description,
+			d.created_on AS createdOn,
 			(SELECT COUNT(*) 
 			 FROM ATTACHMENTS 
 			 WHERE TABLE_NAME = '07MODULE' 
-			   AND CONTAINER_ID = document.id) AS file_count
-		FROM document
-		WHERE prj_id = #{prjId}
-		ORDER BY id DESC
+			   AND CONTAINER_ID = d.id) AS file_count
+		FROM document d
+		LEFT JOIN users u ON d.mem_id = u.id <!-- ⭕ [수정] document의 mem_id와 users의 id를 매핑 -->
+		WHERE d.prj_id = #{prjId}
+		ORDER BY d.id DESC
 	</select>
 
 
-	<select id="selectOne" parameterType="long"
+
+		<select id="selectOne" parameterType="long"
 		resultType="com.example.demo.project.docs.service.DocsVO">
 
 		SELECT
-		id,
-		prj_id,
-		mem_id,
-		title,
-		description,
-		created_on
-		FROM
-		document
-		WHERE id = #{id}
+			d.id,
+			d.prj_id AS prjId,
+			d.mem_id AS memId,
+			
+			<!-- ⭕ [추가] 상세보기에서도 작성자의 이름(아이디)을 조합해서 memName으로 가져옵니다. -->
+			u.name || '(' || u.login || ')' AS memName,
+			
+			d.title,
+			d.description,
+			d.created_on AS createdOn
+		FROM document d
+		LEFT JOIN users u ON d.mem_id = u.id <!-- ⭕ [추가] users 테이블과 조인 조건 연결 -->
+		WHERE d.id = #{id}
 
 	</select>
+
 
 	<update id="update"
 		parameterType="com.example.demo.project.docs.service.DocsVO">
 		UPDATE document
 		SET
 		title = #{title},
-		description = #{description},
-		prj_id = #{prjId},
-		mem_id = #{memId}
+		description = #{description}
 		WHERE id = #{id}
 	</update>
+
 
 
 	<insert id="insert"
 		parameterType="com.example.demo.project.docs.service.DocsVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
-        SELECT document_seq.nextval FROM DUAL
-    </selectKey>
+			SELECT document_seq.nextval FROM DUAL
+		</selectKey>
 		INSERT INTO document (
 		id,
 		prj_id,

@@ -126,9 +126,30 @@
             return ( dt.getFullYear() + "-" + pad(dt.getMonth() + 1) + "-" + pad(dt.getDate()) )
           }
 
+          function memberInfoHref(userId, memberGrpId) {
+            const uid = userId != null ? Number(userId) : NaN;
+            const gid =
+              memberGrpId != null
+                ? Number(memberGrpId)
+                : grpId != null
+                  ? Number(grpId)
+                  : NaN;
+            if (isNaN(uid) || isNaN(gid)) return "";
+            return (
+              "/project/member/info?userId=" +
+              encodeURIComponent(String(uid)) +
+              "&grpId=" +
+              encodeURIComponent(String(gid))
+            );
+          }
+
           function pendingToGridRows() {
-            return pendingMembers.map(function (m) { return {
+            return pendingMembers.map(function (m) {
+              const gid =
+                m.grpId != null ? m.grpId : grpId != null ? grpId : null;
+              return {
                 userId: m.userId,
+                grpId: gid,
                 userName: m.userName || "-",
                 tel: m.tel || "-",
                 email: m.email || "-",
@@ -220,6 +241,28 @@
                   align: "center",
                   width: 300,
                   sortable: true,
+                  escapeHTML: false,
+                  formatter: function (ctx) {
+                    const row = ctx.row;
+                    const text =
+                      ctx.value == null || ctx.value === ""
+                        ? "-"
+                        : String(ctx.value);
+                    const href = memberInfoHref(
+                      row && row.userId,
+                      row && row.grpId,
+                    );
+                    if (!href || text === "-") {
+                      return escapeHtmlText(text);
+                    }
+                    return (
+                      '<a class="grp-grid-name-link" href="' +
+                      href +
+                      '">' +
+                      escapeHtmlText(text) +
+                      "</a>"
+                    );
+                  },
                 },
                 {
                   header: "연락처",
@@ -239,6 +282,17 @@
                 useClient: true,
                 perPage: 10,
               },
+            });
+            membersGrid.on("click", function (ev) {
+              if (groupEditMode || !membersGrid || ev.columnName !== "userName") {
+                return;
+              }
+              const row = membersGrid.getRow(ev.rowKey);
+              if (!row) return;
+              const href = memberInfoHref(row.userId, row.grpId);
+              if (href) {
+                location.href = href;
+              }
             });
           }
 
@@ -663,16 +717,14 @@
           }
 
           setMemberToolbarVisible(registerMode);
-          setRoleToolbarVisible(false);
+          setRoleToolbarVisible(registerMode);
           setEditActionButtonsVisible(false);
           if (!registerMode) {
             initPendingFromServer();
             initPendingRolesFromServer();
           }
           createMembersGrid();
-          if (!registerMode) {
-            createRolesGrid();
-          }
+          createRolesGrid();
 
           let allPickRoles = [];
           let rolePickGrid = null;
@@ -1182,6 +1234,11 @@
               if (pendingMembers.length > 0) {
                 payload.userIds = pendingMembers.map(function (m) {
                   return m.userId;
+                });
+              }
+              if (pendingRoles.length > 0) {
+                payload.roleCds = pendingRoles.map(function (r) {
+                  return r.roleCd;
                 });
               }
 

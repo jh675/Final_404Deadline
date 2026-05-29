@@ -15,4 +15,5 @@ public interface LoginMapper {
 	int updateMcpCd(UserVO vo);
 	int updateLastLogOn(UserVO vo);
 	String selectCompanyStatus(String bizNo);
+	UserVO selectSystemAdmin(String login);
 }

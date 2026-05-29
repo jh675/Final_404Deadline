@@ -1,10 +1,6 @@
 <!doctype html>
-<html
-  lang="ko"
-  xmlns:th="http://www.thymeleaf.org"
-  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/projectLayout}"
->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/projectLayout}">
   <head>
     <meta charset="UTF-8" />
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
@@ -400,13 +396,15 @@
         color: #fff;
         border-color: #555;
       }
-      .grp-role-name-link {
+      .grp-role-name-link,
+      .grp-grid-name-link {
         color: #1976d2;
         cursor: pointer;
         text-decoration: underline;
         text-underline-offset: 2px;
       }
-      .grp-role-name-link:hover {
+      .grp-role-name-link:hover,
+      .grp-grid-name-link:hover {
         color: #0d47a1;
       }
       .grp-role-menus-overlay {
@@ -561,12 +559,12 @@
           </div>
         </section>
 
-        <section th:if="${!registerMode}" class="grp-section" aria-labelledby="grp-roles-heading">
+        <section class="grp-section" aria-labelledby="grp-roles-heading">
           <h2 class="grp-section__title" id="grp-roles-heading">보유 권한</h2>
           <div class="grp-section__body">
             <div class="grp-grid-panel">
               <div id="grpRolesGrid" class="grp-grid-host" role="region" aria-label="보유 권한 목록"></div>
-              <div id="grpRoleToolbar" class="grp-member-toolbar is-hidden">
+              <div id="grpRoleToolbar" class="grp-member-toolbar" th:classappend="${!registerMode} ? 'is-hidden' : ''">
                 <button type="button" id="btnManageRoles" class="grp-member-toolbar__btn">권한 관리</button>
               </div>
             </div>
@@ -589,7 +587,7 @@
         <th:block th:replace="~{project/group/modal/questionModal :: groupQuestionModalScript}"></th:block>
       </th:block>
 
-      <th:block th:if="${!groupNotFound}">
+      <th:block th:if="${registerMode or !groupNotFound}">
         <div th:replace="~{project/group/modal/groupMemberModal :: groupMemberPickOverlay}"></div>
         <div th:replace="~{project/group/modal/groupRoleModal :: groupRoleMenusOverlay}"></div>
         <div th:replace="~{project/group/modal/groupRoleModal :: groupRolePickOverlay}"></div>

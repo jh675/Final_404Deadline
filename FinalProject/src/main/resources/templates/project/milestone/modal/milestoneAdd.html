@@ -30,14 +30,14 @@
 						<div class="mb-3">
 							<label class="form-label">마감일</label>
 							<input type="datetime-local" class="form-control" name="endDate" step="60" required />
-							
-							
 						</div>
+						<small class="form-text text-muted d-block mb-2" data-ms-date-hint></small>
 						<small class="text-danger d-none" data-ms-err></small>
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-outline-danger" data-ms-delete hidden>삭제</button>
+					<button type="button" class="btn btn-outline-danger" data-ms-delete hidden
+					        th:if="${@prjAuth.hasRole('ROLE_MILESTONE_DELETE')}">삭제</button>
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
 					<button type="button" class="btn btn-primary" data-ms-save>추가/수정</button>
 				</div>
@@ -58,6 +58,7 @@
 			var saveBtn = modalEl.querySelector("[data-ms-save]");
 			var startDateEl = form.querySelector('[name="startDate"]');
 			var endDateEl = form.querySelector('[name="endDate"]');
+			var dateHintEl = modalEl.querySelector("[data-ms-date-hint]");
 
 			function toDatetimeLocalValue(d) {
 				d = d || new Date();
@@ -68,8 +69,10 @@
 
 			function toDatetimeLocalFromApi(value, roundToHour) {
 				if (value == null || value === "") return "";
-				var d = value instanceof Date ? value : new Date(value);
-				if (!isNaN(d.getTime())) {
+				var d = (window.MilestoneTimeline && window.MilestoneTimeline.parseWallClockDate)
+					? window.MilestoneTimeline.parseWallClockDate(value)
+					: (value instanceof Date ? value : new Date(value));
+				if (d && !isNaN(d.getTime())) {
 					if (roundToHour) d.setMinutes(0, 0, 0);
 					return toDatetimeLocalValue(d);
 				}
@@ -83,13 +86,44 @@
 				return "";
 			}
 
+			function applyProjectDateBounds() {
+				var mt = window.MilestoneTimeline;
+				if (!mt) return { min: "", max: "" };
+				if (typeof mt.applyMilestoneDateBounds === "function") {
+					mt.applyMilestoneDateBounds(startDateEl, endDateEl);
+				}
+				if (dateHintEl && typeof mt.formatProjectMilestoneBoundsHint === "function") {
+					dateHintEl.textContent = mt.formatProjectMilestoneBoundsHint();
+				}
+				return typeof mt.getProjectMilestoneBounds === "function"
+					? mt.getProjectMilestoneBounds() : { min: "", max: "" };
+			}
+
+			function clampToProjectBounds(el) {
+				if (!el || !el.value) return;
+				if (window.MilestoneTimeline && window.MilestoneTimeline.clampMilestoneDateValue) {
+					window.MilestoneTimeline.clampMilestoneDateValue(el);
+				}
+			}
+
 			function setDefaultMilestoneDates() {
+				applyProjectDateBounds();
 				var start = new Date();
 				start.setMinutes(0, 0, 0);
 				var end = new Date(start);
 				end.setMonth(end.getMonth() + 1);
-				if (startDateEl) startDateEl.value = toDatetimeLocalValue(start);
-				if (endDateEl) endDateEl.value = toDatetimeLocalValue(end);
+				if (startDateEl) {
+					startDateEl.value = toDatetimeLocalValue(start);
+					clampToProjectBounds(startDateEl);
+				}
+				if (endDateEl) {
+					endDateEl.value = toDatetimeLocalValue(end);
+					clampToProjectBounds(endDateEl);
+				}
+				if (startDateEl && endDateEl && startDateEl.value && endDateEl.value
+						&& startDateEl.value > endDateEl.value) {
+					endDateEl.value = startDateEl.value;
+				}
 			}
 
 			function getCsrfHeaders() {
@@ -152,8 +186,15 @@
 				}
 				form.querySelector('[name="id"]').value = ms.id  != null ? ms.id : "";
 				form.querySelector('[name="name"]').value = ms.name || "";
-				if (startDateEl) startDateEl.value = toDatetimeLocalFromApi(ms.startDate, true);
-				if (endDateEl) endDateEl.value = toDatetimeLocalFromApi(ms.endDate, false);
+				applyProjectDateBounds();
+				if (startDateEl) {
+					startDateEl.value = toDatetimeLocalFromApi(ms.startDate, true);
+					clampToProjectBounds(startDateEl);
+				}
+				if (endDateEl) {
+					endDateEl.value = toDatetimeLocalFromApi(ms.endDate, false);
+					clampToProjectBounds(endDateEl);
+				}
 				syncPrjId(ms);
 			}
 
@@ -222,6 +263,15 @@
 				}
 				if (payload.startDate > payload.endDate) {
 					setErr("마감일은 시작일 이후여야 합니다."); return;
+				}
+				if (window.MilestoneTimeline && window.MilestoneTimeline.isMilestoneDateInProjectBounds) {
+					if (!window.MilestoneTimeline.isMilestoneDateInProjectBounds(payload.startDate)
+							|| !window.MilestoneTimeline.isMilestoneDateInProjectBounds(payload.endDate)) {
+						var hint = window.MilestoneTimeline.formatProjectMilestoneBoundsHint
+							? window.MilestoneTimeline.formatProjectMilestoneBoundsHint() : "";
+						setErr("시작·마감일은 프로젝트 기간 안이어야 합니다." + (hint ? " " + hint : ""));
+						return;
+					}
 				}
 				var isEdit = payload.id != null;
 				var url = "/project/milestone/api/milestone";

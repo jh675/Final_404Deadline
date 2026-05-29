@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.project.wiki.mapper.WikiMapper;
 import com.example.demo.project.wiki.service.WikiContentVO;
 import com.example.demo.project.wiki.service.WikiDateGroupVO;
+import com.example.demo.project.wiki.service.WikiLinkSuggestVO;
 import com.example.demo.project.wiki.service.WikiPageVO;
 import com.example.demo.project.wiki.service.WikiService;
 
@@ -159,6 +160,44 @@ public class WikiServiceImpl implements WikiService {
 	@Override
 	public WikiContentVO selectWikiContentLastVerById(Long id) {
 		return mapper.selectWikiContentLastVerById(id);
+	}
+
+	@Override
+	public List<WikiPageVO> getBreadcrumb(Long pageId) {
+		if (pageId == null) {
+			return Collections.emptyList();
+		}
+		List<WikiPageVO> breadcrumb = mapper.selectWikiBreadcrumb(pageId);
+		return breadcrumb != null ? breadcrumb : Collections.emptyList();
+	}
+
+	@Override
+	public boolean hasWikiChildren(Long pageId) {
+		if (pageId == null) {
+			return false;
+		}
+		Long count = mapper.countWikiChildren(pageId);
+		return count != null && count > 0;
+	}
+
+	@Override
+	public List<WikiLinkSuggestVO> suggestWikiLinks(Long projectId, String q) {
+		if (projectId == null) {
+			return Collections.emptyList();
+		}
+		String term = q != null ? q.trim() : "";
+		List<String> titles = mapper.searchWikiTitles(projectId, term.isEmpty() ? null : term);
+		if (titles == null || titles.isEmpty()) {
+			return Collections.emptyList();
+		}
+		List<WikiLinkSuggestVO> result = new ArrayList<>();
+		for (String title : titles) {
+			if (title == null || title.isBlank()) {
+				continue;
+			}
+			result.add(new WikiLinkSuggestVO("wiki", title, "[[" + title + "]]"));
+		}
+		return result;
 	}
 
 	private void sortTreeByTitle(List<WikiPageVO> nodes) {

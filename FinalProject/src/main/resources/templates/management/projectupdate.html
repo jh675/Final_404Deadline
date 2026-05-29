@@ -52,17 +52,22 @@
     <div class="form-group">
     상위프로젝트
     <select name="prjParId">
-        <option value="" selected>=== 선택 ===</option>
+        <option value="" selected>=== 없음 ===</option>
         <option th:each="p : ${projectList}"
             th:value="${p.id}"
             th:text="${p.prjName}"
-            th:if="${p.bizNo == #authentication.principal.bizNo and p.id != editProject.id and p.prjStatusCd != '04PROSTAT' and p.prjStatusCd != '05PROSTAT'}"
+            th:if="${p.bizNo == #authentication.principal.bizNo 
+				    and p.id != editProject.id 
+				    and p.prjStatusCd != '04PROSTAT' 
+				    and p.prjStatusCd != '05PROSTAT'
+				    and p.prjHide != 'Y'
+				    and not (p.prjLft > editProject.prjLft and p.prjRgt < editProject.prjRgt)}"
             th:selected="${p.id == editProject.prjParId}">프로젝트명</option>
     </select>
 </div>
     <div>
-        프로젝트 시작일:<input type="date" name="startDate" id="startDate">
-        프로젝트 종료일:<input type="date" name="closedDate" id="closedDate">
+       예상 프로젝트 시작일: <input type="date" name="startDate" id="startDate">
+       예상 프로젝트 종료일: <input type="date" name="closedDate" id="closedDate">
     </div>
 	<div class="form-group">
 	    프로젝트 상태
@@ -137,14 +142,14 @@
                 if (data && data.length > 0) {
                     data.forEach(user => {
                         const item = document.createElement('div');
-                        item.textContent = `${user.name}/${user.login}/${user.email}`;
+                        item.textContent = `${user.name}/${user.login}`;
                         item.style.padding = '8px 12px';
                         item.style.cursor = 'pointer';
                         item.style.borderBottom = '1px solid #eee';
                         item.onmouseover = () => item.style.backgroundColor = '#f8f9fa';
                         item.onmouseout = () => item.style.backgroundColor = 'white';
                         item.onclick = function() {
-                            managerSearch.value = `${user.name},${user.login},${user.email}`;
+                            managerSearch.value = `${user.login}`;
                             realUserId.value = user.id;
                             dropdown.style.display = 'none';
                         };

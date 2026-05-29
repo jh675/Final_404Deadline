@@ -15,6 +15,7 @@ public interface MilestoneService {
 	Long deleteTimeline(Long id);
 	Long deleteMilestoneIssue(Long id);
 	Long deleteMilestone(Long id);
+	Long moveIssue(MilestoneIssueVO milestoneIssueVO);
 	List<IssueSummaryVO> selectMilestoneNotInIssue(Long id);
 	Long updateMilestone(MilestoneVO milestoneVO);
 	Long getAvg(Long id);

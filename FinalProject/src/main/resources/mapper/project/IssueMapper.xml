@@ -148,7 +148,8 @@
 			LFT AS lft,
 			RGT AS rgt,
 			DONE_RATIO AS doneRatio,
-			IS_ATTACH_CD AS isAttachCd
+			IS_ATTACH_CD AS isAttachCd,
+			(SELECT mi.MILESTONE_ID FROM MILESTONE_ISSUE mi WHERE mi.ISSUE_ID = ISSUE.ID AND ROWNUM = 1) AS milestoneId
 		FROM ISSUE
 		WHERE ID = #{id}
 	</select>
@@ -509,6 +510,20 @@
 		)
 		ORDER BY mem_id
 	</select>
-	
+
+	<select id="searchIssuesForLink" resultType="IssueOutputVO">
+		SELECT id, subject FROM (
+			SELECT i.ID AS id, i.SUBJECT AS subject
+			FROM ISSUE i
+			WHERE i.PRJ_ID = #{prjId}
+			<if test="q != null and q != ''">
+				AND (
+					TO_CHAR(i.ID) LIKE '%' || #{q} || '%'
+					OR UPPER(i.SUBJECT) LIKE '%' || UPPER(#{q}) || '%'
+				)
+			</if>
+			ORDER BY i.ID DESC
+		) WHERE ROWNUM &lt;= 20
+	</select>
 
 </mapper>
