@@ -65,13 +65,13 @@ public class IssueServiceImpl implements IssueService {
 		mapper.insertIssue(issueVO);
 		
 		
-//		System.out.println(issueVO.getSubject());
+		System.out.println(issueVO.getSubject());
 		 // 알림 이벤트 발행
 	    ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId()); // ← mapper 사용
 	    String prjName = project != null ? project.getPrjName() : "알 수 없음";
 	    eventPublisher.publishEvent(new NotificationEvent(
 	        this,
-	        "이슈가 등록되었습니다: [" + prjName + "] " + subcodeMapper.selectScodeNm(issueVO.getSubject())         
+	        "이슈가 등록되었습니다: [" + prjName + "] " + issueVO.getSubject()         
 	    ));
 		
 		return issueVO.getId();

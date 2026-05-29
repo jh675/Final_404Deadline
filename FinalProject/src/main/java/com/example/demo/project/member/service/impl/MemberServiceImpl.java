@@ -3,10 +3,27 @@ package com.example.demo.project.member.service.impl;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.alarm.event.NotificationEvent;
+import com.example.demo.management.mapper.ProjectMapper;
+import com.example.demo.management.service.ProjectVO;
+import com.example.demo.project.group.mapper.GroupMapper;
+import com.example.demo.project.group.service.GroupDetailVO;
 import com.example.demo.project.member.mapper.MemberMapper;
-import com.example.demo.project.member.service.*;
+import com.example.demo.project.member.service.CompanyMemberRowVO;
+import com.example.demo.project.member.service.MemberDetailVO;
+import com.example.demo.project.member.service.MemberGroupPickRowVO;
+import com.example.demo.project.member.service.MemberIssueRowVO;
+import com.example.demo.project.member.service.MemberListCriteria;
+import com.example.demo.project.member.service.MemberRegisterParam;
+import com.example.demo.project.member.service.MemberService;
+import com.example.demo.project.member.service.MemberUpdateParam;
+import com.example.demo.project.member.service.ProjectMemberRowVO;
+
 import lombok.RequiredArgsConstructor;
 
 /** 구성원 조회·제거 — 검증 후 Mapper 호출 */
@@ -15,6 +32,9 @@ import lombok.RequiredArgsConstructor;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberMapper memberMapper;
+    private final ApplicationEventPublisher eventPublisher; // ← 추가
+    private final GroupMapper groupMapper;                  // ← 추가
+    private final ProjectMapper projectMapper;
 
     @Override
     public List<ProjectMemberRowVO> selectProjectMemberList(MemberListCriteria criteria) {
@@ -80,7 +100,58 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
+    public Long registerMember(Long prjId, Long userId, Long grpId) {
+        if (prjId == null) {
+            throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("직원을 선택하세요.");
+        }
+        if (grpId == null) {
+            throw new IllegalArgumentException("소속 그룹을 선택하세요.");
+        }
+
+        if (memberMapper.countGrpInProject(prjId, grpId) < 1) {
+            throw new IllegalArgumentException("선택한 그룹이 이 프로젝트에 존재하지 않습니다.");
+        }
+        if (memberMapper.countActiveMember(userId, grpId) > 0) {
+            throw new IllegalArgumentException("이미 해당 그룹에 등록된 구성원입니다.");
+        }
+
+        MemberRegisterParam param = new MemberRegisterParam();
+        param.setUserId(userId);
+        param.setGrpId(grpId);
+
+        int inserted = memberMapper.insertMember(param);
+        if (inserted < 1 || param.getMemberId() == null) {
+            throw new IllegalStateException("구성원 등록에 실패했습니다.");
+        }
+        
+        System.out.println("=== registerMember 호출됨");
+        System.out.println("=== prjId: " + prjId + " userId: " + userId + " grpId: " + grpId);
+        
+     // ✅ 추가된 유저에게 알림
+        ProjectVO project = projectMapper.getprojectid(prjId);
+        GroupDetailVO group = groupMapper.selectGroupDetail(prjId, grpId);
+        String prjName = project != null ? project.getPrjName() : "알 수 없음";
+        String grpName = group != null ? group.getGrpName() : "알 수 없음";
+
+        String loginId = memberMapper.findLoginById(userId); // ← login 아이디 조회
+        if (loginId != null) {
+            eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                "프로젝트 그룹에 참여되었습니다: [" + prjName + "] " + grpName,
+                loginId
+            ));
+        }
+        
+        return param.getMemberId();
+    }
+
+    @Override
+    @Transactional
     public int registerMembers(Long prjId, List<Long> userIds, Long grpId) {
+    	System.out.println("=== registerMembers 호출됨");
         if (prjId == null) {
             throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
         }
@@ -108,6 +179,27 @@ public class MemberServiceImpl implements MemberService {
         }
 
         memberMapper.insertMembers(uniqueIds, grpId);
+        
+        
+     // ✅ 추가된 유저들에게 각각 알림
+        ProjectVO project = projectMapper.getprojectid(prjId);
+        GroupDetailVO group = groupMapper.selectGroupDetail(prjId, grpId);
+        String prjName = project != null ? project.getPrjName() : "알 수 없음";
+        String grpName = group != null ? group.getGrpName() : "알 수 없음";
+
+        System.out.println("=== project: " + (project != null ? project.getPrjName() : "null")); // ← 추가
+        System.out.println("=== group: " + (group != null ? group.getGrpName() : "null")); //
+        uniqueIds.forEach(uid -> {
+            String loginId = memberMapper.findLoginById(uid); // ← login 아이디 조회
+            System.out.println("=== loginId: " + loginId);
+            if (loginId != null) {
+                eventPublisher.publishEvent(new NotificationEvent(
+                    this,
+                    "프로젝트 그룹에 참여되었습니다: [" + prjName + "] " + grpName,
+                    loginId // ← 숫자 uid 대신 loginId 전송
+                ));
+            }
+        });
         return uniqueIds.size();
     }
 

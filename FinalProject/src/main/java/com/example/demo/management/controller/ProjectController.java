@@ -229,7 +229,6 @@ public class ProjectController {
 		gmvo.setPrjId(projectid);
 		List<IssueOutputVO> issuelist = issueService.selectIssueList(ivo);
 		IssueCountVO count = mainService.issueCount(icvo);
-		List<CalenderVO> Clist = mainService.selectCalender(vo);
 		List<NoticeVO> Nlist = mainService.selectNotice(nvo);
 		List<GroupDetailVO> Glist = mainService.selectGroupMemberCount(gmvo);
 		if (count == null) {
@@ -239,7 +238,6 @@ public class ProjectController {
 		model.addAttribute("project", vo);
 		model.addAttribute("issuelist",issuelist);
 		model.addAttribute("count",count);
-		model.addAttribute("calender",Clist);
 		model.addAttribute("notice",Nlist);
 		model.addAttribute("selectgroup",Glist);
 		model.addAttribute("moduleList",projectservice.listModules(projectid));
