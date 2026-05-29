@@ -6,14 +6,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.example.demo.project.group.service.GroupDetailVO;
-import com.example.demo.project.group.service.GroupInsertProcParam;
-import com.example.demo.project.group.service.GroupListCriteria;
-import com.example.demo.project.group.service.GroupMemberDetailRowVO;
-import com.example.demo.project.group.service.GroupMemberPickRowVO;
-import com.example.demo.project.group.service.GroupRoleDetailRowVO;
-import com.example.demo.project.group.service.GroupUpdateProcParam;
-import com.example.demo.project.group.service.ProjectGroupRowVO;
+import com.example.demo.project.group.service.*;
 
 /** 그룹 MyBatis — GRP 목록·연쇄 삭제 */
 @Mapper
@@ -29,6 +22,11 @@ public interface GroupMapper {
 
     /** 동일 프로젝트·그룹명 존재 여부 (PRJ_ID + NAME) */
     int countGrpByPrjIdAndName(
+            @Param("prjId") Long prjId,
+            @Param("grpName") String grpName);
+
+    /** 그룹 등록 직후 — PRJ_ID + NAME으로 GRP.ID 조회 */
+    Long selectGrpIdByPrjIdAndName(
             @Param("prjId") Long prjId,
             @Param("grpName") String grpName);
 

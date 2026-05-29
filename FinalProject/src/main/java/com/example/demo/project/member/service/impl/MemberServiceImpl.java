@@ -80,37 +80,6 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Long registerMember(Long prjId, Long userId, Long grpId) {
-        if (prjId == null) {
-            throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
-        }
-        if (userId == null) {
-            throw new IllegalArgumentException("직원을 선택하세요.");
-        }
-        if (grpId == null) {
-            throw new IllegalArgumentException("소속 그룹을 선택하세요.");
-        }
-
-        if (memberMapper.countGrpInProject(prjId, grpId) < 1) {
-            throw new IllegalArgumentException("선택한 그룹이 이 프로젝트에 존재하지 않습니다.");
-        }
-        if (memberMapper.countActiveMember(userId, grpId) > 0) {
-            throw new IllegalArgumentException("이미 해당 그룹에 등록된 구성원입니다.");
-        }
-
-        MemberRegisterParam param = new MemberRegisterParam();
-        param.setUserId(userId);
-        param.setGrpId(grpId);
-
-        int inserted = memberMapper.insertMember(param);
-        if (inserted < 1 || param.getMemberId() == null) {
-            throw new IllegalStateException("구성원 등록에 실패했습니다.");
-        }
-        return param.getMemberId();
-    }
-
-    @Override
-    @Transactional
     public int registerMembers(Long prjId, List<Long> userIds, Long grpId) {
         if (prjId == null) {
             throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");

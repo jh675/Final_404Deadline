@@ -12,19 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.alarm.event.NotificationEvent;
 import com.example.demo.project.group.mapper.GroupMapper;
-import com.example.demo.project.group.service.GroupDetailVO;
-import com.example.demo.project.group.service.GroupInsertProcParam;
-import com.example.demo.project.group.service.GroupListCriteria;
-import com.example.demo.project.group.service.GroupMemberDetailRowVO;
-import com.example.demo.project.group.service.GroupMemberPickRowVO;
-import com.example.demo.project.group.service.GroupRoleDetailRowVO;
-import com.example.demo.project.group.service.GroupService;
-import com.example.demo.project.group.service.GroupUpdateProcParam;
-import com.example.demo.project.group.service.ProjectGroupRowVO;
-import com.example.demo.project.option.service.RoleGroupRowVO;
-import com.example.demo.project.option.service.RoleRevokeResultVO;
-import com.example.demo.project.option.service.RoleService;
-import com.example.demo.util.subCode.mapper.SubcodeMapper;
+import com.example.demo.project.group.service.*;
+import com.example.demo.project.option.service.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +25,6 @@ public class GroupServiceImpl implements GroupService {
     private final GroupMapper groupMapper;
     private final RoleService roleService;
     private final ApplicationEventPublisher eventPublisher;
-    private final SubcodeMapper subcodeMapper;
 
     @Override
     public List<ProjectGroupRowVO> selectProjectGroupList(GroupListCriteria criteria) {
@@ -104,7 +92,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public void insertGroup(Long prjId, String grpName, List<Long> userIds) {
+    public void insertGroup(Long prjId, String grpName, List<Long> userIds, List<Long> roleCds) {
         if (prjId == null) {
             throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
         }
@@ -129,8 +117,14 @@ public class GroupServiceImpl implements GroupService {
         if (!"OK".equalsIgnoreCase(msg.trim())) {
             throw new IllegalArgumentException(msg);
         }
-        
-    
+
+        if (roleCds != null && !roleCds.isEmpty()) {
+            Long grpId = groupMapper.selectGrpIdByPrjIdAndName(prjId, name);
+            if (grpId == null) {
+                throw new IllegalStateException("등록된 그룹을 찾을 수 없습니다.");
+            }
+            updateGroupRoles(prjId, grpId, roleCds);
+        }
     }
 
     @Override
@@ -153,7 +147,7 @@ public class GroupServiceImpl implements GroupService {
         GroupUpdateProcParam param = new GroupUpdateProcParam();
         param.setPrjId(prjId);
         param.setGrpId(grpId);
-        param.setMemIds(joinUserIds(userIds));
+        param.setMemIds(joinUserIdsForUpdate(userIds));
         groupMapper.callProcGrpUpdate(param);
 
         String msg = param.getResultMsg();
@@ -246,16 +240,32 @@ public class GroupServiceImpl implements GroupService {
         }
     }
 
+    /** 등록·INSERT — 빈 목록이면 memIds 미전달(null) */
     private static String joinUserIds(List<Long> userIds) {
-        if (userIds == null || userIds.isEmpty()) {
+        return joinUserIdsCsv(userIds, true);
+    }
+
+    /** 수정·UPDATE — 빈 목록이면 ''(그룹 구성원 전원 제거) */
+    private static String joinUserIdsForUpdate(List<Long> userIds) {
+        if (userIds == null) {
             return null;
+        }
+        return joinUserIdsCsv(userIds, false);
+    }
+
+    private static String joinUserIdsCsv(List<Long> userIds, boolean nullWhenEmpty) {
+        if (userIds == null) {
+            return null;
+        }
+        if (userIds.isEmpty()) {
+            return nullWhenEmpty ? null : "";
         }
         String joined = userIds.stream()
                 .filter(Objects::nonNull)
                 .distinct()
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
-        return joined.isEmpty() ? null : joined;
+        return joined.isEmpty() ? (nullWhenEmpty ? null : "") : joined;
     }
 
     /** 프로젝트 소속 확인 후 그룹마다 PROC_GRP_DELETE 호출 */
