@@ -19,4 +19,5 @@ public interface UserManageMapper {
 	int bulkUpdateUsers(Map<String, Object> payload);
 	int checkCompanyExists(String bizNo);
 	int checkUpdateIdDuplicate(UserManageVO vo);
+	int updateMyInfo(UserManageVO vo);
 }
