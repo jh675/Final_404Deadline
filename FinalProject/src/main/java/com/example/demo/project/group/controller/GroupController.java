@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.demo.project.group.service.*;
-import com.example.demo.project.option.service.RoleService;
-import com.example.demo.project.option.service.RoleVO;
+import com.example.demo.project.option.service.*;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
@@ -157,7 +156,7 @@ public class GroupController {
             if (grpName.isEmpty()) {
                 return badRequest("그룹명을 입력하세요.");
             }
-            groupService.insertGroup(prjId, grpName, body.userIds());
+            groupService.insertGroup(prjId, grpName, body.userIds(), body.roleCds());
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (IllegalArgumentException e) {
             return badRequest(e.getMessage());
@@ -258,7 +257,7 @@ public class GroupController {
 
     public record GroupDeleteRequest(List<Long> grpIds) {}
 
-    public record GroupInsertRequest(String grpName, List<Long> userIds) {}
+    public record GroupInsertRequest(String grpName, List<Long> userIds, List<Long> roleCds) {}
 
     public record GroupUpdateRequest(Long grpId, List<Long> userIds) {}
 

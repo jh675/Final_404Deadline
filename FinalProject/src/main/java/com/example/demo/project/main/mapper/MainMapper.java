@@ -13,7 +13,6 @@ import com.example.demo.project.notice.service.NoticeVO;
 @Mapper
 public interface MainMapper {
 	IssueCountVO issueCount(IssueCountVO vo);
-	List<CalenderVO> selectCalender(ProjectVO vo);
 	List<NoticeVO> selectNotice(NoticeVO nvo);
 	List<GroupDetailVO> selectgroup(GroupDetailVO gmvo);
 	

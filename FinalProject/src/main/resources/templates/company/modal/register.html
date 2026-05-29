@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="registerModal">
+
+	<div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+
+		<div class="modal-dialog modal-lg">
+
+			<div class="modal-content">
+
+				<form th:action="@{/admin/company/save}" method="post">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+					<div class="modal-header">
+						<h5 class="modal-title">기업 정보 등록</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+
+					<div class="modal-body">
+
+						<!-- 사업자번호 -->
+						<div class="mb-3 row">
+							<!-- ⭕ [수정] 별표(*)를 부트스트랩 빨간색 글씨 클래스(text-danger)로 감싸줍니다. -->
+							<label class="col-sm-3 col-form-label text-end fw-semibold">사업자번호 <span class="text-danger">*</span></label>
+							<div class="col-sm-9">
+								<input type="text" name="bizNo" class="form-control" placeholder="사업자번호를 입력해 주세요." required>
+							</div>
+						</div>
+
+						<!-- 기업명 -->
+						<div class="mb-3 row">
+							<!-- ⭕ [수정] 별표(*)를 text-danger로 감싸줍니다. -->
+							<label class="col-sm-3 col-form-label text-end fw-semibold">기업명 <span class="text-danger">*</span></label>
+							<div class="col-sm-9">
+								<input type="text" name="companyName" class="form-control" placeholder="기업명을 입력해 주세요." required>
+							</div>
+						</div>
+
+						<!-- 전화번호 -->
+						<div class="mb-3 row">
+							<label class="col-sm-3 col-form-label text-end fw-semibold">전화번호</label>
+							<div class="col-sm-9">
+								<input type="text" name="tel" class="form-control" placeholder="전화번호를 입력해 주세요.">
+							</div>
+						</div>
+
+						<!-- 주소 -->
+						<div class="mb-3 row">
+							<label class="col-sm-3 col-form-label text-end fw-semibold">주소</label>
+							<div class="col-sm-9">
+								<input type="text" name="address" class="form-control" placeholder="주소를 입력해 주세요.">
+							</div>
+						</div>
+
+						<!-- 관리자ID -->
+						<div class="mb-3 row">
+							<!-- ⭕ [수정] 별표(*)를 text-danger로 감싸줍니다. -->
+							<label class="col-sm-3 col-form-label text-end fw-semibold">관리자ID <span class="text-danger">*</span></label>
+							<div class="col-sm-9">
+								<input type="text" name="login" class="form-control" placeholder="관리자 ID를 입력해 주세요." required>
+							</div>
+						</div>
+
+						<!-- 이메일 -->
+						<div class="mb-3 row">
+							<!-- ⭕ [수정] 별표(*)를 text-danger로 감싸줍니다. -->
+							<label class="col-sm-3 col-form-label text-end fw-semibold">이메일 <span class="text-danger">*</span></label>
+							<div class="col-sm-9">
+								<input type="text" name="email" class="form-control" placeholder="이메일을 입력해 주세요." required>
+							</div>
+						</div>
+
+						<!-- 활성여부 -->
+						<div class="mb-3 row">
+							<!-- ⭕ [수정] 별표(*)를 text-danger로 감싸줍니다. -->
+							<label class="col-sm-3 col-form-label text-end fw-semibold">활성여부 <span class="text-danger">*</span></label>
+							<div class="col-sm-9 d-flex align-items-center gap-3">
+								<div class="form-check">
+									<input class="form-check-input" type="radio" name="isActiveCd" id="regActiveY" value="01ACTIVE" checked>
+									<label class="form-check-label" for="regActiveY">활성</label>
+								</div>
+								<div class="form-check">
+									<input class="form-check-input" type="radio" name="isActiveCd" id="regActiveN" value="02ACTIVE">
+									<label class="form-check-label" for="regActiveN">비활성</label>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+						<button type="submit" class="btn btn-primary">등록</button>
+					</div>
+
+				</form>
+
+			</div>
+
+		</div>
+
+	</div>
+
+</div>
+
+</html>

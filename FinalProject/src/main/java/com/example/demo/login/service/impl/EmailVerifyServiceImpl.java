@@ -48,4 +48,14 @@ public class EmailVerifyServiceImpl implements EmailVerifyService {
 	        }
 	        return "fail";
 	    }
+	 
+	 @Override
+		public UserVO verifyMypageUser(UserVO user) {
+			verifyMapper.sendMypageVerifyCode(user);
+			
+			if ("success".equals(user.getResult())) {
+				emailSend.sendVerifyMail(user.getEmail(), user.getVerifyNum());
+			}
+			return user;
+		}
 }

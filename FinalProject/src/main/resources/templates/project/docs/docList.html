@@ -5,6 +5,19 @@
 <head>
 <meta charset="UTF-8">
 <title>문서목록</title>
+<style>
+.tui-grid-cell-content .doc-title, .doc-title {
+	cursor: pointer !important;
+	text-decoration: none;
+	color: #212529;
+	font-weight: 500;
+}
+
+.tui-grid-cell-content .doc-title:hover, .doc-title:hover {
+	color: #0d6efd;
+	text-decoration: underline;
+}
+</style>
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
 <link rel="stylesheet"
@@ -32,17 +45,20 @@
 
 			data: docsData,
 			columns: [
-				    { header: '제목', 
-					  name: 'title', 
-					  width: 150, align:'center', sortable: true,
-					  formatter: ({ row, value }) => {
-
-							return `
-								<a href="/project/docs/form?id=${row.id}">
-									${value}
-								</a>
-							`;
-						}},
+				{ 
+				    header: '제목', 
+				    name: 'title', 
+				    width: 150, align:'center', sortable: true,
+				    formatter: ({ row, value }) => {
+				        return `
+				            <a href="javascript:void(0)"
+				               class="doc-title"
+				               data-id="${row.id}">
+				                ${value}
+				            </a>
+				        `;
+				    }
+				},
 						{ header: '첨부파일', 
 							  name: 'fileCount', 
 							  width: 100, 
@@ -56,7 +72,7 @@
 							  }
 							},
 
-				    { header: '작성자', name: 'memId', width: 150, align:'center', sortable: true },
+				    { header: '작성자', name: 'memName', width: 150, align:'center', sortable: true },
 				    { header: '작성일', name: 'createdOn', width: 150, align:'left', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') },
 				    { 
 				    	header: '수정',
@@ -122,6 +138,77 @@
                 }
             }
         });
+        
+        document.addEventListener('click', function (e) {
+
+            const target = e.target.closest('.doc-title');
+            if (!target) return;
+
+            const id = target.getAttribute('data-id');
+
+            const fileListEl = document.getElementById('view-files');
+            if (fileListEl) {
+                fileListEl.innerHTML = '<li class="text-muted small">첨부파일을 불러오는 중입니다.</li>';
+            }
+
+            fetch('/project/docs/detail?id=' + id)
+                .then(res => res.json())
+                .then(data => {
+
+                    const idEl = document.getElementById('view-id');
+                    const titleEl = document.getElementById('view-title');
+                    const descEl = document.getElementById('view-description');
+                    const memEl = document.getElementById('view-memId');
+                    const dateEl = document.getElementById('view-createdOn');
+
+                    if (idEl) idEl.value = data.id;
+                    if (titleEl) titleEl.innerText = data.title;
+                    if (descEl) descEl.innerText = data.description;
+                    if (memEl) memEl.innerText = data.memName;
+                    if (dateEl) {
+                        dateEl.innerText = data.createdOn
+                            ? dateUtils.format(data.createdOn, 'YYYY-MM-DD HH:mm')
+                            : '';
+                    }
+
+                    const modalEl = document.getElementById('viewModal');
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+
+                    return fetch('/project/docs/files?id=' + id);
+                })
+                .then(res => res && res.json())
+                .then(files => {
+                    if (!fileListEl) return;
+
+                    fileListEl.innerHTML = '';
+
+                    if (!files || files.length === 0) {
+                        fileListEl.innerHTML = '<li class="text-muted small">첨부된 파일이 없습니다.</li>';
+                        return;
+                    }
+
+                    files.forEach(file => {
+                        const fileName = file.fileName || '이름 없음';
+                        const sizeKB = file.fileSize ? (file.fileSize / 1024).toFixed(1) : '0.0';
+
+                        const li = document.createElement('li');
+                        li.className = 'd-flex align-items-center gap-2 mb-2';
+                        li.innerHTML = `
+                            <span>📎</span>
+                            <a href="/download/${file.id}">${fileName}</a>
+                            <span class="text-muted small">(${sizeKB} KB)</span>
+                        `;
+                        fileListEl.appendChild(li);
+                    });
+                })
+                .catch(err => {
+                    console.error('detail fetch 실패:', err);
+                    if (fileListEl) {
+                        fileListEl.innerHTML = '<li class="text-danger small">첨부파일을 불러오지 못했습니다.</li>';
+                    }
+                });
+        });
 
 
 </script>
@@ -135,6 +222,7 @@
 		<div th:replace="~{project/docs/modal/delete :: deleteModal}"></div>
 		<div th:replace="~{project/docs/modal/register :: registerModal}"></div>
 		<div th:replace="~{project/docs/modal/edit :: editModal}"></div>
+		<div th:replace="~{project/docs/modal/view :: viewModal}"></div>
 
 		<div th:if="${msg != null}" id="successNotify"
 			class="alert alert-success shadow"
@@ -170,6 +258,9 @@
 
 				document.getElementById('edit-title').value =
 				button.getAttribute('data-title');
+				
+				document.getElementById('edit-description').value = 
+				button.getAttribute('data-description');
 
 				const docId = button.getAttribute('data-id');
 
@@ -220,14 +311,14 @@
 						if(confirm('첨부파일을 삭제하시겠습니까?')){
 
 							fetch('/project/attach/delete?id=' + fileId)
-								.then(response => response.text())
-								.then(result => {
+							.then(response => response.text())
+							.then(result => {
 
-									if(result === 'success'){
+								if(result === 'success'){
 
-										e.target.closest('.d-flex').remove();
-									}
-								});
+									e.target.closest('.d-flex').remove();
+								}
+							});
 						}
 					}
 				});

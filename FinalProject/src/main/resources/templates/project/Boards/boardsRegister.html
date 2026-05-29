@@ -1,62 +1,56 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/projectLayout}">
 <head>
-<meta charset="UTF-8">
-<title>프로젝트 게시글 등록</title>
-<link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css}" rel="stylesheet">
-<style>
-    
-    .register-container { max-width: 650px; margin: 0 auto; }
-    
-    .text-success-dark { color: #2e7d32 !important; }
-    
-    .btn-green-sm { background-color: #198754; color: white; border: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500; padding: 6px 20px; }
-    .btn-green-sm:hover { background-color: #157347; color: white; }
-    .btn-cancel-sm { border-radius: 4px; font-size: 0.85rem; padding: 6px 18px; }
-    
-    .form-card-mini { border-radius: 6px; border: 1px solid #dee2e6; background-color: white; }
-    .form-label-sm { font-weight: 600; color: #495057; font-size: 0.85rem; margin-bottom: 0.4rem; }
-    .form-control-sm { font-size: 0.85rem; border-radius: 4px; }
-    .form-control-sm:focus { border-color: #198754; box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15); }
-</style>
+    <meta charset="UTF-8">
+    <title>프로젝트 게시판 설정</title>
+    <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css}" rel="stylesheet">
+    <style>
+        .register-container { max-width: 650px; margin: 0 auto; }
+        .text-success-dark { color: #2e7d32 !important; }
+        .btn-green-sm { background-color: #198754; color: white; border: none; border-radius: 4px; font-size: 0.85rem; padding: 6px 20px; }
+        .btn-green-sm:hover { background-color: #157347; color: white; }
+        .form-card-mini { border-radius: 6px; border: 1px solid #dee2e6; background-color: white; }
+        .form-label-sm { font-weight: 600; color: #495057; font-size: 0.85rem; margin-bottom: 0.4rem; }
+    </style>
 </head>
 <body>
 <div layout:fragment="content">
-<div id="wrapper">
+    <div class="register-container">
 
-    <div class="mb-3 border-bottom pb-2">
-        <h5 class="fw-bold text-dark mb-1" 
-            th:text="${boards.id == null or boards.id == 0} ? '프로젝트 게시판 등록' : '프로젝트 게시판 수정'">프로젝트 게시글 등록</h5>
+        <div class="mb-3 border-bottom pb-2">
+            <h5 class="fw-bold text-dark mb-1" 
+                th:text="${boards.id != null and boards.id != 0} ? '프로젝트 게시판 수정' : '프로젝트 게시판 등록'">프로젝트 게시판</h5>
+        </div>
+
+        <div class="card form-card-mini p-4">
+            <form th:action="${boards.id != null and boards.id != 0} ? @{/project/boards/modify} : @{/project/boards/insert}" 
+                  th:object="${boards}" 
+                  method="post">
+                
+                <input type="hidden" th:field="*{id}" />
+                <input type="hidden" name="prjId" th:value="${boards.prjId != null ? boards.prjId : 4}" />
+
+                <div class="mb-3">
+                    <label for="name" class="form-label-sm text-success-dark">게시판 이름 <span class="text-danger">*</span></label>
+                    <input type="text" id="name" th:field="*{name}" class="form-control form-control-sm" placeholder="게시판 이름을 입력하세요." required />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label-sm text-success-dark">설명</label>
+                    <textarea id="description" th:field="*{description}" class="form-control form-control-sm" rows="5" placeholder="게시판에 대한 설명을 입력하세요." style="resize: none;"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                    <button type="button" class="btn btn-light border btn-sm" onclick="location.href='/project/boards/list'">취소</button>
+                    <button type="submit" class="btn btn-green-sm shadow-sm" 
+                            th:text="${boards.id != null and boards.id != 0} ? '수정하기' : '등록하기'">등록</button>
+                </div>
+            </form>
+        </div>
+
     </div>
-
-    <div class="card form-card-mini p-4">
-        <form th:action="${boards.id == null or boards.id == 0} ? @{/project/boards/insert} : @{/project/boards/modify}" th:object="${boards}" method="post">
-            
-            <input type="hidden" name="prjId" value="4" />
-            <input type="hidden" th:field="*{id}" />
-
-            <div class="mb-3">
-                <label for="name" class="form-label-sm text-success-dark">게시판 이름 <span class="text-danger">*</span></label>
-                <input type="text" id="name" th:field="*{name}" class="form-control form-control-sm border-secondary-subtle" placeholder="게시판 이름을 입력하세요." required />
-            </div>
-            
-            <div class="mb-3">
-                <label for="description" class="form-label-sm text-success-dark">설명</label>
-                <textarea id="description" th:field="*{description}" class="form-control form-control-sm border-secondary-subtle" rows="5" placeholder="게시판에 대한 설명을 입력하세요." style="resize: none;"></textarea>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                <button type="button" class="btn btn-light border btn-cancel-sm" onclick="location.href='/project/boards/list'">취소</button>
-                <button type="submit" class="btn btn-green-sm shadow-sm" 
-                        th:text="${boards.id == null or boards.id == 0} ? '등록' : '수정'">등록</button>
-            </div>
-            
-        </form>
-    </div>
-
-</div>
 </div>
 </body>
 </html>

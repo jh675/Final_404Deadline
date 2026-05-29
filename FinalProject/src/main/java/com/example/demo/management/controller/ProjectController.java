@@ -58,7 +58,7 @@ public class ProjectController {
 
 	@GetMapping("management/project")
 	public String listProject(ProjectVO vo, Model model, CompanyVO cvo, GroupDetailVO gvo,
-			Authentication authentication) {
+			Authentication authentication, HttpSession session) {
 
 		List<ProjectVO> list;
 		UserVO loginUser = null;
@@ -82,6 +82,12 @@ public class ProjectController {
 	    
 	    model.addAttribute("projectinfo", Map.of("list", list != null ? list : List.of()));
 	    model.addAttribute("companyList", companyList != null ? companyList : List.of());
+	    
+	    // 프로젝트 목록으로 나갈때는 세션 정보 정리
+	    session.removeAttribute("currentProjectId");
+        session.removeAttribute("currentMenu");
+        session.removeAttribute("moduleList");
+        session.removeAttribute("project");
 	    
 	    return "management/projectlist";
 	}
@@ -229,7 +235,6 @@ public class ProjectController {
 		gmvo.setPrjId(projectid);
 		List<IssueOutputVO> issuelist = issueService.selectIssueList(ivo);
 		IssueCountVO count = mainService.issueCount(icvo);
-		List<CalenderVO> Clist = mainService.selectCalender(vo);
 		List<NoticeVO> Nlist = mainService.selectNotice(nvo);
 		List<GroupDetailVO> Glist = mainService.selectGroupMemberCount(gmvo);
 		if (count == null) {
@@ -239,7 +244,6 @@ public class ProjectController {
 		model.addAttribute("project", vo);
 		model.addAttribute("issuelist",issuelist);
 		model.addAttribute("count",count);
-		model.addAttribute("calender",Clist);
 		model.addAttribute("notice",Nlist);
 		model.addAttribute("selectgroup",Glist);
 		model.addAttribute("moduleList",projectservice.listModules(projectid));

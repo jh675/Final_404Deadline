@@ -12,4 +12,7 @@ public interface EmailVerifyMapper {
 	
 	// 인증 코드 일치 확인
 	void verifyCode(EmailVerifyVO vo);
+	
+	// 마이페이지 이메일 변경 인증용
+	void sendMypageVerifyCode(UserVO user);
 }
