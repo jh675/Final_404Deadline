@@ -48,7 +48,7 @@ public class GptApiClient {
 		try {
 			ResponseEntity<Map> response = restTemplate.postForEntity(GPT_URL, entity, Map.class);
 
-			// ✨ GPT 응답 JSON 파싱 (구조가 다름)
+			// GPT 응답 JSON 파싱 (gemini랑 구조가 다름)
 			List choices = (List) response.getBody().get("choices");
 			Map choice = (Map) choices.get(0);
 			Map msg = (Map) choice.get("message");

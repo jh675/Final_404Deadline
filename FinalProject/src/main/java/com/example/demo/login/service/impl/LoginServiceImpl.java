@@ -37,6 +37,7 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 		
 		String bizNo = null;
 		String loginId = null;
+		String loginType = "USER";
 
 		// 자동 로그인(Remember-Me)으로 접근한 경우
 		// username 변수에 구분자 '_' 가 포함됨 (예: 123-45-67890_cadmin)
@@ -54,46 +55,51 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 			if (attributes != null) {
 				HttpServletRequest request = attributes.getRequest();
 				bizNo = request.getParameter("bizNo");
+				
+				// 로그인 타입 받기
+				String reqType = request.getParameter("loginType");
+				if (reqType != null) loginType = reqType;
 			}
 		}
 		
 		// null 방지 및 공백 제거
 		loginId = (loginId == null) ? "" : loginId.trim();
-		bizNo = (bizNo == null) ? "" : bizNo.trim();
-
-		// 숫자만 추출
-		bizNo = bizNo.replaceAll("[^0-9]", "");
+		UserVO vo = null;
 		
-		// 기업번호가 올바르게 들어왔는지 체크 (일반 로그인 시 필수)
-		if (bizNo.length() != 10) {
-			throw new UsernameNotFoundException("소속 기업 정보가 누락되었거나 사업자번호 형식이 올바르지 않습니다.");
-		}
-		
-		// 하이픈 형식으로 변환 (기존 DB 매칭용 포맷 유지)
-		bizNo = bizNo.substring(0, 3) + "-" +
-				bizNo.substring(3, 5) + "-" +
-				bizNo.substring(5);
-		
-		// 소속 기업의 활성 상태 검증
-		String companyStatus = loginMapper.selectCompanyStatus(bizNo);
-		
-		if (companyStatus == null) {
-			throw new UsernameNotFoundException("등록되지 않은 기업입니다.");
-		}
-		
-		// 기업 상태가 '01ACTIVE'(활성)가 아닌 경우 즉시 차단
-		if (!"01ACTIVE".equals(companyStatus)) {
-			throw new DisabledException("소속 기업이 활성 되어있지 않아 로그인이 제한되었습니다. 관리자에게 문의하세요.");
-		}
-		// DB 조회용 파라미터 세팅
-		UserVO param = new UserVO();
-		param.setBizNo(bizNo);
-		param.setLogin(loginId);
-		
-		UserVO vo = loginMapper.selectOne(param);
-		
-		if (vo == null) {
-			throw new UsernameNotFoundException("해당 기업에 등록된 회원 정보를 찾을 수 없습니다.");
+		if ("ADMIN".equals(loginType)) {
+			// 시스템 관리자 로그인
+			vo = loginMapper.selectSystemAdmin(loginId);
+			if (vo == null) {
+				throw new UsernameNotFoundException("시스템 관리자 계정을 찾을 수 없거나 권한이 없습니다.");
+			}
+		} else {
+			// 기업관리자, 회원 로그인 로직
+			bizNo = (bizNo == null) ? "" : bizNo.trim();
+			bizNo = bizNo.replaceAll("[^0-9]", "");
+			
+			if (bizNo.length() != 10) {
+				throw new UsernameNotFoundException("소속 기업 정보가 누락되었거나 사업자번호 형식이 올바르지 않습니다.");
+			}
+			bizNo = bizNo.substring(0, 3) + "-" + bizNo.substring(3, 5) + "-" + bizNo.substring(5);
+			
+			String companyStatus = loginMapper.selectCompanyStatus(bizNo);
+			
+			if (companyStatus == null) {
+				throw new UsernameNotFoundException("등록되지 않은 기업입니다.");
+			}
+			if (!"01ACTIVE".equals(companyStatus)) {
+				throw new DisabledException("소속 기업이 활성 되어있지 않아 로그인이 제한되었습니다. 관리자에게 문의하세요.");
+			}
+			
+			UserVO param = new UserVO();
+			param.setBizNo(bizNo);
+			param.setLogin(loginId);
+			
+			vo = loginMapper.selectOne(param);
+			
+			if (vo == null) {
+				throw new UsernameNotFoundException("해당 기업에 등록된 회원 정보를 찾을 수 없습니다.");
+			}
 		}
 		
 		if ("02ACTIVE".equals(vo.getStatusCd())) {
