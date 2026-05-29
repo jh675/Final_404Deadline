@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-@Component
+//@Component
 public class GeminiApiClient {
 
 	@Value("${gemini.api-key}")
