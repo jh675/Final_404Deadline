@@ -272,7 +272,14 @@ public class IssueServiceImpl implements IssueService {
 	public Long updateVulk(IssueVulkVO vulkVO) {
 		return mapper.updateVulk(vulkVO);
 	}
-	
-	
-	
+
+	@Override
+	public List<IssueOutputVO> searchIssuesForLink(Long prjId, String q) {
+		if (prjId == null) {
+			return Collections.emptyList();
+		}
+		String term = q != null ? q.trim() : "";
+		List<IssueOutputVO> issues = mapper.searchIssuesForLink(prjId, term.isEmpty() ? null : term);
+		return issues != null ? issues : Collections.emptyList();
+	}
 }

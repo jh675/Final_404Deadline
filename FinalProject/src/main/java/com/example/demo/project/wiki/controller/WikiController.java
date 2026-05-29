@@ -7,10 +7,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +23,10 @@ import org.springframework.web.util.UriUtils;
 import java.nio.charset.StandardCharsets;
 
 import com.example.demo.login.service.UserVO;
+import com.example.demo.project.issue.service.IssueOutputVO;
+import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.wiki.service.WikiContentVO;
+import com.example.demo.project.wiki.service.WikiLinkSuggestVO;
 import com.example.demo.project.wiki.service.WikiPageVO;
 import com.example.demo.project.wiki.service.WikiService;
 import com.example.demo.util.attach.service.AttachService;
@@ -41,6 +46,9 @@ public class WikiController {
 	@Autowired
 	AttachService attachService;
 
+	@Autowired
+	IssueService issueService;
+
 	private Long getCurrentProjectId(HttpSession session) {
 		return (Long) session.getAttribute("currentProjectId");
 	}
@@ -53,6 +61,36 @@ public class WikiController {
 		return null;
 	}
 
+	/** 본문 저장 형식: [[#123 이슈 제목]] */
+	private static String buildIssueLinkInsert(Long id, String subject) {
+		if (id == null) {
+			return "";
+		}
+		String safeSubject = sanitizeLinkText(subject);
+		if (safeSubject.isEmpty()) {
+			return "[[#" + id + "]]";
+		}
+		return "[[#" + id + " " + safeSubject + "]]";
+	}
+
+	private static String formatIssueLinkLabel(Long id, String subject) {
+		String safeSubject = sanitizeLinkText(subject);
+		if (safeSubject.isEmpty()) {
+			return "#" + id;
+		}
+		return safeSubject + " (#" + id + ")";
+	}
+
+	private static String sanitizeLinkText(String text) {
+		if (text == null) {
+			return "";
+		}
+		return text.trim()
+				.replace("]]", "」")
+				.replace("\r", " ")
+				.replace("\n", " ");
+	}
+
 	@GetMapping("/project/wiki/register")
 	public String wikiWrite(Model model, @RequestParam(value = "id", required = false) Long id, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
@@ -61,13 +99,15 @@ public class WikiController {
 		}
 		List<WikiPageVO> pageList = service.selectWikiPageForTree(projectId, id);
 		model.addAttribute("currentMenu", "wiki");
-		model.addAttribute("pageList", pageList);
+		model.addAttribute("pageList", pageList != null ? pageList : Collections.emptyList());
 		if (id != null) {
 			WikiContentVO page = service.selectWikiContentLastVerById(id);
+			if (page == null) {
+				return "redirect:/project/wiki/register";
+			}
 			page.setId(id);
 			model.addAttribute("page", page);
 			model.addAttribute("selectedParentId", page.getParentId());
-			System.out.println(page);
 			List<AttachVO> existingFiles = attachService.selectAttachList("06MODULE", id);
 			model.addAttribute("existingFiles",
 					existingFiles != null ? existingFiles : Collections.emptyList());
@@ -123,6 +163,36 @@ public class WikiController {
 		return "redirect:/project/wiki/view/" + encodedTitle;
 	}
 	
+	@GetMapping("/project/wiki/link-suggest")
+	@ResponseBody
+	public List<WikiLinkSuggestVO> linkSuggest(
+			@RequestParam(name = "q", required = false) String q,
+			@RequestParam(name = "type", defaultValue = "wiki") String type,
+			HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return Collections.emptyList();
+		}
+		String term = q != null ? q.trim() : "";
+		String linkType = type != null ? type.trim().toLowerCase() : "wiki";
+		List<WikiLinkSuggestVO> result = new ArrayList<>();
+
+		if ("wiki".equals(linkType) || "all".equals(linkType)) {
+			result.addAll(service.suggestWikiLinks(projectId, term));
+		}
+		if ("issue".equals(linkType) || "all".equals(linkType)) {
+			for (IssueOutputVO issue : issueService.searchIssuesForLink(projectId, term)) {
+				if (issue == null || issue.getId() == null) {
+					continue;
+				}
+				String subject = issue.getSubject() != null ? issue.getSubject() : "";
+				String label = formatIssueLinkLabel(issue.getId(), subject);
+				result.add(new WikiLinkSuggestVO("issue", label, buildIssueLinkInsert(issue.getId(), subject)));
+			}
+		}
+		return result;
+	}
+
 	@GetMapping("/project/wiki/check")
 	public ResponseEntity<Void> nameCheck(@RequestParam(name = "name") String name, HttpSession session) {
 		Long projectId = getCurrentProjectId(session);
@@ -190,9 +260,12 @@ public class WikiController {
 			}
 		}
 		List<AttachVO> existingFiles = attachService.selectAttachList("06MODULE", latestPage.getPageId());
+		Long pageId = latestPage.getId() != null ? latestPage.getId() : latestPage.getPageId();
 		model.addAttribute("currentMenu", "wiki");
 		model.addAttribute("attachments", existingFiles);
 		model.addAttribute("page", pageToShow);
+		model.addAttribute("breadcrumb", service.getBreadcrumb(pageId));
+		model.addAttribute("hasChildren", service.hasWikiChildren(pageId));
 		model.addAttribute("latestVersion", latestPage.getVersion());
 		model.addAttribute("isHistoricalVersion",
 				pageToShow.getVersion() != null && latestPage.getVersion() != null

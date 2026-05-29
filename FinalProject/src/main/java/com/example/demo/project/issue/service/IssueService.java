@@ -41,4 +41,6 @@ public interface IssueService {
     Long registerStartDate(IssueVulkVO vulkVO);
     Long registerClosedDate(IssueVulkVO vulkVO);
     Long updateVulk(IssueVulkVO vulkVO);
+
+    List<IssueOutputVO> searchIssuesForLink(Long prjId, String q);
 }

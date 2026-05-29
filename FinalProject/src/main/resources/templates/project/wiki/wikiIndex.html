@@ -325,7 +325,8 @@
                     </p>
                 </div>
                 <div class="wiki-index-actions">
-                    <a class="wiki-btn wiki-btn-create" th:href="@{/project/wiki/register}">작성</a>
+                    <a class="wiki-btn wiki-btn-create" th:href="@{/project/wiki/register}"
+                       th:if="${@prjAuth.hasRole('ROLE_WIKI_CREATE')}">작성</a>
                 </div>
             </div>
 

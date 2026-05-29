@@ -25,5 +25,9 @@ public interface WikiMapper {
 	Long nameCheck(@Param("id") Long id, @Param("name") String name);
 	Long insertWikiPage(WikiPageVO page);
 	Long updateWikiPageParent(WikiPageVO page);
+	List<WikiPageVO> selectWikiBreadcrumb(@Param("pageId") Long pageId);
+	Long countWikiChildren(@Param("pageId") Long pageId);
+
+	List<String> searchWikiTitles(@Param("projectId") Long projectId, @Param("q") String q);
 
 }

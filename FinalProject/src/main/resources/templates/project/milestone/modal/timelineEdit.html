@@ -1,36 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org">
 <body>
-<div th:fragment="timelineAddModal">
-	<div class="modal fade" id="timelineAddModal" tabindex="-1" aria-hidden="true">
+<div th:fragment="timelineEditModal">
+	<div class="modal fade" id="timelineEditModal" tabindex="-1" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title">타임라인 추가</h5>
+					<h5 class="modal-title">타임라인 수정</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
 				<div class="modal-body">
-					<form id="timelineAddForm" autocomplete="off">
+					<form id="timelineEditForm" autocomplete="off">
+						<input type="hidden" name="id" />
 						<div class="mb-3">
 							<label class="form-label d-block">유형</label>
 							<div class="form-check form-check-inline">
-								<input class="form-check-input" type="radio" name="typeCd" id="tlType01" value="01TIMELINE" checked>
-								<label class="form-check-label" for="tlType01">기능</label>
+								<input class="form-check-input" type="radio" name="typeCd" id="tlEditType01" value="01TIMELINE">
+								<label class="form-check-label" for="tlEditType01">기능</label>
 							</div>
 							<div class="form-check form-check-inline">
-								<input class="form-check-input" type="radio" name="typeCd" id="tlType02" value="02TIMELINE">
-								<label class="form-check-label" for="tlType02">개선</label>
+								<input class="form-check-input" type="radio" name="typeCd" id="tlEditType02" value="02TIMELINE">
+								<label class="form-check-label" for="tlEditType02">개선</label>
 							</div>
 							<div class="form-check form-check-inline">
-								<input class="form-check-input" type="radio" name="typeCd" id="tlType03" value="03TIMELINE">
-								<label class="form-check-label" for="tlType03">관리</label>
+								<input class="form-check-input" type="radio" name="typeCd" id="tlEditType03" value="03TIMELINE">
+								<label class="form-check-label" for="tlEditType03">관리</label>
 							</div>
-						</div>
-						<div class="mb-3">
-							<label class="form-label">대상 이슈</label>
-							<select class="form-select" name="milestoneIssueId" required>
-								<option value="">이슈를 선택하세요</option>
-							</select>
 						</div>
 						<div class="mb-3">
 							<label class="form-label">설명</label>
@@ -39,14 +34,14 @@
 						<div class="mb-3">
 							<label class="form-label">날짜</label>
 							<input type="datetime-local" class="form-control" name="entryDate" step="60" required />
-							<small class="form-text text-muted" data-tl-date-hint></small>
+							<small class="form-text text-muted" data-tle-date-hint></small>
 						</div>
-						<small class="text-danger d-none" data-tl-err></small>
+						<small class="text-danger d-none" data-tle-err></small>
 					</form>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-					<button type="button" class="btn btn-primary" data-tl-save>추가</button>
+					<button type="button" class="btn btn-primary" data-tle-save>저장</button>
 				</div>
 			</div>
 		</div>
@@ -54,14 +49,14 @@
 
 	<script>
 		(function () {
-			var modalEl = document.getElementById("timelineAddModal");
+			var modalEl = document.getElementById("timelineEditModal");
 			if (!modalEl) return;
-			var form = modalEl.querySelector("#timelineAddForm");
-			var errEl = modalEl.querySelector("[data-tl-err]");
-			var saveBtn = modalEl.querySelector("[data-tl-save]");
-			var selectEl = form.querySelector('[name="milestoneIssueId"]');
+			var form = modalEl.querySelector("#timelineEditForm");
+			var errEl = modalEl.querySelector("[data-tle-err]");
+			var saveBtn = modalEl.querySelector("[data-tle-save]");
+			var idEl = form.querySelector('[name="id"]');
 			var entryDateEl = form.querySelector('[name="entryDate"]');
-			var dateHintEl = modalEl.querySelector("[data-tl-date-hint]");
+			var dateHintEl = modalEl.querySelector("[data-tle-date-hint]");
 
 			function applyEntryDateBounds() {
 				var mt = window.MilestoneTimeline;
@@ -73,16 +68,19 @@
 				}
 			}
 
-			function setDefaultEntryDate() {
-				if (!entryDateEl) return;
-				applyEntryDateBounds();
-				var mt = window.MilestoneTimeline;
-				entryDateEl.value = (mt && mt.defaultEntryDateValue)
-					? mt.defaultEntryDateValue()
-					: "";
+			function toDatetimeLocalValue(d) {
+				if (!d) return "";
+				if (window.MilestoneTimeline && window.MilestoneTimeline.parseWallClockDate) {
+					d = window.MilestoneTimeline.parseWallClockDate(d);
+				} else {
+					d = d instanceof Date ? d : new Date(d);
+				}
+				if (!d || isNaN(d.getTime())) return "";
+				var pad = function (n) { return String(n).padStart(2, "0"); };
+				return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate())
+					+ "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
 			}
 
-			/** datetime-local → 서버(Asia/Seoul) wall-clock 문자열 */
 			function normalizeEntryDate(raw) {
 				var s = (raw || "").toString().trim();
 				if (!s) return "";
@@ -120,57 +118,45 @@
 				else     { errEl.textContent = ""; errEl.classList.add("d-none"); }
 			}
 
-			function loadIssues(milestoneId) {
-				selectEl.innerHTML = '<option value="">불러오는 중…</option>';
-				return fetch("/project/milestone/api/list/" + encodeURIComponent(milestoneId), {
-					headers: { Accept: "application/json" },
-				})
-					.then(function (r) { return r.ok ? r.json() : []; })
-					.then(function (data) {
-						var list = Array.isArray(data) ? data
-							: data && Array.isArray(data.list)   ? data.list
-							: data && Array.isArray(data.issues) ? data.issues : [];
-						selectEl.innerHTML = '<option value="">이슈를 선택하세요</option>';
-						list.forEach(function (it) {
-							var opt = document.createElement("option");
-							opt.value = it.id;
-							opt.textContent = (it.name || "이슈") + (it.issueId != null ? " #" + it.issueId : "");
-							selectEl.appendChild(opt);
-						});
-						if (!list.length) {
-							selectEl.innerHTML = '<option value="">등록된 이슈가 없습니다</option>';
-						}
-					})
-					.catch(function () {
-						selectEl.innerHTML = '<option value="">이슈 목록 로드 실패</option>';
-					});
+			function setTypeCd(typeCd) {
+				var radios = form.querySelectorAll('input[name="typeCd"]');
+				var found = false;
+				radios.forEach(function (r) {
+					r.checked = (r.value === typeCd);
+					if (r.checked) found = true;
+				});
+				if (!found && radios.length) radios[0].checked = true;
 			}
 
-			modalEl.addEventListener("show.bs.modal", function () {
-				setErr("");
-				form.reset();
-				setDefaultEntryDate();
-				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
-					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
-				if (!msId) {
-					selectEl.innerHTML = '<option value="">마일스톤을 먼저 선택하세요</option>';
-					return;
-				}
-				loadIssues(msId);
-			});
+			window.MilestoneTimelineEdit = {
+				open: function (event) {
+					if (!event || event.id == null) return;
+					setErr("");
+					form.reset();
+					idEl.value = String(event.id);
+					setTypeCd(event.typeCd || "01TIMELINE");
+					form.querySelector('[name="contents"]').value = (event.contents || event.content || "").toString();
+					applyEntryDateBounds();
+					entryDateEl.value = toDatetimeLocalValue(event.entryDate || event.start);
+					if (window.MilestoneTimeline && window.MilestoneTimeline.clampEntryDateValue) {
+						window.MilestoneTimeline.clampEntryDateValue(entryDateEl);
+					}
+					bootstrap.Modal.getOrCreateInstance(modalEl).show();
+				},
+			};
 
 			saveBtn.addEventListener("click", function () {
 				setErr("");
 				var fd = new FormData(form);
 				var payload = {
+					id: fd.get("id") ? Number(fd.get("id")) : null,
 					typeCd: (fd.get("typeCd") || "").toString(),
-					milestoneIssueId: fd.get("milestoneIssueId") ? Number(fd.get("milestoneIssueId")) : null,
 					contents: (fd.get("contents") || "").toString().trim(),
 					entryDate: normalizeEntryDate(fd.get("entryDate")),
 				};
-				if (!payload.milestoneIssueId) { setErr("이슈를 선택하세요."); return; }
-				if (!payload.entryDate)       { setErr("날짜를 입력하세요."); return; }
-				if (!payload.typeCd)          { setErr("유형을 선택하세요."); return; }
+				if (!payload.id)       { setErr("수정할 이벤트 정보가 없습니다."); return; }
+				if (!payload.entryDate){ setErr("날짜를 입력하세요."); return; }
+				if (!payload.typeCd)   { setErr("유형을 선택하세요."); return; }
 				var rawDate = (fd.get("entryDate") || "").toString();
 				if (window.MilestoneTimeline && window.MilestoneTimeline.isEntryDateInBounds
 						&& !window.MilestoneTimeline.isEntryDateInBounds(rawDate)) {
@@ -180,7 +166,7 @@
 
 				saveBtn.disabled = true;
 				fetch("/project/milestone/api/timeline", {
-					method: "POST",
+					method: "PUT",
 					headers: getApiJsonHeaders(),
 					body: JSON.stringify(payload),
 				})
@@ -189,8 +175,21 @@
 						return res.json().catch(function () { return null; });
 					})
 					.then(function () {
-						if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
-						bootstrap.Modal.getInstance(modalEl).hide();
+						var editedId = payload.id;
+						var refresh = (window.MilestoneTimeline && window.MilestoneTimeline.refreshSelected)
+							? window.MilestoneTimeline.refreshSelected()
+							: null;
+						var done = function () {
+							if (window.MilestoneTimelineView
+									&& typeof window.MilestoneTimelineView.replaceAfterEdit === "function") {
+								window.MilestoneTimelineView.replaceAfterEdit(editedId);
+							}
+							bootstrap.Modal.getInstance(modalEl).hide();
+						};
+						if (refresh && typeof refresh.then === "function") {
+							return refresh.then(done);
+						}
+						done();
 					})
 					.catch(function (err) {
 						setErr("저장 실패: " + (err && err.message ? err.message : err));

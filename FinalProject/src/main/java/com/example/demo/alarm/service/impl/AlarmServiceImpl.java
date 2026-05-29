@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -66,6 +68,18 @@ public class AlarmServiceImpl implements AlarmService {
                 emitters.remove(userId, emitter);
             }
         }
+    }
+
+    // 서버 종료 시 열린 SSE 연결을 닫아 graceful shutdown 대기(최대 30초)를 방지
+    @EventListener(ContextClosedEvent.class)
+    public void onContextClosed() {
+        emitters.forEach((userId, emitter) -> {
+            try {
+                emitter.complete();
+            } catch (Exception ignored) {
+            }
+        });
+        emitters.clear();
     }
 
     // 30초마다 heartbeat 전송
