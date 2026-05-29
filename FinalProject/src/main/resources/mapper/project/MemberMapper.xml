@@ -9,18 +9,12 @@
   <sql id="memberListWhere">
     <where>
       G.PRJ_ID = #{prjId}
-      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
+      AND G.STATUS_CD = '01ACTIVE'
       <if test="memberName != null and memberName != ''">
         AND U.NAME LIKE '%' || #{memberName} || '%'
       </if>
       <if test="grpName != null and grpName != ''">
         AND G.NAME LIKE '%' || #{grpName} || '%'
-      </if>
-      <if test="prjStartFrom != null and prjStartFrom != ''">
-        AND TRUNC(M.PRJ_START_DATE) &gt;= TO_DATE(#{prjStartFrom}, 'YYYY-MM-DD')
-      </if>
-      <if test="prjStartTo != null and prjStartTo != ''">
-        AND TRUNC(M.PRJ_START_DATE) &lt;= TO_DATE(#{prjStartTo}, 'YYYY-MM-DD')
       </if>
     </where>
   </sql>
@@ -33,31 +27,12 @@
       U.NAME AS userName,
       U.TEL AS tel,
       U.EMAIL AS email,
-      G.NAME AS grpName,
-      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+      G.NAME AS grpName
     FROM USERS U
     JOIN MEMBER M ON U.ID = M.USER_ID
     JOIN GRP G ON M.GRP_ID = G.ID
     <include refid="memberListWhere"/>
     ORDER BY M.USER_ID
-  </select>
-
-  <!-- 등록 화면 — 프로젝트명 -->
-  <select id="selectProjectNameByPrjId" resultType="string">
-    SELECT P.PRJ_NAME
-    FROM project P
-    WHERE P.ID = #{prjId}
-  </select>
-
-  <!-- 구성원 등록 — 프로젝트 투입기간 제한용 기간 조회 -->
-  <select id="selectProjectPeriodByPrjId"
-    resultType="com.example.demo.project.member.service.ProjectPeriodVO">
-    SELECT
-      P.PRJ_NAME AS prjName,
-      TO_CHAR(P.START_DATE, 'YYYY-MM-DD') AS startDate,
-      TO_CHAR(P.CLOSED_DATE, 'YYYY-MM-DD') AS closedDate
-    FROM project P
-    WHERE P.ID = #{prjId}
   </select>
 
   <!-- 구성원 등록 모달 — 동일 biz_no·활성 사용자, MEMBER 미등록(user_id 없음)만 -->
@@ -112,18 +87,13 @@
       U.LOGIN AS login,
       U.LAST_LOG_ON AS lastLoginOn,
       U.PW_UPDATED_ON AS pwUpdatedOn,
-      P.PRJ_NAME AS prjName,
-      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate,
-      TO_CHAR(M.PRJ_END_DATE, 'YYYY-MM-DD') AS prjEndDate,
       G.NAME AS grpName
     FROM MEMBER M
     JOIN USERS U ON U.ID = M.USER_ID
     JOIN GRP G ON G.ID = M.GRP_ID
-    LEFT JOIN project P ON P.ID = G.PRJ_ID
     WHERE G.PRJ_ID = #{prjId}
       AND M.USER_ID = #{userId}
       AND M.GRP_ID = #{grpId}
-      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
       AND G.STATUS_CD = '01ACTIVE'
   </select>
 
@@ -162,7 +132,6 @@
     FROM MEMBER M
     WHERE M.USER_ID = #{userId}
       AND M.GRP_ID = #{grpId}
-      AND M.PRJ_END_DATE IS NULL
   </select>
 
   <select id="selectUserHireDateYmd" resultType="string">
@@ -179,62 +148,35 @@
     INSERT INTO MEMBER (
       ID,
       USER_ID,
-      GRP_ID,
-      PRJ_START_DATE,
-      PRJ_END_DATE
+      GRP_ID
     ) VALUES (
       #{memberId},
       #{userId},
-      #{grpId},
-      TO_DATE(#{prjStartDate}, 'YYYY-MM-DD'),
-      <choose>
-        <when test="prjEndDate != null and prjEndDate != ''">
-          TO_DATE(#{prjEndDate}, 'YYYY-MM-DD')
-        </when>
-        <otherwise>
-          NULL
-        </otherwise>
-      </choose>
+      #{grpId}
     )
   </insert>
 
-  <!-- 구성원 일괄 등록 — PL/SQL 블록 + foreach. 동일 그룹·기간으로 N건 INSERT
-       빈 문자열은 서비스에서 null 로 정규화하여 전달하므로 TO_DATE(NULL, ...) → NULL -->
+  <!-- 구성원 일괄 등록 -->
   <insert id="insertMembers">
     BEGIN
       <foreach collection="userIds" item="uid" separator=";">
         INSERT INTO MEMBER (
           ID,
           USER_ID,
-          GRP_ID,
-          PRJ_START_DATE,
-          PRJ_END_DATE
+          GRP_ID
         ) VALUES (
           mem_seq.NEXTVAL,
           #{uid},
-          #{grpId},
-          TO_DATE(#{prjStartDate}, 'YYYY-MM-DD'),
-          TO_DATE(#{prjEndDate}, 'YYYY-MM-DD')
+          #{grpId}
         )
       </foreach>;
     END;
   </insert>
 
-  <!-- 구성원 수정 — 투입기간·소속 그룹 -->
+  <!-- 구성원 수정 — 소속 그룹 -->
   <update id="updateMember" parameterType="com.example.demo.project.member.service.MemberUpdateParam">
     UPDATE MEMBER M
-    SET
-      M.GRP_ID = #{grpId},
-      M.PRJ_START_DATE = TO_DATE(#{prjStartDate}, 'YYYY-MM-DD'),
-      M.PRJ_END_DATE =
-      <choose>
-        <when test="prjEndDate != null and prjEndDate != ''">
-          TO_DATE(#{prjEndDate}, 'YYYY-MM-DD')
-        </when>
-        <otherwise>
-          NULL
-        </otherwise>
-      </choose>
+    SET M.GRP_ID = #{grpId}
     WHERE M.USER_ID = #{userId}
       AND M.GRP_ID = #{oldGrpId}
       AND EXISTS (

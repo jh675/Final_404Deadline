@@ -9,9 +9,6 @@
             const pageOldGrpId = cfg.dataset.oldGrpId
               ? Number(cfg.dataset.oldGrpId)
               : null;
-            const hireYmd = String(cfg.dataset.hireDate || "");
-            const prjOpenYmd = String(cfg.dataset.prjOpen || "");
-            const prjClosedYmd = String(cfg.dataset.prjClosed || "");
 
             function mountPickerOverlay(el) {
               if (el && el.parentElement !== document.body) {
@@ -27,8 +24,6 @@
               });
             }
 
-            const prjStartInput = document.getElementById("detailPrjStart");
-            const prjEndInput = document.getElementById("detailPrjEnd");
             const grpInput = document.getElementById("detailGrpName");
             const grpIdInput = document.getElementById("detailSelectedGrpId");
             let groupOverlay = document.getElementById("memGroupPickOverlay");
@@ -41,6 +36,10 @@
               "memGroupSearchKeyword",
             );
             let allGroups = [];
+
+            const initialGrpId = cfg.dataset.initialGrpId
+              ? Number(cfg.dataset.initialGrpId)
+              : null;
 
             function includesKeyword(value, keyword) {
               if (!keyword) return true;
@@ -68,93 +67,6 @@
               if (groupSearchKeyword) groupSearchKeyword.value = "";
             }
 
-            function normalizeYmd(value) {
-              if (value == null) return "";
-              const s = String(value).trim();
-              if (!s) return "";
-              if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-              const d = new Date(s);
-              if (isNaN(d.getTime())) return "";
-              const y = d.getFullYear();
-              const m = String(d.getMonth() + 1).padStart(2, "0");
-              const day = String(d.getDate()).padStart(2, "0");
-              return y + "-" + m + "-" + day;
-            }
-
-            const initialPrjStartYmd = normalizeYmd(cfg.dataset.initialStart || "");
-            const initialPrjEndYmd = normalizeYmd(cfg.dataset.initialEnd || "");
-            const initialGrpId = cfg.dataset.initialGrpId
-              ? Number(cfg.dataset.initialGrpId)
-              : null;
-
-            function maxYmd(a, b) {
-              if (!a) return b || "";
-              if (!b) return a;
-              return a >= b ? a : b;
-            }
-
-            function minStartYmd() {
-              return maxYmd(hireYmd, prjOpenYmd);
-            }
-
-            function syncPeriodConstraints() {
-              const minStart = minStartYmd();
-              if (prjStartInput) {
-                if (minStart) {
-                  prjStartInput.min = minStart;
-                } else {
-                  prjStartInput.removeAttribute("min");
-                }
-                if (prjClosedYmd) {
-                  prjStartInput.max = prjClosedYmd;
-                } else {
-                  prjStartInput.removeAttribute("max");
-                }
-                let start = normalizeYmd(prjStartInput.value);
-                if (start && minStart && start < minStart) {
-                  start = minStart;
-                  prjStartInput.value = start;
-                }
-                if (start && prjClosedYmd && start > prjClosedYmd) {
-                  prjStartInput.value = prjClosedYmd;
-                  start = prjClosedYmd;
-                }
-              }
-
-              if (!prjEndInput) return;
-              const start = prjStartInput
-                ? normalizeYmd(prjStartInput.value)
-                : initialPrjStartYmd;
-              if (start) {
-                prjEndInput.min = start;
-              } else if (minStart) {
-                prjEndInput.min = minStart;
-              } else {
-                prjEndInput.removeAttribute("min");
-              }
-              if (prjClosedYmd) {
-                prjEndInput.max = prjClosedYmd;
-              } else {
-                prjEndInput.removeAttribute("max");
-              }
-              let end = normalizeYmd(prjEndInput.value);
-              if (start && end && end < start) {
-                end = start;
-                prjEndInput.value = end;
-              }
-              if (prjClosedYmd && end && end > prjClosedYmd) {
-                prjEndInput.value = prjClosedYmd;
-              }
-            }
-
-            function initDefaultEndDate() {
-              if (!prjEndInput) return;
-              let end = normalizeYmd(prjEndInput.value);
-              if (!end && prjClosedYmd) {
-                prjEndInput.value = prjClosedYmd;
-              }
-            }
-
             function resolveGroupId(row) {
               if (!row) return null;
               const raw =
@@ -179,7 +91,6 @@
               }
             }
 
-            /* ----- 프로젝트 내 그룹 선택 ----- */
             function closeGroupPicker() {
               if (!groupOverlay) return;
               groupOverlay.classList.remove("is-open");
@@ -238,7 +149,6 @@
             }
 
             async function openGroupPicker() {
-			 
               if (!groupOverlay || !groupPickList) return;
               const pid = Number(prjId);
               if (isNaN(pid)) return;
@@ -247,10 +157,9 @@
               groupOverlay.classList.add("is-open");
               groupOverlay.setAttribute("aria-hidden", "false");
               try {
-                const res = await fetch(
-                  "/project/member/projectGroups",
-                  { credentials: "same-origin" },
-                );
+                const res = await fetch("/project/member/projectGroups", {
+                  credentials: "same-origin",
+                });
                 const data = await res.json().catch(function () {
                   return {};
                 });
@@ -290,17 +199,6 @@
               });
             }
 
-            if (prjStartInput) {
-              prjStartInput.addEventListener("change", syncPeriodConstraints);
-              prjStartInput.addEventListener("input", syncPeriodConstraints);
-            }
-            if (prjEndInput) {
-              prjEndInput.addEventListener("change", syncPeriodConstraints);
-              prjEndInput.addEventListener("input", syncPeriodConstraints);
-            }
-            initDefaultEndDate();
-            syncPeriodConstraints();
-
             function buildCsrfHeaders() {
               const headers = { "Content-Type": "application/json" };
               const tokenMeta = document.querySelector('meta[name="_csrf"]');
@@ -332,16 +230,6 @@
               return Promise.resolve(false);
             }
 
-            function isEditStartChanged(currentStartYmd) {
-              return (
-                normalizeYmd(currentStartYmd) !== normalizeYmd(initialPrjStartYmd)
-              );
-            }
-
-            function isEditEndChanged(currentEndYmd) {
-              return normalizeYmd(currentEndYmd) !== normalizeYmd(initialPrjEndYmd);
-            }
-
             function isEditGrpChanged(currentGrpId) {
               const init =
                 initialGrpId != null && initialGrpId !== ""
@@ -354,32 +242,6 @@
               return init !== cur;
             }
 
-            function buildEditConfirmMessage(
-              startYmd,
-              endYmd,
-              grpName,
-              startChanged,
-              endChanged,
-              grpChanged,
-            ) {
-              const lines = ["변경사항은 다음과 같습니다."];
-              if (startChanged) {
-                lines.push("- 투입 시작일: " + (startYmd || "(없음)"));
-              }
-              if (endChanged) {
-                const display = endYmd ? endYmd : "(없음)";
-                lines.push("- 종료일자: " + display);
-              }
-              if (grpChanged) {
-                const name =
-                  grpName && String(grpName).trim()
-                    ? String(grpName).trim()
-                    : "(이름 없음)";
-                lines.push("- 소속그룹: " + name);
-              }
-              return lines.join("\n");
-            }
-
             const saveBtn = document.getElementById("btnMemberSave");
             if (saveBtn) {
               saveBtn.addEventListener("click", async function () {
@@ -390,12 +252,6 @@
                   ? grpIdInput.value.trim()
                   : "";
                 const gid = gidRaw ? Number(gidRaw) : NaN;
-                const start = prjStartInput
-                  ? normalizeYmd(prjStartInput.value)
-                  : "";
-                const end = prjEndInput
-                  ? normalizeYmd(prjEndInput.value)
-                  : "";
 
                 if (isNaN(pid)) {
                   await alertMsg("프로젝트 ID가 올바르지 않습니다.", "알림");
@@ -413,64 +269,20 @@
                   await alertMsg("소속 그룹을 선택하세요.", "알림");
                   return;
                 }
-                if (!start) {
-                  await alertMsg("프로젝트 투입 시작일을 입력하세요.", "알림");
-                  return;
-                }
-                const minStart = minStartYmd();
-                if (minStart && start < minStart) {
-                  await alertMsg(
-                    "프로젝트 투입일은 " + minStart + " 이후로만 지정할 수 있습니다.",
-                    "알림",
-                  );
-                  return;
-                }
-                if (prjClosedYmd && start > prjClosedYmd) {
-                  await alertMsg(
-                    "프로젝트 투입 시작일은 프로젝트 종료일(" +
-                      prjClosedYmd +
-                      ") 이전이어야 합니다.",
-                    "알림",
-                  );
-                  return;
-                }
-                if (end && end < start) {
-                  await alertMsg(
-                    "투입 종료일은 투입 시작일 이후여야 합니다.",
-                    "알림",
-                  );
-                  return;
-                }
-                if (prjClosedYmd && end && end > prjClosedYmd) {
-                  await alertMsg(
-                    "투입 종료일은 프로젝트 종료일(" +
-                      prjClosedYmd +
-                      ") 이후로 지정할 수 없습니다.",
-                    "알림",
-                  );
-                  return;
-                }
 
                 const grpName = grpInput
                   ? String(grpInput.value || "").trim()
                   : "";
-                const startChanged = isEditStartChanged(start);
-                const endChanged = isEditEndChanged(end);
                 const grpChanged = isEditGrpChanged(gid);
-                if (!startChanged && !endChanged && !grpChanged) {
+                if (!grpChanged) {
                   await alertMsg("변경된 내용이 없습니다.", "알림");
                   return;
                 }
 
                 const confirmed = await confirmMsg(
-                  buildEditConfirmMessage(
-                    start,
-                    end,
-                    grpName,
-                    startChanged,
-                    endChanged,
-                    grpChanged,
-                  ),
+                  "소속그룹: " +
+                    (grpName || "(이름 없음)") +
+                    "\n\n위 내용으로 수정하시겠습니까?",
                   "확인",
                 );
                 if (!confirmed) {
@@ -481,8 +293,6 @@
                   userId: uid,
                   oldGrpId: oldGid,
                   grpId: gid,
-                  prjStartDate: start,
-                  prjEndDate: end || null,
                 };
 
                 saveBtn.disabled = true;

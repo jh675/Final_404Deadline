@@ -19,16 +19,10 @@ public class MemberListCriteria {
     private String memberName;
     /** 소속 그룹명 부분 일치 */
     private String grpName;
-    /** 프로젝트 투입일 시작 (yyyy-MM-dd) */
-    private String prjStartFrom;
-    /** 프로젝트 투입일 끝 (yyyy-MM-dd) */
-    private String prjStartTo;
 
     public MemberListCriteria normalized() {
         memberName = nullToEmpty(memberName);
         grpName = nullToEmpty(grpName);
-        prjStartFrom = nullToEmpty(prjStartFrom);
-        prjStartTo = nullToEmpty(prjStartTo);
         return this;
     }
 

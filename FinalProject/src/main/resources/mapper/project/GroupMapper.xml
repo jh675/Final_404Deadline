@@ -30,7 +30,7 @@
       COUNT(M.USER_ID) AS cntMem,
       G.CREATED_ON AS createdOn
     FROM GRP G
-    LEFT JOIN MEMBER M ON M.GRP_ID = G.ID AND M.PRJ_END_DATE IS NULL
+    LEFT JOIN MEMBER M ON M.GRP_ID = G.ID
     <include refid="groupListWhere"/>
     GROUP BY G.ID, G.NAME, G.CREATED_ON
     ORDER BY G.ID
@@ -74,15 +74,13 @@
       U.NAME AS userName,
       U.TEL AS tel,
       U.EMAIL AS email,
-      G.NAME AS grpName,
-      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+      G.NAME AS grpName
     FROM MEMBER M
     JOIN USERS U ON U.ID = M.USER_ID
     JOIN GRP G ON G.ID = M.GRP_ID
     WHERE G.PRJ_ID = #{prjId}
       AND G.ID = #{grpId}
       AND G.STATUS_CD = '01ACTIVE'
-      AND M.PRJ_END_DATE IS NULL
     ORDER BY U.NAME
   </select>
 
@@ -134,13 +132,11 @@
       U.NAME AS userName,
       U.TEL AS tel,
       U.EMAIL AS email,
-      G.NAME AS grpName,
-      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+      G.NAME AS grpName
     FROM MEMBER M
     LEFT JOIN USERS U ON U.ID = M.USER_ID
     LEFT JOIN GRP G ON G.ID = M.GRP_ID
     WHERE G.PRJ_ID = #{prjId}
-      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
       AND G.STATUS_CD = '01ACTIVE'
     ORDER BY U.NAME, M.ID
   </select>

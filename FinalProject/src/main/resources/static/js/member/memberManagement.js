@@ -1,103 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-          (function memberSearchDates() {
-            const form = document.getElementById("memberSearchForm");
-            const start = document.getElementById("prjStartFrom");
-            const end = document.getElementById("prjStartTo");
-            if (!form || !start || !end) return;
-
-            const pad = (n) => String(n).padStart(2, "0");
-            const todayStr = () => {
-              const d = new Date();
-              return ( d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) );
-            };
-
-            const compare = (a, b) => {
-              if (!a || !b) return 0;
-              return a < b ? -1 : a > b ? 1 : 0;
-            };
-
-            function minYmd(a, b) {
-              if (!a) return b;
-              if (!b) return a;
-              return compare(a, b) <= 0 ? a : b;
-            }
-
-            function applyLimits() {
-              const today = todayStr();
-              const sv = start.value;
-              const ev = end.value;
-
-              end.max = today;
-              if (sv) {
-                end.min = sv;
-              } else {
-                end.removeAttribute("min");
-              }
-
-              start.max = ev ? minYmd(today, ev) : today;
-            }
-
-            function clampStart() {
-              const today = todayStr();
-              let sv = start.value;
-              let ev = end.value;
-              if (sv && compare(sv, today) > 0) {
-                sv = today;
-                start.value = sv;
-              }
-              if (sv && ev && compare(sv, ev) > 0) {
-                end.value = sv;
-              }
-              applyLimits();
-            }
-
-            function clampEnd() {
-              const today = todayStr();
-              let sv = start.value;
-              let ev = end.value;
-              if (ev && compare(ev, today) > 0) {
-                end.value = today;
-                ev = today;
-              }
-              if (sv && ev && compare(ev, sv) < 0) {
-                start.value = ev;
-              }
-              applyLimits();
-            }
-
-            clampStart();
-            clampEnd();
-            applyLimits();
-
-            start.addEventListener("change", clampStart);
-            start.addEventListener("input", clampStart);
-            end.addEventListener("change", clampEnd);
-            end.addEventListener("input", clampEnd);
-
-            form.addEventListener("submit", async function (e) {
-              clampStart();
-              clampEnd();
-              const today = todayStr();
-              const sv = start.value;
-              const ev = end.value;
-              if (sv && compare(sv, today) > 0) {
-                e.preventDefault();
-                await window.MemberQuestionModal.alert( "시작일은 오늘 이후로 지정할 수 없습니다.", "알림" );
-                return;
-              }
-              if (ev && compare(ev, today) > 0) {
-                e.preventDefault();
-                await window.MemberQuestionModal.alert( "종료일은 오늘 이후로 지정할 수 없습니다.", "알림" );
-                return;
-              }
-              if (sv && ev && compare(sv, ev) > 0) {
-                e.preventDefault();
-                await window.MemberQuestionModal.alert( "시작일은 종료일보다 늦을 수 없습니다.", "알림" );
-                return;
-              }
-            });
-          })();
-
           function formatDate(value) {
             if (value == null || value === "") return "";
             if ( typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ) return value;
@@ -407,14 +308,6 @@ document.addEventListener("DOMContentLoaded", function () {
                   width: 180,
                   align: "center",
                   sortable: false,
-                },
-                {
-                  header: "프로젝트 투입일",
-                  name: "prjStartDate",
-                  width: 130,
-                  align: "center",
-                  sortable: true,
-                  formatter: ({ value }) => formatDate(value),
                 },
               ],
               pageOptions: {

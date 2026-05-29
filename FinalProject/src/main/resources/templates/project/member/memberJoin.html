@@ -317,9 +317,6 @@
     <script th:inline="javascript">
 /*<![CDATA[*/
 const memJoinPrjId = /*[[${session.currentProjectId}]]*/ 0;
-      const memJoinPrjName = /*[[${session.project != null ? session.project.prjName : ''}]]*/ "";
-      const memJoinPrjStartDate = /*[[${session.project != null && session.project.startDate != null ? #dates.format(session.project.startDate, 'yyyy-MM-dd') : ''}]]*/ "";
-      const memJoinPrjClosedDate = /*[[${session.project != null && session.project.closedDate != null ? #dates.format(session.project.closedDate, 'yyyy-MM-dd') : ''}]]*/ "";
 /*]]>*/
 </script>
   </head>
@@ -351,35 +348,9 @@ const memJoinPrjId = /*[[${session.currentProjectId}]]*/ 0;
       </section>
 
       <section class="mem-join-section" aria-labelledby="mem-join-project-heading">
-        <h2 class="mem-join-section__title" id="mem-join-project-heading">프로젝트 정보</h2>
+        <h2 class="mem-join-section__title" id="mem-join-project-heading">소속 정보</h2>
         <div class="mem-join-section__body">
           <div class="mem-join-form">
-            <div class="mem-field-row">
-              <label for="memJoinPrjName">프로젝트명 <span class="req">*</span></label>
-              <input type="text" id="memJoinPrjName" readonly th:value="${session.project != null ? session.project.prjName : ''}" />
-            </div>
-            <div class="mem-field-row">
-              <label for="memJoinPrjStart">프로젝트 투입기간 <span class="req">*</span></label>
-              <div class="mem-period-inputs">
-                <input
-                  type="date"
-                  id="memJoinPrjStart"
-                  class="mem-input--editable"
-                  placeholder="연도-월-일"
-                />
-                <span class="mem-period-tilde" aria-hidden="true">~</span>
-                <input
-                  type="date"
-                  id="memJoinPrjEnd"
-                  class="mem-input--editable"
-                  placeholder="연도-월-일"
-                />
-              </div>
-            </div>
-            <div class="mem-field-row">
-              <label></label>
-              <p class="mem-join-hint" id="memJoinPeriodHint"></p>
-            </div>
             <div class="mem-field-row">
               <label for="memJoinGrpName">소속 그룹 <span class="req">*</span></label>
               <input
