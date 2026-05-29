@@ -75,7 +75,11 @@
 	select * from calender
 
 	<where>
-		and mem_id = #{memId}
+		and (
+			mem_id = #{memId}
+			or sharing_cd = '01CALSHARE'
+		
+		)
 		<if test="typeCd != null and typeCd != ''">
 			and type_cd = #{typeCd}
 		</if>
@@ -83,7 +87,7 @@
 			and (
 			place like '%' || #{keyword} || '%'
 			or cal_text like '%' || #{keyword} || '%'
-			)
+				)
 
 		</if>
 
