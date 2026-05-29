@@ -6,10 +6,26 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+
+import com.example.demo.alarm.event.NotificationEvent;
 import com.example.demo.project.group.mapper.GroupMapper;
-import com.example.demo.project.group.service.*;
-import com.example.demo.project.option.service.*;
+import com.example.demo.project.group.service.GroupDetailVO;
+import com.example.demo.project.group.service.GroupInsertProcParam;
+import com.example.demo.project.group.service.GroupListCriteria;
+import com.example.demo.project.group.service.GroupMemberDetailRowVO;
+import com.example.demo.project.group.service.GroupMemberPickRowVO;
+import com.example.demo.project.group.service.GroupRoleDetailRowVO;
+import com.example.demo.project.group.service.GroupService;
+import com.example.demo.project.group.service.GroupUpdateProcParam;
+import com.example.demo.project.group.service.ProjectGroupRowVO;
+import com.example.demo.project.option.service.RoleGroupRowVO;
+import com.example.demo.project.option.service.RoleRevokeResultVO;
+import com.example.demo.project.option.service.RoleService;
+import com.example.demo.util.subCode.mapper.SubcodeMapper;
+
 import lombok.RequiredArgsConstructor;
 
 /** 그룹 조회·등록·삭제 — DB 프로시저 호출 */
@@ -19,6 +35,8 @@ public class GroupServiceImpl implements GroupService {
 
     private final GroupMapper groupMapper;
     private final RoleService roleService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final SubcodeMapper subcodeMapper;
 
     @Override
     public List<ProjectGroupRowVO> selectProjectGroupList(GroupListCriteria criteria) {
@@ -111,6 +129,8 @@ public class GroupServiceImpl implements GroupService {
         if (!"OK".equalsIgnoreCase(msg.trim())) {
             throw new IllegalArgumentException(msg);
         }
+        
+    
     }
 
     @Override
@@ -124,6 +144,11 @@ public class GroupServiceImpl implements GroupService {
         if (groupMapper.selectGroupDetail(prjId, grpId) == null) {
             throw new IllegalArgumentException("프로젝트에 존재하지 않는 그룹입니다.");
         }
+        
+        List<GroupMemberDetailRowVO> beforeMembers = groupMapper.selectGroupMembers(prjId, grpId);
+        Set<Long> beforeUserIds = beforeMembers.stream()
+            .map(GroupMemberDetailRowVO::getUserId)
+            .collect(Collectors.toSet());
 
         GroupUpdateProcParam param = new GroupUpdateProcParam();
         param.setPrjId(prjId);
@@ -137,6 +162,24 @@ public class GroupServiceImpl implements GroupService {
         }
         if (!"OK".equalsIgnoreCase(msg.trim())) {
             throw new IllegalArgumentException(msg);
+        }
+        
+     // ✅ 새로 추가된 유저만 골라내기
+        String prjName = groupMapper.selectProjectNameByPrjId(prjId);
+        GroupDetailVO groupDetail = groupMapper.selectGroupDetail(prjId, grpId);
+        String grpName = groupDetail != null ? groupDetail.getGrpName() : "알 수 없음";
+
+        if (userIds != null) {
+            userIds.stream()
+                .filter(Objects::nonNull)
+                .filter(userId -> !beforeUserIds.contains(userId)) // 기존에 없던 유저만
+                .forEach(userId -> {
+                    eventPublisher.publishEvent(new NotificationEvent(
+                        this,
+                        "프로젝트 그룹에 참여되었습니다: [" + prjName + "] " + grpName,
+                        String.valueOf(userId) // ← 특정 유저에게만 전송
+                    ));
+                });
         }
     }
 

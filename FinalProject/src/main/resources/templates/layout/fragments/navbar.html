@@ -269,15 +269,11 @@
 				    });
 				});
 			</script>
-			<!-- SSE 연결 스크립트 -->
 			<script th:inline="javascript">
 			document.addEventListener('DOMContentLoaded', function () {
 			
-				const userId = String(document.getElementById('loginUserId').value);
-				if (!userId || userId === "0") return;
-			
-			    // 비로그인이면 SSE 연결 안 함
-			    if (!userId) return;
+			    const userId = String(document.getElementById('loginUserId').value);
+			    if (!userId || userId === "0") return;
 			
 			    const badge       = document.getElementById('notificationBadge');
 			    const list        = document.getElementById('notificationList');
@@ -286,6 +282,15 @@
 			
 			    let unreadCount = 0;
 			
+			    // SSE 재연결 설정
+			    const SSE_BASE_DELAY_MS = 1000;
+			    const SSE_MAX_DELAY_MS  = 60000;
+			    const SSE_MAX_ATTEMPTS  = 12;
+			    let reconnectAttempt = 0;
+			    let reconnectTimer   = null;
+			    let eventSource      = null;
+			
+			    // 아이콘 매핑
 			    function getIcon(message) {
 			        if (message.includes('이슈가 등록'))        return '🐛';
 			        if (message.includes('이슈 상태가 변경'))   return '🔄';
@@ -294,15 +299,12 @@
 			        if (message.includes('프로젝트 진행상태')) return '📊';
 			        if (message.includes('회사 일정이 등록'))   return '📅';
 			        if (message.includes('1시간 후 일정'))      return '⏰';
+			        if (message.includes('프로젝트가 생성'))    return '🚀';
 			        return '🔔';
 			    }
 			
-			    function addNotification(message) {
-			        emptyNoti.style.display = 'none';
-			
-			        const icon = getIcon(message);
-			        const time = new Date().toLocaleTimeString();
-			
+			    // 알림 렌더링
+			    function renderNotification(icon, message, time) {
 			        const item = document.createElement('li');
 			        item.className = 'dropdown-item border-bottom py-2 px-3';
 			        item.style.whiteSpace = 'normal';
@@ -313,20 +315,36 @@
 			                    <span>${icon}</span>
 			                    <small class="ms-1">${message}</small>
 			                </div>
-			                <button class="btn btn-sm btn-link text-muted p-0 ms-2 delete-btn" 
+			                <button class="btn btn-sm btn-link text-muted p-0 ms-2 delete-btn"
 			                        style="font-size:12px; flex-shrink:0;">✕</button>
 			            </div>
 			            <div class="text-muted mt-1" style="font-size:11px;">${time}</div>
 			        `;
-			
 			        item.querySelector('.delete-btn').addEventListener('click', function () {
 			            item.remove();
 			            unreadCount = Math.max(0, unreadCount - 1);
 			            updateBadge();
 			            checkEmpty();
+			            // sessionStorage에서도 삭제
+			            const saved = JSON.parse(sessionStorage.getItem('notifications') || '[]');
+			            const filtered = saved.filter(n => !(n.message === message && n.time === time));
+			            sessionStorage.setItem('notifications', JSON.stringify(filtered));
 			        });
-			
 			        list.prepend(item);
+			    }
+			
+			    // 알림 추가
+			    function addNotification(message) {
+			        emptyNoti.style.display = 'none';
+			        const icon = getIcon(message);
+			        const time = new Date().toLocaleTimeString();
+			
+			        // sessionStorage에 저장
+			        const notifications = JSON.parse(sessionStorage.getItem('notifications') || '[]');
+			        notifications.unshift({ message, time, icon });
+			        sessionStorage.setItem('notifications', JSON.stringify(notifications));
+			
+			        renderNotification(icon, message, time);
 			        unreadCount++;
 			        updateBadge();
 			
@@ -335,6 +353,18 @@
 			        }
 			    }
 			
+			    // 페이지 로드 시 sessionStorage 복원
+			    function loadSavedNotifications() {
+			        const saved = JSON.parse(sessionStorage.getItem('notifications') || '[]');
+			        if (saved.length > 0) {
+			            emptyNoti.style.display = 'none';
+			            saved.forEach(n => renderNotification(n.icon, n.message, n.time));
+			            unreadCount = saved.length;
+			            updateBadge();
+			        }
+			    }
+			
+			    // 뱃지 업데이트
 			    function updateBadge() {
 			        if (unreadCount > 0) {
 			            badge.style.display = 'block';
@@ -344,6 +374,7 @@
 			        }
 			    }
 			
+			    // 알림 목록 비었는지 확인
 			    function checkEmpty() {
 			        const items = list.querySelectorAll('.dropdown-item');
 			        if (items.length === 0) {
@@ -351,32 +382,86 @@
 			        }
 			    }
 			
+			    // 재연결 상태 초기화
+			    function resetReconnectState() {
+			        reconnectAttempt = 0;
+			        if (reconnectTimer) {
+			            clearTimeout(reconnectTimer);
+			            reconnectTimer = null;
+			        }
+			    }
+			
+			    // SSE 연결
+			    function connectSse() {
+			        if (eventSource) {
+			            eventSource.close();
+			        }
+			
+			        eventSource = new EventSource(`/api/notifications/subscribe?userId=${userId}`);
+			
+			        // 연결 성공 시 재연결 상태 초기화
+			        eventSource.onopen = function () {
+			            resetReconnectState();
+			        };
+			
+			        // heartbeat 수신 시 재연결 상태 초기화
+			        eventSource.addEventListener('heartbeat', function () {
+			            resetReconnectState();
+			        });
+			
+			        // 알림 수신
+			        eventSource.addEventListener('notification', function (event) {
+			            addNotification(event.data);
+			        });
+			
+			        // 연결 끊김 시 exponential backoff 재연결
+			        eventSource.onerror = function () {
+			            eventSource.close();
+			            scheduleReconnect();
+			        };
+			    }
+			
+			    // Exponential Backoff 재연결
+			    function scheduleReconnect() {
+			        if (reconnectAttempt >= SSE_MAX_ATTEMPTS) {
+			            console.warn('SSE 재연결 최대 횟수 초과. 알림 실시간 수신이 중단되었습니다.');
+			            return;
+			        }
+			        const delay = Math.min(SSE_MAX_DELAY_MS, SSE_BASE_DELAY_MS * Math.pow(2, reconnectAttempt));
+			        console.log(`SSE 연결 끊김. ${delay / 1000}초 후 재연결 (시도 ${reconnectAttempt + 1}/${SSE_MAX_ATTEMPTS})`);
+			        reconnectAttempt++;
+			        reconnectTimer = setTimeout(connectSse, delay);
+			    }
+			
+			    // 전체 삭제
 			    clearAllBtn.addEventListener('click', function () {
 			        list.querySelectorAll('.dropdown-item').forEach(item => item.remove());
 			        unreadCount = 0;
 			        updateBadge();
 			        checkEmpty();
+			        sessionStorage.removeItem('notifications');
 			    });
 			
+			    // 드롭다운 열면 뱃지 초기화
 			    document.getElementById('notificationBtn').addEventListener('click', function () {
 			        unreadCount = 0;
 			        updateBadge();
 			    });
 			
+			    // 브라우저 알림 권한 요청
 			    if (Notification.permission === 'default') {
 			        Notification.requestPermission();
 			    }
 			
-			    // SSE 연결
-			    const eventSource = new EventSource(`/api/notifications/subscribe?userId=${userId}`);
-			
-			    eventSource.addEventListener('notification', function (event) {
-			        addNotification(event.data);
+			    // 페이지 떠날 때 연결 정리
+			    window.addEventListener('beforeunload', function () {
+			        if (eventSource) eventSource.close();
+			        if (reconnectTimer) clearTimeout(reconnectTimer);
 			    });
 			
-			    eventSource.onerror = function () {
-			        console.warn('SSE 연결이 끊겼습니다. 재연결 시도 중...');
-			    };
+			    // 초기 실행
+			    loadSavedNotifications();
+			    connectSse();
 			});
 			</script>
 		</div>
