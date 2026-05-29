@@ -19,5 +19,4 @@ public class GroupMemberDetailRowVO {
     private String tel;
     private String email;
     private String grpName;
-    private String prjStartDate;
 }

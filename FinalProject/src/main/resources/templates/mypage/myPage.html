@@ -11,12 +11,43 @@
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
 	rel="stylesheet">
+
+<!-- Toast UI -->
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+<script
+	src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
 
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-	rel="stylesheet">
+<!-- DHTMLX Gantt -->
+<link rel="stylesheet"
+	href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
+<script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
+
+
+<style>
+.status-new.gantt_task_line {
+	background-color: #3498db;
+	border-color: #2980b9;
+}
+
+.status-progress.gantt_task_line {
+	background-color: #e67e22;
+	border-color: #d35400;
+}
+
+.status-review.gantt_task_line {
+	background-color: #9b59b6;
+	border-color: #8e44ad;
+}
+
+.status-done.gantt_task_line {
+	background-color: #27ae60;
+	border-color: #1e8449;
+}
+</style>
+
+
+
 </head>
 <body>
 	<div layout:fragment="content">
@@ -55,7 +86,7 @@
 
 					<!-- 정보 수정 버튼 -->
 					<button type="button" class="btn btn-outline-secondary btn-sm"
-						data-bs-toggle="modal" data-bs-target="#editInfoModal">
+						data-bs-toggle="modal" data-bs-target="#mypageEditModal">
 						정보 수정</button>
 				</div>
 			</div>
@@ -115,9 +146,22 @@
 						<div id="mypageCalendar" style="height: 500px;"></div>
 					</div>
 
-					<!-- 간트차트 탭 (추후 작업) -->
+					<!-- 간트차트 탭 -->
 					<div class="tab-pane fade" id="ganttTab">
-						<p class="text-muted">간트차트 영역 (추후 작업)</p>
+						<!-- 색상 범례 -->
+						<div class="d-flex align-items-center gap-3 mb-2"
+							style="font-size: 13px;">
+							<span class="fw-bold">이슈상태 :</span> <span><span
+								style="display: inline-block; width: 12px; height: 12px; background: #3498db; margin-right: 4px; border-radius: 2px; vertical-align: middle;"></span>신규</span>
+							<span><span
+								style="display: inline-block; width: 12px; height: 12px; background: #e67e22; margin-right: 4px; border-radius: 2px; vertical-align: middle;"></span>진행중</span>
+							<span><span
+								style="display: inline-block; width: 12px; height: 12px; background: #9b59b6; margin-right: 4px; border-radius: 2px; vertical-align: middle;"></span>검토</span>
+							<span><span
+								style="display: inline-block; width: 12px; height: 12px; background: #27ae60; margin-right: 4px; border-radius: 2px; vertical-align: middle;"></span>완료</span>
+						</div>
+						<!-- 간트차트 렌더링 영역 -->
+						<div id="mypageGantt" style="width: 100%; height: 400px;"></div>
 					</div>
 
 				</div>
@@ -180,116 +224,10 @@
 		</div>
 
 		<!-- ===== 내 정보 수정 모달 ===== -->
-		<div class="modal fade" id="editInfoModal" tabindex="-1">
-			<div class="modal-dialog modal-lg">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">내 정보 수정</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-					</div>
-					<div class="modal-body">
-						<div class="row">
+		<div th:replace="~{mypage/modal/mypageUserEdit :: mypageEditModal}"></div>
 
-							<!-- 왼쪽 폼 -->
-							<div class="col-md-8">
-
-								<!-- 아이디 (수정 불가) -->
-								<div class="row mb-3 align-items-center">
-									<label class="col-sm-3 col-form-label">아이디</label>
-									<div class="col-sm-9">
-										<input type="text" class="form-control bg-light"
-											th:value="${#authentication.principal.login}" disabled>
-									</div>
-								</div>
-
-								<!-- 기업번호 (수정 불가) -->
-								<div class="row mb-3 align-items-center">
-									<label class="col-sm-3 col-form-label">기업번호</label>
-									<div class="col-sm-9">
-										<input type="text" class="form-control bg-light"
-											th:value="${#authentication.principal.bizNo}" disabled>
-									</div>
-								</div>
-
-								<!-- 이름 (수정 불가) -->
-								<div class="row mb-3 align-items-center">
-									<label class="col-sm-3 col-form-label">이름</label>
-									<div class="col-sm-9">
-										<input type="text" class="form-control bg-light"
-											th:value="${#authentication.principal.name}" disabled>
-									</div>
-								</div>
-
-								<!-- 이메일 (수정 가능) -->
-								<div class="row mb-3 align-items-center">
-									<label class="col-sm-3 col-form-label"> 이메일 <span
-										class="text-danger">*</span>
-									</label>
-									<div class="col-sm-9">
-										<input type="email" class="form-control" id="modal-email"
-											th:value="${#authentication.principal.email}">
-									</div>
-								</div>
-
-								<!-- 전화번호 (수정 가능) -->
-								<div class="row mb-3 align-items-center">
-									<label class="col-sm-3 col-form-label">전화번호</label>
-									<div class="col-sm-9">
-										<input type="text" class="form-control" id="modal-tel"
-											th:value="${#authentication.principal.tel}">
-									</div>
-								</div>
-
-								<!-- 비밀번호 (수정 가능) -->
-								<div class="row mb-3 align-items-center">
-									<label class="col-sm-3 col-form-label">비밀번호</label>
-									<div class="col-sm-9">
-										<input type="password" class="form-control"
-											id="modal-password" placeholder="변경할 비밀번호 입력 (미입력시 유지)">
-									</div>
-								</div>
-
-								<!-- 역할 (수정 가능) -->
-								<div class="row mb-3 align-items-center">
-									<label class="col-sm-3 col-form-label">역할</label>
-									<div class="col-sm-9">
-										<div class="form-check form-check-inline">
-											<input class="form-check-input" type="radio" name="adminCd"
-												id="role-leader" value="LEADER"
-												th:checked="${#authentication.principal.adminCd == 'LEADER'}">
-											<label class="form-check-label" for="role-leader">프로젝트
-												리더</label>
-										</div>
-										<div class="form-check form-check-inline">
-											<input class="form-check-input" type="radio" name="adminCd"
-												id="role-member" value="MEMBER"
-												th:checked="${#authentication.principal.adminCd == 'MEMBER'}">
-											<label class="form-check-label" for="role-member">팀원</label>
-										</div>
-									</div>
-								</div>
-
-								<!-- 계정 상태 (수정 가능) -->
-								<div class="row mb-3 align-items-center">
-									<label class="col-sm-3 col-form-label">계정 상태</label>
-									<div class="col-sm-9">
-										<div class="form-check form-check-inline">
-											<input class="form-check-input" type="radio" name="statusCd"
-												id="status-active" value="ACTIVE"
-												th:checked="${#authentication.principal.statusCd == 'ACTIVE'}">
-											<label class="form-check-label" for="status-active">활성</label>
-										</div>
-										<div class="form-check form-check-inline">
-											<input class="form-check-input" type="radio" name="statusCd"
-												id="status-inactive" value="INACTIVE"
-												th:checked="${#authentication.principal.statusCd == 'INACTIVE'}">
-											<label class="form-check-label" for="status-inactive">비활성화</label>
-										</div>
-									</div>
-								</div>
-
-							</div>
-
+		
+	
 							<!-- 오른쪽 이미지 영역 (추후 작업) -->
 							<div
 								class="col-md-4 d-flex align-items-start justify-content-center pt-2">
@@ -308,22 +246,16 @@
 				</div>
 			</div>
 		</div>
-
-	</div>
-
-	<th:block layout:fragment="script">
-		<script th:src="@{/js/mypage/mypage.js}"></script>
-	</th:block>
-	
-	<script>
+<script th:src="@{/js/mypage/mypage.js}"></script>
+		<script>
 	
 	// =============================================
 	// 1. 마이페이지 캘린더 (조회 전용)
 	// =============================================
 		
-		 const Calendar = tui.Calendar;
+	const Calendar = tui.Calendar;
 	
-    const calendar = new Calendar('#calendar', {
+    const calendar = new Calendar('#mypagecalendar', {
         defaultView: 'month',
         language: 'ko',
         useFormPopup: false,   
@@ -377,7 +309,7 @@
         });
     }
 	
-  //=========================================================================================
+    //=========================================================================================
     // 2. 공휴일 불러오기
 	//=========================================================================================	
 
@@ -414,13 +346,112 @@
 	        const month = date.getMonth() + 1;
 	        document.getElementById('currentDate').textContent = `${year}년 ${month}월`;
 	    }
-		
-  
-		
-    
 	
+	  
+	  
+	    //=========================================================================================
+	    // 3. 간트차트 불러오기
+		//=========================================================================================	
+		
+	    let mypageGantt = false;
+	    
+			function loadMypageGantt() {
+			if(mypageGantt)	return; 
+			
+			
+			gantt.config.columns = [
+				    { name: "text",        label: "이슈명",   width: 200, tree: true },
+			        { name: "status_cd",   label: "이슈상태", width: 80 },
+			        { name: "assignee",    label: "담당자",   width: 80 },
+			        { name: "due_date",    label: "마감일",   width: 100 },
+			        { name: "progress",    label: "진척도",   width: 60, template: task => task.progress_text }
+			];
+			
+			 	gantt.config.row_height = 30;
+			    gantt.config.bar_height = 18;
+			    gantt.config.min_column_width = 30;
+			    gantt.config.grid_width = 550;
+			    gantt.config.readonly = true;
+
+			    gantt.config.scales = [
+			        { unit: "month", step: 1, format: "%Y-%m" },
+			        { unit: "day",   step: 1, format: "%d" }
+			    ];
+			    
+			    gantt.templates.task_class = function(start, end, task) {
+					switch(task.status_cd) {
+
+					
+						case "신규":  return "status-new";
+						case "진행중": return "status-progress";
+						case "검토":  return "status-review";
+						case "완료":  return "status-done";
+						default:     return "";
+					} 
+			    
+			    }
+			    
+		gantt.init("mypageGantt");
+		mypageGantt = true;
+		
+		// 내 담당 이슈 가져오기 
+		
+		fetch(`/project/gantt/listget?filter=my`)
+		 .then(res => res.json())
+		 .then(data => {
+				allTasks = data
+				.filter(issue => {
+					const startVal = issue.startDate || issue.estStartDate;
+					if(!startVal || !issue.dueDate) return false;
+					const start = new Date(startVal);
+					const end = new Date(issue.dueDate);
+					
+					if(isNaN(start.getTime())|| isNaN(end.getTime())) return false;
+					if(start.getFullYear() === 1970) return false; 
+					if(end <= start) return false;
+					return true;
+				
+				})
+				.map(issue => ({
+				    text:           issue.subject, // 이슈명 
+				    status_cd:      issue.statusCd, // 이슈상태 
+				    priority_cd:    issue.priorityCd, // 우선순위 
+				    assignee:       issue.memName, // 담당자 
+				    est_start_date: formatDate(issue.estStartDate), // 시작예정일(template용)
+				    due_date:       formatDate(issue.dueDate), // 이슈 마감일 
+				    start_date:     formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
+				    start_date_str: formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
+				    end_date:       formatDate(issue.dueDate), //실제 완료일 
+				    end_date_str:   formatDate(issue.dueDate), //실제 완료일 
+				    progress:       (issue.doneRatio ?? 0) / 100, // 진척도 (막대 그래프용)
+				    progress_text:  (issue.doneRatio ?? 0) + "%" // 진척도 (막대 그래프용)
+				}));	
+				gantt.clearAll();
+				gantt.parse({data: allTasks});
+			
+		 	});
+
+	};
+	
+	// 날짜 포멧데이터 
+	 function formatMypageDate(dateStr) {
+			const day = new Date(dateStr);
+			const dd = String(day.getDate()).padStart(2, '0'); 
+			const month = String (day.getMonth() +1) .padStart(2, '0');
+			const years = day.getFullYear();
+			return `${day.getFullYear()}-${month}-${dd}`;			
+		  } 
+	
+	// 간트차트 탭 클릭 시 불러오기 
+	 document.querySelector('[data-bs-target="#ganttTab"]')
+			 .addEventListener('click', function() {
+			  setTimeout(loadMypageGantt, 300);
+
+	 });
+		
+
 	</script>
 
-
+	</div>
 </body>
 </html>
