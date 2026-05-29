@@ -11,12 +11,43 @@
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
 	rel="stylesheet">
+
+<!-- Toast UI -->
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+<script
+	src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
 
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-	rel="stylesheet">
+<!-- DHTMLX Gantt -->
+<link rel="stylesheet"
+	href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
+<script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
+
+
+<style>
+.status-new.gantt_task_line {
+	background-color: #3498db;
+	border-color: #2980b9;
+}
+
+.status-progress.gantt_task_line {
+	background-color: #e67e22;
+	border-color: #d35400;
+}
+
+.status-review.gantt_task_line {
+	background-color: #9b59b6;
+	border-color: #8e44ad;
+}
+
+.status-done.gantt_task_line {
+	background-color: #27ae60;
+	border-color: #1e8449;
+}
+</style>
+
+
+
 </head>
 <body>
 	<div layout:fragment="content">
@@ -115,9 +146,22 @@
 						<div id="mypageCalendar" style="height: 500px;"></div>
 					</div>
 
-					<!-- 간트차트 탭 (추후 작업) -->
+					<!-- 간트차트 탭 -->
 					<div class="tab-pane fade" id="ganttTab">
-						<p class="text-muted">간트차트 영역 (추후 작업)</p>
+						<!-- 색상 범례 -->
+						<div class="d-flex align-items-center gap-3 mb-2"
+							style="font-size: 13px;">
+							<span class="fw-bold">이슈상태 :</span> <span><span
+								style="display: inline-block; width: 12px; height: 12px; background: #3498db; margin-right: 4px; border-radius: 2px; vertical-align: middle;"></span>신규</span>
+							<span><span
+								style="display: inline-block; width: 12px; height: 12px; background: #e67e22; margin-right: 4px; border-radius: 2px; vertical-align: middle;"></span>진행중</span>
+							<span><span
+								style="display: inline-block; width: 12px; height: 12px; background: #9b59b6; margin-right: 4px; border-radius: 2px; vertical-align: middle;"></span>검토</span>
+							<span><span
+								style="display: inline-block; width: 12px; height: 12px; background: #27ae60; margin-right: 4px; border-radius: 2px; vertical-align: middle;"></span>완료</span>
+						</div>
+						<!-- 간트차트 렌더링 영역 -->
+						<div id="mypageGantt" style="width: 100%; height: 400px;"></div>
 					</div>
 
 				</div>
@@ -308,22 +352,17 @@
 				</div>
 			</div>
 		</div>
+		<!-- <script th:src="@{/js/mypage/mypage.js}"></script> 나중에 깃허브 올리기 전에 주석해제 하기  -->
 
-	</div>
-
-	<th:block layout:fragment="script">
-		<script th:src="@{/js/mypage/mypage.js}"></script>
-	</th:block>
-	
-	<script>
+		<script>
 	
 	// =============================================
 	// 1. 마이페이지 캘린더 (조회 전용)
 	// =============================================
 		
-		 const Calendar = tui.Calendar;
+	const Calendar = tui.Calendar;
 	
-    const calendar = new Calendar('#calendar', {
+    const calendar = new Calendar('#mypagecalendar', {
         defaultView: 'month',
         language: 'ko',
         useFormPopup: false,   
@@ -377,7 +416,7 @@
         });
     }
 	
-  //=========================================================================================
+    //=========================================================================================
     // 2. 공휴일 불러오기
 	//=========================================================================================	
 
@@ -414,13 +453,112 @@
 	        const month = date.getMonth() + 1;
 	        document.getElementById('currentDate').textContent = `${year}년 ${month}월`;
 	    }
-		
-  
-		
-    
 	
+	  
+	  
+	    //=========================================================================================
+	    // 3. 간트차트 불러오기
+		//=========================================================================================	
+		
+	    let mypageGantt = false;
+	    
+			function loadMypageGantt() {
+			if(mypageGantt)	return; 
+			
+			
+			gantt.config.columns = [
+				    { name: "text",        label: "이슈명",   width: 200, tree: true },
+			        { name: "status_cd",   label: "이슈상태", width: 80 },
+			        { name: "assignee",    label: "담당자",   width: 80 },
+			        { name: "due_date",    label: "마감일",   width: 100 },
+			        { name: "progress",    label: "진척도",   width: 60, template: task => task.progress_text }
+			];
+			
+			 	gantt.config.row_height = 30;
+			    gantt.config.bar_height = 18;
+			    gantt.config.min_column_width = 30;
+			    gantt.config.grid_width = 550;
+			    gantt.config.readonly = true;
+
+			    gantt.config.scales = [
+			        { unit: "month", step: 1, format: "%Y-%m" },
+			        { unit: "day",   step: 1, format: "%d" }
+			    ];
+			    
+			    gantt.templates.task_class = function(start, end, task) {
+					switch(task.status_cd) {
+
+					
+						case "신규":  return "status-new";
+						case "진행중": return "status-progress";
+						case "검토":  return "status-review";
+						case "완료":  return "status-done";
+						default:     return "";
+					} 
+			    
+			    }
+			    
+		gantt.init("mypageGantt");
+		mypageGantt = true;
+		
+		// 내 담당 이슈 가져오기 
+		
+		fetch(`/project/gantt/listget?filter=my`)
+		 .then(res => res.json())
+		 .then(data => {
+				allTasks = data
+				.filter(issue => {
+					const startVal = issue.startDate || issue.estStartDate;
+					if(!startVal || !issue.dueDate) return false;
+					const start = new Date(startVal);
+					const end = new Date(issue.dueDate);
+					
+					if(isNaN(start.getTime())|| isNaN(end.getTime())) return false;
+					if(start.getFullYear() === 1970) return false; 
+					if(end <= start) return false;
+					return true;
+				
+				})
+				.map(issue => ({
+				    text:           issue.subject, // 이슈명 
+				    status_cd:      issue.statusCd, // 이슈상태 
+				    priority_cd:    issue.priorityCd, // 우선순위 
+				    assignee:       issue.memName, // 담당자 
+				    est_start_date: formatDate(issue.estStartDate), // 시작예정일(template용)
+				    due_date:       formatDate(issue.dueDate), // 이슈 마감일 
+				    start_date:     formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
+				    start_date_str: formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
+				    end_date:       formatDate(issue.dueDate), //실제 완료일 
+				    end_date_str:   formatDate(issue.dueDate), //실제 완료일 
+				    progress:       (issue.doneRatio ?? 0) / 100, // 진척도 (막대 그래프용)
+				    progress_text:  (issue.doneRatio ?? 0) + "%" // 진척도 (막대 그래프용)
+				}));	
+				gantt.clearAll();
+				gantt.parse({data: allTasks});
+			
+		 	});
+
+	};
+	
+	// 날짜 포멧데이터 
+	 function formatMypageDate(dateStr) {
+			const day = new Date(dateStr);
+			const dd = String(day.getDate()).padStart(2, '0'); 
+			const month = String (day.getMonth() +1) .padStart(2, '0');
+			const years = day.getFullYear();
+			return `${day.getFullYear()}-${month}-${dd}`;			
+		  } 
+	
+	// 간트차트 탭 클릭 시 불러오기 
+	 document.querySelector('[data-bs-target="#ganttTab"]')
+			 .addEventListener('click', function() {
+			  setTimeout(loadMypageGantt, 300);
+
+	 });
+		
+
 	</script>
 
-
+	</div>
 </body>
 </html>
