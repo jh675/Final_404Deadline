@@ -99,10 +99,12 @@ public class MilestoneRestController {
 			return null;
 		}
 	}
+	
 	@DeleteMapping("/milestone/{id}")
 	public Long deleteMilestone(@PathVariable("id")Long id) {
 		return service.deleteMilestone(id);
 	}
+	
 	@GetMapping("/avg/{id}")
 	public Long getAvg(@PathVariable("id") Long id) {
 		return service.getAvg(id);
@@ -111,5 +113,19 @@ public class MilestoneRestController {
 	@GetMapping("/expected/{id}")
 	public Long getExpectedProgress(@PathVariable("id") Long id) {
 		return service.getExpectedProgress(id);
+	}
+	
+	@PutMapping("/issue/move")
+	public Long moveIssue(@RequestBody MilestoneIssueVO milestoneIssueVO) {
+		System.out.println(milestoneIssueVO);
+		return service.moveIssue(milestoneIssueVO);
+	}
+	@DeleteMapping("/timeline/{id}")
+	public Long deleteTimeline(@PathVariable("id") Long id) {
+		return service.deleteTimeline(id);
+	}
+	@PutMapping("/timeline")
+	public Long updateTimeline(@RequestBody MilestoneTimelineVO timelineVO) {
+		return service.updateTimeline(timelineVO);
 	}
 }

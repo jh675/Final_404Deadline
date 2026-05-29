@@ -61,7 +61,7 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 	@Override
 	public Long updateTimeline(MilestoneTimelineVO timelineVO) {
-		return null;
+		return mapper.updateTimeline(timelineVO);
 	}
 
 
@@ -72,7 +72,7 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 	@Override
 	public Long deleteTimeline(Long id) {
-		return null;
+		return mapper.deleteTimeline(id);
 	}
 
 	@Override
@@ -110,5 +110,13 @@ public class MilestoneServiceImpl implements MilestoneService {
 				milestone.getEndDate(),
 				holidays);
 	}
+
+	@Override
+	public Long moveIssue(MilestoneIssueVO milestoneIssueVO) {
+		// TODO Auto-generated method stub
+		return mapper.moveIssue(milestoneIssueVO);
+	}
+
+
 
 }

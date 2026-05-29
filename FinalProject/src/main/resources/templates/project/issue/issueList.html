@@ -600,7 +600,8 @@
 
 		<div id="grid"></div>
 		<div class="issue-register-actions">
-			<a th:href="@{/project/issue/pivot}" class="issue-pivot-btn">통계</a>
+			<a th:href="@{/project/issue/pivot}" class="issue-pivot-btn"
+				th:if="${@prjAuth.hasRole('ROLE_ISSUE_VIEW')}">통계</a>
 			<a th:href="@{/project/issue/register}" class="issue-register-btn" th:if="${@prjAuth.hasRole('ROLE_ISSUE_CREATE')}">이슈 등록</a>
 		</div>
 	</div>

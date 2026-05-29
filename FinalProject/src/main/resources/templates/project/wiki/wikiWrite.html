@@ -181,6 +181,72 @@
                 border-radius: 4px;
             }
 
+            .wiki-link-hint {
+                font-size: 12px;
+                color: #888;
+                margin: 0 0 8px;
+            }
+
+            .wiki-link-hint code {
+                background: #f5f5f5;
+                padding: 1px 5px;
+                border-radius: 3px;
+                font-size: 11px;
+            }
+
+            .wiki-link-autocomplete {
+                position: fixed;
+                z-index: 10050;
+                background: #fff;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+                overflow: hidden;
+            }
+
+            .wiki-link-autocomplete-header {
+                padding: 8px 12px;
+                font-size: 11px;
+                color: #666;
+                background: #fafafa;
+                border-bottom: 1px solid #eee;
+            }
+
+            .wiki-link-autocomplete-list {
+                max-height: 220px;
+                overflow-y: auto;
+            }
+
+            .wiki-link-autocomplete-item {
+                display: block;
+                width: 100%;
+                text-align: left;
+                padding: 8px 12px;
+                border: none;
+                background: #fff;
+                font-size: 13px;
+                cursor: pointer;
+            }
+
+            .wiki-link-autocomplete-item:hover,
+            .wiki-link-autocomplete-item.is-active {
+                background: #f1f8e9;
+            }
+
+            .wiki-link-autocomplete-item.is-issue {
+                color: #1565c0;
+            }
+
+            .wiki-link-autocomplete-item.is-wiki {
+                color: #2e7d32;
+            }
+
+            .wiki-link-autocomplete-empty {
+                padding: 10px 12px;
+                font-size: 12px;
+                color: #888;
+            }
+
             /* 첨부파일 */
             .attachment-list {
                 list-style: none;
@@ -351,7 +417,10 @@
                 <!-- 2·3. 마크다운 에디터 (TOAST UI Editor) -->
                 <div class="wiki-form-group">
                     <label>내용</label>
-                    <p class="text-muted small mb-2">마크다운으로 내용을 작성하세요.</p>
+                    <p class="wiki-link-hint" th:inline="none">
+                        위키: <code>[[제목]]</code> · 이슈: <code>[[#번호 제목]]</code>
+                        (선택 시 제목과 번호가 함께 저장됩니다)
+                    </p>
                     <div id="wikiEditor"></div>
                 </div>
 
@@ -359,6 +428,7 @@
                 <div class="wiki-form-group">
                     <label for="parentWiki">상위 위키</label>
                     <select id="parentWiki" name="parentId">
+                        <option value="" th:selected="${selectedParentId == null}">(없음)</option>
                         <option th:each="p : ${pageList}"
                                 th:value="${p.id}"
                                 th:text="${p.title}"
@@ -399,7 +469,8 @@
                                 class="attach-row-existing"
                                 th:attr="data-attach-id=${file.id}, data-file-size=${file.fileSize != null ? file.fileSize : 0}">
                                 <span th:text="${file.fileName != null ? file.fileName : file.diskFileName}">파일명</span>
-                                <button type="button" class="btn-remove-existing">첨부삭제</button>
+                                <button type="button" class="btn-remove-existing"
+                                        th:if="${@prjAuth.hasRole('ROLE_WIKI_UPDATE')}">첨부삭제</button>
                             </li>
                         </ul>
                     </div>
@@ -416,7 +487,8 @@
 
                 <!-- 7·8. 작성 / 취소 -->
                 <div class="wiki-form-actions">
-                    <a class="btn-cancel" th:if="${page != null and page.id != null}" th:href="@{/project/wiki/view(id=${page.id})}">취소</a>
+                    <a class="btn-cancel" th:if="${page != null and page.id != null and page.title != null}"
+                       th:href="@{/project/wiki/view/{name}(name=${page.title})}">취소</a>
                     <a class="btn-cancel" th:unless="${page != null and page.id != null}" th:href="@{/project/wiki/view}">취소</a>
                     <button type="submit" class="btn-submit"
                             th:text="${page != null and page.id != null} ? '수정' : '작성'">작성</button>
@@ -436,6 +508,7 @@
     </div>
 
     <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"></script>
+    <script th:src="@{/js/wiki/wiki-link-autocomplete.js}"></script>
     <script th:inline="javascript">
         var wikiEditorInstance = null;
 
@@ -471,6 +544,10 @@
             if (initialContent) {
                 wikiEditorInstance.setMarkdown(initialContent);
                 syncWikiContent();
+            }
+
+            if (window.WikiLinkAutocomplete) {
+                WikiLinkAutocomplete.init(wikiEditorInstance, '#wikiEditor');
             }
         }
 

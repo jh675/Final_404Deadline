@@ -335,6 +335,7 @@
                 <div class="wiki-history-actions">
                     <a class="wiki-btn" th:href="@{/project/wiki/view/{name}(name=${page.title})}">문서 보기</a>
                     <a class="wiki-btn wiki-btn-primary"
+                       th:if="${@prjAuth.hasRole('ROLE_WIKI_UPDATE')}"
                        th:href="@{/project/wiki/register(id=${page.pageId != null ? page.pageId : page.id})}">편집</a>
                 </div>
             </div>

@@ -20,6 +20,7 @@ public interface MilestoneMapper {
 	Long insertMilestoneIssue(MilestoneIssueVO milestoneIssueVO);
 	Long insertTimeline(MilestoneTimelineVO timelineVO);
 	Long updateTimeline(MilestoneTimelineVO timelineVO);
+	Long moveIssue(MilestoneIssueVO milestoneIssueVO);
 	Long deleteMilestone(Long id);
 	Long deleteMilestoneIssue(Long id);
 	Long deleteTimeline(Long id);

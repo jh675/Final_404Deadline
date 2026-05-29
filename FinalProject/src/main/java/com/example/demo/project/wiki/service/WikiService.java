@@ -19,4 +19,8 @@ public interface WikiService {
 	List<WikiDateGroupVO> getDateGroups(Long projectId);
 	Long insertWikiPage(String title, long prjId, Long parentId);
 	Long updateWikiPageParent(Long pageId, Long parentId);
+	List<WikiPageVO> getBreadcrumb(Long pageId);
+	boolean hasWikiChildren(Long pageId);
+
+	List<WikiLinkSuggestVO> suggestWikiLinks(Long projectId, String q);
 }

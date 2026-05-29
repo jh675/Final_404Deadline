@@ -143,6 +143,23 @@
 		order by p.title
 	</select>
 	
+	<select id="selectWikiBreadcrumb" resultType="wikiPageVO">
+		SELECT
+			p.id AS id,
+			p.title AS title,
+			p.parent_id AS parentId
+		FROM wiki_page p
+		START WITH p.id = #{pageId}
+		CONNECT BY PRIOR p.parent_id = id
+		ORDER BY LEVEL DESC
+	</select>
+
+	<select id="countWikiChildren" resultType="long">
+		SELECT COUNT(*)
+		FROM wiki_page
+		WHERE parent_id = #{pageId}
+	</select>
+
 	<select id="selectWikiPageListGroupParent" resultType="wikiPageVO">
 		select
 			p.id,
@@ -177,6 +194,19 @@
 		values (#{id}, 1,#{pageId}, #{content}, #{describe}, #{memId})
 	</insert>
 	
+	<select id="searchWikiTitles" resultType="string">
+		SELECT title FROM (
+			SELECT p.title AS title
+			FROM wiki_page p
+			JOIN wiki w ON w.id = p.wiki_id
+			WHERE w.prj_id = #{projectId}
+			<if test="q != null and q != ''">
+				AND UPPER(p.title) LIKE '%' || UPPER(#{q}) || '%'
+			</if>
+			ORDER BY p.title
+		) WHERE ROWNUM &lt;= 20
+	</select>
+
 	<insert id="updateWikiContent" parameterType="wikiContentVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
 			select w_content_seq.nextval from dual

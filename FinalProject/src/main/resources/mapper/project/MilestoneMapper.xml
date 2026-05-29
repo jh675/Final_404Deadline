@@ -94,7 +94,21 @@
 			where milestone_id=${id}
 		)
 	</select>
-
-
+	<update id="moveIssue">
+		update milestone_issue
+		set milestone_id = #{milestoneId}
+		where id = #{id}
+	</update>
+	<delete id="deleteTimeline">
+		delete from milestone_timeline
+		where milestone_issue_id = #{id}
+	</delete>
+	<update id="updateTimeline">
+		update milestone_timeline
+		set contents = #{contents},
+		entry_date = #{entryDate},
+		type_cd = #{typeCd}
+		where id = #{id}
+	</update>
 
 </mapper>
