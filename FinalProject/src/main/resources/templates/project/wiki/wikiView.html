@@ -351,10 +351,9 @@
         </aside>
     </div>
 
-    <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.js"></script>
     <script th:src="@{/js/wiki/wiki-link-autocomplete.js}"></script>
     <script th:inline="javascript">
-        function initWikiViewer() {
+        function mountWikiViewer() {
             var markdown = /*[[${page != null && page.content != null ? page.content : ''}]]*/ '';
             if (!markdown || !window.toastui || !window.toastui.Editor) return;
 
@@ -387,11 +386,13 @@
             });
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initWikiViewer);
-        } else {
-            initWikiViewer();
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.ToastUiBundle) {
+                ToastUiBundle.requireViewer(mountWikiViewer);
+            } else {
+                mountWikiViewer();
+            }
+        });
 
         function confirmDelete(btn) {
             if (btn.disabled) return;

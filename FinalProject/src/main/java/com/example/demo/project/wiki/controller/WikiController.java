@@ -99,6 +99,7 @@ public class WikiController {
 		}
 		List<WikiPageVO> pageList = service.selectWikiPageForTree(projectId, id);
 		model.addAttribute("currentMenu", "wiki");
+		model.addAttribute("wikiEditorPage", true);
 		model.addAttribute("pageList", pageList != null ? pageList : Collections.emptyList());
 		if (id != null) {
 			WikiContentVO page = service.selectWikiContentLastVerById(id);
@@ -128,13 +129,12 @@ public class WikiController {
 			return "redirect:/";
 		}
 
-		Long id = service.insertWikiPage(wikiContentVO.getTitle(), projectId, wikiContentVO.getParentId());
-		if(attachService.hasAttachmentFiles(files)) {
+		Long id = service.saveNewWiki(
+				wikiContentVO.getTitle(), projectId, wikiContentVO.getParentId(),
+				wikiContentVO, loginUser.getId());
+		if (attachService.hasAttachmentFiles(files)) {
 			attachService.saveAndInsertAttachments(id, files, "06MODULE", "Wiki");
 		}
-		wikiContentVO.setPageId(id);
-		wikiContentVO.setMemId(loginUser.getId());
-		service.insertWikiContent(wikiContentVO);
 		String encodedTitle = UriUtils.encodePathSegment(
 				wikiContentVO.getTitle(), StandardCharsets.UTF_8);
 		return "redirect:/project/wiki/view/" + encodedTitle;
@@ -152,12 +152,10 @@ public class WikiController {
 			return "redirect:/";
 		}
 		service.updateWikiPageParent(wikiContentVO.getPageId(), wikiContentVO.getParentId());
-
-		if(attachService.hasAttachmentFiles(files)) {
+		service.reviseWiki(wikiContentVO, loginUser.getId());
+		if (attachService.hasAttachmentFiles(files)) {
 			attachService.saveAndInsertAttachments(wikiContentVO.getPageId(), files, "06MODULE", "Wiki");
 		}
-		wikiContentVO.setMemId(loginUser.getId());
-		service.updateWikiContent(wikiContentVO);
 		String encodedTitle = UriUtils.encodePathSegment(
 				wikiContentVO.getTitle(), StandardCharsets.UTF_8);
 		return "redirect:/project/wiki/view/" + encodedTitle;

@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.project.wiki.mapper.WikiMapper;
 import com.example.demo.project.wiki.service.WikiContentVO;
@@ -40,15 +41,51 @@ public class WikiServiceImpl implements WikiService {
 		return history != null ? history : Collections.emptyList();
 	}
 
+	private static final String DEFAULT_DESCRIBE = "-";
+
+	private void normalizeWikiContent(WikiContentVO wikiContentVO) {
+		if (wikiContentVO == null) {
+			return;
+		}
+		if (wikiContentVO.getDescribe() == null || wikiContentVO.getDescribe().isBlank()) {
+			wikiContentVO.setDescribe(DEFAULT_DESCRIBE);
+		} else {
+			wikiContentVO.setDescribe(wikiContentVO.getDescribe().trim());
+		}
+		if (wikiContentVO.getContent() == null) {
+			wikiContentVO.setContent("");
+		}
+	}
+
 	@Override
 	public Long insertWikiContent(WikiContentVO wikiContentVO) {
+		normalizeWikiContent(wikiContentVO);
 		mapper.insertWikiContent(wikiContentVO);
 		return wikiContentVO.getId();
 	}
 
 	@Override
 	public Long updateWikiContent(WikiContentVO wikiContentVO) {
+		normalizeWikiContent(wikiContentVO);
 		return mapper.updateWikiContent(wikiContentVO);
+	}
+
+	@Override
+	@Transactional
+	public Long saveNewWiki(String title, long prjId, Long parentId, WikiContentVO content, Long memId) {
+		Long pageId = insertWikiPage(title, prjId, parentId);
+		content.setPageId(pageId);
+		content.setTitle(title);
+		content.setMemId(memId);
+		insertWikiContent(content);
+		return pageId;
+	}
+
+	@Override
+	@Transactional
+	public void reviseWiki(WikiContentVO content, Long memId) {
+		content.setMemId(memId);
+		updateWikiContent(content);
 	}
 
 	@Override

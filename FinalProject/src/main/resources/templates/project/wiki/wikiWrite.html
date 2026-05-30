@@ -7,6 +7,8 @@
     <title>위키 작성</title>
     <th:block layout:fragment="head-content">
         <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor.min.css" />
+        <!-- 위키 작성 전용: 편집기 번들만 로드 (AI 모달은 별도 fragment로 toastui 미사용) -->
+        <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"></script>
         <style>
             .wiki-write-page {
                 font-family: "Malgun Gothic", "맑은 고딕", -apple-system, sans-serif;
@@ -196,7 +198,8 @@
 
             .wiki-link-autocomplete {
                 position: fixed;
-                z-index: 10050;
+                /* Bootstrap 모달(1055)보다 낮게 — 모달 닫기/배경 클릭 가로채기 방지 */
+                z-index: 1040;
                 background: #fff;
                 border: 1px solid #ccc;
                 border-radius: 6px;
@@ -440,8 +443,9 @@
                 <!-- 5. 설명 -->
                 <div class="wiki-form-group">
                     <label for="wikiDescribe">설명</label>
-                    <input type="text" id="wikiDescribe" name="describe" placeholder="변경 요약 또는 페이지 설명"
+                    <input type="text" id="wikiDescribe" name="describe" placeholder="변경 요약 (비워두면 자동 저장)"
                            th:value="${page != null ? page.describe : ''}">
+                    <p class="attachment-hint">설명을 비워두면 시스템이 기본값으로 저장합니다.</p>
                 </div>
 
                 <!-- 6. 첨부파일 (작성) -->
@@ -507,7 +511,6 @@
         </aside>
     </div>
 
-    <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"></script>
     <script th:src="@{/js/wiki/wiki-link-autocomplete.js}"></script>
     <script th:inline="javascript">
         var wikiEditorInstance = null;
@@ -520,11 +523,11 @@
         }
 
         function initWikiEditor() {
-            if (wikiEditorInstance) return;
-            if (!window.toastui || !window.toastui.Editor) return;
+            if (wikiEditorInstance) return true;
+            if (!window.toastui || !window.toastui.Editor) return false;
 
             var el = document.querySelector('#wikiEditor');
-            if (!el) return;
+            if (!el) return false;
 
             var initialContent = /*[[${page != null ? page.content : ''}]]*/ '';
 
@@ -540,23 +543,27 @@
             });
 
             wikiEditorInstance.on('change', syncWikiContent);
+            wikiEditorInstance.on('load', function () {
+                if (window.WikiLinkAutocomplete && !wikiEditorInstance.__wikiAutocompleteBound) {
+                    WikiLinkAutocomplete.init(wikiEditorInstance, '#wikiEditor');
+                    wikiEditorInstance.__wikiAutocompleteBound = true;
+                }
+            });
 
             if (initialContent) {
                 wikiEditorInstance.setMarkdown(initialContent);
                 syncWikiContent();
             }
-
-            if (window.WikiLinkAutocomplete) {
-                WikiLinkAutocomplete.init(wikiEditorInstance, '#wikiEditor');
-            }
+            return true;
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initWikiEditor);
-        } else {
-            initWikiEditor();
-        }
-
+        document.addEventListener('DOMContentLoaded', function () {
+            if (initWikiEditor()) return;
+            var attempt = 0;
+            var timer = setInterval(function () {
+                if (initWikiEditor() || ++attempt > 20) clearInterval(timer);
+            }, 50);
+        });
         (function () {
             var MAX_FILES = 5;
             var MAX_TOTAL_BYTES = 50 * 1024 * 1024;
