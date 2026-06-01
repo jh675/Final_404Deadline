@@ -126,16 +126,23 @@
 
             .wiki-btn-create,
             .wiki-btn-edit,
-            .wiki-btn-history {
+            .wiki-btn-history,
+            .wiki-btn-start {
                 border-color: #66bb6a;
                 color: #2e7d32;
             }
 
             .wiki-btn-create:hover,
             .wiki-btn-edit:hover,
-            .wiki-btn-history:hover {
+            .wiki-btn-history:hover,
+            .wiki-btn-start:hover {
                 background: #f1f8e9;
                 color: #1b5e20;
+            }
+
+            .wiki-btn-start:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
             }
 
             .wiki-btn-delete {
@@ -294,10 +301,15 @@
                     <a class="wiki-btn wiki-btn-history"
                        th:if="${@prjAuth.hasRole('ROLE_WIKI_VIEW')}"
                        th:href="@{/project/wiki/history/{name}(name=${page.title})}">역사</a>
+                    <button type="button" class="wiki-btn wiki-btn-start"
+                            th:if="${@prjAuth.hasRole('ROLE_WIKI_UPDATE') and !isStartPage}"
+                            th:attr="data-wiki-title=${page != null ? page.title : ''}"
+                            onclick="confirmSetStartPage(this)">첫페이지 설정</button>
                     <button type="button" class="wiki-btn wiki-btn-delete"
                             th:if="${@prjAuth.hasRole('ROLE_WIKI_DELETE')}"
-                            th:disabled="${hasChildren == true}"
-                            th:attr="data-wiki-id=${page != null ? page.id : 0}"
+                            th:attr="data-wiki-id=${page != null ? page.id : 0},data-wiki-title=${page != null ? page.title : ''}"
+                            th:disabled="${isStartPage}"
+                            th:title="${isStartPage} ? '시작 페이지는 삭제할 수 없습니다.' : ''"
                             onclick="confirmDelete(this)">삭제</button>
                 </div>
             </div>
@@ -392,14 +404,53 @@
             } else {
                 mountWikiViewer();
             }
+            var wikiNotice = /*[[${wikiNotice}]]*/ null;
+            if (wikiNotice) {
+                alert(wikiNotice);
+            }
         });
+
+        function confirmSetStartPage(btn) {
+            if (btn.disabled) return;
+            var title = btn.getAttribute('data-wiki-title') || '';
+            var encodedTitle = encodeURIComponent(title);
+            if (!encodedTitle) {
+                alert('시작 페이지로 설정할 위키 제목을 확인할 수 없습니다.');
+                return;
+            }
+            csrfFetch('/project/wiki/start-page?name=' + encodedTitle, {
+                method: 'POST'
+            }).then(function (response) {
+                if (!response.ok) {
+                    throw new Error('시작 페이지 변경에 실패했습니다.');
+                }
+                alert('시작 페이지가 변경되었습니다.');
+                window.location.reload();
+            }).catch(function (error) {
+                alert(error.message);
+            });
+        }
 
         function confirmDelete(btn) {
             if (btn.disabled) return;
-            var id = btn.getAttribute('data-wiki-id');
-            if (!confirm('이 위키 페이지를 삭제하시겠습니까?\n하위 위키가 있으면 삭제할 수 없습니다.')) return;
-            /* TODO: 삭제 API 연동 */
-            alert('삭제 기능은 컨트롤러 연동 후 동작합니다. (pageId: ' + id + ')');
+            var title = btn.getAttribute('data-wiki-title') || '';
+            if (btn.disabled) {
+                alert('시작 페이지는 삭제할 수 없습니다.');
+                return;
+            }
+            var encodedTitle = encodeURIComponent(title);
+            if (!encodedTitle) {
+                alert('삭제할 위키 제목을 확인할 수 없습니다.');
+                return;
+            }
+            csrfFetch('/project/wiki/' + encodedTitle, {
+                method: 'DELETE',
+            }).then(function () {
+                alert('위키가 삭제되었습니다.');
+                window.location.href = '/project/wiki';
+            }).catch(function (error) {
+                alert('삭제 중 예외 발생: ' + error.message);
+            });
         }
     </script>
 </div>

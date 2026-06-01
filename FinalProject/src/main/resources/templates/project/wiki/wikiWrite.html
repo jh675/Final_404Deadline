@@ -731,8 +731,6 @@
                     var li = btn.closest('.attach-row-existing');
                     var id = li && li.getAttribute('data-attach-id');
                     if (!id) return;
-                    if (!confirm('이 첨부파일을 삭제하시겠습니까?')) return;
-
                     var tokenMeta = document.querySelector('meta[name="_csrf"]');
                     var headerMeta = document.querySelector('meta[name="_csrf_header"]');
                     var headers = {};
@@ -743,6 +741,7 @@
                     fetch('/delete/' + encodeURIComponent(id), { method: 'DELETE', headers: headers })
                         .then(function (res) {
                             if (!res.ok) throw new Error('delete failed');
+                            alert('첨부파일이 삭제되었습니다.');
                             li.remove();
                             if (countExisting() === 0) {
                                 var subsection = existingListEl.closest('.attach-subsection');
