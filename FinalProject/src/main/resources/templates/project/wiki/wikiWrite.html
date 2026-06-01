@@ -521,6 +521,12 @@
                 hidden.value = wikiEditorInstance.getMarkdown();
             }
         }
+        window.syncWikiContent = syncWikiContent;
+
+        function initWikiLinkAutocomplete() {
+            if (!wikiEditorInstance || !window.WikiLinkAutocomplete) return;
+            WikiLinkAutocomplete.init(wikiEditorInstance, '#wikiEditor');
+        }
 
         function initWikiEditor() {
             if (wikiEditorInstance) return true;
@@ -543,12 +549,9 @@
             });
 
             wikiEditorInstance.on('change', syncWikiContent);
-            wikiEditorInstance.on('load', function () {
-                if (window.WikiLinkAutocomplete && !wikiEditorInstance.__wikiAutocompleteBound) {
-                    WikiLinkAutocomplete.init(wikiEditorInstance, '#wikiEditor');
-                    wikiEditorInstance.__wikiAutocompleteBound = true;
-                }
-            });
+            /* load는 생성 직후 이미 발생할 수 있어, 등록 직후 즉시 init + load fallback 둘 다 사용 */
+            initWikiLinkAutocomplete();
+            wikiEditorInstance.on('load', initWikiLinkAutocomplete);
 
             if (initialContent) {
                 wikiEditorInstance.setMarkdown(initialContent);

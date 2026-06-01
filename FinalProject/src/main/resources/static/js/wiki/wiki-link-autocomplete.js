@@ -186,12 +186,12 @@ var WikiLinkAutocomplete = (function () {
                     ? '검색 결과가 없습니다.'
                     : '목록에서 선택하거나 검색어를 더 입력하세요.';
                 list.appendChild(empty);
-            dropdown.hidden = false;
-            dropdown.style.pointerEvents = 'auto';
-            state.open = true;
-            positionDropdown();
-            return;
-        }
+                dropdown.hidden = false;
+                dropdown.style.pointerEvents = 'auto';
+                state.open = true;
+                positionDropdown();
+                return;
+            }
 
             state.items.forEach(function (item, idx) {
                 var row = document.createElement('button');
