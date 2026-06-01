@@ -755,15 +755,6 @@ searchForm.addEventListener('submit', function(e) {
         return;
     }
 
-    // 검색조건은 있는데 검색어가 없는 경우
-    if (searchType !== '' && keyword === '') {
-        e.preventDefault();
-        document.getElementById('searchType').classList.remove('is-invalid');
-        warning.innerText = '검색어를 입력해주세요.';
-        warning.classList.remove('d-none');
-        return;
-    }
-
     // 정상일 경우 경고 숨김
     document.getElementById('searchType').classList.remove('is-invalid');
     warning.classList.add('d-none');

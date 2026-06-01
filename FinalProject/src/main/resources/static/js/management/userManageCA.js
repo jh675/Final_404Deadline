@@ -82,17 +82,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-	// 💡 1. 로딩 직후 체크박스 컬럼을 먼저 숨깁니다. (UX 기획 반영)
+	// 로딩 직후 체크박스 컬럼을 숨기기.
     grid.hideColumn('_checked');
 
-    // 💡 2. 일괄작업 모드 켜기
+    // 일괄작업 모드 켜기
     document.getElementById('toggleBulkModeBtn').addEventListener('click', function() {
         this.classList.add('d-none'); // 일괄작업 버튼 숨기기
         document.getElementById('bulkControls').classList.remove('d-none'); // 적용 컨트롤 보이기
         grid.showColumn('_checked'); // 🌟 그리드 체크박스 나타나기!
     });
 
-    // 💡 3. 일괄작업 모드 취소
+    // 일괄작업 모드 취소
     document.getElementById('cancelBulkModeBtn').addEventListener('click', function() {
         document.getElementById('bulkControls').classList.add('d-none');
         document.getElementById('toggleBulkModeBtn').classList.remove('d-none');
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         grid.hideColumn('_checked'); // 🌟 그리드 체크박스 숨기기!
     });
 	
-	// 💡 2. 일괄 처리 적용 버튼 이벤트
+	// 일괄 처리 적용 버튼 이벤트
     document.getElementById('bulkApplyBtn').addEventListener('click', async function() {
         const actionVal = document.getElementById('bulkActionType').value;
         if (!actionVal) {
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // actionVal 분리 (예: 'status_01ACTIVE' -> type: 'status', value: '01ACTIVE')
         const [updateType, updateValue] = actionVal.split('_');
 
-        // 🚨 UX 방어 로직: 관리자의 PM 권한을 해제하려고 할 때 차단
+        //  관리자의 PM 권한을 해제하려고 할 때 차단
         if (updateType === 'prjManager' && updateValue === '02ACTIVE') {
             const hasAdmin = checkedRows.some(row => row.adminCd === '01ROLE' || row.adminCd === '02ROLE');
             if (hasAdmin) {
@@ -529,14 +529,14 @@ searchForm.addEventListener('submit', function(e) {
         warning.classList.remove('d-none');
         return;
     }
-
+/* 검색어가 없을 경우 전체 목록 조회 (팀원들의 검색 로직에 맞춰 통일화)
     if (searchType !== '' && keyword === '') {
         e.preventDefault();
         document.getElementById('searchType').classList.remove('is-invalid');
         warning.innerText = '검색어를 입력해주세요.';
         warning.classList.remove('d-none');
         return;
-    }
+    }*/
 
     document.getElementById('searchType').classList.remove('is-invalid');
     warning.classList.add('d-none');
