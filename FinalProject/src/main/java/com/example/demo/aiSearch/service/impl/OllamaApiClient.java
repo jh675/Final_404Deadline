@@ -12,10 +12,10 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-//@Component
+@Component
 public class OllamaApiClient {
 
-    private final String OLLAMA_URL = "http://localhost:11434/api/generate";
+    private final String OLLAMA_URL = "http://192.168.0.6:11434/api/generate";
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String callOllama(String prompt) {

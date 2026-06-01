@@ -27,8 +27,8 @@ public class AiSearchServiceImpl {
 	private final CalenderMapper calenderMapper;
 	private final SubcodeService subcodeService;
 //	private final GeminiApiClient geminiApiClient;
-	private final GptApiClient gptApiClient;
-//	private final OllamaApiClient ollamaApiClient;
+//	private final GptApiClient gptApiClient;
+	private final OllamaApiClient ollamaApiClient;
 
 	public String processIntelligentSearch(String userMessage, Long userId, Long prjId) {
 
@@ -177,9 +177,9 @@ public class AiSearchServiceImpl {
 						+ "7. 내부 시스템 코드값이나 DB 구조에 대한 질문에는 답변을 정중히 거부해.",
 				today, contextData.toString(), userMessage);
 
-		return gptApiClient.callGpt(finalPrompt);
+//		return gptApiClient.callGpt(finalPrompt);
 //		return geminiApiClient.callGemini(finalPrompt);
-//		return ollamaApiClient.callOllama(finalPrompt);
+		return ollamaApiClient.callOllama(finalPrompt);
 	}
 
 	// 질문의 의도를 파악 로직
@@ -190,9 +190,9 @@ public class AiSearchServiceImpl {
 				+ "- 둘 다 묻거나, '오늘 뭐해야돼?', '요약해줘' 같이 포괄적으로 물어보면: ALL\n\n" + "사용자 질문: \"%s\"\n\n" + "대답:", userMessage);
 
 		try {
-			String intent = gptApiClient.callGpt(prompt).trim().toUpperCase();
+//			String intent = gptApiClient.callGpt(prompt).trim().toUpperCase();
 //			String intent = geminiApiClient.callGemini(prompt).trim().toUpperCase();
-//			String intent = ollamaApiClient.callOllama(prompt).trim().toUpperCase();
+			String intent = ollamaApiClient.callOllama(prompt).trim().toUpperCase();
 
 			// 안전장치 (AI의 의도파악이 정확하지 않을 경우를 대비)
 			if (intent.contains("COMPLETED_TASK"))
