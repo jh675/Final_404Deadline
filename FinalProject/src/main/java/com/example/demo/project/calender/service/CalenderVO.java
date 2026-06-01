@@ -1,11 +1,5 @@
 package com.example.demo.project.calender.service;
 
-import java.util.Date;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.Data;
 
 @Data
@@ -21,11 +15,8 @@ public class CalenderVO {
 	private String keyword;
 	private String calType;
 	
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date calStart;
-	
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date calEnd;
-	private Date createdOn;
-	private Date updatedOn;
+	private String calStart;
+	private String  calEnd;
+	private String  createdOn;
+	private String  updatedOn;
 }
