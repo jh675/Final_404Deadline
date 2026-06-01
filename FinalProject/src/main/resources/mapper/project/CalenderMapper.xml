@@ -116,17 +116,6 @@
         </where>
     </select>
 
-    <select id="findByCalStartBetween" resultType="calenderVO">
-        SELECT
-            ID AS id,
-            CAL_TEXT AS calText,
-            GET_SUB_CODE_NAME(CAL_TYPE) AS calType,
-            GET_SUB_CODE_NAME(TYPE_CD) AS typeCd,
-            TO_CHAR(CAL_START, 'YYYY-MM-DD HH24:MI:SS') AS calStart
-        FROM CALENDER
-        WHERE CAL_START BETWEEN #{start} AND #{end}
-    </select>
-
 <!-- 1시간 전 알림용 -->
 <select id="findByCalStartBetween" resultType="calenderVO">
     SELECT
