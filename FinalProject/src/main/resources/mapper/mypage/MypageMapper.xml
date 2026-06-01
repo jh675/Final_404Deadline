@@ -5,25 +5,59 @@
 
 	<select id="selectMyProjectList" parameterType="long"
 		resultType="MypageVO">
-		  SELECT
-            p.ID              AS id,
-            p.PRJ_NAME        AS prjName,
-            p.PRJ_DESC        AS prjDesc,
-            sc.NAME           AS prjStatusCd,
-            p.START_DATE      AS startDate,
-            p.CLOSED_DATE     AS closedDate,
-            p.CREATED_ON      AS createdOn
-        FROM PROJECT p
-        INNER JOIN GRP g ON g.PRJ_ID = p.ID
-        INNER JOIN MEMBER m ON m.GRP_ID = g.ID
-        LEFT JOIN SUB_CODE sc ON sc.S_CODE = p.PRJ_STATUS_CD
-                              AND sc.M_CODE = '00PROSTAT'
-        WHERE m.USER_ID = #{userId}
-        and p.prj_status_cd not in('04PROSTAT', '05PROSTAT')
-        GROUP BY
-            p.ID, p.PRJ_NAME, p.PRJ_DESC, sc.NAME,
-            p.START_DATE, p.CLOSED_DATE, p.CREATED_ON
-        ORDER BY p.CREATED_ON DESC
+		SELECT
+		p.ID AS id,
+		p.PRJ_NAME AS prjName,
+		p.PRJ_DESC AS
+		prjDesc,
+		sc.NAME AS prjStatusCd,
+		p.START_DATE AS startDate,
+		p.CLOSED_DATE AS closedDate,
+		p.CREATED_ON AS createdOn
+		FROM PROJECT p
+		INNER JOIN GRP g ON g.PRJ_ID = p.ID
+		INNER JOIN MEMBER m ON m.GRP_ID =
+		g.ID
+		LEFT JOIN SUB_CODE sc ON sc.S_CODE = p.PRJ_STATUS_CD
+		AND sc.M_CODE
+		= '00PROSTAT'
+		WHERE m.USER_ID = #{userId}
+		and p.prj_status_cd not
+		in('04PROSTAT', '05PROSTAT')
+		GROUP BY
+		p.ID, p.PRJ_NAME, p.PRJ_DESC,
+		sc.NAME,
+		p.START_DATE, p.CLOSED_DATE, p.CREATED_ON
+		ORDER BY p.CREATED_ON
+		DESC
+	</select>
+
+	<select id="selectWeeklyIssueList"
+		resultType="com.example.demo.mypage.service.MypageIssueVO">
+		SELECT
+		i.ID AS id,
+		i.SUBJECT AS subject,
+		u.NAME AS memName,
+		sc1.NAME AS statusCd,
+		sc2.NAME AS priorityCd,
+		TO_CHAR(i.DUE_DATE, 'YYYY-MM-DD') AS dueDate,
+		i.DONE_RATIO AS doneRatio
+		FROM ISSUE i
+		LEFT JOIN USERS u ON u.ID = i.MEM_ID
+		LEFT JOIN SUB_CODE sc1 ON sc1.S_CODE = i.STATUS_CD AND sc1.M_CODE =
+		'00ISSUESTAT'
+		LEFT JOIN SUB_CODE sc2 ON sc2.S_CODE = i.PRIORITY_CD AND sc2.M_CODE =
+		'00ISSUEPRI'
+		WHERE i.PRJ_ID IN
+		<foreach collection="list" item="prjId" open="(" separator=","
+			close=")">
+			#{prjId}
+		</foreach>
+		AND i.DUE_DATE BETWEEN TRUNC(SYSDATE) -
+		MOD(TO_NUMBER(TO_CHAR(SYSDATE,'D'))-2, 7)
+		AND TRUNC(SYSDATE) - MOD(TO_NUMBER(TO_CHAR(SYSDATE,'D'))-2, 7) + 6
+		AND i.STATUS_CD != '04ISSUESTAT'
+		ORDER BY i.DUE_DATE ASC
 	</select>
 
 </mapper>

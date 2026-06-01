@@ -33,96 +33,110 @@
 
 		<script th:inline="javascript">
 		const docsData = /*[[${list}]]*/ [];
+		
+//		=============================수정함=======================================
+		// Thymeleaf를 이용해 권한 여부를 Javascript boolean 변수로 저장
+		const hasUpdateRole = /*[[${@prjAuth.hasRole('ROLE_DOCS_UPDATE')}]]*/ false;
+		const hasDeleteRole = /*[[${@prjAuth.hasRole('ROLE_DOCS_DELETE')}]]*/ false;
 		 
+		// 기본 컬럼 배열 세팅 
+		const gridColumns = [
+			{ 
+			    header: '제목', 
+			    name: 'title', 
+			    width: 150, align:'center', sortable: true,
+			    formatter: ({ row, value }) => {
+			        return `
+			            <a href="javascript:void(0)"
+			               class="doc-title"
+			               data-id="${row.id}">
+			                ${value}
+			            </a>
+			        `;
+			    }
+			},
+			{ 
+				header: '첨부파일', 
+				name: 'fileCount', 
+				width: 100, 
+				align: 'center',
+				formatter: ({ row }) => {
+				    if (row.fileCount > 0) {
+				        return '<span style="font-size: 16px; cursor: default;" title="첨부파일 있음">📎</span>';
+				    }
+				    return ''; 
+				}
+			},
+			{ header: '작성자', name: 'memName', width: 150, align:'center', sortable: true },
+			{ header: '작성일', name: 'createdOn', width: 150, align:'left', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') }
+		];
+
+		// 수정 권한이 있을 경우에만 컬럼 배열에 추가
+		if (hasUpdateRole) {
+			gridColumns.push({ 
+		    	header: '수정',
+		    	name: 'edit',
+		    	width: 100,
+		    	align:'center',
+		    	sortable: true,
+		    	formatter: ({ row }) => {
+		    		return `
+		    			<button
+		    				class="btn btn-secondary btn-sm "
+		    				data-bs-toggle="modal"
+		    				data-bs-target="#editModal"
+		    				data-id="${row.id}"
+		    				data-title="${row.title}"
+		    				data-description="${row.description}"
+		    				data-prjid="${row.prjId}">
+		    				수정
+		    			</button>
+		    		`;
+		    	}
+		    });
+		}
+
+		// 삭제 권한이 있을 경우에만 컬럼 배열에 추가
+		if (hasDeleteRole) {
+			gridColumns.push({ 
+				header: '삭제',
+				name: 'deleteBtn',
+				width: 100,
+				align:'center',
+				sortable: true,
+				formatter: ({ row }) => {
+					return '<button class="btn btn-danger btn-sm" ' +
+					       'data-bs-toggle="modal" ' +
+					       'data-bs-target="#deleteModal" ' +
+					       'data-id="' + row.id + '">' +
+					       '삭제</button>';
+				}
+			});
+		}
+
+		// 그리드 생성
 		const grid = new tui.Grid({
 			el: document.getElementById('grid'), 
 			autowidth: true,
-			scrollX: false,        // 가로 스크롤바 숨김
-			scrollY: false,        // 세로 스크롤바 숨김 (rowHeight × 행수 만큼 자동 확장)
-			bodyHeight: 'auto',    // 본문 높이를 데이터 양에 맞춰 자동 조절
-			rowHeight: 36,         // 한 행의 높이(px)
-			minBodyHeight: 100,    // 데이터 0건일 때 최소 높이(px)
-
+			scrollX: false,
+			scrollY: false,
+			bodyHeight: 'auto',
+			rowHeight: 36,
+			minBodyHeight: 100,
 			data: docsData,
-			columns: [
-				{ 
-				    header: '제목', 
-				    name: 'title', 
-				    width: 150, align:'center', sortable: true,
-				    formatter: ({ row, value }) => {
-				        return `
-				            <a href="javascript:void(0)"
-				               class="doc-title"
-				               data-id="${row.id}">
-				                ${value}
-				            </a>
-				        `;
-				    }
-				},
-						{ header: '첨부파일', 
-							  name: 'fileCount', 
-							  width: 100, 
-							  align: 'center',
-							  formatter: ({ row }) => {
-							      // 마이바티스 selectAll 쿼리에서 새로 생성한 file_count(자바 필드명 fileCount) 값을 검사합니다.
-							      if (row.fileCount > 0) {
-							          return '<span style="font-size: 16px; cursor: default;" title="첨부파일 있음">📎</span>';
-							      }
-							      return ''; // 첨부파일이 없으면 빈칸으로 표시
-							  }
-							},
-
-				    { header: '작성자', name: 'memName', width: 150, align:'center', sortable: true },
-				    { header: '작성일', name: 'createdOn', width: 150, align:'left', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') },
-				    { 
-				    	header: '수정',
-				    	name: 'edit',
-				    	width: 100,
-				    	align:'center',
-				    	sortable: true,
-
-				    	formatter: ({ row }) => {
-
-				    		return `
-				    			<button
-				    				class="btn btn-secondary btn-sm"
-				    				data-bs-toggle="modal"
-				    				data-bs-target="#editModal"
-				    				data-id="${row.id}"
-				    				data-title="${row.title}"
-				    				data-description="${row.description}"
-				    				data-prjid="${row.prjId}">
-				    				수정
-				    			</button>
-				    		`;
-				    	}
-				    },
-
-	               { header: '삭제',
-	                  name: 'deleteBtn',
-	                  width: 100,
-	                  align:'center',
-	                  sortable: true,
-	                  formatter: ({ row }) => {
-	                      return '<button class="btn btn-danger btn-sm" ' +
-	                             'data-bs-toggle="modal" ' +
-	                             'data-bs-target="#deleteModal" ' +
-	                             'data-id="' + row.id + '">' +
-	                             '삭제</button>';
-	                         }
-                      }
-
-			],
-			rowHeaders: ['rowNum'],
 			
+			// 조립된 컬럼 배열을 여기에 넣습니다.
+			columns: gridColumns, 
+			
+			rowHeaders: ['rowNum'],
 			pageOptions: {
 				useClient: true,
 				perPage: 10
 			}
-
 		});
-		
-        grid.on('click', (ev) => {
+//		=============================여기까지 수정했음=======================================		
+        
+		grid.on('click', (ev) => {
             const row = grid.getRow(ev.rowKey);
             if (!row) return;
 
@@ -212,7 +226,8 @@
 		<div class="d-flex justify-content-end my-3">
 
 			<button class="btn btn-primary" data-bs-toggle="modal"
-				data-bs-target="#registerModal">등록</button>
+				data-bs-target="#registerModal"
+				th:if="${@prjAuth.hasRole('ROLE_DOCS_CREATE')}">등록</button>
 
 		</div>
 
