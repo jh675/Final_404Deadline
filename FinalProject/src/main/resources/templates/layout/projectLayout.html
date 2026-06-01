@@ -103,7 +103,7 @@
                        
                     <a th:if="${mod1.enaNameCd == '02MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
+                       th:classappend="${session.currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
                        th:href="@{/project/gantt/list}">간트차트</a>
                 
                     <a th:if="${mod1.enaNameCd == '07MODULE'}" 

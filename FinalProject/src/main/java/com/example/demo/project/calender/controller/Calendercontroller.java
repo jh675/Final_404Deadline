@@ -71,7 +71,8 @@ public class Calendercontroller {
 	@DeleteMapping("/calendar/delete")
 	@ResponseBody
 	public int delete(@RequestParam(name = "id") int id) {
-		return calenderService.delete(id);
+		int memId = getLoginUser().getId().intValue();
+		return calenderService.delete(id, memId);
 	}
 
 	// 일정 검색
