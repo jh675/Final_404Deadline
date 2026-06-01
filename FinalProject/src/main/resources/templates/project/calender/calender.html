@@ -380,8 +380,8 @@
                           : item.typeCd === '02CALTYPE' ? 'group' 
                           : item.typeCd === '03CALTYPE' ? 'company' : 'personal',
                 title: item.calText || '제목없음',
-                start: item.calStart.split('T')[0],          
-                end: item.calEnd.split('T')[0],
+                start: item.calStart.replace('T', ' ').split('.')[0],          
+                end: item.calEnd.replace('T', ' ').split('.')[0],
                 extendedProps: {
                     calStart: item.calStart,
                     calEnd: item.calEnd,
@@ -468,10 +468,10 @@
    	    // 그룹일정, 회사일정 선택 시 => 전체공유만 활성화 나만보기 비활성화 
    	    
    	    // 1. 개인일정 => 나만보기, 전체공유 둘다 보기
-   	    if(selectBox == 'personal') {
+   	    if(selectBox == '01CALTYPE') {
    	        document.getElementById('ins_sharingMe').disabled = false;
    	        document.getElementById('ins_sharingAll').disabled = false;
-		} else if (selectBox == 'group'|| selectBox == 'company') {
+		} else if (selectBox == '02CALTYPE'|| selectBox == '03CALTYPE') {
 			document.getElementById('ins_sharingAll').disabled = false;
 		}
 
@@ -495,7 +495,7 @@
         const endDate = document.getElementById('ins_endDate').value;
         const startTime = document.getElementById('ins_calStart').value || '09:00:00';
         const endTime = document.getElementById('ins_calEnd').value || '18:00:00';
-		const checkedRadio = document.querySelector('input[name="sharingCd"]:checked').value;
+		const checkedRadio = document.querySelector('input[name="sharingCd"]:checked');
         const sharingCd = checkedRadio ? checkedRadio.value : '02CALSHARE';
         // 등록 시 시간 표시 (선택한 날짜 + 시간)
         const calStart = `${startDate} ${startTime}`;
@@ -552,7 +552,11 @@
 	    if (!rawDateTime) return null;
 	    
 	    // "T" 분리 및 밀리초(.0) 제거 후 공백 기준 분리
-	    let cleanStr = rawDateTime.replace('T', ' ').split('.')[0].trim();
+	  	let cleanStr = rawDateTime
+        .replace(/\+09:00$/, '')   // 뒤에 +09:00 제거
+        .replace(/\.000$/, '')      // .000 제거
+        .replace('T', ' ')          // T를 공백으로
+        .trim();
 	    let parts = cleanStr.split(' '); // 예: ['2026-05-06', '18:00:00']
 	    
 	    if (parts.length < 2) return null;
