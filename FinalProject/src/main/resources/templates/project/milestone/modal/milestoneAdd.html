@@ -309,7 +309,6 @@
 					setErr("");
 					var idVal = form.querySelector('[name="id"]').value;
 					if (!idVal) { setErr("삭제할 마일스톤을 선택하세요."); return; }
-					if (!window.confirm("이 마일스톤을 삭제할까요?")) return;
 					deleteBtn.disabled = true;
 					fetch("/project/milestone/api/milestone/" + encodeURIComponent(idVal), {
 						method: "DELETE",
@@ -318,6 +317,7 @@
 						.then(function (res) {
 							if (!res.ok) throw new Error("HTTP " + res.status);
 							window.MilestoneTimeline.removeMilestoneLocal(idVal);
+							alert("마일스톤이 삭제되었습니다.");
 							bootstrap.Modal.getInstance(modalEl).hide();
 						})
 						.catch(function (err) {

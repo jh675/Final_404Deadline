@@ -16,9 +16,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.login.service.UserVO;
@@ -31,6 +33,7 @@ import com.example.demo.project.member.service.MemberListCriteria;
 import com.example.demo.project.member.service.MemberService;
 import com.example.demo.project.member.service.ProjectMemberRowVO;
 import com.example.demo.project.milestone.service.MilestoneService;
+import com.example.demo.project.milestone.service.MilestoneSyncException;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
@@ -170,7 +173,19 @@ public class IssueController {
 		model.addAttribute("issue", issue);
 		model.addAttribute("issueIds", issueService.getIssueIds(projectId, issue.getId()));
 		model.addAttribute("project", projectService.getprojectid(projectId));
+		if (issue.getId() != null) {
+			model.addAttribute("milestoneUnlinkBlocked", issueService.isMilestoneUnlinkBlocked(issue.getId()));
+		} else {
+			model.addAttribute("milestoneUnlinkBlocked", false);
+		}
 		return "project/issue/issueRegist";
+	}
+
+	@ExceptionHandler(MilestoneSyncException.class)
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> handleMilestoneSync(MilestoneSyncException ex) {
+		return ResponseEntity.badRequest()
+				.body(Map.of("ok", false, "message", ex.getMessage()));
 	}
 
 	@PostMapping(value = "/project/issue/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -187,6 +202,8 @@ public class IssueController {
 		}
 		issueVO.setPrjId(projectId);
 		issueVO.setWriter(loginUser.getId());
+		System.out.println(issueVO);
+		System.out.println("===========================");
 		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
@@ -198,7 +215,7 @@ public class IssueController {
 		return "redirect:/project/issue/list";
 	}
 
-	@PostMapping(value = "/project/issue/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PutMapping(value = "/project/issue/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String issueUpdate(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments,
 			HttpSession session) {

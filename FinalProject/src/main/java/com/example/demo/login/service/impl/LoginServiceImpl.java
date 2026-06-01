@@ -154,6 +154,10 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 	        throw new IllegalArgumentException("이미 등록된 사업자번호입니다.");
 	    }
 	    
+	    // 기업 전화번호 하이픈(-) 자동 포맷팅
+	    String formattedCompanyTel = formatPhoneNumber(company.getTel());
+	    company.setTel(formattedCompanyTel);
+	    
 	    // 기업 상태: '03ACTIVE' (승인 요청/대기) 강제 세팅
 	    company.setIsActiveCd("03ACTIVE");
 	    companyMapper.insert(company);
@@ -172,11 +176,51 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 	    if (user.getName() == null || user.getName().trim().isEmpty()) {
 	        user.setName(company.getCompanyName() + " 관리자"); 
 	    }
+	    
+	    // 관리자 전화번호 셋팅 및 포맷팅
 	    if (user.getTel() == null || user.getTel().trim().isEmpty()) {
-	        user.setTel(company.getTel());
+	        user.setTel(formattedCompanyTel); // 기업번호를 그대로 쓸 경우 이미 포맷팅된 번호 사용
+	    } else {
+	        user.setTel(formatPhoneNumber(user.getTel())); // 유저가 따로 입력한 번호도 포맷팅
 	    }
 
-	    // 3. 비활성 상태로 유저 INSERT
+	    // 비활성 상태로 유저 INSERT
 	    userManageMapper.insertUser(user);
+	}
+
+
+	private String formatPhoneNumber(String tel) {
+	    if (tel == null || tel.trim().isEmpty()) return "";
+	    
+	    // 숫자 이외의 모든 문자(하이픈, 공백 등)를 제거
+	    String digits = tel.replaceAll("[^0-9]", "");
+	    String formatted = digits;
+	    
+	    // 길이에 따른 정규식 포맷팅
+	    if (digits.length() == 8) { 
+	        // 1588-1588 (9자리)
+	        formatted = digits.replaceFirst("^(\\d{4})(\\d{4})$", "$1-$2");
+	    } else if (digits.startsWith("02")) { 
+	        // 서울 (02)
+	        if (digits.length() == 9) { // 02-123-4567 (11자리)
+	            formatted = digits.replaceFirst("^(\\d{2})(\\d{3})(\\d{4})$", "$1-$2-$3");
+	        } else if (digits.length() == 10) { // 02-1234-5678 (12자리)
+	            formatted = digits.replaceFirst("^(\\d{2})(\\d{4})(\\d{4})$", "$1-$2-$3");
+	        }
+	    } else if (digits.length() == 10) { 
+	        // 그 외 지역번호 3자리 (031-123-4567) (12자리)
+	        formatted = digits.replaceFirst("^(\\d{3})(\\d{3})(\\d{4})$", "$1-$2-$3");
+	    } else if (digits.length() == 11) { 
+	        // 휴대전화 (010-1234-5678) (13자리 - 최대치!)
+	        formatted = digits.replaceFirst("^(\\d{3})(\\d{4})(\\d{4})$", "$1-$2-$3");
+	    } 
+	    
+	    // DB 제약조건(VARCHAR2(13))
+	    if (formatted.length() > 13) {
+	        // 무조건 13자리가 넘으면 하이픈을 빼버리거나 잘라내서 DB 에러를 막습니다.
+	        return digits.length() > 13 ? digits.substring(0, 13) : digits;
+	    }
+	    
+	    return formatted;
 	}
 }
