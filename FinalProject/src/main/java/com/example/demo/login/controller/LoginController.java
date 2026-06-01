@@ -31,13 +31,11 @@ public class LoginController {
 	
 	@GetMapping("/")
 	public String main(Model model, HttpSession session) {
-		// 프로젝트 밖으로 나왔으므로 프로젝트 관련 세션 정보만 깔끔하게 청소!
+		// 프로젝트 밖으로 나왔으므로 프로젝트 관련 세션 정보 삭제
         session.removeAttribute("currentProjectId");
         session.removeAttribute("currentMenu");
         session.removeAttribute("moduleList");
         session.removeAttribute("project");
-        
-        session.setAttribute("currentTopMenu", "home");
 		// 시큐리티 컨텍스트 객체를 얻습니다.
 		SecurityContext context = SecurityContextHolder.getContext();
 
@@ -55,7 +53,7 @@ public class LoginController {
 	        
 	        // 시스템 관리자
 	        if(roles.contains("ROLE_ADMIN")) {
-	            return "redirect:/management/project";
+	            return "redirect:/admin/company/list";
 	        }
 
 	        // 기업 관리자
@@ -65,7 +63,7 @@ public class LoginController {
 
 	        // 일반 사용자
 	        if(roles.contains("ROLE_USER")) {
-	            return "redirect:/management/project";
+	            return "redirect:/calendar/list";
 	        }
 
 	        // 권한이 없는 경우
@@ -73,11 +71,18 @@ public class LoginController {
 
 	    } else {
 	        // 비로그인 사용자
-	        return "login/info";
 	    }
   	
+	    session.setAttribute("currentTopMenu", "home");
+	    return "login/info";
 //	    userVO 꺼내서 쓰는 방법 > 회의록 밑의 개발표준 9번 확인
 	    
+	}
+	
+	@GetMapping("/login")
+	public String goLoginPg(HttpSession session) {
+		session.setAttribute("currentTopMenu", "login");
+		return "login/login";
 	}
 	
 	@GetMapping("/login/companies/search")
