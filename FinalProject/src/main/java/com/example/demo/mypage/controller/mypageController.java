@@ -40,6 +40,8 @@ import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class mypageController {
 
