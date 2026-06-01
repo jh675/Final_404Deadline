@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mypage.mapper.MypageMepper">
+
+	<select id="selectMyProjectList" parameterType="long"
+		resultType="MypageVO">
+		  SELECT
+            p.ID              AS id,
+            p.PRJ_NAME        AS prjName,
+            p.PRJ_DESC        AS prjDesc,
+            sc.NAME           AS prjStatusCd,
+            p.START_DATE      AS startDate,
+            p.CLOSED_DATE     AS closedDate,
+            p.CREATED_ON      AS createdOn
+        FROM PROJECT p
+        INNER JOIN GRP g ON g.PRJ_ID = p.ID
+        INNER JOIN MEMBER m ON m.GRP_ID = g.ID
+        LEFT JOIN SUB_CODE sc ON sc.S_CODE = p.PRJ_STATUS_CD
+                              AND sc.M_CODE = '00PROSTAT'
+        WHERE m.USER_ID = #{userId}
+        and p.prj_status_cd not in('04PROSTAT', '05PROSTAT')
+        GROUP BY
+            p.ID, p.PRJ_NAME, p.PRJ_DESC, sc.NAME,
+            p.START_DATE, p.CLOSED_DATE, p.CREATED_ON
+        ORDER BY p.CREATED_ON DESC
+	</select>
+
+</mapper>
+

@@ -170,7 +170,6 @@
 							<th>시작일</th>
 							<th>종료일</th>
 							<th>생성일</th>
-							<th>참가인원</th>
 							<th>상세페이지</th>
 						</tr>
 					</thead>
@@ -179,16 +178,14 @@
 							<td colspan="8" class="text-muted py-4">참가중인 프로젝트가 없습니다.</td>
 						</tr>
 						<tr th:each="p : ${projectList}">
-							<td th:text="${p.prjName}"></td>
+							<td th:text="${p.prjName}"></td> <!-- 프로젝트 이름 -->
 							<td class="text-truncate" style="max-width: 200px;"
-								th:text="${p.prjDesc != null ? p.prjDesc : '-'}"></td>
-							<td></td>
-							<td></td>
+								th:text="${p.prjDesc != null ? p.prjDesc : '-'}"></td> <!-- 프로젝트 설명 -->
+							<td th:text="${p.prjStatusCd != null ? p.prjStatusCd : '-'}"></td> <!-- 프로젝트 진행상태 -->
+							<td th:text="${p.startDate != null ? #dates.format(p.startDate, 'yyyy-MM-dd') : '-'}"></td> <!-- 프로젝트 시작일 -->
+							<td th:text="${p.closedDate != null ? #dates.format(p.closedDate, 'yyyy-MM-dd') : '-'}"></td> <!-- 프로젝트 종료일 -->
 							<td
-								th:text="${p.closedDate != null ? #dates.format(p.closedDate, 'yyyy-MM-dd') : '-'}"></td>
-							<td
-								th:text="${p.createdOn != null ? #dates.format(p.createdOn, 'yyyy-MM-dd') : '-'}"></td>
-							<td></td>
+								th:text="${p.createdOn != null ? #dates.format(p.createdOn, 'yyyy-MM-dd') : '-'}"></td> <!-- 프로젝트 생성일 -->
 							<td><a th:href="@{/project/{id}(id=${p.id})}"
 								class="btn btn-outline-primary btn-sm">이동하기</a></td>
 						</tr>
@@ -559,8 +556,35 @@
 		
 			document.addEventListener('DOMContentLoaded', function() {
 			    loadcalendarEvents();
-			    loadMyIssues();  // ← 추가
+			    loadMyIssues(); 
 			});
+			
+			
+			//=========================================================================================
+			// 4. 이번주 마감 전체 이슈 불러오기
+			//=========================================================================================
+			
+				function loadAllIssues() {
+				
+				const tbody = document.getelementById('weekWeeklyIssueList');
+				tbody.innnerHTML = '';
+				
+				if (!projectList || projectList.length === 0) {
+					tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-3">소속된 프로젝트가 없습니다.</td></tr>';
+					return;
+				}
+				
+				const statusColor = { '신규': 'primary', '진행중': 'warning', '검토': 'secondary', '완료': 'success' };
+				const priorityColor = { '최상': 'danger', '상': 'warning', '중': 'info', '하': 'secondary' };
+				
+				const today = new Date(); today,setHours(0, 0, 0, 0);
+				const weekStart = new Date(today); weekStart.setDate(today.getDate() - today.getDay());
+				const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
+
+				let allGroupIssues = [];
+				let fetchPromises = [];
+			}
+			
 	</script>
 	</div>
 </body>

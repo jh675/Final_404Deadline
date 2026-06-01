@@ -26,6 +26,7 @@ import com.example.demo.management.service.ProjectVO;
 import com.example.demo.management.userManage.service.UserManageService;
 import com.example.demo.management.userManage.service.UserManageVO;
 import com.example.demo.mypage.service.MypageService;
+import com.example.demo.mypage.service.MypageVO;
 import com.example.demo.project.calender.service.CalenderService;
 import com.example.demo.project.calender.service.CalenderVO;
 import com.example.demo.project.calender.service.HolidayService;
@@ -79,12 +80,8 @@ public class mypageController {
 	public String mypage(Model model) {
 		UserVO loginUser = getLoginUser();
 		
-		// 프로젝트 목록 
-		ProjectVO vo = new ProjectVO();
-		vo.setUserId(loginUser.getId());
-		List<ProjectVO> list = projectService.userProjectList(vo);
+		List<MypageVO> list = mypageService.selectMyProjectList(loginUser.getId());
 		model.addAttribute("projectList", list);
-		
 		
 		// 캘린더 목록 
 		CalenderVO calvo = new CalenderVO();
@@ -257,11 +254,13 @@ public class mypageController {
 		return ResponseEntity.ok().body("SUCCESS");
 	}
 	
-	// 이번주 그룹 전체 마감이슈 
-	@GetMapping("/mypage/issue/week")
-	@ResponseBody
-	public List<IssueOutputVO> weekIssueList(IssueInputVO vo) {
-		return issueMapper.selectIssueList(vo);
-	}
+	/*
+	 * // 이번주 그룹 전체 마감이슈
+	 * 
+	 * @GetMapping("/mypage/issue/week")
+	 * 
+	 * @ResponseBody public List<IssueOutputVO> weekIssueList(IssueOutputVO vo) {
+	 * return issueMapper.selectIssueList(vo); }
+	 */
 
 }
