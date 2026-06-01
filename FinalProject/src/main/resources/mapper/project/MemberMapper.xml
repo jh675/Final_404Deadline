@@ -192,8 +192,8 @@
   </delete>
   
   <select id="findLoginById" parameterType="Long" resultType="String">
-    SELECT LOGIN
-    FROM USERS
-    WHERE ID = #{userId}
-</select>
+	    SELECT BIZ_NO || '_' || LOGIN
+	    FROM USERS
+	    WHERE ID = #{userId}
+	</select>
 </mapper>

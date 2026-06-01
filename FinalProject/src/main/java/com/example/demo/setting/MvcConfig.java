@@ -33,7 +33,8 @@ class MvcConfig implements WebMvcConfigurer {
 					"/css/**",          // 화면 스타일 정적 리소스 제외
 					"/js/**",           // 자바스크립트 정적 리소스 제외
 					"/images/**",       // 이미지 정적 리소스 제외
-					"/error/**"         // 에러 페이지 제외
+					"/error/**",         // 에러 페이지 제외
+					"/api/notifications/**" // 비동기 통신 제외(알림)
 				);
 	}
 }

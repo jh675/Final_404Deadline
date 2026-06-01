@@ -118,7 +118,11 @@
         <div layout:fragment="content">
         </div>
 	<div th:replace="~{layout/fragments/footer :: yedam}"></div>
-	<th:block th:replace="~{layout/fragments/modal/aiModal :: aiModalFragment}"></th:block>
+		<!-- 위키 작성: AI 모달은 Toast UI 없이 텍스트만 (편집기와 toastui 전역 충돌 방지) -->
+		<th:block th:if="${wikiEditorPage}"
+		          th:replace="~{layout/fragments/modal/aiModal :: aiModalWikiSafeFragment}"></th:block>
+		<th:block th:unless="${wikiEditorPage}"
+		          th:replace="~{layout/fragments/modal/aiModal :: aiModalFragment}"></th:block>
   </div>
 </body>
 </html>

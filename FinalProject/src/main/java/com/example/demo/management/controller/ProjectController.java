@@ -88,7 +88,7 @@ public class ProjectController {
         session.removeAttribute("currentMenu");
         session.removeAttribute("moduleList");
         session.removeAttribute("project");
-	    
+        session.setAttribute("currentTopMenu", "project");
 	    return "management/projectlist";
 	}
 
@@ -217,6 +217,22 @@ public class ProjectController {
 	    projectservice.projectDelete(vo);
 	    rttr.addFlashAttribute("msg", "프로젝트가 삭제되었습니다.");
 	    return "redirect:/management/project";
+	}
+	
+	@PostMapping("/management/restoration")
+	public String reproject(ProjectVO vo,RedirectAttributes redirectAttributes) {
+		
+		System.out.println("전달받은 id: " + vo.getId());
+	    System.out.println("전달받은 prjIdentifier: " + vo.getPrjIdentifier());
+		int result = projectservice.reproject(vo);
+		System.out.println("업데이트 결과: " + result);
+	    if (result == 0) {
+	        // 중복으로 업데이트 차단된 경우
+	        redirectAttributes.addFlashAttribute("errorMsg", "이미 사용중인 식별자입니다.");
+	    } else {
+	        redirectAttributes.addFlashAttribute("successMsg", "복구되었습니다.");
+	    }
+		return "redirect:/management/project";
 	}
 	
 	//대시보드

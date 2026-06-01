@@ -17,6 +17,7 @@
  *   - wikiView.html:  WikiLinkAutocomplete.expandInternalLinks(markdown)
  */
 var WikiLinkAutocomplete = (function () {
+    var hideHandlers = [];
     /** [[# ...]] — 이슈 링크 (마크다운 Heading # 과 충돌하지 않도록 [[# 사용) */
     var ISSUE_TRIGGER = /\[\[#([^\]]*)$/;
     /** [[ ...]] — 위키 링크 ([[# 로 시작하는 경우는 제외) */
@@ -105,6 +106,8 @@ var WikiLinkAutocomplete = (function () {
      */
     function init(editor, anchorSelector) {
         if (!editor) return;
+        if (editor.__wikiAutocompleteBound) return;
+        editor.__wikiAutocompleteBound = true;
 
         var dropdown = document.createElement('div');
         dropdown.className = 'wiki-link-autocomplete';
@@ -132,9 +135,10 @@ var WikiLinkAutocomplete = (function () {
             open: false
         };
 
-        function hideDropdown() {
-            if (state.pointerInside) return;
+        function hideDropdown(force) {
+            if (!force && state.pointerInside) return;
             dropdown.hidden = true;
+            dropdown.style.pointerEvents = 'none';
             header.textContent = '';
             list.innerHTML = '';
             state.trigger = null;
@@ -183,6 +187,7 @@ var WikiLinkAutocomplete = (function () {
                     : '목록에서 선택하거나 검색어를 더 입력하세요.';
                 list.appendChild(empty);
                 dropdown.hidden = false;
+                dropdown.style.pointerEvents = 'auto';
                 state.open = true;
                 positionDropdown();
                 return;
@@ -212,6 +217,7 @@ var WikiLinkAutocomplete = (function () {
             });
 
             dropdown.hidden = false;
+            dropdown.style.pointerEvents = 'auto';
             state.open = true;
             positionDropdown();
 
@@ -249,6 +255,7 @@ var WikiLinkAutocomplete = (function () {
 
         /** ↑↓ Enter Esc — 에디터 기본 동작(줄바꿈 등)보다 먼저 처리 (capture) */
         function handleAutocompleteKeydown(e) {
+            if (document.body.classList.contains('modal-open')) return false;
             if (!state.open) return false;
 
             if (e.key === 'ArrowDown' && state.items.length) {
@@ -362,12 +369,17 @@ var WikiLinkAutocomplete = (function () {
             /** TOAST UI Editor 내부 textarea/ProseMirror — Enter가 에디터에서 먼저 삼켜지는 경우 대비 */
             function bindEditorInputs() {
                 editorRoot.querySelectorAll('textarea, .ProseMirror, [contenteditable="true"]').forEach(function (el) {
+                    if (el.__wikiAcKeydownBound) return;
+                    el.__wikiAcKeydownBound = true;
                     el.addEventListener('keydown', handleAutocompleteKeydown, true);
                 });
             }
             bindEditorInputs();
             setTimeout(bindEditorInputs, 300);
-            setTimeout(bindEditorInputs, 1000);
+            if (typeof MutationObserver !== 'undefined') {
+                var mo = new MutationObserver(function () { bindEditorInputs(); });
+                mo.observe(editorRoot, { childList: true, subtree: true });
+            }
         }
 
         document.addEventListener('mousedown', function (e) {
@@ -381,7 +393,24 @@ var WikiLinkAutocomplete = (function () {
         window.addEventListener('resize', function () {
             if (state.open) positionDropdown();
         });
+
+        hideHandlers.push(function (force) {
+            state.pointerInside = false;
+            hideDropdown(force);
+        });
     }
+
+    function hideAll() {
+        hideHandlers.forEach(function (hide) {
+            hide(true);
+        });
+    }
+
+    document.addEventListener('show.bs.modal', function (e) {
+        if (e.target && e.target.id === 'aiResultModal') {
+            hideAll();
+        }
+    });
 
     /** 마크다운 링크 라벨 안의 대괄호 이스케이프 */
     function escapeMarkdownLinkLabel(text) {
@@ -420,6 +449,7 @@ var WikiLinkAutocomplete = (function () {
 
     return {
         init: init,
+        hideAll: hideAll,
         expandInternalLinks: expandInternalLinks
     };
 })();

@@ -26,6 +26,8 @@ public interface CalenderMapper {
 	List<CalenderVO> findByCreatedOnAfter(Date date);
 
 //1시간 전 알림용
-List<CalenderVO> findByCalStartBetween(@Param("start") Date start, @Param("end") Date end);
- 
+	List<CalenderVO> findByCalStartBetween(@Param("start") Date start, @Param("end") Date end);
+	
+	String findBizNoByMemId(Long memId);
+	List<String> findUsernamesByBizNo(String bizNo);
 }
