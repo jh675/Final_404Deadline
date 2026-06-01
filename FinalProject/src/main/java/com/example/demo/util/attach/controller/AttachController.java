@@ -1,15 +1,12 @@
 package com.example.demo.util.attach.controller;
 
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ContentDisposition;
@@ -25,24 +22,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Controller
-@Slf4j
 public class AttachController {
-	@Value("${file.upload-dir}")
-	private String uploadDir;
-	
 	@Autowired
 	AttachService service;
-	private Path uploadRoot() throws IOException {
-		//업로드 경로를 가져온다
-		Path root = Paths.get(uploadDir.trim()).toAbsolutePath().normalize();
-		//업로드 경로가 없으면 만든다
-		Files.createDirectories(root);
-		//업로드 경로를 반환한다
-		return root;
-	}
+
 	@GetMapping("/download/{id}")
 	public ResponseEntity<Resource> downloadFile(@PathVariable("id") Long id) throws MalformedURLException {
 		// 키값을 통해 아이디 받아옴
@@ -79,7 +63,6 @@ public class AttachController {
 			
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
-			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}

@@ -33,7 +33,7 @@ public class EmailSendImpl implements EmailSendService {
 		try {
 			mailSender.send(message);
 		} catch (Exception e) {
-			e.printStackTrace();
+			// 발송 실패 시 호출부에서 재시도·안내 처리
 		}
 	}
 }

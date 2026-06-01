@@ -1,0 +1,44 @@
+{
+  "properties": [
+    {
+      "name": "openapi.holiday.service-key",
+      "type": "java.lang.String",
+      "description": "공공데이터포털 특일정보 API 서비스 키."
+    },
+    {
+      "name": "file.upload-dir",
+      "type": "java.lang.String",
+      "description": "첨부파일 저장 루트 디렉터리 경로."
+    },
+    {
+      "name": "openai.api-key",
+      "type": "java.lang.String",
+      "description": "OpenAI API 인증 키."
+    },
+    {
+      "name": "gemini.api-key",
+      "type": "java.lang.String",
+      "description": "Google Gemini API 인증 키."
+    },
+    {
+      "name": "mybatis.configuration.map-underscore-to-camel-case",
+      "type": "java.lang.Boolean",
+      "description": "MyBatis 컬럼명 snake_case → camelCase 매핑 여부."
+    },
+    {
+      "name": "mybatis.configuration.jdbc-type-for-null",
+      "type": "java.lang.String",
+      "description": "MyBatis NULL 바인딩 JDBC 타입."
+    },
+    {
+      "name": "mybatis.type-aliases-package",
+      "type": "java.lang.String",
+      "description": "MyBatis type alias 스캔 패키지."
+    },
+    {
+      "name": "mybatis.mapper-locations",
+      "type": "java.lang.String",
+      "description": "MyBatis XML mapper 위치 (classpath 패턴)."
+    }
+  ]
+}

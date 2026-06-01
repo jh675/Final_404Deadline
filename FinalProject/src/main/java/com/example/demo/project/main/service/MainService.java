@@ -2,8 +2,6 @@ package com.example.demo.project.main.service;
 
 import java.util.List;
 
-import com.example.demo.management.service.ProjectVO;
-import com.example.demo.project.calender.service.CalenderVO;
 import com.example.demo.project.group.service.GroupDetailVO;
 import com.example.demo.project.notice.service.NoticeVO;
 

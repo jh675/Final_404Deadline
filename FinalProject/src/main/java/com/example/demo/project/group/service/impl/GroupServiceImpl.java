@@ -138,7 +138,6 @@ public class GroupServiceImpl implements GroupService {
         if (groupMapper.selectGroupDetail(prjId, grpId) == null) {
             throw new IllegalArgumentException("프로젝트에 존재하지 않는 그룹입니다.");
         }
-        System.out.println("=== updateGroup 호출됨");
         List<GroupMemberDetailRowVO> beforeMembers = groupMapper.selectGroupMembers(prjId, grpId);
         Set<Long> beforeUserIds = beforeMembers.stream()
             .map(GroupMemberDetailRowVO::getUserId)
@@ -162,10 +161,7 @@ public class GroupServiceImpl implements GroupService {
         String prjName = groupMapper.selectProjectNameByPrjId(prjId);
         GroupDetailVO groupDetail = groupMapper.selectGroupDetail(prjId, grpId);
         String grpName = groupDetail != null ? groupDetail.getGrpName() : "알 수 없음";
-        
-        System.out.println("=== 기존 멤버: " + beforeUserIds);
-        System.out.println("=== 새 멤버: " + userIds);
-        
+
         if (userIds != null) {
             userIds.stream()
                 .filter(Objects::nonNull)
