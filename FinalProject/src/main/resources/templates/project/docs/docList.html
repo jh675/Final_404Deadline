@@ -33,6 +33,8 @@
 
 		<script th:inline="javascript">
 		const docsData = /*[[${list}]]*/ [];
+		
+//		=============================수정함=======================================
 		// Thymeleaf를 이용해 권한 여부를 Javascript boolean 변수로 저장
 		const hasUpdateRole = /*[[${@prjAuth.hasRole('ROLE_DOCS_UPDATE')}]]*/ false;
 		const hasDeleteRole = /*[[${@prjAuth.hasRole('ROLE_DOCS_DELETE')}]]*/ false;
@@ -132,8 +134,9 @@
 				perPage: 10
 			}
 		});
-		
-        grid.on('click', (ev) => {
+//		=============================여기까지 수정했음=======================================		
+        
+		grid.on('click', (ev) => {
             const row = grid.getRow(ev.rowKey);
             if (!row) return;
 
@@ -222,8 +225,9 @@
 </script>
 		<div class="d-flex justify-content-end my-3">
 
-			<button class="btn btn-primary" data-bs-toggle="modal" 
-				data-bs-target="#registerModal" th:if="${@prjAuth.hasRole('ROLE_DOCS_CREATE')}">등록</button>
+			<button class="btn btn-primary" data-bs-toggle="modal"
+				data-bs-target="#registerModal"
+				th:if="${@prjAuth.hasRole('ROLE_DOCS_CREATE')}">등록</button>
 
 		</div>
 
