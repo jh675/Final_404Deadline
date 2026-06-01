@@ -236,8 +236,6 @@
 						if (!eligible.length) return;
 						const url = action === 'start' ? '/project/issue/api/start-date' : '/project/issue/api/closed-date';
 						const label = action === 'start' ? '시작일' : '완료일';
-						if (!confirm(label + '을(를) ' + eligible.length + '건에 등록하시겠습니까?')) return;
-
 						fetch(url, {
 							method: 'PUT',
 							headers: buildAuthHeaders(true),

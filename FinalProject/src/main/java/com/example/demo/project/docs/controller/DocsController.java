@@ -170,9 +170,6 @@ public class DocsController {
 			return "success";
 
 		} catch (Exception e) {
-
-			e.printStackTrace();
-
 			return "fail";
 		}
 

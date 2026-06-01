@@ -140,13 +140,6 @@
       AND M.GRP_ID = #{grpId}
   </select>
 
-  <!-- 사용자 입사일 조회 -->
-  <select id="selectUserHireDateYmd" resultType="string">
-    SELECT TO_CHAR(U.HIRE_DATE, 'YYYY-MM-DD')
-    FROM USERS U
-    WHERE U.ID = #{userId}
-  </select>
-
   <!-- 구성원 일괄 등록 -->
   <insert id="insertMembers">
     BEGIN

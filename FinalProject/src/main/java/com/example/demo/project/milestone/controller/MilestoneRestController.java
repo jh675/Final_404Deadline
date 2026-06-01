@@ -58,10 +58,8 @@ public class MilestoneRestController {
 				return null;
 			}
 			milestoneVO.setPrjId(projectId);
-//			System.out.println(milestoneVO);
 			return service.insertMilestone(milestoneVO);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -70,7 +68,6 @@ public class MilestoneRestController {
 		try {
 			return service.insertMilestoneIssue(milestoneIssueVO);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -79,7 +76,6 @@ public class MilestoneRestController {
 		try {
 			return service.insertTimeline(timelineVO);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -107,7 +103,6 @@ public class MilestoneRestController {
 		try {
 			return service.updateMilestone(milestoneVO);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -129,7 +124,6 @@ public class MilestoneRestController {
 	
 	@PutMapping("/issue/move")
 	public Long moveIssue(@RequestBody MilestoneIssueVO milestoneIssueVO) {
-		System.out.println(milestoneIssueVO);
 		return service.moveIssue(milestoneIssueVO);
 	}
 	@DeleteMapping("/timeline/{id}")
