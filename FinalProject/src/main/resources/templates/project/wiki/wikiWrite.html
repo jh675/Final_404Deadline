@@ -7,6 +7,8 @@
     <title>위키 작성</title>
     <th:block layout:fragment="head-content">
         <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor.min.css" />
+        <!-- 위키 작성 전용: 편집기 번들만 로드 (AI 모달은 별도 fragment로 toastui 미사용) -->
+        <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"></script>
         <style>
             .wiki-write-page {
                 font-family: "Malgun Gothic", "맑은 고딕", -apple-system, sans-serif;
@@ -196,7 +198,8 @@
 
             .wiki-link-autocomplete {
                 position: fixed;
-                z-index: 10050;
+                /* Bootstrap 모달(1055)보다 낮게 — 모달 닫기/배경 클릭 가로채기 방지 */
+                z-index: 1040;
                 background: #fff;
                 border: 1px solid #ccc;
                 border-radius: 6px;
@@ -382,7 +385,6 @@
     </th:block>
 </head>
 <body>
-
 <div layout:fragment="content" class="wiki-write-page py-2">
 
     <div class="wiki-write-layout">
@@ -423,10 +425,6 @@
                         (선택 시 제목과 번호가 함께 저장됩니다)
                     </p>
                     <div id="wikiEditor"></div>
-                    <p id="wikiEditorError" class="text-danger small mt-2" style="display:none" role="alert"></p>
-                    <!-- 수정 시 본문: JS 문자열 깨짐 방지용 (Thymeleaf 인라인 대신 value 사용) -->
-                    <textarea id="wikiInitialContentHolder" hidden
-                              th:text="${page != null and page.content != null ? page.content : ''}"></textarea>
                 </div>
 
                 <!-- 4. 상위 위키 -->
@@ -445,8 +443,9 @@
                 <!-- 5. 설명 -->
                 <div class="wiki-form-group">
                     <label for="wikiDescribe">설명</label>
-                    <input type="text" id="wikiDescribe" name="describe" placeholder="변경 요약 또는 페이지 설명"
+                    <input type="text" id="wikiDescribe" name="describe" placeholder="변경 요약 (비워두면 자동 저장)"
                            th:value="${page != null ? page.describe : ''}">
+                    <p class="attachment-hint">설명을 비워두면 시스템이 기본값으로 저장합니다.</p>
                 </div>
 
                 <!-- 6. 첨부파일 (작성) -->
@@ -512,171 +511,59 @@
         </aside>
     </div>
 
-    <!-- JS: Toast UI → 자동완성 → 초기화 (순서 유지) -->
-    <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"
-            id="wikiToastUiScript"></script>
-    <!-- aiModal의 viewer 스크립트보다 먼저 Editor 생성자 보존 (viewer가 toastui.Editor를 덮어씀) -->
-    <script>
-        window.ToastUiMarkdownEditor = window.toastui && window.toastui.Editor;
-    </script>
     <script th:src="@{/js/wiki/wiki-link-autocomplete.js}"></script>
     <script th:inline="javascript">
         var wikiEditorInstance = null;
-        var wikiEditorBootDone = false;
-
-        function getToastUiEditorClass() {
-            return window.ToastUiMarkdownEditor
-                || (window.toastui && window.toastui.Editor);
-        }
-
-        function showWikiEditorError(message) {
-            var errEl = document.getElementById('wikiEditorError');
-            if (errEl) {
-                errEl.textContent = message;
-                errEl.style.display = 'block';
-            }
-        }
 
         function syncWikiContent() {
             var hidden = document.getElementById('wikiContentHidden');
-            if (!hidden || !wikiEditorInstance) return;
-            if (typeof wikiEditorInstance.getMarkdown !== 'function') return;
-            hidden.value = wikiEditorInstance.getMarkdown();
-        }
-
-        function getWikiInitialContent() {
-            var holder = document.getElementById('wikiInitialContentHolder');
-            return holder ? holder.value : '';
-        }
-
-        function initWikiLinkAutocomplete() {
-            if (!wikiEditorInstance || !window.WikiLinkAutocomplete) return;
-            WikiLinkAutocomplete.init(wikiEditorInstance, '#wikiEditor');
-        }
-
-        function isToastUiReady() {
-            var EditorClass = getToastUiEditorClass();
-            return typeof EditorClass === 'function'
-                && typeof EditorClass.prototype.getMarkdown === 'function';
+            if (hidden && wikiEditorInstance) {
+                hidden.value = wikiEditorInstance.getMarkdown();
+            }
         }
 
         function initWikiEditor() {
             if (wikiEditorInstance) return true;
+            if (!window.toastui || !window.toastui.Editor) return false;
 
-            var EditorClass = getToastUiEditorClass();
-            if (!isToastUiReady()) return false;
-
-            var el = document.getElementById('wikiEditor');
+            var el = document.querySelector('#wikiEditor');
             if (!el) return false;
 
-            var errEl = document.getElementById('wikiEditorError');
-            if (errEl) errEl.style.display = 'none';
+            var initialContent = /*[[${page != null ? page.content : ''}]]*/ '';
 
-            try {
-                var initialContent = getWikiInitialContent();
+            /* placeholder + previewStyle:'vertical' 조합은 미리보기에 로딩 스피너가 무한 표시되는 버그 (#2669) */
+            wikiEditorInstance = new toastui.Editor({
+                el: el,
+                height: '420px',
+                initialEditType: 'markdown',
+                previewStyle: 'vertical',
+                previewHighlight: false,
+                usageStatistics: false,
+                plugins: []
+            });
 
-                /* vertical + placeholder 조합 시 미리보기 스피너 무한 로딩 (#2669) → tab 사용 */
-                wikiEditorInstance = new EditorClass({
-                    el: el,
-                    height: '420px',
-                    initialEditType: 'markdown',
-                    previewStyle: 'tab',
-                    previewHighlight: false,
-                    usageStatistics: false,
-                    initialValue: initialContent || '',
-                    plugins: []
-                });
+            wikiEditorInstance.on('change', syncWikiContent);
+            wikiEditorInstance.on('load', function () {
+                if (window.WikiLinkAutocomplete && !wikiEditorInstance.__wikiAutocompleteBound) {
+                    WikiLinkAutocomplete.init(wikiEditorInstance, '#wikiEditor');
+                    wikiEditorInstance.__wikiAutocompleteBound = true;
+                }
+            });
 
-                wikiEditorInstance.on('change', syncWikiContent);
-                wikiEditorInstance.on('load', function () {
-                    syncWikiContent();
-                    initWikiLinkAutocomplete();
-                });
-
-                setTimeout(syncWikiContent, 0);
-                setTimeout(initWikiLinkAutocomplete, 300);
-                return true;
-            } catch (e) {
-                console.error('Wiki editor init failed:', e);
-                showWikiEditorError('에디터 초기화에 실패했습니다. 새로고침 후 다시 시도해 주세요.');
-                wikiEditorInstance = null;
-                return false;
+            if (initialContent) {
+                wikiEditorInstance.setMarkdown(initialContent);
+                syncWikiContent();
             }
+            return true;
         }
 
-        function bootWikiEditor() {
-            if (wikiEditorBootDone) return;
-            if (initWikiEditor()) {
-                wikiEditorBootDone = true;
-                return;
-            }
-            var attempts = 0;
+        document.addEventListener('DOMContentLoaded', function () {
+            if (initWikiEditor()) return;
+            var attempt = 0;
             var timer = setInterval(function () {
-                if (initWikiEditor()) {
-                    wikiEditorBootDone = true;
-                    clearInterval(timer);
-                } else if (++attempts >= 120) {
-                    clearInterval(timer);
-                    if (!isToastUiReady()) {
-                        showWikiEditorError(
-                            '에디터 라이브러리(Toast UI)를 불러오지 못했습니다. '
-                            + '인터넷 연결 또는 uicdn.toast.com 차단 여부를 확인해 주세요.'
-                        );
-                    }
-                }
+                if (initWikiEditor() || ++attempt > 20) clearInterval(timer);
             }, 50);
-        }
-
-        /** uicdn 실패 시 jsdelivr 대체 로드 */
-        function loadToastUiFallback() {
-            if (isToastUiReady()) {
-                bootWikiEditor();
-                return;
-            }
-            var s = document.createElement('script');
-            s.src = 'https://cdn.jsdelivr.net/npm/@toast-ui/editor@3.2.2/dist/toastui-editor-all.min.js';
-            s.onload = function () {
-                window.ToastUiMarkdownEditor = window.toastui && window.toastui.Editor;
-                bootWikiEditor();
-            };
-            s.onerror = function () {
-                showWikiEditorError('에디터 스크립트를 CDN에서 받아오지 못했습니다.');
-            };
-            document.head.appendChild(s);
-        }
-
-        (function scheduleWikiEditorBoot() {
-            var primary = document.getElementById('wikiToastUiScript');
-            if (primary) {
-                primary.addEventListener('error', loadToastUiFallback);
-            }
-
-            function start() {
-                if (isToastUiReady()) {
-                    bootWikiEditor();
-                    return;
-                }
-                var wait = 0;
-                var waitTimer = setInterval(function () {
-                    if (isToastUiReady()) {
-                        clearInterval(waitTimer);
-                        bootWikiEditor();
-                    } else if (++wait >= 40) {
-                        clearInterval(waitTimer);
-                        loadToastUiFallback();
-                    }
-                }, 50);
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', start);
-            } else {
-                start();
-            }
-            /* aiModal viewer 스크립트 이후에도 한 번 더 시도 */
-            window.addEventListener('load', bootWikiEditor);
-        })();
-
+        });
         (function () {
             var MAX_FILES = 5;
             var MAX_TOTAL_BYTES = 50 * 1024 * 1024;

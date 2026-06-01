@@ -17,14 +17,25 @@
  *   - wikiView.html:  WikiLinkAutocomplete.expandInternalLinks(markdown)
  */
 var WikiLinkAutocomplete = (function () {
+    var hideHandlers = [];
     /** [[# ...]] — 이슈 링크 (마크다운 Heading # 과 충돌하지 않도록 [[# 사용) */
     var ISSUE_TRIGGER = /\[\[#([^\]]*)$/;
     /** [[ ...]] — 위키 링크 ([[# 로 시작하는 경우는 제외) */
     var WIKI_TRIGGER = /\[\[(?!#)([^\]]*)$/;
 
-    /** 줄/칸 → 문자열 오프셋 (마크다운 모드) */
-    function offsetFromLineCh(md, lineIdx, ch) {
+    /**
+     * TOAST UI Editor 마크다운 + 커서 위치 → 전체 텍스트와 커서 기준 before/after 분리
+     * @returns {{ md: string, before: string, after: string, pos: number }}
+     */
+    function getMarkdownContext(editor) {
+        var md = editor.getMarkdown();
+        var sel = editor.getSelection();
+        if (!sel || !sel[0]) {
+            return { md: md, before: md, after: '', pos: md.length };
+        }
         var lines = md.split('\n');
+        var lineIdx = sel[0][0];
+        var ch = sel[0][1];
         var pos = 0;
         for (var i = 0; i < lineIdx && i < lines.length; i++) {
             pos += lines[i].length + 1;
@@ -32,64 +43,6 @@ var WikiLinkAutocomplete = (function () {
         if (lineIdx < lines.length) {
             pos += Math.min(ch, lines[lineIdx].length);
         }
-        return pos;
-    }
-
-    /** 문자열 오프셋 → [줄, 칸] (replaceSelection용) */
-    function offsetToLineCh(md, offset) {
-        var lines = md.split('\n');
-        var pos = 0;
-        for (var li = 0; li < lines.length; li++) {
-            var lineLen = lines[li].length;
-            if (pos + lineLen >= offset || li === lines.length - 1) {
-                return [li, Math.max(0, offset - pos)];
-            }
-            pos += lineLen + 1;
-        }
-        return [0, 0];
-    }
-
-    /**
-     * 커서 위치 + 마크다운 본문 (TUI Editor 마크다운/CodeMirror 6 대응)
-     * getSelection()만으로는 커서를 못 잡는 경우가 많아 여러 경로를 시도한다.
-     */
-    function getMarkdownContext(editor, editorRoot) {
-        var md = (editor.getMarkdown && editor.getMarkdown()) || '';
-        var pos = null;
-
-        if (typeof editor.getCurrentModeEditor === 'function') {
-            try {
-                var modeEd = editor.getCurrentModeEditor();
-                if (modeEd && modeEd.view && modeEd.view.state) {
-                    var st = modeEd.view.state;
-                    md = st.doc.toString();
-                    pos = st.selection.main.head;
-                }
-            } catch (e) { /* ignore */ }
-        }
-
-        if (pos === null && typeof editor.getSelection === 'function') {
-            var sel = editor.getSelection();
-            if (sel && Array.isArray(sel[0]) && typeof sel[0][0] === 'number') {
-                pos = offsetFromLineCh(md, sel[0][0], sel[0][1]);
-            } else if (sel && typeof sel[0] === 'number') {
-                pos = Math.min(sel[0], md.length);
-            }
-        }
-
-        if (pos === null && editorRoot) {
-            var ta = editorRoot.querySelector('.toastui-editor-md-container textarea, textarea');
-            if (ta && typeof ta.selectionStart === 'number') {
-                md = ta.value || md;
-                pos = ta.selectionStart;
-            }
-        }
-
-        if (pos === null) {
-            pos = md.length;
-        }
-
-        pos = Math.max(0, Math.min(pos, md.length));
         return {
             md: md,
             before: md.substring(0, pos),
@@ -153,8 +106,8 @@ var WikiLinkAutocomplete = (function () {
      */
     function init(editor, anchorSelector) {
         if (!editor) return;
-        if (editor.__wikiLinkAutocompleteInited) return;
-        editor.__wikiLinkAutocompleteInited = true;
+        if (editor.__wikiAutocompleteBound) return;
+        editor.__wikiAutocompleteBound = true;
 
         var dropdown = document.createElement('div');
         dropdown.className = 'wiki-link-autocomplete';
@@ -182,9 +135,10 @@ var WikiLinkAutocomplete = (function () {
             open: false
         };
 
-        function hideDropdown() {
-            if (state.pointerInside) return;
+        function hideDropdown(force) {
+            if (!force && state.pointerInside) return;
             dropdown.hidden = true;
+            dropdown.style.pointerEvents = 'none';
             header.textContent = '';
             list.innerHTML = '';
             state.trigger = null;
@@ -232,11 +186,12 @@ var WikiLinkAutocomplete = (function () {
                     ? '검색 결과가 없습니다.'
                     : '목록에서 선택하거나 검색어를 더 입력하세요.';
                 list.appendChild(empty);
-                dropdown.hidden = false;
-                state.open = true;
-                positionDropdown();
-                return;
-            }
+            dropdown.hidden = false;
+            dropdown.style.pointerEvents = 'auto';
+            state.open = true;
+            positionDropdown();
+            return;
+        }
 
             state.items.forEach(function (item, idx) {
                 var row = document.createElement('button');
@@ -262,6 +217,7 @@ var WikiLinkAutocomplete = (function () {
             });
 
             dropdown.hidden = false;
+            dropdown.style.pointerEvents = 'auto';
             state.open = true;
             positionDropdown();
 
@@ -279,23 +235,17 @@ var WikiLinkAutocomplete = (function () {
             var savedTrigger = state.trigger;
             if (!savedTrigger || !item) return;
 
-            var ctx = getMarkdownContext(editor, editorRoot);
+            var ctx = getMarkdownContext(editor);
             var insertText = item.insert || '';
             if (!insertText) return;
 
+            var newMd = ctx.md.substring(0, savedTrigger.replaceStart)
+                + insertText
+                + ctx.md.substring(ctx.pos);
+
             state.suppressUntil = Date.now() + 400;
             state.pointerInside = false;
-
-            if (typeof editor.replaceSelection === 'function') {
-                var from = offsetToLineCh(ctx.md, savedTrigger.replaceStart);
-                var to = offsetToLineCh(ctx.md, ctx.pos);
-                editor.replaceSelection(insertText, from, to);
-            } else {
-                var newMd = ctx.md.substring(0, savedTrigger.replaceStart)
-                    + insertText
-                    + ctx.md.substring(ctx.pos);
-                editor.setMarkdown(newMd);
-            }
+            editor.setMarkdown(newMd);
             hideDropdown();
 
             if (typeof window.syncWikiContent === 'function') {
@@ -305,6 +255,7 @@ var WikiLinkAutocomplete = (function () {
 
         /** ↑↓ Enter Esc — 에디터 기본 동작(줄바꿈 등)보다 먼저 처리 (capture) */
         function handleAutocompleteKeydown(e) {
+            if (document.body.classList.contains('modal-open')) return false;
             if (!state.open) return false;
 
             if (e.key === 'ArrowDown' && state.items.length) {
@@ -350,7 +301,7 @@ var WikiLinkAutocomplete = (function () {
             if (Date.now() < state.suppressUntil) return;
             if (state.pointerInside) return;
 
-            var ctx = getMarkdownContext(editor, editorRoot);
+            var ctx = getMarkdownContext(editor);
             var trigger = detectTrigger(ctx.before);
             if (!trigger) {
                 if (state.open) hideDropdown();
@@ -391,34 +342,8 @@ var WikiLinkAutocomplete = (function () {
         }
 
         editor.on('change', onEditorInput);
-        if (typeof editor.on === 'function') {
-            editor.on('load', function () {
-                bindEditorInputs();
-            });
-        }
 
         var editorRoot = anchorSelector ? document.querySelector(anchorSelector) : null;
-
-        /** CodeMirror 6 / textarea에 직접 input·keyup 연결 (change만으로는 타이핑을 못 잡는 경우 대비) */
-        function bindEditorInputs() {
-            if (!editorRoot) return;
-            editorRoot.querySelectorAll(
-                '.cm-content, .cm-editor, .toastui-editor-md-container, .ProseMirror, textarea'
-            ).forEach(function (el) {
-                if (el.__wikiLinkAutocompleteBound) return;
-                el.__wikiLinkAutocompleteBound = true;
-                el.addEventListener('input', onEditorInput, true);
-                el.addEventListener('keyup', function (e) {
-                    if (!isNavigationKey(e.key)) onEditorInput();
-                }, true);
-            });
-        }
-
-        bindEditorInputs();
-        setTimeout(bindEditorInputs, 0);
-        setTimeout(bindEditorInputs, 300);
-        setTimeout(bindEditorInputs, 1000);
-
         if (editorRoot) {
             editorRoot.addEventListener('keyup', function (e) {
                 if (isNavigationKey(e.key)) return;
@@ -444,12 +369,17 @@ var WikiLinkAutocomplete = (function () {
             /** TOAST UI Editor 내부 textarea/ProseMirror — Enter가 에디터에서 먼저 삼켜지는 경우 대비 */
             function bindEditorInputs() {
                 editorRoot.querySelectorAll('textarea, .ProseMirror, [contenteditable="true"]').forEach(function (el) {
+                    if (el.__wikiAcKeydownBound) return;
+                    el.__wikiAcKeydownBound = true;
                     el.addEventListener('keydown', handleAutocompleteKeydown, true);
                 });
             }
             bindEditorInputs();
             setTimeout(bindEditorInputs, 300);
-            setTimeout(bindEditorInputs, 1000);
+            if (typeof MutationObserver !== 'undefined') {
+                var mo = new MutationObserver(function () { bindEditorInputs(); });
+                mo.observe(editorRoot, { childList: true, subtree: true });
+            }
         }
 
         document.addEventListener('mousedown', function (e) {
@@ -463,7 +393,24 @@ var WikiLinkAutocomplete = (function () {
         window.addEventListener('resize', function () {
             if (state.open) positionDropdown();
         });
+
+        hideHandlers.push(function (force) {
+            state.pointerInside = false;
+            hideDropdown(force);
+        });
     }
+
+    function hideAll() {
+        hideHandlers.forEach(function (hide) {
+            hide(true);
+        });
+    }
+
+    document.addEventListener('show.bs.modal', function (e) {
+        if (e.target && e.target.id === 'aiResultModal') {
+            hideAll();
+        }
+    });
 
     /** 마크다운 링크 라벨 안의 대괄호 이스케이프 */
     function escapeMarkdownLinkLabel(text) {
@@ -502,6 +449,7 @@ var WikiLinkAutocomplete = (function () {
 
     return {
         init: init,
+        hideAll: hideAll,
         expandInternalLinks: expandInternalLinks
     };
 })();

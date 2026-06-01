@@ -351,15 +351,14 @@
         </aside>
     </div>
 
-    <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.js"></script>
     <script th:src="@{/js/wiki/wiki-link-autocomplete.js}"></script>
     <script th:inline="javascript">
-        function initWikiViewer() {
+        function mountWikiViewer() {
             var markdown = /*[[${page != null && page.content != null ? page.content : ''}]]*/ '';
-            if (!markdown || !window.toastui || !window.toastui.Editor) return false;
+            if (!markdown || !window.toastui || !window.toastui.Editor) return;
 
             var el = document.querySelector('#wikiViewer');
-            if (!el) return false;
+            if (!el) return;
 
             if (window.WikiLinkAutocomplete && typeof WikiLinkAutocomplete.expandInternalLinks === 'function') {
                 markdown = WikiLinkAutocomplete.expandInternalLinks(markdown);
@@ -385,24 +384,15 @@
                     }
                 }
             });
-            return true;
         }
 
-        function bootWikiViewer() {
-            if (initWikiViewer()) return;
-            var attempts = 0;
-            var timer = setInterval(function () {
-                if (initWikiViewer() || ++attempts >= 100) {
-                    clearInterval(timer);
-                }
-            }, 50);
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', bootWikiViewer);
-        } else {
-            bootWikiViewer();
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.ToastUiBundle) {
+                ToastUiBundle.requireViewer(mountWikiViewer);
+            } else {
+                mountWikiViewer();
+            }
+        });
 
         function confirmDelete(btn) {
             if (btn.disabled) return;
