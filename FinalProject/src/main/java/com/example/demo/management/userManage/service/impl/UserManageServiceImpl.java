@@ -55,6 +55,8 @@ public class UserManageServiceImpl implements UserManageService {
 
 	@Override
 	public int updateUser(UserManageVO vo) {
+		validateBizNoWithAdminCd(vo);
+
 		// 단일 수정 시, 상태가 '비활성(02ACTIVE)'으로 들어오면
 		// 화면에서 어떤 값을 넘겼든 무시하고 비밀번호 초기화를 '필요(01ACTIVE)'로 강제 세팅합니다.
 		if ("02ACTIVE".equals(vo.getStatusCd())) {
@@ -72,8 +74,6 @@ public class UserManageServiceImpl implements UserManageService {
 			vo.setResult("DUPLICATE_LOGIN");
 			return 0;
 		}
-
-		validateBizNoWithAdminCd(vo);
 
 		return userManageMapper.updateUser(vo);
 	}

@@ -17,7 +17,6 @@
             updated_on AS updatedOn
         FROM messages
         WHERE board_id = #{boardId}
-        AND FIELDPARENT_ID IS NULL
         ORDER BY id DESC
     </select>
 

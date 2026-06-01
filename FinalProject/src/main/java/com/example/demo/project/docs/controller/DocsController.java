@@ -3,10 +3,13 @@ package com.example.demo.project.docs.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,7 +23,6 @@ import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
 import jakarta.servlet.http.HttpSession;
-import org.springframework.security.core.Authentication;
 
 @RequestMapping("/project")
 @Controller
@@ -100,7 +102,7 @@ public class DocsController {
 
 
 
-	@PostMapping("/docs/update")
+	@PutMapping("/docs/update")
 	public String update(DocsVO vo, HttpSession session, @RequestParam("attachments") MultipartFile[] attachments,
 			RedirectAttributes rttr, // ⭕ 세션 만료 시 화면에 알림을 주기 위해 추가합니다.
 			Authentication authentication) { // ⭕ 등록과 동일하게 시큐리티 인증 객체를 주입받습니다.
@@ -137,7 +139,7 @@ public class DocsController {
 	}
 
 
-	@GetMapping("/docs/delete")
+	@DeleteMapping("/docs/delete")
 	public String delete(@RequestParam("id") Long id) {
 
 		docsService.delete(id);
