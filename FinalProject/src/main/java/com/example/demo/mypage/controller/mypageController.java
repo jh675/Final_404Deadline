@@ -225,7 +225,7 @@ public class mypageController {
 					attachService.removeAttach(attach); // 물리 파일 삭제
 					attachService.deleteAttach(attach.getId()); // DB 삭제
 				} catch (Exception e) {
-					e.printStackTrace();
+					// 개별 첨부 삭제 실패 시 다음 항목 계속 처리
 				}
 			}
 		}
@@ -250,7 +250,6 @@ public class mypageController {
 					attachService.removeAttach(attach);
 					attachService.deleteAttach(attach.getId());
 				} catch (Exception e) {
-					e.printStackTrace();
 					return ResponseEntity.internalServerError().build();
 				}
 			}

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -20,10 +22,8 @@ public class GptApiClient {
 	@Value("${openai.api-key}")
 	private String apiKey;
 
-	// GPT 채팅 API 엔드포인트
 	private final String GPT_URL = "https://api.openai.com/v1/chat/completions";
 
-	// RestTemplate 재사용 (1분 컷 최적화 유지!)
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	public String callGpt(String prompt) {
@@ -31,10 +31,7 @@ public class GptApiClient {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setBearerAuth(apiKey);
 
-		// 구글과 다른 GPT용 JSON 바디 조립
 		Map<String, Object> body = new HashMap<>();
-
-		//
 		body.put("model", "gpt-4o");
 		body.put("temperature", 0.2);
 
@@ -47,14 +44,17 @@ public class GptApiClient {
 		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
 		try {
-			ResponseEntity<Map> response = restTemplate.postForEntity(GPT_URL, entity, Map.class);
+			ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+					GPT_URL,
+					HttpMethod.POST,
+					entity,
+					new ParameterizedTypeReference<Map<String, Object>>() {});
 
-			// GPT 응답 JSON 파싱 (gemini랑 구조가 다름)
-			List choices = (List) response.getBody().get("choices");
-			Map choice = (Map) choices.get(0);
-			Map msg = (Map) choice.get("message");
-
-			return (String) msg.get("content");
+			Map<String, Object> responseBody = response.getBody();
+			if (responseBody == null) {
+				return "AI 비서와 통신을 연결할 수 없습니다. 인터넷 연결이나 서버 상태를 확인해 주세요.";
+			}
+			return extractGptText(responseBody);
 		} catch (HttpStatusCodeException e) {
 			int statusCode = e.getStatusCode().value();
 
@@ -69,10 +69,28 @@ public class GptApiClient {
 			} else {
 				return "AI 서버와 통신 중 문제가 발생했습니다. (에러 코드: " + statusCode + ") 잠시 후 다시 시도해 주세요.";
 			}
-
-			// 통신 자체가 아예 안 되는 경우 (네트워크 단절 등)
 		} catch (Exception e) {
 			return "AI 비서와 통신을 연결할 수 없습니다. 인터넷 연결이나 서버 상태를 확인해 주세요.";
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static String extractGptText(Map<String, Object> responseBody) {
+		Object choicesObj = responseBody.get("choices");
+		if (!(choicesObj instanceof List<?> choices) || choices.isEmpty()) {
+			return "AI 응답 형식을 해석할 수 없습니다.";
+		}
+		Object choiceObj = choices.get(0);
+		if (!(choiceObj instanceof Map<?, ?>)) {
+			return "AI 응답 형식을 해석할 수 없습니다.";
+		}
+		Map<String, Object> choice = (Map<String, Object>) choiceObj;
+		Object messageObj = choice.get("message");
+		if (!(messageObj instanceof Map<?, ?>)) {
+			return "AI 응답 형식을 해석할 수 없습니다.";
+		}
+		Map<String, Object> message = (Map<String, Object>) messageObj;
+		Object content = message.get("content");
+		return content instanceof String s ? s : "AI 응답 형식을 해석할 수 없습니다.";
 	}
 }

@@ -1,6 +1,5 @@
 package com.example.demo.alarm.scheduler;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,19 +23,13 @@ public class NotificationScheduler {
 
     @Scheduled(fixedRate = 60000)
     public void checkScheduleReminder() {
-        System.out.println("=== 일정 체크 시작: " + new Date());
-
         List<CalenderVO> upcoming = calenderMapper.findByCalStartBetween(null, null);
-        System.out.println("=== 해당 일정 개수: " + upcoming.size());
 
         upcoming.forEach(cal -> {
-            // ✅ 이미 알림 보낸 일정은 스킵
             if (sentReminderIds.contains(cal.getId())) {
-                System.out.println("=== 이미 알림 보낸 일정 스킵: " + cal.getCalText());
                 return;
             }
 
-            System.out.println("=== 일정 감지: " + cal.getCalText());
             alarmService.sendToAll(
                 "1시간 후 일정이 시작됩니다: " + cal.getCalText()
             );

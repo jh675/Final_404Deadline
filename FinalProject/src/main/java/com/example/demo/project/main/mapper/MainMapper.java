@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.example.demo.management.service.ProjectVO;
-import com.example.demo.project.calender.service.CalenderVO;
 import com.example.demo.project.group.service.GroupDetailVO;
 import com.example.demo.project.main.service.IssueCountVO;
 import com.example.demo.project.notice.service.NoticeVO;
