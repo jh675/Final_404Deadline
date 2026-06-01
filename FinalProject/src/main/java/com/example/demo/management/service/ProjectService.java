@@ -22,4 +22,5 @@ public interface ProjectService {
 	List<GroupDetailVO> listGroup(GroupDetailVO gvo);
 	List<MemberDetailVO> listMember(MemberDetailVO mvo);
 	int updateProject(ProjectVO vo, List<String> moduleList);
+	int reproject(ProjectVO vo);
 }

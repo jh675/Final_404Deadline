@@ -82,89 +82,94 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-	// 💡 1. 로딩 직후 체크박스 컬럼을 먼저 숨깁니다. (UX 기획 반영)
+	// 로딩 직후 체크박스 컬럼을 숨기기.
     grid.hideColumn('_checked');
 
-    // 💡 2. 일괄작업 모드 켜기
+    // 일괄작업 모드 켜기
     document.getElementById('toggleBulkModeBtn').addEventListener('click', function() {
         this.classList.add('d-none'); // 일괄작업 버튼 숨기기
         document.getElementById('bulkControls').classList.remove('d-none'); // 적용 컨트롤 보이기
-        grid.showColumn('_checked'); // 🌟 그리드 체크박스 나타나기!
+        grid.showColumn('_checked'); 
     });
 
-    // 💡 3. 일괄작업 모드 취소
+    // 일괄작업 모드 취소
     document.getElementById('cancelBulkModeBtn').addEventListener('click', function() {
         document.getElementById('bulkControls').classList.add('d-none');
         document.getElementById('toggleBulkModeBtn').classList.remove('d-none');
+		document.getElementById('bulkFeedback').textContent = ''; // 에러 문구 초기화
         grid.uncheckAll(); // 체크된 것 모두 해제
-        grid.hideColumn('_checked'); // 🌟 그리드 체크박스 숨기기!
+        grid.hideColumn('_checked');
     });
 	
-	// 💡 2. 일괄 처리 적용 버튼 이벤트
-    document.getElementById('bulkApplyBtn').addEventListener('click', async function() {
-        const actionVal = document.getElementById('bulkActionType').value;
-        if (!actionVal) {
-            alert('일괄 처리할 작업을 선택해주세요.');
-            return;
-        }
+	// 일괄 처리 적용 버튼 이벤트
+	document.getElementById('bulkApplyBtn').addEventListener('click', async function() {
+	    const bulkFeedback = document.getElementById('bulkFeedback');
+	    bulkFeedback.textContent = ''; // 초기화
 
-        // 체크된 행 데이터들 가져오기 (TUI Grid 내장 함수)
-        const checkedRows = grid.getCheckedRows();
-        if (checkedRows.length === 0) {
-            alert('선택된 회원이 없습니다. 체크박스를 선택해주세요.');
-            return;
-        }
+	    const actionVal = document.getElementById('bulkActionType').value;
+	    if (!actionVal) {
+	        bulkFeedback.textContent = '일괄 처리할 작업을 선택해주세요.';
+	        return;
+	    }
 
-        // actionVal 분리 (예: 'status_01ACTIVE' -> type: 'status', value: '01ACTIVE')
-        const [updateType, updateValue] = actionVal.split('_');
+	    const checkedRows = grid.getCheckedRows();
+	    if (checkedRows.length === 0) {
+	        bulkFeedback.textContent = '선택된 회원이 없습니다. 체크박스를 선택해주세요.';
+	        return;
+	    }
 
-        // 🚨 UX 방어 로직: 관리자의 PM 권한을 해제하려고 할 때 차단
-        if (updateType === 'prjManager' && updateValue === '02ACTIVE') {
-            const hasAdmin = checkedRows.some(row => row.adminCd === '01ROLE' || row.adminCd === '02ROLE');
-            if (hasAdmin) {
-                alert('시스템/기업관리자의 프로젝트 매니저 권한은 해제할 수 없습니다.\n일반 사원만 선택해주세요.');
-                return;
-            }
-        }
+	    const [updateType, updateValue] = actionVal.split('_');
 
-        if (!confirm(`선택한 ${checkedRows.length}명의 회원을 일괄 변경하시겠습니까?`)) {
-            return;
-        }
+	    if (updateType === 'prjManager' && updateValue === '02ACTIVE') {
+	        const hasAdmin = checkedRows.some(row => row.adminCd === '01ROLE' || row.adminCd === '02ROLE');
+	        if (hasAdmin) {
+	            bulkFeedback.textContent = '시스템/기업관리자의 PM 권한은 해제할 수 없습니다.';
+	            return;
+	        }
+	    }
 
-        // 체크된 회원들의 ID만 추출
-        const userIds = checkedRows.map(row => row.id);
+	    if (!confirm(`선택한 ${checkedRows.length}명의 회원을 일괄 변경하시겠습니까?`)) {
+	        return;
+	    }
 
-        // 서버로 보낼 Payload
-        const payload = {
-            ids: userIds,
-            type: updateType, // 'status' 또는 'prjManager'
-            value: updateValue // '01ACTIVE' 또는 '02ACTIVE'
-        };
+	    // 서버로 보낼 Payload
+	    const userIds = checkedRows.map(row => row.id);
+	    const payload = {
+	        ids: userIds,
+	        type: updateType,
+	        value: updateValue
+	    };
 
-        try {
-            const response = await csrfFetch('/cadmin/users/bulk-update', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+	    try {
+	        const fetchUrl = '/cadmin/users/bulk-update';
+	        
+	        const response = await csrfFetch(fetchUrl, {
+	            method: 'PUT',
+	            headers: { 'Content-Type': 'application/json' },
+	            body: JSON.stringify(payload)
+	        });
 
-            const result = await response.json();
-            if (result.result === 'SUCCESS') {
-                alert('일괄 처리가 완료되었습니다.');
-                location.reload();
-            } else {
-                alert('처리 중 오류가 발생했습니다.');
-            }
-        } catch (error) {
-            console.error('Bulk Update Error:', error);
-            alert('서버 통신 중 오류가 발생했습니다.');
-        }
-    });
+	        const result = await response.json();
+	        if (result.result === 'SUCCESS') {
+	            alert('일괄 처리가 완료되었습니다.'); // 성공 후 새로고침 되므로 성공 알림은 유지
+	            location.reload();
+	        } else {
+	            bulkFeedback.textContent = '처리 중 오류가 발생했습니다.';
+	        }
+	    } catch (error) {
+	        console.error('Bulk Update Error:', error);
+	        alert('서버 통신 중 오류가 발생했습니다.'); // 서버 통신 오류 유지
+	    }
+	});
 	
     // 저장 버튼 공통 처리
     document.getElementById('saveBtn').addEventListener('click', async function() {
         const mode = this.dataset.mode;
 
+		// 추가: 공통 피드백 텍스트 초기화
+	    const generalFeedback = document.getElementById('generalFeedback');
+	    if(generalFeedback) generalFeedback.textContent = '';
+		
 		// 이전 에러 상태 초기화 (아이디 중복 메시지도 기본 메시지로 원상복구)
         const inputs = ['login', 'name', 'hireDate'];
         inputs.forEach(id => {
@@ -201,7 +206,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 		
 		// 하나라도 비어있다면 폼 제출 중단
-        if (!isValid) return;
+		if (!isValid) {
+	        if(generalFeedback) generalFeedback.textContent = '필수 입력 항목을 확인해주세요.';
+	        return;
+	    }
 		
         const body = {
             id: document.getElementById('userId').value,
@@ -278,22 +286,24 @@ document.addEventListener('DOMContentLoaded', async function() {
                 location.reload();
             }
         } else {
-            alert('처리 중 오류가 발생했습니다.');
+            if(generalFeedback) generalFeedback.textContent = '처리 중 오류가 발생했습니다. 다시 시도해주세요.';
         }
     });
 
 	// 입력창에 값을 입력하면 빨간 경고 테두리와 메시지를 지워줌
-    ['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', function() {
-                this.classList.remove('is-invalid');
-            });
-            el.addEventListener('change', function() {
-                this.classList.remove('is-invalid');
-            });
-        }
-    });
+	['login', 'name', 'hireDate', 'adminCd', 'bizNo'].forEach(id => {
+	    const el = document.getElementById(id);
+	    if (el) {
+	        el.addEventListener('input', function() {
+	            this.classList.remove('is-invalid');
+	            if(document.getElementById('generalFeedback')) document.getElementById('generalFeedback').textContent = '';
+	        });
+	        el.addEventListener('change', function() {
+	            this.classList.remove('is-invalid');
+	            if(document.getElementById('generalFeedback')) document.getElementById('generalFeedback').textContent = '';
+	        });
+	    }
+	});
 }); // DOMContentLoaded 닫기
 
 // 프로필 이미지 로드
@@ -414,6 +424,8 @@ function resetProfileImageUI() {
 
 // 등록 모달 열기
 window.openInsertModal = function() {
+	if(document.getElementById('generalFeedback')) document.getElementById('generalFeedback').textContent = '';
+	
     pendingProfileFile = null;
     isProfileDeleted = false;
     resetProfileImageUI();
@@ -444,6 +456,8 @@ window.openInsertModal = function() {
 
 // 수정 모달 열기
 window.openUpdateModal = function(id) {
+	if(document.getElementById('generalFeedback')) document.getElementById('generalFeedback').textContent = '';
+	
     const row = userData.find(user => Number(user.id) === Number(id));
     if (!row) {
         alert('사용자 정보를 찾을 수 없습니다.');
@@ -529,14 +543,14 @@ searchForm.addEventListener('submit', function(e) {
         warning.classList.remove('d-none');
         return;
     }
-
+/* 검색어가 없을 경우 전체 목록 조회 (팀원들의 검색 로직에 맞춰 통일화)
     if (searchType !== '' && keyword === '') {
         e.preventDefault();
         document.getElementById('searchType').classList.remove('is-invalid');
         warning.innerText = '검색어를 입력해주세요.';
         warning.classList.remove('d-none');
         return;
-    }
+    }*/
 
     document.getElementById('searchType').classList.remove('is-invalid');
     warning.classList.add('d-none');

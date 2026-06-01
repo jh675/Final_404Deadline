@@ -18,6 +18,8 @@ import com.example.demo.management.userManage.service.UserManageVO;
 import com.example.demo.util.subCode.service.SubcodeService;
 import com.example.demo.util.subCode.service.SubcodeVO;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping("/admin")
 public class CompanyController {
@@ -28,8 +30,8 @@ public class CompanyController {
 	SubcodeService subCodeService;
 
 	@GetMapping("/company/list")
-	public String companylist(Model model, @ModelAttribute("company") CompanyVO company) {
-
+	public String companylist(Model model, @ModelAttribute("company") CompanyVO company, HttpSession session) {
+		session.setAttribute("currentTopMenu", "company");
 		List<SubcodeVO> activeCodeList = subCodeService.getSubCodeList("00ACTIVE");
 		model.addAttribute("activeCodeList", activeCodeList);
 		return "company/list";
