@@ -39,7 +39,7 @@ class WebSecurityConfig {
 //				.requestMatchers("/api/notifications/**").permitAll()
 				.requestMatchers("/admin/**").hasAnyRole("ADMIN") // 시스템관리자 01ROLE
 				.requestMatchers("/cadmin/**").hasAnyRole("CADMIN") // 기업관리자 02ROLE
-				// ★ 추가: DB에 등록된 세부 프로젝트 권한이 필요한 URL 패턴들 (그룹으로 묶어서 매니저 적용)
+				// DB에 등록된 세부 프로젝트 권한이 필요한 URL 패턴들 
 				.requestMatchers(
 					"/project/issue/**", 
 					"/project/member/**", 

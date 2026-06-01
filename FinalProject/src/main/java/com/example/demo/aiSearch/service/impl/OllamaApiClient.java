@@ -12,9 +12,9 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-@Component
+//@Component
 public class OllamaApiClient {
-
+//속도가 너무 느린 문제가 있음 검색 시간이 약 1분 걸림
     private final String OLLAMA_URL = "http://192.168.0.6:11434/api/generate";
     private final RestTemplate restTemplate = new RestTemplate();
 
