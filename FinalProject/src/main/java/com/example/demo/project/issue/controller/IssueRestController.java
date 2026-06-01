@@ -97,7 +97,7 @@ public class IssueRestController {
 		input.setContent(content);
 		input.setMemId(loginUser.getId());
 
-		int inserted = issueService.insertComment(input);
+		Long inserted = issueService.insertComment(input);
 		if (inserted <= 0) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Map.of("ok", false, "message", "댓글 등록에 실패했습니다."));

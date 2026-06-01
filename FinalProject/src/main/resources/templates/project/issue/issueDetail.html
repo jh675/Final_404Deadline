@@ -1357,8 +1357,6 @@ table.data-table tbody td {
 
 			var id = btn.getAttribute('data-attach-id');
 			if (!id) return;
-			if (!confirm('이 첨부파일을 삭제하시겠습니까?')) return;
-
 			var headers = {};
 			if (tokenMeta && headerMeta) {
 				headers[headerMeta.content] = tokenMeta.content;
@@ -1367,6 +1365,7 @@ table.data-table tbody td {
 			fetch('/delete/' + encodeURIComponent(id), { method: 'DELETE', headers: headers })
 				.then(function (res) {
 					if (!res.ok) throw new Error('delete failed');
+					alert('첨부파일이 삭제되었습니다.');
 					location.reload();
 				})
 				.catch(function () {
