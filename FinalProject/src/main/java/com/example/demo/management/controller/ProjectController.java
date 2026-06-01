@@ -88,7 +88,7 @@ public class ProjectController {
         session.removeAttribute("currentMenu");
         session.removeAttribute("moduleList");
         session.removeAttribute("project");
-	    
+        session.setAttribute("currentTopMenu", "project");
 	    return "management/projectlist";
 	}
 
