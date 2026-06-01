@@ -1,8 +1,10 @@
 package com.example.demo.mypage.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import com.example.demo.management.service.ProjectService;
 import com.example.demo.management.service.ProjectVO;
 import com.example.demo.management.userManage.service.UserManageService;
 import com.example.demo.management.userManage.service.UserManageVO;
+import com.example.demo.mypage.service.MypageIssueVO;
 import com.example.demo.mypage.service.MypageService;
 import com.example.demo.mypage.service.MypageVO;
 import com.example.demo.project.calender.service.CalenderService;
@@ -37,36 +40,33 @@ import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
-import jakarta.servlet.http.HttpSession;
-
-
 @Controller
 public class mypageController {
-	
+
 	@Autowired
-	ProjectService projectService; 
-	
+	ProjectService projectService;
+
 	@Autowired
 	MypageService mypageService;
-	
+
 	@Autowired
 	CalenderService calenderService;
-	
+
 	@Autowired
 	HolidayService holidayService;
-	
+
 	// 프로필 이미지 처리를 위한 서비스 추가
 	@Autowired
 	AttachService attachService;
-	
+
 	// 비밀번호 암호화 및 검증을 위한 인코더 추가
 	@Autowired
 	PasswordEncoder passwordEncoder;
-	
+
 	// 유저 정보 업데이트를 위한 서비스 추가
 	@Autowired
 	UserManageService userManageService;
-	
+
 	// 마이페이지 - 간트차트 조회 추가
 	@Autowired
 	IssueMapper issueMapper;
@@ -76,32 +76,32 @@ public class mypageController {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		return (UserVO) auth.getPrincipal();
 	}
-	
-	// 마이페이지 접속 	
+
+	// 마이페이지 접속
 	@GetMapping("/mypage")
 	public String mypage(Model model, HttpSession session) {
 		session.setAttribute("currentTopMenu", "mypage");
 		UserVO loginUser = getLoginUser();
-		
+
 		List<MypageVO> list = mypageService.selectMyProjectList(loginUser.getId());
 		model.addAttribute("projectList", list);
-		
-		// 캘린더 목록 
+
+		// 캘린더 목록
 		CalenderVO calvo = new CalenderVO();
 		calvo.setMemId(loginUser.getId().intValue());
 		List<CalenderVO> callist = calenderService.selectAll(calvo);
 		model.addAttribute("calenderList", callist);
-		
-		// 공휴일 목록 
+
+		// 공휴일 목록
 		int year = java.time.LocalDate.now().getYear();
 		List<HolidayVO> holiday = holidayService.getHolidays(year);
 		model.addAttribute("holidayList", holiday);
 
 		return "mypage/myPage";
 	}
-	
-	// 마이페이지 일정 탭 - 간트차트 조회 
-	
+
+	// 마이페이지 일정 탭 - 간트차트 조회
+
 	@GetMapping("/mypage/gantt/list")
 	@ResponseBody
 	public List<IssueOutputVO> myPageGantt() {
@@ -110,15 +110,14 @@ public class mypageController {
 		vo.setMemId(memId);
 		return issueMapper.selectIssueList(vo);
 	}
-	
-	
-	// 마이페이지 내 정보 수정 
+
+	// 마이페이지 내 정보 수정
 	@PostMapping("/mypage/update")
 	@ResponseBody
 	public String updateInfo(@RequestBody UserVO update) {
 		UserVO loginUser = getLoginUser();
 		update.setId(loginUser.getId());
-		
+
 		int result = mypageService.updateUser(update);
 		return result > 0 ? "success" : "fail";
 	}
@@ -145,8 +144,8 @@ public class mypageController {
 
 		return "mypage/mypageProject";
 	}
-	
-	// 마이페이지 내 정보 수정 
+
+	// 마이페이지 내 정보 수정
 	@PutMapping("/mypage/update")
 	@ResponseBody
 	public Map<String, String> updateInfo(@RequestBody Map<String, String> payload) {
@@ -180,7 +179,7 @@ public class mypageController {
 		String updateStatus = userManageService.updateMyInfo(updateVo);
 		result.put("status", updateStatus); // SUCCESS, DUPLICATE_LOGIN, FAIL 반환
 
-		// 성공 시 세션 정보 갱신 
+		// 성공 시 세션 정보 갱신
 		if ("SUCCESS".equals(updateStatus)) {
 			loginUser.setLogin(updateVo.getLogin());
 			loginUser.setName(updateVo.getName());
@@ -202,7 +201,7 @@ public class mypageController {
 	public ResponseEntity<AttachVO> getMyProfileImage() {
 		UserVO loginUser = getLoginUser(); // 안전하게 세션에서 본인 ID 꺼내기
 		List<AttachVO> list = attachService.selectAttachList("09MODULE", loginUser.getId());
-		
+
 		if (list != null && !list.isEmpty()) {
 			return ResponseEntity.ok(list.get(list.size() - 1));
 		}
@@ -230,8 +229,8 @@ public class mypageController {
 		}
 
 		// 새 프로필 저장
-		attachService.saveAndInsertAttachments(userId, new MultipartFile[]{file}, "09MODULE", "users");
-		
+		attachService.saveAndInsertAttachments(userId, new MultipartFile[] { file }, "09MODULE", "users");
+
 		return ResponseEntity.ok().body("SUCCESS");
 	}
 
@@ -256,14 +255,25 @@ public class mypageController {
 		}
 		return ResponseEntity.ok().body("SUCCESS");
 	}
-	
-	/*
-	 * // 이번주 그룹 전체 마감이슈
-	 * 
-	 * @GetMapping("/mypage/issue/week")
-	 * 
-	 * @ResponseBody public List<IssueOutputVO> weekIssueList(IssueOutputVO vo) {
-	 * return issueMapper.selectIssueList(vo); }
-	 */
 
+	// 이번주 그룹 전체 마감이슈
+
+	@GetMapping("/mypage/issue/week")
+
+	@ResponseBody
+	public List<MypageIssueVO> weekIssueList() {
+		UserVO loginUser = getLoginUser();
+
+		// 참여 프로젝트 id 목록 가져오기
+		List<MypageVO> projectList = mypageService.selectMyProjectList(loginUser.getId());
+
+		if (projectList == null || projectList.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		List<Long> prjIdList = projectList.stream().map(MypageVO::getId).collect(Collectors.toList());
+
+		return mypageService.selectWeeklyIssueList(prjIdList);
+
+	}
 }
