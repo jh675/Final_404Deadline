@@ -122,15 +122,40 @@ public class ProjectServiceImpl implements ProjectService {
 	        vo.setEnaId(String.join(",", moduleList));
 	    }
 
+	    // ✅ 업데이트 전 기존 상태값 조회
+	    ProjectVO before = projectMapper.getprojectid(vo.getId());
+	    String beforeStatus = before != null ? before.getPrjStatusCd() : null;
+
 	    
-	    if (vo.getPrjStatusCd() != null) {
+
+	    // ✅ 기존 상태와 새 상태가 다를 때만 알림
+	    if (vo.getPrjStatusCd() != null
+	            && !vo.getPrjStatusCd().equals(beforeStatus)) {
+
+	        // 한글로 변환
+	        String statusName = convertStatus(vo.getPrjStatusCd());
+
 	        eventPublisher.publishEvent(new NotificationEvent(
 	            this,
 	            "프로젝트 진행상태가 변경되었습니다: "
-	            + vo.getPrjName() + " → " + subcodeMapper.selectScodeNm(vo.getPrjStatusCd())  
+	            + vo.getPrjName() + " → " + statusName
 	        ));
 	    }
-	    
+
 	    return projectMapper.projectUpdate(vo);
+	}
+	
+	private String convertStatus(String statusCd) {
+	    switch (statusCd) {
+	        case "01PROSTAT": return "기획";
+	        case "02PROSTAT": return "진행중";
+	        case "03PROSTAT": return "검수";
+	        case "04PROSTAT": return "완료";
+	        case "05PROSTAT": return "중단";
+	        default: return statusCd;
+	    }
+	}
+	public int reproject(ProjectVO vo) {
+		return projectMapper.reproject(vo);
 	}
 }
