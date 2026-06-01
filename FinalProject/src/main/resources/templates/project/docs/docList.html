@@ -131,10 +131,7 @@
                 const buttonEl = ev.nativeEvent.target;
                 const docId = buttonEl.getAttribute('data-id');
                 if (docId) {
-                    document.getElementById('confirmDeleteLink').setAttribute(
-                        'onclick', 
-                        "location.href='/project/docs/delete?id=" + docId + "'"
-                    );
+                	document.getElementById('deleteDocId').value = docId;
                 }
             }
         });

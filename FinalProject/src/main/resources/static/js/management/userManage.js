@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('toggleBulkModeBtn').addEventListener('click', function() {
         this.classList.add('d-none'); // 일괄작업 버튼 숨기기
         document.getElementById('bulkControls').classList.remove('d-none'); // 적용 컨트롤 보이기
-        grid.showColumn('_checked'); // 🌟 그리드 체크박스 나타나기!
+        grid.showColumn('_checked');
     });
 
     // 일괄작업 취소 버튼
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('bulkControls').classList.add('d-none');
         document.getElementById('toggleBulkModeBtn').classList.remove('d-none');
         grid.uncheckAll(); // 체크된 것 모두 해제
-        grid.hideColumn('_checked'); // 🌟 그리드 체크박스 숨기기!
+        grid.hideColumn('_checked'); 
     });
 
     // 일괄 처리 적용 버튼 이벤트
@@ -255,9 +255,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             isValid = false;
         }
         // 소속기업 검사 (select 태그로 존재할 경우)
-        if (bizNoSelect && bizNoSelect.tagName === 'SELECT' && !bizNoSelect.value) {
-            bizNoSelect.classList.add('is-invalid');
-            isValid = false;
+		if (adminCdSelect.value !== '01ROLE') {
+            if (bizNoSelect && bizNoSelect.tagName === 'SELECT' && !bizNoSelect.value) {
+                bizNoSelect.classList.add('is-invalid');
+                isValid = false;
+            }
         }
         // 이름 검사
         if (!nameInput.value.trim()) {
@@ -693,14 +695,17 @@ window.openUpdateModal = function(id) {
 // 기업관리자, 시스템 관리자 프로젝트 매니저 역할 고정
 function changeRoleArea(adminCd) {
     const roleArea = document.getElementById('prjManagerArea');
+	const bizNoArea = document.getElementById('bizNoArea'); // 소속기업 선택창 영역
     const bizNoSelect = document.getElementById('bizNo');     // 소속기업 select
     const bizNoView = document.getElementById('bizNoView');     // 기업번호 input
     // 시스템관리자(01ROLE)를 선택한 경우
     if (adminCd === '01ROLE') {
         // 자동으로 본사 기업번호 매핑
+		if (bizNoArea) bizNoArea.style.display = 'none';
+		
         if (bizNoSelect) {
-            bizNoSelect.value = '';        
-            bizNoSelect.disabled = true;  
+            bizNoSelect.value = '';       
+			bizNoSelect.classList.remove('is-invalid'); // 숨겨질 때 에러 테두리 제거 
         }
         if (bizNoView) {
             bizNoView.value = '124-87-03358'; 
@@ -712,6 +717,8 @@ function changeRoleArea(adminCd) {
     }
     // 기업관리자(02ROLE) 또는 사원(03ROLE)을 선택한 경우
     else {
+		if (bizNoArea) bizNoArea.style.display = '';
+		
         if (bizNoSelect) {
             bizNoSelect.disabled = false; // 소속기업을 고를 수 있도록 활성화
 			
