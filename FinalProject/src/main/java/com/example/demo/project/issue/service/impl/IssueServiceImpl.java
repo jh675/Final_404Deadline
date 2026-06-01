@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.alarm.event.NotificationEvent;
 import com.example.demo.management.mapper.ProjectMapper;
@@ -22,6 +23,9 @@ import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.issue.service.IssueSummaryVO;
 import com.example.demo.project.issue.service.IssueVulkVO;
+import com.example.demo.project.milestone.mapper.MilestoneMapper;
+import com.example.demo.project.milestone.service.MilestoneIssueVO;
+import com.example.demo.project.milestone.service.MilestoneSyncException;
 import com.example.demo.util.subCode.mapper.SubcodeMapper;
 
 @Service
@@ -30,6 +34,9 @@ public class IssueServiceImpl implements IssueService {
 	private static final List<String> STATUS_COLS = List.of("신규", "진행중", "검토", "완료");
 	private static final List<String> PRIORITY_COLS = List.of("최상", "상", "중", "하");
 	private static final List<String> CATEGORY_COLS = List.of("버그", "기능", "작업", "개선");
+	private static final String MILESTONE_UNLINK_BLOCKED_MSG =
+			"타임라인이 등록된 이슈는 마일스톤에서 해제할 수 없습니다. "
+			+ "마일스톤 화면에서 타임라인을 삭제하거나 다른 마일스톤으로 이동해 주세요.";
 
 	@Autowired
 	IssueMapper mapper;
@@ -37,6 +44,8 @@ public class IssueServiceImpl implements IssueService {
 	ProjectMapper projectMapper;
 	@Autowired
 	SubcodeMapper subcodeMapper;
+	@Autowired
+	MilestoneMapper milestoneMapper;
 	
 	@Autowired private ApplicationEventPublisher eventPublisher;
 	
@@ -61,45 +70,96 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
+	@Transactional
 	public Long insertIssue(IssueInputVO issueVO) {
 		mapper.insertIssue(issueVO);
-		
-		
-		System.out.println(issueVO.getSubject());
-		 // 알림 이벤트 발행
-	    ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId()); // ← mapper 사용
-	    String prjName = project != null ? project.getPrjName() : "알 수 없음";
-	    eventPublisher.publishEvent(new NotificationEvent(
-	        this,
-	        "이슈가 등록되었습니다: [" + prjName + "] " + issueVO.getSubject()         
-	    ));
-		
+		syncMilestoneIssue(issueVO.getId(), issueVO.getMilestoneId());
+		ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId());
+		String prjName = project != null ? project.getPrjName() : "알 수 없음";
+		eventPublisher.publishEvent(new NotificationEvent(
+				this,
+				"이슈가 등록되었습니다: [" + prjName + "] " + issueVO.getSubject()));
 		return issueVO.getId();
 	}
 
 	@Override
-	public int updateIssue(IssueInputVO issueVO) {
-		
+	@Transactional
+	public Long updateIssue(IssueInputVO issueVO) {
+		syncMilestoneIssue(issueVO.getId(), issueVO.getMilestoneId());
+
 		if (issueVO.getStatusCd() != null) {
-	        ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId());
-	        String prjName = project != null ? project.getPrjName() : "알 수 없음";
-	        
-	        eventPublisher.publishEvent(new NotificationEvent(
-	            this,
-	            "이슈 상태가 변경되었습니다: [" + prjName + "] "
-	            + issueVO.getSubject() + " → " + subcodeMapper.selectScodeNm(issueVO.getStatusCd())
-	        ));
-	    }
-		
+			ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId());
+			String prjName = project != null ? project.getPrjName() : "알 수 없음";
+			eventPublisher.publishEvent(new NotificationEvent(
+					this,
+					"이슈 상태가 변경되었습니다: [" + prjName + "] "
+							+ issueVO.getSubject() + " → "
+							+ subcodeMapper.selectScodeNm(issueVO.getStatusCd())));
+		}
+
 		return mapper.updateIssue(issueVO);
 	}
 
-
-
 	@Override
-	public int deleteIssue(Long id) {
-		return mapper.deleteIssue(id);
+	public boolean isMilestoneUnlinkBlocked(Long issueId) {
+		if (issueId == null) {
+			return false;
+		}
+		MilestoneIssueVO existing = milestoneMapper.selectMilestoneIssueByIssueId(issueId);
+		if (existing == null || existing.getId() == null) {
+			return false;
+		}
+		return hasTimelineEvents(existing.getId());
 	}
+
+	/**
+	 * milestone_issue 와 요청 milestoneId 를 동기화합니다.
+	 * 없음 → INSERT, 변경 → UPDATE(moveIssue), 해제 → DELETE(타임라인 있으면 거부).
+	 */
+	private void syncMilestoneIssue(Long issueId, Long newMilestoneId) {
+		if (issueId == null) {
+			return;
+		}
+
+		MilestoneIssueVO existing = milestoneMapper.selectMilestoneIssueByIssueId(issueId);
+
+		if (newMilestoneId == null) {
+			if (existing == null) {
+				return;
+			}
+			if (hasTimelineEvents(existing.getId())) {
+				throw new MilestoneSyncException(MILESTONE_UNLINK_BLOCKED_MSG);
+			}
+			milestoneMapper.deleteMilestoneIssue(existing.getId());
+			return;
+		}
+
+		if (existing == null) {
+			MilestoneIssueVO created = new MilestoneIssueVO();
+			created.setIssueId(issueId);
+			created.setMilestoneId(newMilestoneId);
+			milestoneMapper.insertMilestoneIssue(created);
+			return;
+		}
+
+		if (newMilestoneId.equals(existing.getMilestoneId())) {
+			return;
+		}
+
+		MilestoneIssueVO move = new MilestoneIssueVO();
+		move.setId(existing.getId());
+		move.setMilestoneId(newMilestoneId);
+		milestoneMapper.moveIssue(move);
+	}
+
+	private boolean hasTimelineEvents(Long milestoneIssueId) {
+		if (milestoneIssueId == null) {
+			return false;
+		}
+		Long count = milestoneMapper.countTimelineByMilestoneIssueId(milestoneIssueId);
+		return count != null && count > 0;
+	}
+
 
 	@Override
 	public List<IssueOutputVO> selectChildIssueList(Long id) {
@@ -132,7 +192,7 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
-	public int insertComment(CommentInputVO vo) {
+	public Long insertComment(CommentInputVO vo) {
 		return mapper.insertComment(vo);
 	}
 

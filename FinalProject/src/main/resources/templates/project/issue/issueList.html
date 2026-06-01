@@ -565,7 +565,7 @@
 					<option value="">미선택</option>
 					<option th:each="member : ${members}"
 						th:value="${member.userId}"
-						th:text="${member.userName}">담당자</option>
+						th:text="${member.userName + '(' + member.login + ')'}">담당자</option>
 				</select>
 			</div>
 

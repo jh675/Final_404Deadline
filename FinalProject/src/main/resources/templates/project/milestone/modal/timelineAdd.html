@@ -190,6 +190,7 @@
 					})
 					.then(function () {
 						if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
+						alert("타임라인 이벤트가 추가되었습니다.");
 						bootstrap.Modal.getInstance(modalEl).hide();
 					})
 					.catch(function (err) {

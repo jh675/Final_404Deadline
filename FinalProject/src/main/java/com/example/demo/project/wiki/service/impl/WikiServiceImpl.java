@@ -19,22 +19,26 @@ import com.example.demo.project.wiki.service.WikiLinkSuggestVO;
 import com.example.demo.project.wiki.service.WikiPageVO;
 import com.example.demo.project.wiki.service.WikiService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class WikiServiceImpl implements WikiService {
 
 	@Autowired
 	WikiMapper mapper;
 	
+	//이름으로검색
 	@Override
 	public WikiContentVO selectWikiContentLastVerByTitle(Long id,String title) {
 		return mapper.selectWikiContentLastVerByTitle(id,title);
 	}
-
+	//버전조회
 	@Override
 	public WikiContentVO selectWikiContentByPageIdAndVersion(Long pageId, Long version) {
 		return mapper.selectWikiContentByPageIdAndVersion(pageId, version);
 	}
-
+	//제목별기준으로 색인조회
 	@Override
 	public List<WikiContentVO> selectWikiHistoryByPageId(Long pageId) {
 		List<WikiContentVO> history = mapper.selectWikiHistoryByPageId(pageId);
@@ -56,7 +60,8 @@ public class WikiServiceImpl implements WikiService {
 			wikiContentVO.setContent("");
 		}
 	}
-
+	
+	//등록
 	@Override
 	public Long insertWikiContent(WikiContentVO wikiContentVO) {
 		normalizeWikiContent(wikiContentVO);
@@ -64,12 +69,8 @@ public class WikiServiceImpl implements WikiService {
 		return wikiContentVO.getId();
 	}
 
-	@Override
-	public Long updateWikiContent(WikiContentVO wikiContentVO) {
-		normalizeWikiContent(wikiContentVO);
-		return mapper.updateWikiContent(wikiContentVO);
-	}
 
+	//수정(버전누적)
 	@Override
 	@Transactional
 	public Long saveNewWiki(String title, long prjId, Long parentId, WikiContentVO content, Long memId) {
@@ -80,29 +81,14 @@ public class WikiServiceImpl implements WikiService {
 		insertWikiContent(content);
 		return pageId;
 	}
-
+	
+	//
 	@Override
 	@Transactional
 	public void reviseWiki(WikiContentVO content, Long memId) {
 		content.setMemId(memId);
-		updateWikiContent(content);
+		mapper.updateWikiContent(content);
 	}
-
-	@Override
-	public Long deleteWikiContent(Long id) {
-		return mapper.deleteWikiContent(id);
-	}
-
-	@Override
-	public List<WikiPageVO> selectWikiPageForDate(Long id) {
-		return mapper.selectWikiPageForDate(id);
-	}
-
-	@Override
-	public List<WikiPageVO> selectWikiPageListGroupParent(Long id) {
-		return mapper.selectWikiPageListGroupParent(id);
-	}
-
 	@Override
 	public Long nameCheck(Long id,String name) {
 		return mapper.nameCheck(id,name);
@@ -111,11 +97,6 @@ public class WikiServiceImpl implements WikiService {
 	@Override
 	public List<WikiPageVO> selectWikiPageForTree(Long prjId, Long id) {
 		return mapper.selectWikiPageForTree(prjId, id);
-	}
-
-	@Override
-	public List<WikiPageVO> selectWikiIndexPages(Long projectId) {
-		return mapper.selectWikiIndexPages(projectId);
 	}
 
 	@Override
@@ -218,6 +199,29 @@ public class WikiServiceImpl implements WikiService {
 	}
 
 	@Override
+	public boolean isStartPage(Long projectId, String name) {
+		if (projectId == null || name == null || name.isBlank()) {
+			return false;
+		}
+		Long count = mapper.countStartPageByTitle(projectId, name);
+		return count != null && count > 0;
+	}
+
+	@Override
+	@Transactional
+	public boolean setStartPage(Long projectId, String name) {
+		if (projectId == null || name == null || name.isBlank()) {
+			return false;
+		}
+		Long pageId = mapper.getIdByTitle(projectId, name);
+		if (pageId == null) {
+			return false;
+		}
+		Long updated = mapper.updateStartPage(projectId, name);
+		return updated != null && updated > 0;
+	}
+
+	@Override
 	public List<WikiLinkSuggestVO> suggestWikiLinks(Long projectId, String q) {
 		if (projectId == null) {
 			return Collections.emptyList();
@@ -235,6 +239,31 @@ public class WikiServiceImpl implements WikiService {
 			result.add(new WikiLinkSuggestVO("wiki", title, "[[" + title + "]]"));
 		}
 		return result;
+	}
+
+
+	@Override
+	@Transactional
+	public boolean deleteWikiPage(Long projectId, String name) {
+		try {
+			if (isStartPage(projectId, name)) {
+				return false;
+			}
+			Long pageId = mapper.getIdByTitle(projectId, name);
+			if (pageId == null) {
+				return false;
+			}
+			Long parentId = mapper.getParentIdByPageId(pageId);
+			// 삭제 대상의 자식 페이지는 삭제 대상의 부모를 승계한다.
+			mapper.reparentWikiChildren(pageId, parentId);
+			mapper.deleteWikiContent(pageId);
+			mapper.deleteWikiPage(pageId);
+			return true;
+		} catch (Exception e) {
+			log.error("위키 페이지 삭제 중 예외 발생: projectId={}, name={}", projectId, name, e);
+			return false;
+		}
+
 	}
 
 	private void sortTreeByTitle(List<WikiPageVO> nodes) {

@@ -27,7 +27,8 @@
       U.NAME AS userName,
       U.TEL AS tel,
       U.EMAIL AS email,
-      G.NAME AS grpName
+      G.NAME AS grpName,
+      u.login as login
     FROM USERS U
     JOIN MEMBER M ON U.ID = M.USER_ID
     JOIN GRP G ON M.GRP_ID = G.ID
