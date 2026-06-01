@@ -145,7 +145,6 @@
 .toastui-calendar-see-more-container {
 	height: 200px !important;
 }
-
 </style>
 
 
@@ -320,7 +319,7 @@
 
 		<script
 			src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
-		<script>
+		<script th:inline="javascript">
 
 	//=========================================================================================
 	// 1. 캘린더 기본 설정 부분
@@ -627,6 +626,22 @@
             document.getElementById('upd_id').value = data.id || '';
             document.getElementById('upd_place').value = data.place || ''; 
             document.getElementById('upd_calText').value = data.calText || '';
+            
+            
+            // 전체 공유 시 본인 일정 아닌 경우 삭제/수정 안되게 
+             const loginMemId = /*[[${#authentication.principal.id}]]*/ null;
+			 const deleteBtn = document.querySelector('#updateModalOverlay .btn-danger');
+			 const updateBtn = document.querySelector('#updateModalOverlay .btn-primary');
+			
+			    if (data.memId != loginMemId) {
+			        // 타인 일정 → 삭제/수정 버튼 숨기기
+			        if (deleteBtn) deleteBtn.style.display = 'none';
+			        if (updateBtn) updateBtn.style.display = 'none';
+			    } else {
+			        // 본인 일정 → 삭제/수정 버튼 보이기
+			        if (deleteBtn) deleteBtn.style.display = '';
+			        if (updateBtn) updateBtn.style.display = '';
+			    }
             
             // 공유유형
             if (data.typeCd) {

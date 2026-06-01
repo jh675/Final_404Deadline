@@ -170,6 +170,7 @@
 						
 						if(isNaN(start.getTime())|| isNaN(end.getTime())) return false;
 						if(start.getFullYear() === 1970) return false; 
+						if(issue.statusCd === '완료') return false;
 						if(end <= start) return false;
 						return true;
 					
