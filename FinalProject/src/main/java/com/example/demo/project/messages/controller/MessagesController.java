@@ -10,6 +10,8 @@ import com.example.demo.project.messages.service.MessagesService;
 import com.example.demo.project.messages.service.MessagesVO;
 import com.example.demo.util.attach.service.AttachService;
 import jakarta.servlet.http.HttpSession;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequestMapping("/project/messages")
 @Controller
@@ -19,21 +21,40 @@ public class MessagesController {
     @Autowired private BoardsService boardsService;
     @Autowired private AttachService attachService;
 
-    //목록 조회
+    // 1. 목록 및 상세 보기
     @GetMapping("/list")
     public String list(Model model, @RequestParam("boardId") Long boardId, 
                        @RequestParam(value = "id", required = false) Long id, 
                        MessagesVO messages, HttpSession session) {
         session.setAttribute("currentMenu", "messages");
         messages.setBoardId(boardId);
-        model.addAttribute("list", messagesService.selectAll(messages));
+        List<MessagesVO> allList = messagesService.selectAll(messages);
+        
+        model.addAttribute("list", allList);
         model.addAttribute("boardId", boardId);
         model.addAttribute("board", boardsService.selectOne(boardId));
-        if (id != null) model.addAttribute("message", messagesService.selectOne(id));
+        
+        model.addAttribute("message", null); 
+        model.addAttribute("replyList", null);
+        
+        if (id != null) {
+            MessagesVO selectedMsg = messagesService.selectOne(id);
+            if (selectedMsg != null) {
+                Long targetId = (selectedMsg.getFieldparentId() != null) ? selectedMsg.getFieldparentId() : id;
+                MessagesVO targetMsg = messagesService.selectOne(targetId);
+                
+                if (targetMsg != null) {
+                    model.addAttribute("message", targetMsg);
+                    model.addAttribute("replyList", allList.stream()
+                        .filter(m -> m.getFieldparentId() != null && m.getFieldparentId().equals(targetId))
+                        .collect(Collectors.toList()));
+                }
+            }
+        }
         return "project/messages/messagesList";
     }
 
-    //등록 폼
+    // 2. 등록 폼
     @GetMapping("/register")
     public String registerForm(Model model, @RequestParam("boardId") Long boardId,
                                @RequestParam(value = "parentId", required = false) Long parentId) {
@@ -45,7 +66,7 @@ public class MessagesController {
         return "project/messages/messagesRegister";
     }
 
-    // 3. 등록 처리
+    // 3. 데이터 삽입 및 첨부파일 처리
     @PostMapping("/insert")
     public String insert(@ModelAttribute MessagesVO messages, 
                          @RequestPart(value="attachments", required = false) MultipartFile[] attachments) {
@@ -65,19 +86,17 @@ public class MessagesController {
         return "project/messages/messagesRegister";
     }
 
-    //수정 처리
+    // 5. 업데이트
     @PostMapping({"/modify", "/update"})
     public String modify(@ModelAttribute MessagesVO messages) {
         messagesService.update(messages);
         return "redirect:/project/messages/list?boardId=" + messages.getBoardId();
     }
 
-    //삭제 처리
+    // 6. 삭제
     @GetMapping("/delete")
     public String delete(@RequestParam("id") Long id, @RequestParam("boardId") Long boardId) {
         messagesService.delete(id);
         return "redirect:/project/messages/list?boardId=" + boardId;
     }
-    
-    
 }
