@@ -44,7 +44,7 @@ public class HistoryController {
         model.addAttribute("modifierName", criteria.getModifierName());
         model.addAttribute("tableName", criteria.getTableName());
         model.addAttribute("detail", criteria.getDetail());
-        model.addAttribute("currentMenu", "history");
+        session.setAttribute("currentMenu", "history");
 
         return "project/history/history";
     }

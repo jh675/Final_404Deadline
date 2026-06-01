@@ -109,4 +109,17 @@
     WHERE CAL_START BETWEEN #{start} AND #{end}
 </select>
    
+   <select id="findUsernamesByBizNo" parameterType="String" resultType="String">
+	    SELECT BIZ_NO || '_' || LOGIN
+	    FROM USERS
+	    WHERE BIZ_NO = #{bizNo}
+	    AND STATUS_CD = '01ACTIVE'
+	</select>
+	
+	<select id="findBizNoByMemId" parameterType="Long" resultType="String">
+	    SELECT BIZ_NO
+	    FROM USERS
+	    WHERE ID = #{memId}
+	</select>
+   
  </mapper>

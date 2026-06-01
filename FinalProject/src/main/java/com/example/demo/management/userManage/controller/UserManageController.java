@@ -27,6 +27,7 @@ import com.example.demo.util.attach.service.AttachVO;
 import com.example.demo.util.subCode.service.SubcodeService;
 import com.example.demo.util.subCode.service.SubcodeVO;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +42,8 @@ public class UserManageController {
 	private final SubcodeService subCodeService;
 	
 	@GetMapping("/userList")
-	public String userList(Model model, @ModelAttribute("filter01") UserManageVO userManage) {
+	public String userList(Model model, @ModelAttribute("filter01") UserManageVO userManage, HttpSession session) {
+		session.setAttribute("currentTopMenu", "user");
 		List<UserManageVO> list = userManageService.selectAll(userManage);
 		List<SubcodeVO> activeCodeList = subCodeService.getSubCodeList("00ACTIVE");
 		model.addAttribute("activeCodeList", activeCodeList);

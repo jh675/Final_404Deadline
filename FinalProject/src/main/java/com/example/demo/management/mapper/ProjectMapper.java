@@ -42,4 +42,6 @@ public interface ProjectMapper {
 
 	// 프로젝트 상태 변경 감지용
 	List<ProjectVO> findByUpdatedOnAfter(Date date);
+	
+	int reproject(ProjectVO vo);
 } 
