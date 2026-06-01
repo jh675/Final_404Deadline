@@ -109,7 +109,7 @@
             grid = new tui.Grid({
               el: gridEl,
               data: filterMembers(allMembers).map(memberToGridRow),
-              rowHeaders: [{ type: "checkbox", header: "선택" }],
+              rowHeaders: ["checkbox"],
               scrollX: false,
               scrollY: false,
               bodyHeight: "auto",
