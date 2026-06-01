@@ -200,9 +200,16 @@ public class ProjectController {
 	
 	@PostMapping("/management/hide")
 	public String projectHide(ProjectVO vo ,RedirectAttributes rttr) {
-		projectservice.projectHide(vo);
-		rttr.addFlashAttribute("msg", "프로젝트가 성공적으로 삭제되었습니다.");
-		return "redirect:/management/project";
+		Long id = vo.getId();
+
+	    if (projectservice.hasChildProject(id)) {
+	        rttr.addFlashAttribute("msg", "하위 프로젝트가 있어 삭제 할 수 없습니다.");
+	        return "redirect:/management/project";
+	    }
+
+	    projectservice.projectHide(vo);
+	    rttr.addFlashAttribute("msg", "프로젝트가 성공적으로 삭제되었습니다.");
+	    return "redirect:/management/project";
 	}
 	
 	@PostMapping("/management/delete")
