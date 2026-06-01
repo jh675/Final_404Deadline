@@ -20,4 +20,5 @@ public class ProjectMemberRowVO {
     private String tel;
     private String email;
     private String grpName;
+    private String login;
 }

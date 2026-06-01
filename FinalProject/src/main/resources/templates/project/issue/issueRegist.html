@@ -70,6 +70,13 @@
 	color: #333;
 }
 
+.form-grid select:disabled {
+	background: #f5f5f5;
+	color: #666;
+	cursor: not-allowed;
+	opacity: 1;
+}
+
 .form-grid textarea {
 	min-height: 140px;
 	resize: vertical;
@@ -419,12 +426,24 @@
 			<div class="field-wrap">
 				<select id="milestoneId" name="milestoneId">
 					<option value=""
-						th:selected="${issue == null or issue.milestoneId == null}">없음</option>
+						th:disabled="${milestoneUnlinkBlocked}"
+						th:selected="${issue == null or issue.milestoneId == null}"
+						th:text="${milestoneUnlinkBlocked ? '없음 (타임라인 등록으로 해제 불가)' : '없음'}">없음</option>
 					<option th:each="milestone : ${milestones}"
 						th:value="${milestone.id}"
 						th:text="${milestone.name}"
+						th:attr="data-start=${milestone.startDate != null ? #dates.format(milestone.startDate, 'yyyy-MM-dd') : null},
+							data-end=${milestone.endDate != null ? #dates.format(milestone.endDate, 'yyyy-MM-dd') : null}"
 						th:selected="${issue != null and issue.milestoneId != null and issue.milestoneId == milestone.id}">마일스톤</option>
 				</select>
+				<p class="form-hint"
+					th:if="${milestoneUnlinkBlocked}">
+					등록된 타임라인이 있어 마일스톤을 「없음」으로 해제할 수 없습니다. 다른 마일스톤으로 변경하거나, 마일스톤 화면에서 타임라인을 삭제해 주세요.
+				</p>
+				<p class="form-hint"
+					th:if="${!milestoneUnlinkBlocked and !(@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE'))}">
+					마일스톤·이슈 수정 권한이 모두 있어야 변경할 수 있습니다. (현재 조회만 가능)
+				</p>
 			</div>
 
 			<label>첨부파일</label>
@@ -541,6 +560,45 @@
 	var STATUS_DONE = '04ISSUESTAT';
 	var lockedStatusCd = null;
 	var selectedFiles = [];
+	var projectDateMin = /*[[${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : ''}]]*/ '';
+	var projectDateMax = /*[[${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : ''}]]*/ '';
+
+	function setDateInputBounds(inputEl, minVal, maxVal) {
+		if (!inputEl) return;
+		if (minVal) inputEl.min = minVal;
+		else inputEl.removeAttribute('min');
+		if (maxVal) inputEl.max = maxVal;
+		else inputEl.removeAttribute('max');
+	}
+
+	function clampDateInputValue(inputEl) {
+		if (!inputEl || !inputEl.value) return;
+		if (inputEl.min && inputEl.value < inputEl.min) inputEl.value = inputEl.min;
+		if (inputEl.max && inputEl.value > inputEl.max) inputEl.value = inputEl.max;
+	}
+
+	function getSelectedMilestoneDateBounds() {
+		var msEl = document.getElementById('milestoneId');
+		if (!msEl || !msEl.value) return null;
+		var opt = msEl.options[msEl.selectedIndex];
+		if (!opt) return null;
+		var start = opt.getAttribute('data-start') || '';
+		var end = opt.getAttribute('data-end') || '';
+		if (!start && !end) return null;
+		return { min: start || projectDateMin, max: end || projectDateMax };
+	}
+
+	function applyIssueDateBounds() {
+		var estEl = document.getElementById('estStartDate');
+		var dueEl = document.getElementById('dueDate');
+		var bounds = getSelectedMilestoneDateBounds();
+		var minVal = bounds ? bounds.min : projectDateMin;
+		var maxVal = bounds ? bounds.max : projectDateMax;
+		setDateInputBounds(estEl, minVal, maxVal);
+		setDateInputBounds(dueEl, minVal, maxVal);
+		clampDateInputValue(estEl);
+		clampDateInputValue(dueEl);
+	}
 
 	function getEffectiveStatus() {
 		if (lockedStatusCd) return lockedStatusCd;
@@ -651,7 +709,13 @@
 		}
 	}
 	applyIssueSelects();
+	applyIssueDateBounds();
 	applyProgressByStatus();
+
+	var milestoneIdEl = document.getElementById('milestoneId');
+	if (milestoneIdEl) {
+		milestoneIdEl.addEventListener('change', applyIssueDateBounds);
+	}
 
 	var doneRatioEl = document.getElementById('doneRatio');
 	if (doneRatioEl) {
@@ -784,7 +848,8 @@
 			statusCd: getEffectiveStatus(),
 			doneRatio: document.getElementById('doneRatio').value ? Number(document.getElementById('doneRatio').value) : 0,
 			description: document.getElementById('description').value || '',
-			parentIssue: document.getElementById('parentIssue').value ? Number(document.getElementById('parentIssue').value) : null
+			parentIssue: document.getElementById('parentIssue').value ? Number(document.getElementById('parentIssue').value) : null,
+			milestoneId: document.getElementById('milestoneId').value ? Number(document.getElementById('milestoneId').value) : null
 		};
 		var est = document.getElementById('estStartDate').value;
 		var due = document.getElementById('dueDate').value;
@@ -803,9 +868,11 @@
 		if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
 			headers[headerMeta.content] = tokenMeta.content;
 		}
+		var isEdit = /*[[${issue != null and issue.id != null}]]*/ false;
 		var saveUrl = /*[[${issue != null and issue.id != null} ? @{/project/issue/update} : @{/project/issue/insert}]]*/ '/project/issue/insert';
+		var saveMethod = /*[[${issue != null and issue.id != null} ? 'PUT' : 'POST']]*/ 'POST';
 		fetch(saveUrl, {
-			method: 'POST',
+			method: saveMethod,
 			headers: headers,
 			body: formData
 		}).then(function (res) {
@@ -817,7 +884,9 @@
 				window.location.href = /*[[@{/project/issue/list}]]*/ '/project/issue/list';
 				return;
 			}
-			alert('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+			return res.json().catch(function () { return null; }).then(function (data) {
+				alert(data && data.message ? data.message : '저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+			});
 		}).catch(function () {
 			alert('네트워크 오류가 발생했습니다.');
 		});

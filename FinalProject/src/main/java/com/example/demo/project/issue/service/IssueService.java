@@ -15,11 +15,10 @@ public interface IssueService {
     /** 등록된 이슈 PK를 반환합니다. */
     Long insertIssue(IssueInputVO issueVO);
 
-    int updateIssue(IssueInputVO issueVO);
+    Long updateIssue(IssueInputVO issueVO);
 
-
-
-    int deleteIssue(Long id);
+    /** 타임라인이 있어 마일스톤 해제(없음)가 불가한 이슈인지 */
+    boolean isMilestoneUnlinkBlocked(Long issueId);
 
     List<IssueOutputVO> selectChildIssueList(Long id);
 
@@ -29,7 +28,7 @@ public interface IssueService {
     
     List<CommentOutputVO> getComment(Long id);
 
-    int insertComment(CommentInputVO vo);
+    Long insertComment(CommentInputVO vo);
     
 	List<IssueSummaryVO> getIssueIds(Long prjId, Long issueId);
 	List<IssueOutputVO> getRelationIssue(Long id);

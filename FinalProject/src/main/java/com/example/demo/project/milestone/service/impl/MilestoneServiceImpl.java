@@ -15,6 +15,7 @@ import com.example.demo.project.milestone.mapper.MilestoneMapper;
 import com.example.demo.project.milestone.service.MilestoneExpectedProgressCalculator;
 import com.example.demo.project.milestone.service.MilestoneIssueVO;
 import com.example.demo.project.milestone.service.MilestoneService;
+import com.example.demo.project.milestone.service.MilestoneSyncException;
 import com.example.demo.project.milestone.service.MilestoneTimelineVO;
 import com.example.demo.project.milestone.service.MilestoneVO;
 
@@ -67,6 +68,15 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 	@Override
 	public Long deleteMilestoneIssue(Long id) {
+		if (id == null) {
+			return null;
+		}
+		Long count = mapper.countTimelineByMilestoneIssueId(id);
+		if (count != null && count > 0) {
+			throw new MilestoneSyncException(
+					"타임라인이 등록된 이슈는 마일스톤에서 해제할 수 없습니다. "
+					+ "마일스톤 화면에서 타임라인을 삭제하거나 다른 마일스톤으로 이동해 주세요.");
+		}
 		return mapper.deleteMilestoneIssue(id);
 	}
 

@@ -1,9 +1,13 @@
 package com.example.demo.project.milestone.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.project.issue.service.IssueSummaryVO;
 import com.example.demo.project.milestone.service.MilestoneIssueVO;
 import com.example.demo.project.milestone.service.MilestoneService;
+import com.example.demo.project.milestone.service.MilestoneSyncException;
 import com.example.demo.project.milestone.service.MilestoneTimelineVO;
 import com.example.demo.project.milestone.service.MilestoneVO;
 
@@ -90,6 +95,13 @@ public class MilestoneRestController {
 	public Long deleteMilestoneIssue(@PathVariable("id")Long id) {
 		return service.deleteMilestoneIssue(id);
 	}
+
+	@ExceptionHandler(MilestoneSyncException.class)
+	public ResponseEntity<Map<String, Object>> handleMilestoneSync(MilestoneSyncException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(Map.of("ok", false, "message", ex.getMessage()));
+	}
+
 	@PutMapping("/milestone")
 	public Long updateMilestone(@RequestBody MilestoneVO milestoneVO) {
 		try {
