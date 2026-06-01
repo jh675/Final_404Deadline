@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.login.service.UserVO;
 import com.example.demo.mypage.mapper.MypageMepper;
+import com.example.demo.mypage.service.MypageIssueVO;
 import com.example.demo.mypage.service.MypageService;
 import com.example.demo.mypage.service.MypageVO;
 
@@ -27,5 +28,8 @@ public class MypageServiceImpl implements MypageService {
 	public List<MypageVO> selectMyProjectList(Long userId) {
 		return mypageMepper.selectMyProjectList(userId);
 	}
-
+	@Override
+	public List<MypageIssueVO> selectWeeklyIssueList(List<Long> prjIdList) {
+	    return mypageMepper.selectWeeklyIssueList(prjIdList);
+	}
 }

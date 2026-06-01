@@ -178,14 +178,22 @@
 							<td colspan="8" class="text-muted py-4">참가중인 프로젝트가 없습니다.</td>
 						</tr>
 						<tr th:each="p : ${projectList}">
-							<td th:text="${p.prjName}"></td> <!-- 프로젝트 이름 -->
+							<td th:text="${p.prjName}"></td>
+							<!-- 프로젝트 이름 -->
 							<td class="text-truncate" style="max-width: 200px;"
-								th:text="${p.prjDesc != null ? p.prjDesc : '-'}"></td> <!-- 프로젝트 설명 -->
-							<td th:text="${p.prjStatusCd != null ? p.prjStatusCd : '-'}"></td> <!-- 프로젝트 진행상태 -->
-							<td th:text="${p.startDate != null ? #dates.format(p.startDate, 'yyyy-MM-dd') : '-'}"></td> <!-- 프로젝트 시작일 -->
-							<td th:text="${p.closedDate != null ? #dates.format(p.closedDate, 'yyyy-MM-dd') : '-'}"></td> <!-- 프로젝트 종료일 -->
+								th:text="${p.prjDesc != null ? p.prjDesc : '-'}"></td>
+							<!-- 프로젝트 설명 -->
+							<td th:text="${p.prjStatusCd != null ? p.prjStatusCd : '-'}"></td>
+							<!-- 프로젝트 진행상태 -->
 							<td
-								th:text="${p.createdOn != null ? #dates.format(p.createdOn, 'yyyy-MM-dd') : '-'}"></td> <!-- 프로젝트 생성일 -->
+								th:text="${p.startDate != null ? #dates.format(p.startDate, 'yyyy-MM-dd') : '-'}"></td>
+							<!-- 프로젝트 시작일 -->
+							<td
+								th:text="${p.closedDate != null ? #dates.format(p.closedDate, 'yyyy-MM-dd') : '-'}"></td>
+							<!-- 프로젝트 종료일 -->
+							<td
+								th:text="${p.createdOn != null ? #dates.format(p.createdOn, 'yyyy-MM-dd') : '-'}"></td>
+							<!-- 프로젝트 생성일 -->
 							<td><a th:href="@{/project/{id}(id=${p.id})}"
 								class="btn btn-outline-primary btn-sm">이동하기</a></td>
 						</tr>
@@ -222,26 +230,26 @@
 			<!-- ===== 전체 이슈 영역 (추후 작업) ===== -->
 			<h5 class="fw-bold mb-3">이번주 마감 전체이슈</h5>
 			<div class="table-responsive">
-					<table
-						class="table table-bordered table-hover text-center align-middle"
-						style="font-size: 14px;">
-						<thead class="table-dark">
-							<tr>
-								<th>이슈명</th>
-								<th>담당자</th>
-								<th>상태</th>
-								<th>우선순위</th>
-								<th>마감일</th>
-								<th>진척도</th>
-							</tr>
-						</thead>
-						<tbody id="weekWeeklyIssueList">
-							<tr>
-								<td colspan="6" class="text-muted py-3">로딩 중...</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+				<table
+					class="table table-bordered table-hover text-center align-middle"
+					style="font-size: 14px;">
+					<thead class="table-dark">
+						<tr>
+							<th>이슈명</th>
+							<th>담당자</th>
+							<th>상태</th>
+							<th>우선순위</th>
+							<th>마감일</th>
+							<th>진척도</th>
+						</tr>
+					</thead>
+					<tbody id="weekWeeklyIssueList">
+						<tr>
+							<td colspan="6" class="text-muted py-3">로딩 중...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 
 		</div>
 
@@ -557,32 +565,53 @@
 			document.addEventListener('DOMContentLoaded', function() {
 			    loadcalendarEvents();
 			    loadMyIssues(); 
+			    loadAllIssues();
 			});
 			
 			
 			//=========================================================================================
 			// 4. 이번주 마감 전체 이슈 불러오기
 			//=========================================================================================
-			
-				function loadAllIssues() {
-				
-				const tbody = document.getelementById('weekWeeklyIssueList');
-				tbody.innnerHTML = '';
-				
-				if (!projectList || projectList.length === 0) {
-					tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-3">소속된 프로젝트가 없습니다.</td></tr>';
-					return;
-				}
-				
-				const statusColor = { '신규': 'primary', '진행중': 'warning', '검토': 'secondary', '완료': 'success' };
-				const priorityColor = { '최상': 'danger', '상': 'warning', '중': 'info', '하': 'secondary' };
-				
-				const today = new Date(); today,setHours(0, 0, 0, 0);
-				const weekStart = new Date(today); weekStart.setDate(today.getDate() - today.getDay());
-				const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
+			function loadAllIssues() {
+			    const tbody = document.getElementById('weekWeeklyIssueList'); // ← getElementById 오타 수정
+			    tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-3">로딩 중...</td></tr>';
 
-				let allGroupIssues = [];
-				let fetchPromises = [];
+			    const statusColor = { '신규': 'primary', '진행중': 'warning', '검토': 'secondary', '완료': 'success' };
+			    const priorityColor = { '최상': 'danger', '상': 'warning', '중': 'info', '하': 'secondary' };
+
+			    fetch('/mypage/issue/week', {
+			        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+			    })
+			    .then(res => res.json())
+			    .then(data => {
+			        if (!Array.isArray(data) || data.length === 0) {
+			            tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-3">이번주 마감 이슈가 없습니다.</td></tr>';
+			            return;
+			        }
+
+			        tbody.innerHTML = data.map(issue => {
+			            const status = issue.statusCd || '-';
+			            const priority = issue.priorityCd || '-';
+			            const doneRatio = issue.doneRatio ?? 0;
+
+			            return `
+			                <tr>
+			                    <td class="text-start">${issue.subject || '-'}</td>
+			                    <td>${issue.memName || '-'}</td>
+			                    <td><span class="badge bg-${statusColor[status] || 'secondary'}">${status}</span></td>
+			                    <td><span class="badge bg-${priorityColor[priority] || 'secondary'}">${priority}</span></td>
+			                    <td>${issue.dueDate || '-'}</td>
+			                    <td>
+			                        <div class="progress" style="height: 16px;">
+			                            <div class="progress-bar" style="width:${doneRatio}%">${doneRatio}%</div>
+			                        </div>
+			                    </td>
+			                </tr>`;
+			        }).join('');
+			    })
+			    .catch(() => {
+			        tbody.innerHTML = '<tr><td colspan="6" class="text-danger py-3">데이터 로딩 실패</td></tr>';
+			    });
 			}
 			
 	</script>

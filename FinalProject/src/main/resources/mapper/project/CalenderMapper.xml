@@ -81,6 +81,7 @@
     <delete id="delete">
         DELETE FROM CALENDER
         WHERE ID = #{id}
+        and mem_id = #{memId}
     </delete>
 
     <select id="getList" resultType="calenderVO">
