@@ -87,16 +87,18 @@
 		        <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleBulkModeBtn">일괄작업</button>
 		
 		        <div id="bulkControls" class="d-none d-flex align-items-center gap-2">
-		            <select id="bulkActionType" class="form-select form-select-sm" style="width: auto;">
-		                <option value="">일괄 작업 선택</option>
-		                <option value="status_01ACTIVE">계정 활성화</option>
-		                <option value="status_02ACTIVE">계정 비활성화</option>
-		                <option value="prjManager_01ACTIVE">PM 역할 부여</option>
-		                <option value="prjManager_02ACTIVE">PM 역할 해제</option>
-		            </select>
-		            <button type="button" class="btn btn-sm btn-secondary" id="bulkApplyBtn">적용</button>
-		            <button type="button" class="btn btn-sm btn-light" id="cancelBulkModeBtn">취소</button>
-		        </div>
+				    <select id="bulkActionType" class="form-select form-select-sm" style="width: auto;">
+				        <option value="">일괄 작업 선택</option>
+				        <option value="status_01ACTIVE">계정 활성화</option>
+				        <option value="status_02ACTIVE">계정 비활성화</option>
+				        <option value="prjManager_01ACTIVE">PM 역할 부여</option>
+				        <option value="prjManager_02ACTIVE">PM 역할 해제</option>
+				    </select>
+				    <button type="button" class="btn btn-sm btn-secondary" id="bulkApplyBtn">적용</button>
+				    <button type="button" class="btn btn-sm btn-light" id="cancelBulkModeBtn">취소</button>
+				    
+				    <span id="bulkFeedback" class="small fw-bold text-danger ms-2"></span>
+				</div>
 		    </div>
 		    
 		    <div>
