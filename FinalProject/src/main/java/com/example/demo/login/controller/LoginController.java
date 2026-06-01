@@ -36,7 +36,8 @@ public class LoginController {
         session.removeAttribute("currentMenu");
         session.removeAttribute("moduleList");
         session.removeAttribute("project");
-		
+        
+        session.setAttribute("currentTopMenu", "home");
 		// 시큐리티 컨텍스트 객체를 얻습니다.
 		SecurityContext context = SecurityContextHolder.getContext();
 

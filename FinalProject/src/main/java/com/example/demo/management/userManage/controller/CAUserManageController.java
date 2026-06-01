@@ -27,6 +27,7 @@ import com.example.demo.management.userManage.service.UserManageVO;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +47,8 @@ public class CAUserManageController {
 	}
 	
 	@GetMapping("/userList")
-	public String userList(Model model, @ModelAttribute("filter01") UserManageVO userManage) {
+	public String userList(Model model, @ModelAttribute("filter01") UserManageVO userManage, HttpSession session) {
+		session.setAttribute("currentTopMenu", "user");
 		// 내 기업의 직원만 보도록 bizNo 강제 세팅
 		String myBizNo = getCurrentAdmin().getBizNo();
 		userManage.setBizNo(myBizNo); 

@@ -14,9 +14,8 @@ import org.springframework.web.client.RestTemplate;
 
 //@Component
 public class OllamaApiClient {
-
-    // 외부 인터넷이 아니라 내 컴퓨터(localhost)의 Ollama 서버로 요청!
-    private final String OLLAMA_URL = "http://localhost:11434/api/generate";
+//속도가 너무 느린 문제가 있음 검색 시간이 약 1분 걸림
+    private final String OLLAMA_URL = "http://192.168.0.6:11434/api/generate";
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String callOllama(String prompt) {
@@ -45,7 +44,7 @@ public class OllamaApiClient {
                 return "[HTTP " + statusCode + " 에러]** 상세 내용: " + errorBody;
             }
             
-        // ✨ [추가] 아예 연결조차 되지 않을 때 (서버가 꺼져있음)
+        // 서버가 꺼져있는 경우
         } catch (ResourceAccessException e) {
             return "Ollama 서버에 접속할 수 없습니다. 윈도우 우측 하단 트레이 아이콘에 Ollama가 켜져 있는지 확인해 주세요!";
             
