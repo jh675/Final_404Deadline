@@ -144,6 +144,7 @@
 					})
 					.then(function () {
 						if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
+						alert("이슈가 마일스톤에 등록되었습니다.");
 						bootstrap.Modal.getInstance(modalEl).hide();
 					})
 					.catch(function (err) {

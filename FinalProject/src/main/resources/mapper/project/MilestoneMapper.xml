@@ -45,6 +45,21 @@
 		on m.id=i.milestone_id
 		where i.milestone_id=#{id}
 	</select>
+	<select id="selectMilestoneIssueByIssueId" resultType="MilestoneIssueVO">
+		SELECT id,
+		       milestone_id milestoneId,
+		       issue_id issueId
+		  FROM milestone_issue
+		 WHERE issue_id = #{issueId}
+		   AND ROWNUM = 1
+	</select>
+
+	<select id="countTimelineByMilestoneIssueId" resultType="long">
+		SELECT COUNT(*)
+		  FROM milestone_timeline
+		 WHERE milestone_issue_id = #{milestoneIssueId}
+	</select>
+
 	<select id="selectMilestoneNotInIssue">
 		select id,subject from issue
 		where id not in(
@@ -101,7 +116,7 @@
 	</update>
 	<delete id="deleteTimeline">
 		delete from milestone_timeline
-		where milestone_issue_id = #{id}
+		where id = #{id}
 	</delete>
 	<update id="updateTimeline">
 		update milestone_timeline

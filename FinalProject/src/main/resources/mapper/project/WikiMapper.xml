@@ -106,23 +106,6 @@
 		ORDER BY p.title
 	</select>
 	
-	<select id="selectWikiPageForDate" resultType="wikiPageVO">
-		SELECT
-			p.id AS id,
-			p.wiki_id AS wikiId,
-			p.title AS title,
-			p.last_ver AS lastVer,
-			w.prj_id AS prjId,
-			p.parent_id AS parentId,
-			c.describe AS describe,
-			c.updated_on AS updatedOn
-		FROM wiki_page p
-		JOIN wiki w ON w.id = p.wiki_id
-		LEFT JOIN wiki_content c ON c.page_id = p.id AND c.version = p.last_ver
-		WHERE w.prj_id = #{id}
-		ORDER BY c.updated_on DESC, p.title
-	</select>
-	
 	<select id="selectWikiPageForTree" resultType="wikiPageVO">
 		select
 			p.id,
@@ -160,18 +143,6 @@
 		WHERE parent_id = #{pageId}
 	</select>
 
-	<select id="selectWikiPageListGroupParent" resultType="wikiPageVO">
-		select
-			p.id,
-			p.title,
-			p.parent_id AS parentId
-		from wiki_page p
-		join wiki i
-		on i.id = p.wiki_id
-		where i.prj_id = #{id}
-		order by nvl(p.parent_id, 0), p.title
-	</select>
-	
 	<insert id="insertWikiPage" parameterType="wikiPageVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
 			select w_page_seq.nextval from dual
@@ -207,6 +178,13 @@
 		) WHERE ROWNUM &lt;= 20
 	</select>
 
+	<select id="countStartPageByTitle" resultType="long">
+		select count(*)
+		from wiki
+		where prj_id = #{projectId}
+		and start_page = #{name}
+	</select>
+
 	<insert id="updateWikiContent" parameterType="wikiContentVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
 			select w_content_seq.nextval from dual
@@ -214,5 +192,45 @@
 		insert into wiki_content (id,version, page_id, content,describe,mem_Id)
 		values (#{id}, (select max(version)+1 from wiki_content where page_id =#{pageId}),#{pageId}, #{content}, #{describe}, #{memId})
 	</insert>
+
+	<delete id="deleteWikiPage" parameterType="long">
+		delete from wiki_page
+		where id = #{pageId}
+	</delete>
+
+	<delete id="deleteWikiContent" parameterType="long">
+		delete from wiki_content
+		where page_id = #{pageId}
+	</delete>
+
+	<select id="getIdByTitle" resultType="long">
+		select p.id
+		from wiki_page p
+		join wiki w
+		on w.id = p.wiki_id
+		where w.prj_id = #{projectId}
+		and p.title = #{name}
+	</select>
+
+	<select id="getParentIdByPageId" resultType="long">
+		select parent_id
+		from wiki_page
+		where id = #{pageId}
+	</select>
+
+	<update id="reparentWikiChildren">
+		update wiki_page
+		set parent_id = #{parentId}
+		where parent_id = #{pageId}
+	</update>
+
+	<update id="updateStartPage">
+		update wiki
+		set start_page = #{name}
+		where prj_id = #{projectId}
+	</update>
+
+
+
 	
 </mapper>

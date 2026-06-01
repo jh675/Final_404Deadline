@@ -19,9 +19,6 @@ public interface WikiMapper {
 
 	Long insertWikiContent(WikiContentVO wikiContentVO);
 	Long updateWikiContent(WikiContentVO wikiContentVO);
-	Long deleteWikiContent(@Param("id") Long id);
-	List<WikiPageVO> selectWikiPageForDate(@Param("id") Long id);
-	List<WikiPageVO> selectWikiPageListGroupParent(@Param("id") Long id);
 	Long nameCheck(@Param("id") Long id, @Param("name") String name);
 	Long insertWikiPage(WikiPageVO page);
 	Long updateWikiPageParent(WikiPageVO page);
@@ -29,5 +26,13 @@ public interface WikiMapper {
 	Long countWikiChildren(@Param("pageId") Long pageId);
 
 	List<String> searchWikiTitles(@Param("projectId") Long projectId, @Param("q") String q);
+	Long countStartPageByTitle(@Param("projectId") Long projectId, @Param("name") String name);
+	Long getParentIdByPageId(@Param("pageId") Long pageId);
+	void reparentWikiChildren(@Param("pageId") Long pageId, @Param("parentId") Long parentId);
+	Long updateStartPage(@Param("projectId") Long projectId, @Param("name") String name);
+
+	void deleteWikiPage(@Param("pageId") Long pageId);
+	void deleteWikiContent(@Param("pageId") Long pageId);
+	Long getIdByTitle(@Param("projectId") Long projectId, @Param("name") String name);
 
 }

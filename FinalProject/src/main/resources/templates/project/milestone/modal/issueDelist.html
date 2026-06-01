@@ -112,19 +112,20 @@
 				var opt = selectEl.options[selectEl.selectedIndex];
 				if (opt && opt.disabled) { setErr("타임라인이 등록된 이슈는 해제할 수 없습니다."); return; }
 
-				var label = opt ? opt.textContent : ("이슈 #" + miId);
-				if (!window.confirm("\"" + label + "\" 이슈를 해제할까요?")) return;
-
 				deleteBtn.disabled = true;
 				fetch("/project/milestone/api/issue/" + encodeURIComponent(miId), {
 					method: "DELETE",
 					headers: Object.assign({ Accept: "application/json" }, getCsrfHeaders()),
 				})
 					.then(function (res) {
-						if (!res.ok) throw new Error("HTTP " + res.status);
+						if (res.ok) return;
+						return res.json().catch(function () { return null; }).then(function (data) {
+							throw new Error(data && data.message ? data.message : ("HTTP " + res.status));
+						});
 					})
 					.then(function () {
 						if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
+						alert("이슈가 마일스톤에서 해제되었습니다.");
 						bootstrap.Modal.getInstance(modalEl).hide();
 					})
 					.catch(function (err) {
