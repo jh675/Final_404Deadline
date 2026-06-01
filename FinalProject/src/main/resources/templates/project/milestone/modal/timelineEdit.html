@@ -184,6 +184,7 @@
 									&& typeof window.MilestoneTimelineView.replaceAfterEdit === "function") {
 								window.MilestoneTimelineView.replaceAfterEdit(editedId);
 							}
+							alert("타임라인 이벤트가 수정되었습니다.");
 							bootstrap.Modal.getInstance(modalEl).hide();
 						};
 						if (refresh && typeof refresh.then === "function") {

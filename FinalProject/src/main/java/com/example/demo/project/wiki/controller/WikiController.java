@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -33,9 +35,6 @@ import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
 import jakarta.servlet.http.HttpSession;
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Controller
 public class WikiController {
 
@@ -119,7 +118,8 @@ public class WikiController {
 	@PostMapping(path = "/project/wiki/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String wikiWrite(@ModelAttribute WikiContentVO wikiContentVO,
 			@RequestParam(value = "files", required = false) MultipartFile[] files,
-			HttpSession session) {
+			HttpSession session,
+			RedirectAttributes redirectAttributes) {
 		Long projectId = getCurrentProjectId(session);
 		UserVO loginUser = getLoginUser();
 		if (projectId == null) {
@@ -137,13 +137,15 @@ public class WikiController {
 		}
 		String encodedTitle = UriUtils.encodePathSegment(
 				wikiContentVO.getTitle(), StandardCharsets.UTF_8);
+		redirectAttributes.addFlashAttribute("wikiNotice", "위키가 작성되었습니다.");
 		return "redirect:/project/wiki/view/" + encodedTitle;
 	}
 	
 	@PostMapping(path = "/project/wiki/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String wikiUpdate(@ModelAttribute WikiContentVO wikiContentVO,
 			@RequestParam(value = "files", required = false) MultipartFile[] files,
-			HttpSession session) {
+			HttpSession session,
+			RedirectAttributes redirectAttributes) {
 		UserVO loginUser = getLoginUser();
 		if (getCurrentProjectId(session) == null) {
 			return "redirect:/management/project";
@@ -158,6 +160,7 @@ public class WikiController {
 		}
 		String encodedTitle = UriUtils.encodePathSegment(
 				wikiContentVO.getTitle(), StandardCharsets.UTF_8);
+		redirectAttributes.addFlashAttribute("wikiNotice", "위키가 수정되었습니다.");
 		return "redirect:/project/wiki/view/" + encodedTitle;
 	}
 	
@@ -197,9 +200,9 @@ public class WikiController {
 		if (projectId == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		if(service.nameCheck(projectId,name)==0){
+		if (service.nameCheck(projectId, name) == 0) {
 			return ResponseEntity.ok().build();
-		}else{
+		} else {
 			return ResponseEntity.badRequest().build();
 		}
 
@@ -248,6 +251,10 @@ public class WikiController {
 		}
 		WikiContentVO latestPage = service.selectWikiContentLastVerByTitle(projectId,name);
 		if (latestPage == null) {
+			// 첫 페이지가 아직 없는 프로젝트에서 자기 자신(/project/wiki)으로 재리다이렉트 되는 루프를 방지한다.
+			if (name == null || name.isBlank()) {
+				return "redirect:/project/wiki/index?type=title";
+			}
 			return "redirect:/project/wiki";
 		}
 		WikiContentVO pageToShow = latestPage;
@@ -264,6 +271,7 @@ public class WikiController {
 		model.addAttribute("page", pageToShow);
 		model.addAttribute("breadcrumb", service.getBreadcrumb(pageId));
 		model.addAttribute("hasChildren", service.hasWikiChildren(pageId));
+		model.addAttribute("isStartPage", service.isStartPage(projectId, pageToShow.getTitle()));
 		model.addAttribute("latestVersion", latestPage.getVersion());
 		model.addAttribute("isHistoricalVersion",
 				pageToShow.getVersion() != null && latestPage.getVersion() != null
@@ -287,6 +295,33 @@ public class WikiController {
 		model.addAttribute("page", page);
 		model.addAttribute("historyList", service.selectWikiHistoryByPageId(page.getPageId()));
 		return "project/wiki/wikiHistory";
+	}
+
+	@PostMapping("/project/wiki/start-page")
+	@ResponseBody
+	public ResponseEntity<Void> setWikiStartPage(@RequestParam("name") String name, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null || name == null || name.isBlank()) {
+			return ResponseEntity.badRequest().build();
+		}
+		if (!service.setStartPage(projectId, name)) {
+			return ResponseEntity.badRequest().build();
+		}
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping("/project/wiki/{name}")
+	@ResponseBody
+	public ResponseEntity<Void> wikiDelete(@PathVariable("name") String name, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return ResponseEntity.badRequest().build();
+		}
+		if (service.isStartPage(projectId, name)) {
+			return ResponseEntity.status(409).build();
+		}
+		service.deleteWikiPage(projectId, name);
+		return ResponseEntity.noContent().build();
 	}
 	
 	

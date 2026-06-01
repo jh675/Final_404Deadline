@@ -167,7 +167,6 @@
 					if (delBtn) {
 						delBtn.addEventListener("click", function () {
 							if (e.id == null) { setErr("삭제할 이벤트 ID가 없습니다."); return; }
-							if (!window.confirm("이 타임라인 이벤트를 삭제할까요?")) return;
 							delBtn.disabled = true;
 							setErr("");
 							deleteTimeline(e.id)
@@ -180,6 +179,7 @@
 										renderRows(ctx.events);
 										if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
 									}
+									alert("타임라인 이벤트가 삭제되었습니다.");
 								})
 								.catch(function (err) {
 									setErr("삭제 실패: " + (err && err.message ? err.message : err));
