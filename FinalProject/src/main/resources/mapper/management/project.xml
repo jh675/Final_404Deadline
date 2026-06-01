@@ -109,6 +109,20 @@
  	delete from project
  	where id = #{id}
  </delete>
+ 
+ <update id="reproject" parameterType="projectVO">
+ 	UPDATE project
+	SET prj_hide ='N', updated_on = SYSDATE, prj_identifier = #{prjIdentifier}
+	WHERE id = #{id}
+	  AND NOT EXISTS (
+	    SELECT 1
+	    FROM project p2
+	    WHERE p2.biz_no = (SELECT biz_no FROM project WHERE id = #{id})
+	      AND p2.prj_identifier = #{prjIdentifier}
+	      AND p2.id != #{id}
+ 	 )
+ </update>
+ 
  <select id="countChildProject" resultType="int">
     SELECT COUNT(*)
     FROM project
