@@ -17,6 +17,8 @@ import com.example.demo.login.service.UserVO;
 import com.example.demo.project.calender.service.CalenderService;
 import com.example.demo.project.calender.service.CalenderVO;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class Calendercontroller {
 
@@ -31,7 +33,8 @@ public class Calendercontroller {
 
 	// 캘린더 페이지접속
 	@GetMapping({ "/calendar/list" })
-	public String callenderlist() {
+	public String callenderlist(HttpSession session) {
+		session.setAttribute("currentTopMenu", "calendar");
 		return "project/calender/calender";
 	}
 
