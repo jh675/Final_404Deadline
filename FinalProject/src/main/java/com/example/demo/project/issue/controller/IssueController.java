@@ -1,8 +1,6 @@
 package com.example.demo.project.issue.controller;
 
 import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,16 +29,13 @@ import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.member.service.MemberListCriteria;
 import com.example.demo.project.member.service.MemberService;
-import com.example.demo.project.member.service.ProjectMemberRowVO;
 import com.example.demo.project.milestone.service.MilestoneService;
 import com.example.demo.project.milestone.service.MilestoneSyncException;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
 import jakarta.servlet.http.HttpSession;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Controller
 public class IssueController {
 
@@ -82,9 +77,7 @@ public class IssueController {
 		MemberListCriteria filter = new MemberListCriteria();
 		filter.setPrjId(projectId);
 		List<IssueOutputVO> issueList = issueService.selectIssueList(issueVO);
-		List<ProjectMemberRowVO> memList=memberService.selectProjectMemberList(filter);
-		System.out.println(memList);
-		model.addAttribute("members", memList);
+		model.addAttribute("members", memberService.selectProjectMemberList(filter));
 		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issueList", issueList);
 		return "project/issue/issueList";
@@ -202,8 +195,6 @@ public class IssueController {
 		}
 		issueVO.setPrjId(projectId);
 		issueVO.setWriter(loginUser.getId());
-		System.out.println(issueVO);
-		System.out.println("===========================");
 		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
@@ -219,7 +210,6 @@ public class IssueController {
 	public String issueUpdate(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments,
 			HttpSession session) {
-		System.out.println(issueVO);
 		Long projectId = getCurrentProjectId(session);
 		UserVO loginUser = getLoginUser();
 		if (projectId == null) {

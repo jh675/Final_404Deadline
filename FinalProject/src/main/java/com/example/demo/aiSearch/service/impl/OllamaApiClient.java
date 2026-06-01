@@ -3,11 +3,12 @@ package com.example.demo.aiSearch.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -30,8 +31,17 @@ public class OllamaApiClient {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.postForEntity(OLLAMA_URL, entity, Map.class);
-            return (String) response.getBody().get("response");
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    OLLAMA_URL,
+                    HttpMethod.POST,
+                    entity,
+                    new ParameterizedTypeReference<Map<String, Object>>() {});
+            Map<String, Object> responseBody = response.getBody();
+            if (responseBody == null) {
+                return "로컬 AI 비서와 통신 중 알 수 없는 오류가 발생했습니다.";
+            }
+            Object text = responseBody.get("response");
+            return text instanceof String s ? s : "AI 응답 형식을 해석할 수 없습니다.";
         } catch (HttpStatusCodeException e) {
             int statusCode = e.getStatusCode().value();
             String errorBody = e.getResponseBodyAsString(); // Ollama가 보낸 상세 에러 내용
