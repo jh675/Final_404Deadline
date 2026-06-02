@@ -29,7 +29,6 @@
 						   <ul id="resetCompanyDropdown" class="list-group position-absolute w-100 shadow" 
 						       style="display: none; z-index: 1100; max-height: 200px; overflow-y: auto;">
 						    </ul>
-						    
 						    <small id="bizNoError" class="text-danger d-none"></small>
 						</div>
 
@@ -48,9 +47,7 @@
 								<button type="button" id="sendCodeBtn" class="btn btn-primary">
 									인증요청</button>
 							</div>
-
 							<small id="emailError" class="text-danger d-none"></small>
-
 						</div>
 
 						<!-- 공통 메시지 -->
@@ -59,56 +56,39 @@
 
 						<!-- 인증번호 -->
 						<div id="verifyArea" class="mb-3 d-none">
-
 							<label class="form-label">인증번호</label>
-
 							<div class="d-flex gap-2">
-
 								<input type="text" id="verifyNum" class="form-control">
-
+								<span class="input-group-text text-danger fw-bold d-none" id="resetPwTimerDisplay" style="width: 65px; justify-content: center;">03:00</span>
 								<button type="button" id="verifyBtn" class="btn btn-success">
 									인증</button>
-
 							</div>
-
 							<small id="verifyError" class="text-danger d-none"></small>
-
 						</div>
 
 						<!-- 비밀번호 -->
 						<div id="passwordArea" class="d-none">
-
 							<div class="mb-3">
-
 								<label class="form-label">새 비밀번호</label> <input type="password"
 									id="newPassword" autocomplete="new-password"
 									class="form-control">
-
 							</div>
-
 							<div class="mb-3">
-
 								<label class="form-label">비밀번호 확인</label> <input type="password"
 									id="newPasswordCheck" autocomplete="new-password"
 									class="form-control"> <small id="passwordError"
 									class="text-danger d-none"></small>
-
 							</div>
-
 						</div>
-
 						<small id="resultMsg" class="text-success d-none"></small>
 					</div>
 
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary"
 							data-bs-dismiss="modal">닫기</button>
-
 						<button type="button" id="confirmBtn"
 							class="btn btn-primary d-none">확인</button>
-
 					</div>
-
 				</div>
 			</div>
 		</div>
