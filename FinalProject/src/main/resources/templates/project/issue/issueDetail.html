@@ -10,523 +10,69 @@
 <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
 <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
 <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+<link rel="stylesheet" th:href="@{/css/project/issue.css}" />
 <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-<style>
-.issue-shell {
-	font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
-	color: #333;
-}
-
-.issue-shell .issue-inner {
-	max-width: 960px;
-	margin: 0 auto;
-	background: #fff;
-	border: 1px solid #ddd;
-	border-radius: 8px;
-	padding: 28px 32px 36px;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.back-row {
-	margin-bottom: 16px;
-}
-
-.back-row a {
-	font-size: 13px;
-	color: #5b6cff;
-	text-decoration: none;
-}
-
-.back-row a:hover {
-	text-decoration: underline;
-}
-
-.page-title-row {
-	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 16px;
-	flex-wrap: wrap;
-	margin-bottom: 22px;
-}
-
-.page-title-row .page-title {
-	margin-bottom: 0;
-	flex: 1;
-	min-width: 0;
-}
-
-.page-title {
-	font-size: 22px;
-	font-weight: 700;
-	margin-bottom: 22px;
-	line-height: 1.35;
-}
-
-.issue-register-btn {
-	flex-shrink: 0;
-	display: inline-block;
-	padding: 10px 22px;
-	background-color: #5b6cff;
-	color: #fff;
-	border: none;
-	border-radius: 4px;
-	font-size: 14px;
-	font-weight: 600;
-	text-decoration: none;
-	cursor: pointer;
-}
-
-.issue-register-btn:hover {
-	background-color: #4956d8;
-	color: #fff;
-	text-decoration: none;
-}
-
-.meta-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 14px 32px;
-	margin-bottom: 24px;
-}
-
-.meta-item label {
-	display: block;
-	font-size: 12px;
-	font-weight: 600;
-	color: #555;
-	margin-bottom: 4px;
-}
-
-.meta-item input,
-.meta-item textarea {
-	width: 100%;
-	padding: 8px 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	font-size: 13px;
-	background: #fafafa;
-	color: #333;
-}
-
-.meta-item textarea {
-	min-height: 72px;
-	resize: vertical;
-	font-family: inherit;
-}
-
-.meta-item input.short {
-	max-width: 120px;
-}
-
-.meta-item .parent-issue-link {
-	display: block;
-	width: 100%;
-	padding: 8px 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	font-size: 13px;
-	background: #fafafa;
-	color: #5b6cff;
-	text-decoration: none;
-}
-
-.meta-item .parent-issue-link:hover {
-	color: #4956d8;
-	text-decoration: underline;
-}
-
-.meta-item .meta-empty {
-	display: block;
-	padding: 8px 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	font-size: 13px;
-	background: #fafafa;
-	color: #333;
-}
-
-.section-block {
-	margin-bottom: 22px;
-}
-
-.section-head {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-bottom: 10px;
-	font-size: 14px;
-	font-weight: 600;
-	color: #333;
-}
-
-.badge-count {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-width: 22px;
-	height: 22px;
-	padding: 0 6px;
-	font-size: 12px;
-	font-weight: 600;
-	background: #e8e9ef;
-	color: #444;
-	border-radius: 999px;
-}
-
-.attach-list {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 12px 20px;
-	align-items: center;
-}
-
-.attach-item {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	font-size: 13px;
-	color: #444;
-}
-
-.attach-item a {
-	color: #5b6cff;
-	text-decoration: none;
-	font-size: 16px;
-	line-height: 1;
-}
-
-.attach-item a:hover {
-	color: #4956d8;
-}
-
-.attach-item-actions {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	flex-shrink: 0;
-}
-
-.attach-delete-btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 22px;
-	height: 22px;
-	padding: 0;
-	border: none;
-	border-radius: 4px;
-	background: transparent;
-	color: #999;
-	font-size: 18px;
-	line-height: 1;
-	cursor: pointer;
-}
-
-.attach-delete-btn:hover {
-	background: #fee;
-	color: #c33;
-}
-
-/* 첨부: 3열 그리드, 2줄까지 노출 후 더보기/접기 */
-.attach-list-scroll-wrap {
-	overflow: hidden;
-	min-height: 0;
-}
-
-.attach-list-scroll-wrap.is-expanded {
-	max-height: none !important;
-	overflow: visible;
-}
-
-.attach-list.attach-list--grid {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 10px 14px;
-	align-items: start;
-}
-
-.attach-list.attach-list--grid .attach-item {
-	min-width: 0;
-	overflow-wrap: anywhere;
-}
-
-.attach-list-toggle {
-	display: inline-flex;
-	align-items: center;
-	margin-top: 8px;
-	padding: 0;
-	border: none;
-	background: none;
-	color: #5b6cff;
-	font-size: 13px;
-	font-weight: 500;
-	cursor: pointer;
-}
-
-.attach-list-toggle:hover {
-	color: #4956d8;
-	text-decoration: underline;
-}
-
-table.data-table {
-	width: 100%;
-	border-collapse: collapse;
-	font-size: 13px;
-}
-
-table.data-table thead th {
-	background: #f0f1f5;
-	border: 1px solid #ddd;
-	padding: 10px 12px;
-	text-align: left;
-	font-weight: 600;
-	color: #444;
-}
-
-table.data-table tbody td {
-	border: 1px solid #e5e5e5;
-	padding: 10px 12px;
-	background: #fff;
-}
-
-.tab-row {
-	display: flex;
-	gap: 8px;
-	margin-top: 8px;
-	margin-bottom: 12px;
-}
-
-.tab-btn {
-	padding: 8px 18px;
-	border: 1px solid #ccc;
-	border-radius: 20px;
-	background: #fff;
-	font-size: 13px;
-	font-weight: 600;
-	color: #444;
-	cursor: pointer;
-	transition: background .15s, color .15s, border-color .15s;
-}
-
-.tab-btn:hover {
-	border-color: #bbb;
-}
-
-.tab-btn.is-active {
-	background: #4a4a4a;
-	color: #fff;
-	border-color: #4a4a4a;
-}
-
-.tab-panel-wrap {
-	background: #e8e9ec;
-	border-radius: 6px;
-	padding: 16px;
-	min-height: 220px;
-}
-
-.tab-panel {
-	display: none;
-}
-
-.tab-panel.is-visible {
-	display: block;
-}
-
-/* 댓글 스레드 */
-.comment-thread .comment {
-	background: #f4f4f6;
-	border-radius: 4px;
-	padding: 10px 12px;
-	margin-bottom: 8px;
-	font-size: 13px;
-}
-
-.comment-thread .comment .meta {
-	font-size: 12px;
-	color: #666;
-	margin-bottom: 6px;
-}
-
-.comment-thread .comment .meta strong {
-	color: #333;
-	margin-right: 8px;
-}
-
-.comment-thread .comment .meta .comment-num {
-	font-weight: 700;
-	color: #5b6cff;
-	margin-right: 10px;
-}
-
-.comment-thread .nested {
-	margin-left: 20px;
-	margin-top: 8px;
-	padding-left: 12px;
-	border-left: 2px solid #d0d0d8;
-}
-
-.comment-thread .nested .comment::before {
-	content: "↳ ";
-	color: #888;
-}
-
-.comment-thread .comment.is-reply {
-	border-left: 2px solid #d0d0d8;
-	padding-left: 12px;
-}
-
-.comment-thread-scroll {
-	overflow-y: visible;
-	scrollbar-gutter: stable;
-}
-
-.comment-form {
-	display: flex;
-	gap: 10px;
-	margin-top: 14px;
-	align-items: stretch;
-}
-
-.comment-form textarea {
-	flex: 1;
-	min-height: 80px;
-	padding: 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	font-size: 13px;
-	font-family: inherit;
-	resize: vertical;
-}
-
-.comment-form button {
-	align-self: flex-end;
-	padding: 10px 22px;
-	background: #7c5cff;
-	color: #fff;
-	border: none;
-	border-radius: 4px;
-	font-size: 13px;
-	font-weight: 600;
-	cursor: pointer;
-	white-space: nowrap;
-}
-
-.comment-form button:hover {
-	background: #6a4ae6;
-}
-
-.comment-actions {
-	margin-top: 8px;
-	display: flex;
-	gap: 8px;
-	align-items: center;
-}
-
-.history-detail-link {
-	color: #1976d2;
-	text-decoration: underline;
-	cursor: pointer;
-}
-
-.history-detail-link:hover {
-	color: #1565c0;
-}
-
-.comment-actions .btn-reply {
-	padding: 4px 10px;
-	font-size: 12px;
-	font-weight: 600;
-	color: #5b6cff;
-	background: #fff;
-	border: 1px solid #c8c9d8;
-	border-radius: 4px;
-	cursor: pointer;
-}
-
-.comment-actions .btn-reply:hover {
-	border-color: #5b6cff;
-	color: #4956d8;
-}
-
-.comment-form-wrap {
-	margin-top: 14px;
-}
-
-.comment-form-wrap .comment-form {
-	margin-top: 0;
-}
-
-.reply-hint-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
-	font-size: 12px;
-	color: #555;
-	margin-bottom: 8px;
-	padding: 8px 10px;
-	background: #eef0ff;
-	border: 1px solid #d8dcff;
-	border-radius: 4px;
-}
-
-.reply-hint-row button {
-	padding: 4px 12px;
-	font-size: 12px;
-	font-weight: 600;
-	color: #444;
-	background: #fff;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	cursor: pointer;
-}
-
-.reply-hint-row button:hover {
-	border-color: #999;
-}
-
-.inner-table-title {
-	font-size: 13px;
-	font-weight: 600;
-	margin-bottom: 8px;
-	display: flex;
-	align-items: center;
-	gap: 8px;
-}
-
-/* 그리드 본문 3행(40px×3) + 헤더는 그리드가 별도 처리 */
-#childIssueList {
-	width: 100%;
-}
-</style>
+<script th:src="@{/js/common/gridTheme.js}"></script>
 </th:block>
 </head>
 <body>
 <div layout:fragment="content">
 <div class="issue-shell">
-<div class="issue-inner">
-	<div class="back-row">
-		<a th:href="@{/project/issue/list}">← 이슈 목록</a>
-	</div>
-
-	<p th:if="${issue == null}" style="padding:24px 0;color:#666;">이슈를 찾을 수 없습니다.</p>
+<div id="wrapper">
+	<p th:if="${issue == null}" class="issue-page-desc">이슈를 찾을 수 없습니다.</p>
 
 	<th:block th:if="${issue != null}">
-	<div class="page-title-row">
-		<h1 class="page-title" th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
-		<a class="issue-register-btn" th:href="@{/project/issue/register(id=${issue.id})}"
-			th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">이슈 수정</a>
+	<div class="issue-page-head">
+		<a th:href="@{/project/issue/list}" class="issue-page-back">← 이슈 목록</a>
+		<h1 class="issue-page-head__title"
+			th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
+		<div class="right-area" th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
+			<a class="btn btn-primary btn-sm"
+				th:href="@{/project/issue/register(id=${issue.id})}">이슈 수정</a>
+		</div>
 	</div>
 
-	<div class="meta-grid">
+	<div class="issue-meta-grid">
 		<div class="meta-item">
-			<label>설명</label>
-			<textarea readonly th:text="${issue.description}">설명</textarea>
+			<label>상태</label>
+			<input type="text" class="form-control form-control-sm" readonly th:value="${issue.statusCd ?: '—'}" />
 		</div>
 		<div class="meta-item">
+			<label>담당자</label>
+			<input type="text" class="form-control form-control-sm" readonly th:value="${issue.memName != null ? issue.memName : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>우선순위</label>
+			<input type="text" class="form-control form-control-sm" readonly th:value="${issue.priorityCd ?: '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>진척률</label>
+			<input type="text" class="form-control form-control-sm" readonly
+				th:value="${issue.doneRatio != null ? issue.doneRatio + '%' : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>시작 예정일</label>
+			<input type="text" class="form-control form-control-sm" readonly
+				th:value="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>종료 예정일</label>
+			<input type="text" class="form-control form-control-sm" readonly
+				th:value="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : '—'}" />
+		</div>
+		<div class="meta-item">
+			<label>시작일</label>
+			<input type="text" class="form-control form-control-sm" readonly
+				th:attr="data-server-date=${issue.startDate != null ? #dates.format(issue.startDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
+		</div>
+		<div class="meta-item">
+			<label>종료일</label>
+			<input type="text" class="form-control form-control-sm" readonly
+				th:attr="data-server-date=${issue.closedDate != null ? #dates.format(issue.closedDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
+		</div>
+		<div class="meta-item meta-item--full">
 			<label>상위 이슈</label>
 			<th:block th:if="${ParentIssue != null and ParentIssue.id != null}">
 				<a class="parent-issue-link" th:href="@{/project/issue/detail(id=${ParentIssue.id})}"
@@ -534,42 +80,9 @@ table.data-table tbody td {
 			</th:block>
 			<span class="meta-empty" th:unless="${ParentIssue != null and ParentIssue.id != null}">—</span>
 		</div>
-		<div class="meta-item">
-			<label>상태</label>
-			<input type="text" readonly th:value="${issue.statusCd ?: '—'}" />
-		</div>
-		<div class="meta-item">
-			<label>담당자</label>
-			<input type="text" readonly th:value="${issue.memName != null ? issue.memName : '—'}" />
-		</div>
-		<div class="meta-item">
-			<label>시작 예정일</label>
-			<input type="text" readonly
-				th:value="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : '—'}" />
-		</div>
-		<div class="meta-item">
-			<label>종료 예정일</label>
-			<input type="text" readonly
-				th:value="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : '—'}" />
-		</div>
-		<div class="meta-item">
-			<label>시작일</label>
-			<input type="text" readonly
-				th:attr="data-server-date=${issue.startDate != null ? #dates.format(issue.startDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
-		</div>
-		<div class="meta-item">
-			<label>종료일</label>
-			<input type="text" readonly
-				th:attr="data-server-date=${issue.closedDate != null ? #dates.format(issue.closedDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
-		</div>
-		<div class="meta-item">
-			<label>우선순위</label>
-			<input type="text" readonly class="short" th:value="${issue.priorityCd ?: '—'}" />
-		</div>
-		<div class="meta-item">
-			<label>진척률</label>
-			<input type="text" readonly class="short"
-				th:value="${issue.doneRatio != null ? issue.doneRatio + '%' : '—'}" />
+		<div class="meta-item meta-item--full">
+			<label>설명</label>
+			<textarea class="form-control" readonly th:text="${issue.description}">설명</textarea>
 		</div>
 	</div>
 
@@ -608,11 +121,11 @@ table.data-table tbody td {
 	</div>
 
 	<div class="tab-row" role="tablist">
-		<button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="comments">
+		<button type="button" class="tab-btn btn btn-info btn-sm text-white is-active" role="tab" aria-selected="true" data-tab="comments">
 			댓글 <span class="badge-count" id="commentCountBadge">0</span>
 		</button>
-		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="related">연관된 이슈</button>
-		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="history" th:if="${@prjAuth.hasRole('ROLE_HISTORY_VIEW')}">히스토리</button>
+		<button type="button" class="tab-btn btn btn-outline-info btn-sm" role="tab" aria-selected="false" data-tab="related">연관된 이슈</button>
+		<button type="button" class="tab-btn btn btn-outline-info btn-sm" role="tab" aria-selected="false" data-tab="history" th:if="${@prjAuth.hasRole('ROLE_HISTORY_VIEW')}">히스토리</button>
 	</div>
 
 	<div class="tab-panel-wrap" id="tabPanels">
@@ -625,13 +138,13 @@ table.data-table tbody td {
 			<div class="comment-form-wrap">
 				<div class="reply-hint-row" id="replyHintRow" hidden>
 					<span id="replyHintText"></span>
-					<button type="button" id="cancelReplyBtn">답글 취소</button>
+					<button type="button" class="btn btn-danger btn-sm" id="cancelReplyBtn">답글 취소</button>
 				</div>
 				<form class="comment-form" id="issueCommentForm" th:data-issue-id="${issue.id}">
 					<input type="hidden" name="issueId" th:value="${issue.id}" />
 					<input type="hidden" name="parentId" id="commentParentId" value="" />
 					<textarea name="content" placeholder="댓글 내용" required></textarea>
-					<button type="submit">등록</button>
+					<button type="submit" class="btn btn-primary btn-sm">등록</button>
 				</form>
 			</div>
 		</div>
@@ -1137,7 +650,7 @@ table.data-table tbody td {
 			var content = escapeHtml(comment.content || '').replace(/\r?\n/g, '<br>');
 			var replyButton = comment.id != null
 				? '<div class="comment-actions">'
-					+ '<button type="button" class="btn-reply" data-comment-id="' + escapeHtml(comment.id)
+					+ '<button type="button" class="btn btn-info btn-sm btn-reply" data-comment-id="' + escapeHtml(comment.id)
 					+ '" data-comment-num="' + (index + 1) + '">댓글달기</button>'
 				+ '</div>'
 				: '';
@@ -1384,7 +897,7 @@ table.data-table tbody td {
 <th:block th:if="${issue != null}">
 <script th:inline="javascript">
 /*<![CDATA[*/
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
 	var allChildIssues = /*[[${childIssueList}]]*/ [];
 	if (!Array.isArray(allChildIssues)) {
 		allChildIssues = [];
@@ -1437,7 +950,7 @@ table.data-table tbody td {
 			}
 		]
 	});
-})();
+});
 /*]]>*/
 </script>
 </th:block>

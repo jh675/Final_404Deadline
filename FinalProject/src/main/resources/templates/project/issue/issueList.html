@@ -15,518 +15,20 @@
   -->
   <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
   <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+  <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+  <link rel="stylesheet" th:href="@{/css/project/issue.css}" />
   <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
   <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-
-<style>
-/* 검색 영역 */
-.search-area {
-	display: flex;
-	flex-wrap: nowrap;
-	align-items: center;
-	gap: 12px;
-	padding-bottom: 20px;
-	border-bottom: 1px solid #eee;
-	margin-bottom: 20px;
-	overflow-x: auto;
-}
-
-.search-item {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	flex-shrink: 0;
-}
-
-.search-item label {
-	font-weight: 600;
-	font-size: 13px;
-	color: #555;
-	white-space: nowrap;
-}
-
-.search-item select, .search-item input[type="text"] {
-	height: 32px;
-	padding: 0 8px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	font-size: 13px;
-	background-color: #fff;
-	min-width: 90px;
-}
-
-.search-item input[type="text"] {
-	min-width: 160px;
-}
-
-.checkbox-item {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	font-size: 13px;
-	white-space: nowrap;
-	flex-shrink: 0;
-}
-
-.search-btn {
-	height: 32px;
-	padding: 0 16px;
-	background-color: #5b6cff;
-	color: #fff;
-	border: none;
-	border-radius: 4px;
-	font-size: 13px;
-	cursor: pointer;
-	font-weight: 600;
-	white-space: nowrap;
-	flex-shrink: 0;
-}
-
-.search-btn:hover {
-	background-color: #4956d8;
-}
-
-.search-cancel-btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	height: 32px;
-	padding: 0 16px;
-	background-color: #fff;
-	color: #555;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	font-size: 13px;
-	cursor: pointer;
-	font-weight: 600;
-	white-space: nowrap;
-	flex-shrink: 0;
-	text-decoration: none;
-}
-
-.search-cancel-btn:hover {
-	background-color: #f5f5f5;
-	color: #333;
-}
-
-.right-area {
-	margin-left: auto;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	flex-shrink: 0;
-}
-
-/* TOAST UI Grid 컨테이너 */
-#grid {
-	margin-top: 8px;
-}
-
-.issue-register-actions {
-	margin-top: 18px;
-	text-align: right;
-	display: flex;
-	justify-content: flex-end;
-	gap: 10px;
-}
-
-.issue-register-btn {
-	display: inline-block;
-	padding: 10px 22px;
-	background-color: #5b6cff;
-	color: #fff;
-	border: none;
-	border-radius: 4px;
-	font-size: 14px;
-	font-weight: 600;
-	text-decoration: none;
-	cursor: pointer;
-}
-
-.issue-register-btn:hover {
-	background-color: #4956d8;
-	color: #fff;
-}
-
-.issue-pivot-btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 10px 18px;
-	background-color: #fff;
-	color: #444;
-	border: 1px solid #c8cce8;
-	border-radius: 4px;
-	font-size: 14px;
-	font-weight: 700;
-	text-decoration: none;
-	cursor: pointer;
-}
-
-.issue-pivot-btn:hover {
-	background-color: #f5f6ff;
-	border-color: #5b6cff;
-	color: #3d44a8;
-}
-
-.issue-date-actions {
-	display: flex;
-	justify-content: flex-end;
-	align-items: center;
-	gap: 4px;
-}
-
-.issue-date-btn {
-	height: 26px;
-	padding: 0 8px;
-	border: 1px solid #c8cce8;
-	border-radius: 4px;
-	background-color: #f5f6ff;
-	color: #4a5080;
-	font-size: 11px;
-	font-weight: 600;
-	cursor: pointer;
-	white-space: nowrap;
-}
-
-.issue-date-btn:hover {
-	background-color: #e8ebff;
-	border-color: #5b6cff;
-	color: #3d44a8;
-}
-
-.issue-date-btn:disabled {
-	background-color: #f0f0f0;
-	border-color: #ddd;
-	color: #999;
-	cursor: not-allowed;
-	opacity: 0.75;
-}
-
-.issue-date-btn:disabled:hover {
-	background-color: #f0f0f0;
-	border-color: #ddd;
-	color: #999;
-}
-
-/* 일괄 선택 · 빠른수정 */
-.issue-bulk-bar {
-	display: none;
-	align-items: center;
-	gap: 12px;
-	flex-wrap: wrap;
-	margin: 12px 0 8px;
-	padding: 10px 14px;
-	background: #eef0ff;
-	border: 1px solid #d8dcff;
-	border-radius: 6px;
-	font-size: 13px;
-	color: #333;
-}
-
-.issue-bulk-bar.is-visible {
-	display: flex;
-}
-
-.issue-bulk-bar .bulk-count {
-	font-weight: 700;
-	color: #3d44a8;
-}
-
-.issue-bulk-btn {
-	height: 32px;
-	padding: 0 16px;
-	border: none;
-	border-radius: 4px;
-	font-size: 13px;
-	font-weight: 600;
-	cursor: pointer;
-	white-space: nowrap;
-}
-
-.issue-bulk-btn-primary {
-	background: #5b6cff;
-	color: #fff;
-}
-
-.issue-bulk-btn-primary:hover:not(:disabled) {
-	background: #4956d8;
-}
-
-.issue-bulk-btn-primary:disabled {
-	background: #b8bdf5;
-	cursor: not-allowed;
-}
-
-.issue-bulk-btn-ghost {
-	background: #fff;
-	color: #555;
-	border: 1px solid #ccc;
-}
-
-.issue-bulk-btn-ghost:hover {
-	background: #f5f5f5;
-}
-
-.issue-quick-btn {
-	height: 26px;
-	padding: 0 10px;
-	border: 1px solid #c8cce8;
-	border-radius: 4px;
-	background: #fff;
-	color: #4a5080;
-	font-size: 11px;
-	font-weight: 600;
-	cursor: pointer;
-	white-space: nowrap;
-}
-
-.issue-quick-btn:hover {
-	background: #f5f6ff;
-	border-color: #5b6cff;
-	color: #3d44a8;
-}
-
-.issue-row-check {
-	width: 16px;
-	height: 16px;
-	cursor: pointer;
-	accent-color: #5b6cff;
-}
-
-/* 빠른수정 모달 */
-.issue-quick-modal-backdrop {
-	display: none;
-	position: fixed;
-	inset: 0;
-	z-index: 1200;
-	background: rgba(0, 0, 0, 0.4);
-	align-items: center;
-	justify-content: center;
-	padding: 16px;
-}
-
-.issue-quick-modal-backdrop.is-open {
-	display: flex;
-}
-
-.issue-quick-modal {
-	width: 100%;
-	max-width: 440px;
-	background: #fff;
-	border-radius: 8px;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-	overflow: hidden;
-}
-
-.issue-quick-modal-head {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 16px 20px;
-	border-bottom: 1px solid #eee;
-}
-
-.issue-quick-modal-head h2 {
-	margin: 0;
-	font-size: 17px;
-	font-weight: 700;
-	color: #222;
-}
-
-.issue-quick-modal-close {
-	border: none;
-	background: transparent;
-	font-size: 22px;
-	line-height: 1;
-	color: #888;
-	cursor: pointer;
-	padding: 0 4px;
-}
-
-.issue-quick-modal-close:hover {
-	color: #333;
-}
-
-.issue-quick-modal-body {
-	padding: 18px 20px 8px;
-}
-
-.issue-quick-field {
-	margin-bottom: 14px;
-}
-
-.issue-quick-field label {
-	display: block;
-	font-size: 12px;
-	font-weight: 600;
-	color: #555;
-	margin-bottom: 6px;
-}
-
-.issue-quick-field select {
-	width: 100%;
-	height: 36px;
-	padding: 0 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	font-size: 13px;
-	background: #fff;
-}
-
-.issue-quick-hint {
-	font-size: 12px;
-	color: #666;
-	line-height: 1.5;
-	margin: 0 0 12px;
-	padding: 10px 12px;
-	background: #f7f8fc;
-	border-radius: 4px;
-	border: 1px solid #e8e9ef;
-}
-
-.issue-quick-hint.is-warn {
-	background: #fff8e6;
-	border-color: #f0e0b0;
-	color: #7a5c00;
-}
-
-.issue-quick-target-block {
-	margin-bottom: 16px;
-	padding: 12px 14px;
-	background: #f7f8fc;
-	border: 1px solid #e8e9ef;
-	border-radius: 6px;
-}
-
-.issue-quick-target-head {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	margin-bottom: 8px;
-	font-size: 12px;
-	font-weight: 600;
-	color: #555;
-}
-
-.issue-quick-target-count {
-	color: #3d44a8;
-	font-weight: 700;
-}
-
-.issue-quick-target-list {
-	margin: 0;
-	padding: 0 0 0 18px;
-	max-height: 140px;
-	overflow-y: auto;
-	font-size: 13px;
-	color: #333;
-	line-height: 1.55;
-}
-
-.issue-quick-target-list li {
-	margin-bottom: 4px;
-	word-break: break-all;
-}
-
-.issue-quick-target-list li:last-child {
-	margin-bottom: 0;
-}
-
-.issue-quick-date-panel {
-	margin-bottom: 14px;
-	padding: 12px 14px;
-	background: #fff8e6;
-	border: 1px solid #f0e0b0;
-	border-radius: 6px;
-	font-size: 12px;
-	color: #444;
-}
-
-.issue-quick-date-summary {
-	font-weight: 700;
-	color: #7a5c00;
-	margin-bottom: 10px;
-}
-
-.issue-quick-date-section {
-	margin-top: 8px;
-}
-
-.issue-quick-date-section-title {
-	font-weight: 600;
-	font-size: 12px;
-	color: #555;
-	margin-bottom: 4px;
-}
-
-.issue-quick-date-section-title.is-ok {
-	color: #2e7d32;
-}
-
-.issue-quick-date-section-title.is-skip {
-	color: #c62828;
-}
-
-.issue-quick-date-detail-list {
-	margin: 0;
-	padding: 0 0 0 16px;
-	max-height: 100px;
-	overflow-y: auto;
-	line-height: 1.5;
-}
-
-.issue-quick-date-detail-list li {
-	margin-bottom: 6px;
-	word-break: break-all;
-}
-
-.issue-quick-date-detail-list li.issue-quick-date-excluded-item {
-	list-style: none;
-	margin-left: -16px;
-	padding-left: 0;
-}
-
-.issue-quick-date-issue {
-	display: block;
-	font-size: 13px;
-	color: #333;
-}
-
-.issue-quick-date-reason {
-	display: block;
-	font-size: 11px;
-	color: #c62828;
-	margin-top: 2px;
-}
-
-.issue-quick-date-empty {
-	list-style: none;
-	margin-left: -16px;
-	color: #888;
-	font-size: 12px;
-}
-
-.issue-quick-modal-foot {
-	display: flex;
-	justify-content: flex-end;
-	gap: 8px;
-	padding: 12px 20px 18px;
-}
-
-.issue-quick-modal-foot .issue-bulk-btn {
-	min-width: 72px;
-}
-</style>
+  <script th:src="@{/js/common/gridTheme.js}"></script>
 </th:block>
 </head>
 <body>
 <div layout:fragment="content">
 	<div class="issue-shell">
-	<div class="issue-inner">
+	<div id="wrapper">
 		<!-- 1. 검색 영역 (form 으로 감싸서 GET submit) -->
 		<form id="searchForm" th:action="@{/project/issue/list}" method="get"
-			th:object="${filter}" class="search-area">
+			th:object="${filter}" class="search-area mb-0">
 			<div class="search-item">
 				<label for="categoryCd">유형</label>
 				<select id="categoryCd" th:field="*{categoryCd}">
@@ -569,7 +71,7 @@
 				</select>
 			</div>
 
-			<div class="right-area">
+			<div class="right-area d-flex flex-wrap align-items-end gap-2">
 				<div class="search-item">
 					<label for="subject">제목</label>
 					<input type="text" id="subject" th:field="*{subject}"
@@ -581,8 +83,8 @@
 						th:checked="*{myIssue == 'Y'}" /> 내가 맡은 이슈
 				</label>
 
-				<button type="submit" class="search-btn">검색</button>
-				<a th:href="@{/project/issue/list}" class="search-cancel-btn">취소</a>
+				<button type="submit" class="btn btn-primary">검색</button>
+				<a th:href="@{/project/issue/list}" class="btn btn-secondary">취소</a>
 			</div>
 		</form>
 
@@ -590,19 +92,23 @@
 		<div id="issueBulkBar" class="issue-bulk-bar" aria-live="polite"
 			th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
 			<span class="bulk-count" id="issueBulkCount">0건 선택</span>
-			<button type="button" class="issue-bulk-btn issue-bulk-btn-primary" id="issueBulkQuickBtn" disabled>
+			<button type="button" class="btn btn-success" id="issueBulkQuickBtn" disabled>
 				빠른수정
 			</button>
-			<button type="button" class="issue-bulk-btn issue-bulk-btn-ghost" id="issueBulkClearBtn">
+			<button type="button" class="btn btn-secondary" id="issueBulkClearBtn">
 				선택 해제
 			</button>
 		</div>
 
 		<div id="grid"></div>
-		<div class="issue-register-actions">
-			<a th:href="@{/project/issue/pivot}" class="issue-pivot-btn"
-				th:if="${@prjAuth.hasRole('ROLE_ISSUE_VIEW')}">통계</a>
-			<a th:href="@{/project/issue/register}" class="issue-register-btn" th:if="${@prjAuth.hasRole('ROLE_ISSUE_CREATE')}">이슈 등록</a>
+		<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
+			<div id="issuePaginationSlot" class="flex-grow-1"></div>
+			<div class="issue-register-actions d-flex justify-content-end gap-2 mt-0 pt-0 border-0">
+			<a th:href="@{/project/issue/pivot}" class="btn btn-info"
+					th:if="${@prjAuth.hasRole('ROLE_ISSUE_VIEW')}">통계</a>
+			<a th:href="@{/project/issue/register}" class="btn btn-success"
+					th:if="${@prjAuth.hasRole('ROLE_ISSUE_CREATE')}">이슈 등록</a>
+			</div>
 		</div>
 	</div>
 	</div>
@@ -895,7 +401,7 @@
 					formatter: function (props) {
 						const id = props.row == null ? '' : props.row.id;
 						if (id == null || id === '') return '';
-						return '<button type="button" class="issue-quick-btn" data-id="' + id + '">빠른수정</button>';
+						return '<button type="button" class="btn btn-success btn-sm issue-quick-btn" data-id="' + id + '">빠른수정</button>';
 					}
 				} : null
 			].filter(Boolean);
@@ -909,8 +415,8 @@
 				scrollX: false,        // 가로 스크롤바 숨김
 				scrollY: false,        // 세로 스크롤바 숨김 (rowHeight × 행수 만큼 자동 확장)
 				bodyHeight: 'auto',    // 본문 높이를 데이터 양에 맞춰 자동 조절
-				rowHeight: 36,         // 한 행의 높이(px)
-				minBodyHeight: 100,    // 데이터 0건일 때 최소 높이(px)
+				rowHeight: 40,         // 회원/기업 목록 그리드와 동일 행 높이
+				minBodyHeight: 200,    // 데이터 0건일 때 최소 높이(px)
 
 				// ── 컬럼 정의 (가장 핵심) ─────────────────────────────
 				// 배열 순서대로 왼쪽부터 표시됨
@@ -948,6 +454,27 @@
 					//   페이지 번호 버튼을 한 번에 최대 몇 개까지 보일지 (Grid v4.14.0 이상).
 					// position: 'bottom',
 					//   페이징 바 위치. 'bottom'(기본값) | 'top'(그리드 상단).
+				}
+			});
+
+			function syncPaginationToFooter() {
+				const slot = document.getElementById('issuePaginationSlot');
+				if (!slot) return;
+				const paginationEl = gridEl.querySelector('.tui-pagination');
+				if (!paginationEl) return;
+				slot.appendChild(paginationEl);
+			}
+
+			// 초기 렌더 시 폭 계산이 살짝 어긋나 가로 스크롤이 생기는 케이스를 보정
+			requestAnimationFrame(function () {
+				if (grid && typeof grid.refreshLayout === 'function') {
+					grid.refreshLayout();
+				}
+				syncPaginationToFooter();
+			});
+			window.addEventListener('resize', function () {
+				if (grid && typeof grid.refreshLayout === 'function') {
+					grid.refreshLayout();
 				}
 			});
 
@@ -1022,8 +549,13 @@
 				grid.on('afterPageMove', function () {
 					refreshSelectColumn();
 					bindSelectHeaderClick();
+					syncPaginationToFooter();
 				});
 			}
+
+			grid.on('sort', function () {
+				syncPaginationToFooter();
+			});
 
 			/**
 			 * 행 클릭: 선택/빠른수정 컬럼은 상세 이동 안 함
