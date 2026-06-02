@@ -69,16 +69,61 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 폼 제출 시 최종 방어
-    companyRequestForm.addEventListener('submit', function(e) {
+	// 폼 제출 시 비동기 처리 및 1.5초 대기 로직
+    companyRequestForm.addEventListener('submit', async function(e) {
+        e.preventDefault(); 
+
         if (!isBizNoVerified) {
-			// 사업자 번호 중복체크를 하지 않은 경우
-            e.preventDefault();
-			reqBizNoInput.classList.remove('is-valid');
+            // 사업자 번호 중복체크를 하지 않은 경우
+            reqBizNoInput.classList.remove('is-valid');
             reqBizNoInput.classList.add('is-invalid');
             bizNoFeedback.className = 'small mt-1 text-danger';
             bizNoFeedback.textContent = '사업자번호 중복확인을 먼저 진행해주세요.';
             reqBizNoInput.focus();
+            return;
+        }
+
+        const submitBtn = document.getElementById('requestSubmitBtn');
+        const feedback = document.getElementById('requestFeedback');
+        
+        // 이중 클릭 방지
+        submitBtn.disabled = true;
+        submitBtn.textContent = '요청 중...';
+        feedback.textContent = '';
+
+        try {
+            // 폼 데이터를 모아서 fetch로 백엔드에 전송 (Thymeleaf CSRF 토큰 자동 포함)
+            const formData = new FormData(companyRequestForm);
+            const response = await fetch(companyRequestForm.action, {
+                method: 'POST',
+                body: formData 
+            });
+
+            if (response.ok) {
+                // 통신 성공 시
+                feedback.className = 'small fw-bold text-success';
+                feedback.textContent = '기업 등록 요청이 완료되었습니다. 잠시 후 창이 닫힙니다.';
+                
+                submitBtn.className = 'btn btn-success px-5 py-2 fw-semibold';
+                submitBtn.textContent = '요청 완료';
+                
+                // 1.5초 대기 후 새로고침하여 모달 닫기
+                setTimeout(() => {
+                    location.reload(); 
+                }, 1500);
+                
+            } else {
+                feedback.className = 'small fw-bold text-danger';
+                feedback.textContent = '요청 처리 중 오류가 발생했습니다.';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '등록 요청';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            feedback.className = 'small fw-bold text-danger';
+            feedback.textContent = '서버 통신 중 오류가 발생했습니다.';
+            submitBtn.disabled = false;
+            submitBtn.textContent = '등록 요청';
         }
     });
 });

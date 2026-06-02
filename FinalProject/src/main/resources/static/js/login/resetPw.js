@@ -25,6 +25,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const newPasswordCheck = document.querySelector('#newPasswordCheck');
     const passwordError = document.querySelector('#passwordError');
     const resultMsg = document.querySelector('#resultMsg');
+	
+	const resetPwTimerDisplay = document.querySelector('#resetPwTimerDisplay'); // 타이머 UI 변수
+    let pwVerifyTimer = null; // 타이머 변수
+
+    // 타이머 함수
+    function startPwVerifyTimer(durationInSeconds) {
+        if (pwVerifyTimer) clearInterval(pwVerifyTimer);
+        
+        resetPwTimerDisplay.classList.remove('d-none');
+        verifyNum.disabled = false;
+
+        const endTime = Date.now() + (durationInSeconds * 1000);
+
+        function updateTimer() {
+            const timeLeft = Math.max(0, endTime - Date.now());
+            const totalSeconds = Math.ceil(timeLeft / 1000);
+
+            const m = Math.floor(totalSeconds / 60);
+            const s = totalSeconds % 60;
+            resetPwTimerDisplay.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(pwVerifyTimer);
+                
+                // 타임아웃 UI 처리
+                verifyNum.disabled = true;
+                verifyBtn.disabled = true;
+                sendBtn.disabled = false;
+                sendBtn.textContent = '재인증 요청';
+                
+                showMessage('인증 시간이 만료되었습니다. 다시 요청해주세요.', 'danger');
+            }
+        }
+        updateTimer();
+        pwVerifyTimer = setInterval(updateTimer, 500); 
+    }
 
     // 기업 검색 및 자동완성 로직
     let resetDebounceTimer;
@@ -71,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	
 	resetCompanyNameInput.addEventListener('blur', function() {
 	    // 포커스를 잃는 순간, 검색 0.3초 대기 타이머를 강제로 취소
-	    clearTimeout(debounceTimer);
+	    clearTimeout(resetDebounceTimer);
 	    
 	    // 드롭다운 닫기
 	    resetCompanyDropdown.style.display = 'none';
@@ -141,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showMessage('인증번호가 발송되었습니다.', 'success');
                 verifyArea.classList.remove('d-none');
                 verifyBtn.disabled = false;
+				startPwVerifyTimer(180); // 타이머 시작
             } else if (result === 'no_user') {
                 showMessage('회원정보가 일치하지 않습니다.', 'danger');
             } else {
@@ -178,6 +215,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.text();
             
             if (result === 'success') {
+				//타이머 종료
+				clearInterval(pwVerifyTimer);
+                resetPwTimerDisplay.classList.add('d-none');
+                verifyNum.disabled = true; // 성공한 인증번호 변경 불가 처리
+				
                 passwordArea.classList.remove('d-none');
                 confirmBtn.classList.remove('d-none');
                 verifyBtn.textContent = '인증완료';
@@ -260,9 +302,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.text();
 
-            if (result === 'success') {
-                showResultmsg('비밀번호가 변경되었습니다.');
+			if (result === 'success') {
+                showResultmsg('비밀번호가 성공적으로 변경되었습니다. 잠시 후 창이 닫힙니다.');
                 confirmBtn.disabled = true;
+                
+                // 1.5초 대기 후 화면 새로고침하여 모달 닫기 및 초기화
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
                 showResultmsg('비밀번호 변경에 실패했습니다.');
                 confirmBtn.disabled = false;
@@ -278,8 +325,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 모달 초기화
     const resetPwModal = document.querySelector('#resetPwModal');
     resetPwModal.addEventListener('hidden.bs.modal', () => {
+		// 타이머 초기화
+		if (pwVerifyTimer) clearInterval(pwVerifyTimer);
+        resetPwTimerDisplay.classList.add('d-none');
+        verifyNum.disabled = false;
         
-        // ⭐ 새로 추가된 인풋들 및 드롭다운 초기화
+		// 새로 추가된 인풋들 및 드롭다운 초기화
         resetCompanyNameInput.value = '';
         resetBizNo.value = '';
         resetCompanyDropdown.innerHTML = '';

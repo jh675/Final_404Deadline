@@ -6,7 +6,6 @@
     <meta charset="UTF-8">
     <title>위키</title>
     <th:block layout:fragment="head-content">
-        <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.css" />
         <style>
             .wiki-page {
                 font-family: "Malgun Gothic", "맑은 고딕", -apple-system, sans-serif;
@@ -376,7 +375,7 @@
                 markdown = WikiLinkAutocomplete.expandInternalLinks(markdown);
             }
 
-            new toastui.Editor({
+            new toastui.Editor.factory({
                 el: el,
                 viewer: true,
                 height: 'auto',
