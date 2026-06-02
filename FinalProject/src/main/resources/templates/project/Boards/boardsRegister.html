@@ -27,7 +27,7 @@
         <div class="card form-card-mini p-4">
             <form th:action="${boards.id != null and boards.id != 0} ? @{/project/boards/modify} : @{/project/boards/insert}" 
                   th:object="${boards}" 
-                  method="post">
+                  method="post">	
                 
                 <input type="hidden" th:field="*{id}" />
                 <input type="hidden" name="prjId" th:value="${boards.prjId != null ? boards.prjId : 4}" />

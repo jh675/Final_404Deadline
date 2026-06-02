@@ -21,7 +21,7 @@ public class MessagesController {
     @Autowired private BoardsService boardsService;
     @Autowired private AttachService attachService;
 
-    // 1. 목록 및 상세 보기
+    // 목록,상세보기
     @GetMapping("/list")
     public String list(Model model, @RequestParam("boardId") Long boardId, 
                        @RequestParam(value = "id", required = false) Long id, 
@@ -54,7 +54,7 @@ public class MessagesController {
         return "project/messages/messagesList";
     }
 
-    // 2. 등록 폼
+    // 등록 폼
     @GetMapping("/register")
     public String registerForm(Model model, @RequestParam("boardId") Long boardId,
                                @RequestParam(value = "parentId", required = false) Long parentId) {
@@ -66,7 +66,7 @@ public class MessagesController {
         return "project/messages/messagesRegister";
     }
 
-    // 3. 데이터 삽입 및 첨부파일 처리
+    // 데이터 삽입
     @PostMapping("/insert")
     public String insert(@ModelAttribute MessagesVO messages, 
                          @RequestPart(value="attachments", required = false) MultipartFile[] attachments) {
@@ -77,7 +77,7 @@ public class MessagesController {
         return "redirect:/project/messages/list?boardId=" + messages.getBoardId();
     }
 
-    // 4. 수정 폼
+    // 수정 폼
     @GetMapping("/modify")
     public String modifyForm(Model model, @RequestParam("id") Long id) {
         MessagesVO message = messagesService.selectOne(id);
@@ -86,15 +86,15 @@ public class MessagesController {
         return "project/messages/messagesRegister";
     }
 
-    // 5. 업데이트
+    // 업데이트
     @PostMapping({"/modify", "/update"})
     public String modify(@ModelAttribute MessagesVO messages) {
         messagesService.update(messages);
         return "redirect:/project/messages/list?boardId=" + messages.getBoardId();
     }
 
-    // 6. 삭제
-    @GetMapping("/delete")
+ // 삭제
+    @RequestMapping(value = "/delete", method = {RequestMethod.GET, RequestMethod.POST})
     public String delete(@RequestParam("id") Long id, @RequestParam("boardId") Long boardId) {
         messagesService.delete(id);
         return "redirect:/project/messages/list?boardId=" + boardId;
