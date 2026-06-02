@@ -374,6 +374,7 @@
 		
 		}
 		function loadEvents(typeCd = '') {
+		const loginMemId = /*[[${#authentication.principal.id}]]*/ null;
     	csrfFetch(`/calendar/listJson?typeCd=${typeCd}`, { 
             headers: { 'X-Requested-With': 'XMLHttpRequest' } 
         })
@@ -386,9 +387,9 @@
                 calendarId: item.typeCd === '01CALTYPE' ? 'personal' 
                           : item.typeCd === '02CALTYPE' ? 'group' 
                           : item.typeCd === '03CALTYPE' ? 'company' : 'personal',
-                title: item.sharingCd === '01CALSHARE'
-                       ? `[${item.memName || '알수없음'}] ${item.calText || '제목없음'}`
-                       : item.calText || '제목없음',
+                        		  title: (item.sharingCd === '01CALSHARE' && item.memId != loginMemId)
+                                  ? `[${item.memName || '알수없음'}] ${item.calText || '제목없음'}`
+                                  : item.calText || '제목없음',
                 start: item.calStart.replace('T', ' ').split('.')[0],          
                 end: item.calEnd.replace('T', ' ').split('.')[0],
                 extendedProps: {
@@ -503,8 +504,8 @@
         // 시작/종료시간 드롭 박스에서 선택 한 날짜 가져오기 
         const startDate = document.getElementById('ins_startDate').value;
         const endDate = document.getElementById('ins_endDate').value;
-        const startTime = document.getElementById('ins_calStart').value || '09:00:00';
-        const endTime = document.getElementById('ins_calEnd').value || '18:00:00';
+        const startTime = document.getElementById('ins_calStart').value;
+        const endTime = document.getElementById('ins_calEnd').value;
 		const checkedRadio = document.querySelector('input[name="sharingCd"]:checked');
         const sharingCd = checkedRadio ? checkedRadio.value : '02CALSHARE';
         // 등록 시 시간 표시 (선택한 날짜 + 시간)
@@ -601,8 +602,11 @@
 	        const timeParts = timeValue.split(':');
 	        const hour = parseInt(timeParts[0]);
 	        const min = timeParts[1];
+	        
 	        const ampm = hour >= 12 ? '오후' : '오전';
-	        const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+	        const displayHour = hour === 0 ? 12 
+	        				  : hour > 12 ? hour - 12
+	        				  : hour;
 	        const displayHourStr = String(displayHour).padStart(2, '0');
 	        
 	        const optionText = `${ampm} ${displayHourStr}:${min}`;
@@ -719,7 +723,7 @@
         const sharingCd = checkedRadio ? checkedRadio.value : ''; 
         
         if(!id || !place || !startDate || !endDate || !startTime || !endTime || !typeCd ||!calType) {
-            showAlert('내용을 모두 입력해주세요(일정 유형 및 시/분 선택 포함)');
+            showAlert('내용을 모두 입력해주세요(일정 유형 및 시/분 선택 포함)', 'updateModalOverlay');
             return;
         }
     
@@ -898,33 +902,46 @@
 	    
 	}
  
-	// 3) 일정 등록, 수정, 삭제 시 안내 매세지 모달창 
+		// 3) 일정 등록, 수정, 삭제 시 안내 매세지 모달창 
 		function showAlert(msg, returnModalId = null) {
 	    const alertTarget = document.getElementById('alertMsg');
-	    
+	
 	    if (alertTarget) {
-	        // 태그가 정상적으로 존재하면 모달창 텍스트 세팅 후 모달 오픈
 	        alertTarget.textContent = msg;
-	        
-	        // 프로젝트에서 사용하는 부트스트랩 모달 오픈 방식 적용
-	         const alertModalEl = document.getElementById('alertModalOverlay');
-	         const alertModal =  bootstrap.Modal.getOrCreateInstance(alertModalEl);
-	         alertModal.show();
-	        
-	        
-	      // 등록 모달 닫힐 때 캘린더 선택 영역 초기화
-	         alertModalEl.addEventListener('hidden.bs.modal', function handler() {
-	             alertModalEl.removeEventListener('hidden.bs.modal', handler);
-	             if (returnModalId) {
-	                 openModal(returnModalId);
-	             }
-	         });
-	         
-	     } else {
-	         alert(msg);
-	     }
-	 }
-
+	
+	        const alertModalEl = document.getElementById('alertModalOverlay');
+	
+	        if (returnModalId) {
+	            // 등록 모달 먼저 닫기
+	            const returnModalEl = document.getElementById(returnModalId);
+	            const returnModalInstance = bootstrap.Modal.getInstance(returnModalEl);
+	            if (returnModalInstance) {
+	                returnModalInstance.hide();
+	            }
+	
+	            // 등록 모달 닫힌 후 alert 열기
+	            returnModalEl.addEventListener('hidden.bs.modal', function handler() {
+	                returnModalEl.removeEventListener('hidden.bs.modal', handler);
+	                const alertModal = bootstrap.Modal.getOrCreateInstance(alertModalEl);
+	                alertModal.show();
+	
+	                // alert 닫힌 후 등록 모달 다시 열기
+	                alertModalEl.addEventListener('hidden.bs.modal', function alertHandler() {
+	                    alertModalEl.removeEventListener('hidden.bs.modal', alertHandler);
+	                    setTimeout(() => openModal(returnModalId), 100);
+	                });
+	            });
+	
+	        } else {
+	            // returnModalId 없을 때는 그냥 alert만 열기
+	            const alertModal = bootstrap.Modal.getOrCreateInstance(alertModalEl);
+	            alertModal.show();
+	        }
+	
+	    } else {
+	        alert(msg);
+	    }
+	}
     // 4) 일정 삭제 시 확인 모달창  
     function confirmDelete() {
     // closeModal 대신 그냥 숨기기만 하고 backdrop은 유지

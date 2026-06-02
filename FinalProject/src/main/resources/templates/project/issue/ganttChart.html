@@ -241,6 +241,10 @@
 		    	}
 			};
 			
+			// 간트차트 막대 클릭 시 나오는 팝업창 안열리게 설정 
+			gantt.config.details_on_dblclick = false; // 더블클릭 시 팝업 끄기
+			gantt.config.allow_click_for_details = false; // 클릭 시 팝업 끄기
+
 			// 4) 초기화 
 			gantt.init("gantt_here");
 			
