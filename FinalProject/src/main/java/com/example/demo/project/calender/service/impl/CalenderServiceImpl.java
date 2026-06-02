@@ -38,20 +38,11 @@ public class CalenderServiceImpl implements CalenderService{
   
   @Override
   public int insert(CalenderVO vo) {
-	  
-	  
 	    if ("03CALTYPE".equals(vo.getTypeCd())) {
-	        System.out.println("=== 회사일정 감지!");
-
 	        String bizNo = calenderMapper.findBizNoByMemId(vo.getMemId().longValue());
-	       
-	       
 	        if (bizNo != null) {
 	            List<String> usernames = calenderMapper.findUsernamesByBizNo(bizNo);
-	            System.out.println("=== 대상 usernames: " + usernames);
-
 	            usernames.forEach(username -> {
-	                System.out.println("=== 알림 전송 → " + username);
 	                eventPublisher.publishEvent(new NotificationEvent(
 	                    this,
 	                    "회사 일정이 등록되었습니다: " + vo.getCalText(),

@@ -1,7 +1,5 @@
 package com.example.demo.project.issue.controller;
 
-import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.login.service.UserVO;
@@ -48,8 +44,6 @@ public class IssueRestController {
 		try {
 			return ResponseEntity.ok(issueService.getComment(issueId));
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
 	}
@@ -59,8 +53,6 @@ public class IssueRestController {
 		try {
 			return ResponseEntity.ok(issueService.getRelationIssue(issueId));
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
 	}
@@ -69,12 +61,9 @@ public class IssueRestController {
 		try {
 			return ResponseEntity.ok(issueService.getHistory(issueId));
 		} catch (Exception e) {
-			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
 	}
-	
-	
 
 	@PostMapping("/{issueId}/comments")
 	public ResponseEntity<Map<String, Object>> createComment(@PathVariable("issueId") Long issueId,
@@ -97,7 +86,7 @@ public class IssueRestController {
 		input.setContent(content);
 		input.setMemId(loginUser.getId());
 
-		int inserted = issueService.insertComment(input);
+		Long inserted = issueService.insertComment(input);
 		if (inserted <= 0) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Map.of("ok", false, "message", "댓글 등록에 실패했습니다."));
@@ -120,14 +109,6 @@ public class IssueRestController {
 		if(count == null) {
 			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
 		}
-//		int updated = issueService.updateIssueStartDate(id);
-//		if (updated <= 0) {
-//			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
-//		}
-//		Map<String, Object> body = new LinkedHashMap<>();
-//		body.put("ok", true);
-//		body.put("id", id);
-//		body.put("registeredAt", new Date());
 		return ResponseEntity.ok(Map.of("ok", true, "message", count+"개의 이슈의의 시작일이 등록되었습니다."));
 	}
 

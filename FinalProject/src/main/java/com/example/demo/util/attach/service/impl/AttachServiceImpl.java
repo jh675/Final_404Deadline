@@ -51,7 +51,7 @@ public class AttachServiceImpl implements AttachService {
 			}
 
 		} catch (Exception e) {
-			System.err.println(e);
+			log.error("첨부파일 등록 실패", e);
 			return 0;
 		}
 		return 1;

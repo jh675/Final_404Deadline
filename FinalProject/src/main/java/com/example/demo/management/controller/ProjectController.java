@@ -228,11 +228,7 @@ public class ProjectController {
 	
 	@PostMapping("/management/restoration")
 	public String reproject(ProjectVO vo,RedirectAttributes redirectAttributes) {
-		
-		System.out.println("전달받은 id: " + vo.getId());
-	    System.out.println("전달받은 prjIdentifier: " + vo.getPrjIdentifier());
 		int result = projectservice.reproject(vo);
-		System.out.println("업데이트 결과: " + result);
 	    if (result == 0) {
 	        // 중복으로 업데이트 차단된 경우
 	        redirectAttributes.addFlashAttribute("errorMsg", "이미 사용중인 식별자입니다.");

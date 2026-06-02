@@ -31,8 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberMapper memberMapper;
-    private final ApplicationEventPublisher eventPublisher; // ← 추가
-    private final GroupMapper groupMapper;                  // ← 추가
+    private final ApplicationEventPublisher eventPublisher;
+    private final GroupMapper groupMapper;
     private final ProjectMapper projectMapper;
 
     @Override
@@ -100,7 +100,6 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public int registerMembers(Long prjId, List<Long> userIds, Long grpId) {
-    	System.out.println("=== registerMembers 호출됨");
         if (prjId == null) {
             throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
         }
@@ -128,25 +127,19 @@ public class MemberServiceImpl implements MemberService {
         }
 
         memberMapper.insertMembers(uniqueIds, grpId);
-        
-        
-     // ✅ 추가된 유저들에게 각각 알림
+
         ProjectVO project = projectMapper.getprojectid(prjId);
         GroupDetailVO group = groupMapper.selectGroupDetail(prjId, grpId);
         String prjName = project != null ? project.getPrjName() : "알 수 없음";
         String grpName = group != null ? group.getGrpName() : "알 수 없음";
 
-        System.out.println("=== project: " + (project != null ? project.getPrjName() : "null")); // ← 추가
-        System.out.println("=== group: " + (group != null ? group.getGrpName() : "null")); //
         uniqueIds.forEach(uid -> {
-            String loginId = memberMapper.findLoginById(uid); // ← login 아이디 조회
-            System.out.println("=== loginId: " + loginId);
+            String loginId = memberMapper.findLoginById(uid);
             if (loginId != null) {
                 eventPublisher.publishEvent(new NotificationEvent(
                     this,
                     "프로젝트 그룹에 참여되었습니다: [" + prjName + "] " + grpName,
-                    loginId // ← 숫자 uid 대신 loginId 전송
-                ));
+                    loginId));
             }
         });
         return uniqueIds.size();
