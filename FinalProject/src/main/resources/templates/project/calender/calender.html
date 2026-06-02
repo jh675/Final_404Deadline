@@ -145,6 +145,14 @@
 .toastui-calendar-see-more-container {
 	height: 200px !important;
 }
+
+#alertModalOverlay {
+	z-index: 1070 !important;
+}
+
+#alertModalOverlay+.modal-backdrop {
+	z-index: 1065 !important;
+}
 </style>
 
 
@@ -315,8 +323,8 @@
 		</div>
 		<!-- modal fade 끝 -->
 
-		<div th:replace="~{project/calender/modal/calenderAdd}"></div>
-
+		<div
+			th:replace="~{project/calender/modal/calenderAdd :: calenderAddModal}"></div>
 		<script
 			src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
 		<script th:inline="javascript">
@@ -378,7 +386,9 @@
                 calendarId: item.typeCd === '01CALTYPE' ? 'personal' 
                           : item.typeCd === '02CALTYPE' ? 'group' 
                           : item.typeCd === '03CALTYPE' ? 'company' : 'personal',
-                title: item.calText || '제목없음',
+                title: item.sharingCd === '01CALSHARE'
+                       ? `[${item.memName || '알수없음'}] ${item.calText || '제목없음'}`
+                       : item.calText || '제목없음',
                 start: item.calStart.replace('T', ' ').split('.')[0],          
                 end: item.calEnd.replace('T', ' ').split('.')[0],
                 extendedProps: {
@@ -398,7 +408,8 @@
             // 캘린더에 공휴일 일정 불러오기 
             return loadHoliday(calendar.getDate().getFullYear());
  
-        });
+        })
+    	.catch (err => console.error('일정 로드 실패: ', err));
     }
     
 
@@ -512,9 +523,15 @@
         const colorTagCd = colortag[typeCd] || '';
  
         // 필수값 모두 입력 안내 
-        if (!place || !typeCd || !calStart || !calEnd) {
-            showAlert('필수값 모두 입력해 주세요');
+        if (!place || !typeCd || !calType ||!calStart || !calEnd) {
+            showAlert('내용을 모두 입력해 주세요', 'insertModalOverlay');
             return;
+        }
+        
+        // 날짜 선택 시 유효성 검사 
+        if(new Date(startDate) > new Date(endDate)) {
+			showAlert('종료일이 시작일보다 빠른 날은 선택 불가')
+        	return;
         }
  
         // 등록 시 입력 받은 데이터 하나로 묶기 
@@ -713,7 +730,7 @@
         const calEnd = `${endDate} ${finalEnd}`;
     
         csrfFetch('/calendar/update', {
-            method: 'PUT',
+            method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `id=${id}&place=${encodeURIComponent(place)}&calText=${encodeURIComponent(calText)}&typeCd=${typeCd}&calType=${calType}&calStart=${encodeURIComponent(calStart)}&calEnd=${encodeURIComponent(calEnd)}&sharingCd=${sharingCd}`
         })
@@ -743,7 +760,7 @@
 		    }
 		
 		    csrfFetch('/calendar/delete', {
-		        method: 'DELETE',
+		        method: 'POST',
 		        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 		        body: `id=${id}`
 		    })
@@ -758,24 +775,18 @@
 		        return res.text();
 		    })
 		    .then(() => {
-		    	  setTimeout(() => {
 		    	        // 모든 모달 강제 닫기
 		    	        document.querySelectorAll('.modal').forEach(modal => {
 		    	            const instance = bootstrap.Modal.getInstance(modal);
 		    	            if (instance) instance.hide();
-		    	            modal.classList.remove('show');
-		    	            modal.style.display = 'none';
-		    	            modal.setAttribute('aria-hidden', 'true');
-		    	            modal.removeAttribute('aria-modal');
 		    	        });
 		    	        // backdrop 강제 제거
 		    	        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
 		    	        document.body.classList.remove('modal-open');
 		    	        document.body.style.removeProperty('padding-right');
 
-		    	        showAlert('일정이 삭제되었습니다.');
 		    	        loadEvents();
-		    	    }, 400);
+		    	        showAlert('일정이 삭제되었습니다.');    	   
 		    })
 		    .catch(err => {
 		        console.error(err);
@@ -888,7 +899,7 @@
 	}
  
 	// 3) 일정 등록, 수정, 삭제 시 안내 매세지 모달창 
-		function showAlert(msg) {
+		function showAlert(msg, returnModalId = null) {
 	    const alertTarget = document.getElementById('alertMsg');
 	    
 	    if (alertTarget) {
@@ -896,15 +907,23 @@
 	        alertTarget.textContent = msg;
 	        
 	        // 프로젝트에서 사용하는 부트스트랩 모달 오픈 방식 적용
-	        // 예: openModal('alertModalOverlay'); 또는 새 부트스트랩 인스턴스 생성
-	        const alertModal = new bootstrap.Modal(document.getElementById('alertModalOverlay'));
-	        alertModal.show();
-	    } else {
-	        // [안전 장치] 만약 HTML 구조 문제로 alertMsg를 못 찾으면 기본 브라우저 알림창을 띄웁니다.
-	        alert(msg);
-	    }
-	}
-       
+	         const alertModalEl = document.getElementById('alertModalOverlay');
+	         const alertModal =  bootstrap.Modal.getOrCreateInstance(alertModalEl);
+	         alertModal.show();
+	        
+	        
+	      // 등록 모달 닫힐 때 캘린더 선택 영역 초기화
+	         alertModalEl.addEventListener('hidden.bs.modal', function handler() {
+	             alertModalEl.removeEventListener('hidden.bs.modal', handler);
+	             if (returnModalId) {
+	                 openModal(returnModalId);
+	             }
+	         });
+	         
+	     } else {
+	         alert(msg);
+	     }
+	 }
 
     // 4) 일정 삭제 시 확인 모달창  
     function confirmDelete() {
