@@ -515,6 +515,7 @@ document.addEventListener("DOMContentLoaded", function () {
           var pendingGroups = [];
           window.__rolePendingGroupsRef = pendingGroups;
           var grpRoleCount = 0;
+          var roleRevokeInProgress = false;
           var roleGroupsGrid = null;
           var allPickGroups = [];
           var pickGrid = null;
@@ -1017,6 +1018,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (isRegisterMode) return;
             if (roleEditMode) return;
             if (!roleGroupsGrid) return;
+            if (roleRevokeInProgress) return;
             if (ev.columnName === "grpName") {
               var navRow = roleGroupsGrid.getRow(ev.rowKey);
               var navGid =
@@ -1031,31 +1033,38 @@ document.addEventListener("DOMContentLoaded", function () {
               return;
             }
             if (ev.columnName !== "revoke") return;
+            if (ev.nativeEvent && ev.nativeEvent.stopPropagation) {
+              ev.nativeEvent.stopPropagation();
+            }
             var row = roleGroupsGrid.getRow(ev.rowKey);
             if (!row || row.id == null) return;
 
+            roleRevokeInProgress = true;
             var grpId = Number(row.id);
             var apiRoleCd = Number(rc);
             var grpName = row.grpName || "해당 그룹";
-            if (isNaN(grpId) || isNaN(apiRoleCd)) return;
-
-            var firstOk = await confirmModal(
-              '"' +
-                grpName +
-                '" 그룹에서 이 권한을 회수하시겠습니까?',
-              "권한 회수 확인",
-            );
-            if (!firstOk) return;
-
-            var deleteRoleIfUnused = false;
-            if (grpRoleCount <= 1) {
-              deleteRoleIfUnused = await confirmModal(
-                "이 권한을 사용하는 그룹이 더 이상 없습니다.\n권한(역할) 자체를 삭제하시겠습니까?",
-                "권한 삭제 확인",
-              );
+            if (isNaN(grpId) || isNaN(apiRoleCd)) {
+              roleRevokeInProgress = false;
+              return;
             }
 
             try {
+              var firstOk = await confirmModal(
+                '"' +
+                  grpName +
+                  '" 그룹에서 이 권한을 회수하시겠습니까?',
+                "권한 회수 확인",
+              );
+              if (!firstOk) return;
+
+              var deleteRoleIfUnused = false;
+              if (grpRoleCount <= 1) {
+                deleteRoleIfUnused = await confirmModal(
+                  "이 권한을 사용하는 그룹이 더 이상 없습니다.\n권한(역할) 자체를 삭제하시겠습니까?",
+                  "권한 삭제 확인",
+                );
+              }
+
               var res = await fetch("/project/role/revokeRoleFromGroup", {
                 method: "POST",
                 headers: buildCsrfHeaders(),
@@ -1096,6 +1105,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 "권한 회수 중 오류가 발생했습니다.",
                 "권한 회수 실패",
               );
+            } finally {
+              roleRevokeInProgress = false;
             }
           }
 
