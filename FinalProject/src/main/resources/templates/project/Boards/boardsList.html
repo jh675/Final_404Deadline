@@ -72,16 +72,12 @@
                             
                             <td class="text-start text-muted" th:text="${board.description}">설명 내용</td>
                             
-                            <td th:with="
-                                searchVO=${new com.example.demo.project.messages.service.MessagesVO()},
-                                dummy=${searchVO.setBoardId(board.id)},
-                                msgList=${@messagesServiceImpl.selectAll(searchVO)},
-                                realCount=${msgList != null ? #lists.size(msgList) : 0}
-                            ">
-                                <span th:classappend="${realCount > 0} ? 'bg-light-green text-success border border-success-subtle' : 'bg-light text-muted border'"
+                            <td>
+                                <span th:classappend="${board.topicsCount > 0} ? 'bg-light-green text-success border border-success-subtle' : 'bg-light text-muted border'"
                                       class="badge px-2 py-0.5" 
-                                      th:text="${realCount} + '건'">0건</span>
+                                      th:text="${board.topicsCount} + '건'">0건</span>
                             </td>
+                            
                             <td>
                                 <div class="d-flex gap-1 justify-content-center">
                                     <button type="button" class="btn-action-modify" th:onclick="|location.href='@{/project/boards/modify(id=${board.id})}'|">수정</button>
