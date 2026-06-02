@@ -621,7 +621,7 @@
       </script>
       <script
         th:if="${menuSections != null and !menuSections.isEmpty() and (registerMode or currentRole != null)}"
-        th:src="@{/js/role/roleManagementInfo.js}"
+        th:src="@{/js/role/roleManagementInfo.js(v=2)}"
       ></script>
     </div>
   </body>
