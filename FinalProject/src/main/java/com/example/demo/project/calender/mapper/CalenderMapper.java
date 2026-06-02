@@ -20,7 +20,7 @@ public interface CalenderMapper {
 
 	int update(CalenderVO vo);
 
-	int delete(int id, int memId);
+	int delete(CalenderVO vo);
 
 //새 일정 등록 감지용
 	List<CalenderVO> findByCreatedOnAfter(Date date);

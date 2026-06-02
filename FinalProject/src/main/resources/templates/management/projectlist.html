@@ -294,7 +294,18 @@
       let appliedProjectTerm = '';
       let companyData = [];
       let projectData = [];
+      let searchTimer = null;
+      const isAdmin = /*[[${#authentication.principal.adminNm}]]*/ '';
+	  const userBizNo = /*[[${#authentication.principal.bizNo}]]*/ '';
 
+	  
+	  function debounce(fn, delay) { // ← 추가
+		    return function(...args) {
+		        clearTimeout(searchTimer);
+		        searchTimer = setTimeout(() => fn.apply(this, args), delay);
+		    };
+		}
+	  
       function loadSearchData() {
         companyData = Array.from(document.querySelectorAll('.search-company-data')).map(el => ({
           bizNo: el.getAttribute('data-biz-no') || '',
@@ -315,7 +326,8 @@
     	    const selectValue = document.getElementById("projectStatusSelect").value;
     	    const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-name]");
 
-    	    // 1단계: 각 행의 기본 매칭 여부 계산
+    	    // 1단계: 기본 매칭
+    	    const matchedIds = new Set();
     	    rows.forEach(row => {
     	        const status = row.getAttribute("data-status");
     	        const bizNo = row.getAttribute("data-biz-no") || '';
@@ -339,46 +351,38 @@
     	        }
 
     	        row._matched = matched;
+    	        if (matched) matchedIds.add(row.getAttribute("data-prj-id"));
     	    });
 
-    	    // 2단계: 매칭된 행 기준으로 상위/하위 ID 수집 (반복으로 모든 계층 처리)
-    	    let changed = true;
-    	    while (changed) {
-    	        changed = false;
-    	        const visibleIds = new Set();
+    	    // 2단계: 매칭된 행의 부모 ID 추가 (중첩루프 없이)
+    	    rows.forEach(row => {
+    	        if (!row._matched) return;
+    	        let parId = row.getAttribute("data-par-id");
+    	        while (parId) {
+    	            if (matchedIds.has(parId)) break;
+    	            matchedIds.add(parId);
+    	            // 부모 행 찾기
+    	            const parentRow = Array.from(rows).find(r => r.getAttribute("data-prj-id") === parId);
+    	            if (!parentRow) break;
+    	            parentRow._matched = true;
+    	            parId = parentRow.getAttribute("data-par-id");
+    	        }
+    	    });
 
-    	        rows.forEach(row => {
-    	            if (row._matched) {
-    	                visibleIds.add(row.getAttribute("data-prj-id"));
-    	            }
-    	        });
+    	    // 3단계: 매칭된 부모의 자식도 표시
+    	    rows.forEach(row => {
+    	        const parId = row.getAttribute("data-par-id");
+    	        if (!row._matched && parId && matchedIds.has(parId)) {
+    	            row._matched = true;
+    	        }
+    	    });
 
-    	        rows.forEach(row => {
-    	            if (!row._matched) {
-    	                const prjId = row.getAttribute("data-prj-id") || '';
-    	                const parId = row.getAttribute("data-par-id") || '';
-
-    	                // 상위가 매칭되어 있으면 하위도 표시
-    	                if (parId && visibleIds.has(parId)) {
-    	                    row._matched = true;
-    	                    changed = true;
-    	                }
-
-    	                // 하위가 매칭되어 있으면 상위도 표시
-    	                rows.forEach(child => {
-    	                    if (child._matched && child.getAttribute("data-par-id") === prjId) {
-    	                        row._matched = true;
-    	                        changed = true;
-    	                    }
-    	                });
-    	            }
-    	        });
-    	    }
-
-    	    // 3단계: 표시 여부 결정
+    	    // 4단계: 표시 여부 결정
     	    rows.forEach(row => {
     	        row.style.display = row._matched ? "" : "none";
     	    });
+
+    	    calcDepthAndIndent();
     	}
 
       function filterProjects() {
@@ -431,28 +435,56 @@
           dropdownEl.style.display = 'none';
           return;
         }
+        
+        
+        
+	    if (projectSearch && projectDropdown) {
+	    	  setupAutocomplete(
+	    	    projectSearch,
+	    	    projectDropdown,
+	    	    function(term) {
+	    	      const seen = new Set();
+	    	      
+	    	      return projectData
+	    	        .filter(p => includesTerm(p.prjName, term))
+	    	        .filter(p => {
+	    	          if (isAdmin !== '시스템관리자') {
+	    	            return p.bizNo === userBizNo;
+	    	          }
+	    	          return true;
+	    	        })
+	    	        .filter(p => {
+	    	          if (seen.has(p.prjName)) return false;
+	    	          seen.add(p.prjName);
+	    	          return true;
+	    	        })
+	    	        .map(p => ({ label: p.prjName, prjName: p.prjName }));
+	    	    },
+	    	    function(item) {
+	    	      selectedPrjName = item ? item.prjName : '';
+	    	    }
+	    	  );
+	    	}
 
         renderDropdown(dropdownEl, getItems(term), inputEl, onSelect);
       }
 
       function setupAutocomplete(inputEl, dropdownEl, getItems, onSelect) {
-        if (!inputEl || !dropdownEl) return;
+    	    if (!inputEl || !dropdownEl) return;
 
-        inputEl.addEventListener('input', function() {
-          onSelect(null);
-          if (this.value.trim().length < 1) {
-            dropdownEl.style.display = 'none';
-            return;
-          }
-          showAutocomplete(inputEl, dropdownEl, getItems, onSelect);
-        });
+    	    const debouncedSearch = debounce(function(value) {
+    	        onSelect(null);
+    	        if (value.trim().length < 1) {
+    	            dropdownEl.style.display = 'none';
+    	            return;
+    	        }
+    	        showAutocomplete(inputEl, dropdownEl, getItems, onSelect);
+    	    }, 300);
 
-        document.addEventListener('click', function(e) {
-          if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
-            dropdownEl.style.display = 'none';
-          }
-        });
-      }
+    	    inputEl.addEventListener('input', function() {
+    	        debouncedSearch(this.value);
+    	    });
+    	}
       
       function openReprojectModal(el) {
     	    const id = el.getAttribute('data-id');
@@ -506,6 +538,7 @@
               }
             }
           );
+          
         }
 
         const projectSearch = document.getElementById('projectSearch');
@@ -546,7 +579,24 @@
             }
           });
         });
-
+        document.addEventListener('click', function(e) {
+            const companySearch = document.getElementById('companySearch');
+            const companyDropdown = document.getElementById('companyDropdown');
+            const projectSearch = document.getElementById('projectSearch');
+            const projectDropdown = document.getElementById('projectDropdown');
+            
+            if (companySearch && companyDropdown) {
+                if (!companySearch.contains(e.target) && !companyDropdown.contains(e.target)) {
+                    companyDropdown.style.display = 'none';
+                }
+            }
+            if (projectSearch && projectDropdown) {
+                if (!projectSearch.contains(e.target) && !projectDropdown.contains(e.target)) {
+                    projectDropdown.style.display = 'none';
+                }
+            }
+        });
+        
         applyAllFilters();
       });
 	

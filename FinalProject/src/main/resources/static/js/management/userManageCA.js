@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 			}
 		}
 
-        if (isSuccess) {
+		if (isSuccess) {
             try {
                 if (isProfileDeleted && finalUserId) {
                     await csrfFetch(`/cadmin/user/profile/${finalUserId}`, { method: "DELETE" });
@@ -278,15 +278,37 @@ document.addEventListener('DOMContentLoaded', async function() {
                     formData.append("file", pendingProfileFile);
                     await csrfFetch("/cadmin/user/profile", { method: "POST", body: formData });
                 }
-                alert(mode === 'insert' ? '회원 등록이 완료되었습니다.' : '회원 수정이 완료되었습니다.');
-                location.reload();
+                
+                if (generalFeedback) {
+                    generalFeedback.className = 'small fw-bold text-success';
+                    generalFeedback.textContent = mode === 'insert' ? '회원 등록이 완료되었습니다. 잠시 후 창이 닫힙니다.' : '회원 수정이 완료되었습니다. 잠시 후 창이 닫힙니다.';
+                }
+                
+                // 중복 클릭 방지를 위해 버튼 잠금
+                document.getElementById('saveBtn').disabled = true;
+                
+                // 1.5초 대기 후 새로고침
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+
             } catch (error) {
                 console.error(error);
-                alert("회원 정보는 저장되었으나, 프로필 이미지 처리에 실패했습니다.");
-                location.reload();
+                if (generalFeedback) {
+                    generalFeedback.className = 'small fw-bold text-danger';
+                    generalFeedback.textContent = '회원 정보는 저장되었으나, 프로필 이미지 처리에 실패했습니다.';
+                }
+                document.getElementById('saveBtn').disabled = true;
+
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             }
         } else {
-            if(generalFeedback) generalFeedback.textContent = '처리 중 오류가 발생했습니다. 다시 시도해주세요.';
+            if(generalFeedback) {
+                generalFeedback.className = 'small fw-bold text-danger';
+                generalFeedback.textContent = '처리 중 오류가 발생했습니다. 다시 시도해주세요.';
+            }
         }
     });
 

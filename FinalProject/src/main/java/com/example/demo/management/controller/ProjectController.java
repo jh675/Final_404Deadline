@@ -136,20 +136,30 @@ public class ProjectController {
 	@PostMapping("/management/projectcreate")
 	public String projectInsert(ProjectVO vo, 
 	                             @RequestParam(value="moduleList", required=false) List<String> moduleList, 
-	                             Authentication authentication,GroupDetailVO gVo, MemberDetailVO mvo,WikiVO wVo,RoleVO rVo) {
+	                             Authentication authentication, GroupDetailVO gVo, MemberDetailVO mvo, 
+	                             WikiVO wVo, RoleVO rVo, Model model) {
 	    
-	    // 1. 인증 객체에서 로그인 유저 정보 가져오기 (가장 확실한 방법)
 	    if (authentication != null && authentication.getPrincipal() instanceof UserVO loginUser) {
-	        // 프로젝트를 생성하는 사람의 정보 세팅
-	        vo.setUserId(loginUser.getId()); 
-	        vo.setBizNo(loginUser.getBizNo());
+	        vo.setBizNo(loginUser.getBizNo()); // userId 세팅 제거
 	    }
-
-	    // 2. 서비스 호출 (프로젝트 정보와 모듈 리스트를 함께 넘김)
-	    // 기존의 projectservice.projectInsert(vo) 대신 새로운 메서드를 호출합니다.
-	    projectservice.insertProjectWithModules(vo, moduleList, gVo, mvo, wVo, rVo);
 	    
-	    return "redirect:/management/project";
+	    // 폼에서 선택한 매니저 ID를 userId에 세팅
+	    vo.setUserId(vo.getManagerId());
+
+	    try {
+	        projectservice.insertProjectWithModules(vo, moduleList, gVo, mvo, wVo, rVo);
+	        return "redirect:/management/project";
+	        
+	    } catch (IllegalStateException e) {
+	        List<ProjectVO> list = projectservice.listProject(null);
+	        model.addAttribute("projectList", list != null ? list : List.of());
+	        model.addAttribute("errorMessage", e.getMessage());
+	        
+	        if (vo.getCopyPrjId() != null) {
+	            model.addAttribute("copyProject", projectservice.getprojectid(vo.getCopyPrjId()));
+	        }
+	        return "management/projectcreate";
+	    }
 	}
 	
 	@GetMapping("/management/projectupdate")
@@ -191,6 +201,9 @@ public class ProjectController {
 	    if (authentication != null && authentication.getPrincipal() instanceof UserVO loginUser) {
 	        vo.setBizNo(loginUser.getBizNo());
 	    }
+	    
+	    // 폼에서 선택한 매니저 ID 세팅
+	    vo.setUserId(vo.getManagerId());
 	    
 	    projectservice.updateProject(vo, moduleList);
 	    

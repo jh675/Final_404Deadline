@@ -14,13 +14,14 @@
 <select id="searchUsersByBizNo" resultType="com.example.demo.login.service.UserVO">
     SELECT 
         id     AS "id", 
-        name   AS "name",  <!-- VO 필드명이 name이면 반드시 "name"으로 별칭 -->
+        name   AS "name",
         login  AS "login",
         email  AS "email"
     FROM users 
     WHERE biz_no = #{bizNo}
       AND name LIKE '%' || #{term} || '%'
       AND PRJ_MANAGER_CD = '01ACTIVE'
+      AND status_cd = '01ACTIVE'
 </select>
  
  <select id="userProjectList" resultType="ProjectVO">
