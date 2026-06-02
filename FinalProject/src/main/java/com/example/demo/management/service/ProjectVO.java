@@ -46,8 +46,8 @@ public class ProjectVO {
 	private String copyGroups;   // "Y" / "N"
 	private String copyUsers;    // "Y" / "N"
 	private String copyRoles;
-	
-	
+	//유저 이름(매니저 검색용)
+	private String userName;
 	//그룹테이블
 	private Long prjId;
     private Long grpId;
@@ -67,6 +67,14 @@ public class ProjectVO {
     private String calType;
     
     
-    
+    private Long managerId;
+
+    public Long getManagerId() {
+        return managerId;
+    }
+
+    public void setManagerId(Long managerId) {
+        this.managerId = managerId;
+    }
     
 }
