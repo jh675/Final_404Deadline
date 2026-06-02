@@ -18,13 +18,10 @@
 						<!-- 기업번호 -->
 						<div class="mb-3 position-relative">
 						   <label class="form-label">소속 기업명</label> 
-						   
 						   <!-- 화면에 보여지는 검색창 -->
 						   <input type="text" id="resetCompanyNameInput" class="form-control" placeholder="기업명을 검색하세요" autocomplete="off">
-						   
 						   <!-- 실제 전송되는 기업번호 (hidden) -->
 						   <input type="hidden" id="resetBizNo">
-						   
 						   <!-- 자동완성 드롭다운 -->
 						   <ul id="resetCompanyDropdown" class="list-group position-absolute w-100 shadow" 
 						       style="display: none; z-index: 1100; max-height: 200px; overflow-y: auto;">
@@ -44,7 +41,7 @@
 							<label class="form-label">이메일</label>
 							<div class="d-flex gap-2">
 								<input type="email" id="email" class="form-control">
-								<button type="button" id="sendCodeBtn" class="btn btn-primary">
+								<button type="button" id="sendCodeBtn" class="btn btn-primary flex-shrink-0 text-nowrap">
 									인증요청</button>
 							</div>
 							<small id="emailError" class="text-danger d-none"></small>
@@ -60,7 +57,7 @@
 							<div class="d-flex gap-2">
 								<input type="text" id="verifyNum" class="form-control">
 								<span class="input-group-text text-danger fw-bold d-none" id="resetPwTimerDisplay" style="width: 65px; justify-content: center;">03:00</span>
-								<button type="button" id="verifyBtn" class="btn btn-success">
+								<button type="button" id="verifyBtn" class="btn btn-success flex-shrink-0 text-nowrap">
 									인증</button>
 							</div>
 							<small id="verifyError" class="text-danger d-none"></small>

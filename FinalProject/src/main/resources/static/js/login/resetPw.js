@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	
 	resetCompanyNameInput.addEventListener('blur', function() {
 	    // 포커스를 잃는 순간, 검색 0.3초 대기 타이머를 강제로 취소
-	    clearTimeout(debounceTimer);
+	    clearTimeout(resetDebounceTimer);
 	    
 	    // 드롭다운 닫기
 	    resetCompanyDropdown.style.display = 'none';
