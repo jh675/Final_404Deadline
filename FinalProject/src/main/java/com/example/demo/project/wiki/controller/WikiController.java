@@ -98,7 +98,6 @@ public class WikiController {
 		}
 		List<WikiPageVO> pageList = service.selectWikiPageForTree(projectId, id);
 		model.addAttribute("currentMenu", "wiki");
-		model.addAttribute("wikiEditorPage", true);
 		model.addAttribute("pageList", pageList != null ? pageList : Collections.emptyList());
 		if (id != null) {
 			WikiContentVO page = service.selectWikiContentLastVerById(id);

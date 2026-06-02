@@ -1,5 +1,5 @@
 /**
- * TOAST UI Viewer 번들 지연 로드 (위키 작성 페이지는 editor-all만 head에서 로드)
+ * TOAST UI Viewer 번들 지연 로드
  */
 var ToastUiBundle = (function () {
     var VIEWER_SRC = 'https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.js';
