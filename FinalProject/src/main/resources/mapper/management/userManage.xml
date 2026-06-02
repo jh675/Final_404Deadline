@@ -92,6 +92,7 @@
 	        TEL = #{tel},
 	        EMAIL = #{email},
 	        ADMIN_CD = #{adminCd},
+	        GENDER_CD = #{genderCd},
 	        STATUS_CD = #{statusCd},
 	        HIRE_DATE = #{hireDate},
 	        PRJ_MANAGER_CD = #{prjManagerCd},

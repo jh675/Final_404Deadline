@@ -44,9 +44,12 @@
                                 <input type="email" name="email" class="form-control" placeholder="관리자 이메일을 입력해 주세요" required>
                             </div>
                         </div>
-                        <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-dark px-5 py-2 fw-semibold" style="border-radius: 6px;">등록 요청</button>
-                        </div>
+                        <div class="modal-footer flex-column border-0 pt-0">
+						    <div class="w-100 text-center mb-1">
+						        <span id="requestFeedback" class="small fw-bold"></span>
+						    </div>
+						    <button type="submit" id="requestSubmitBtn" class="btn btn-dark px-5 py-2 fw-semibold" style="border-radius: 6px;">등록 요청</button>
+						</div>
                     </form>
                 </div>
             </div>

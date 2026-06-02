@@ -4,7 +4,60 @@ let myCropper = null;
 
 // 이메일 인증 상태 플래그
 let isEmailVerified = true;
+// 타이머 변수
+let mypageTimer = null;
 
+// 타이머 함수
+function startMypageTimer(durationInSeconds) {
+    const timerDisplay = document.getElementById('mypageTimerDisplay');
+    const verifyInput = document.getElementById('verifyCodeInput');
+    const btnConfirmVerify = document.getElementById('btnConfirmVerify');
+    const btnEmailAction = document.getElementById('btnEmailAction');
+    const emailFeedback = document.getElementById('emailFeedback');
+
+    // 기존 타이머가 있다면 초기화
+    if (mypageTimer) clearInterval(mypageTimer);
+    
+    // UI 초기화
+    timerDisplay.classList.remove('d-none');
+    verifyInput.disabled = false;
+    btnConfirmVerify.disabled = false;
+
+    // 현재 시간 기준으로 정확히 3분 뒤의 시간(밀리초) 기록
+    const endTime = Date.now() + (durationInSeconds * 1000);
+
+    function updateTimer() {
+        // 남은 시간 = 종료 시간 - 현재 시간
+        const timeLeft = Math.max(0, endTime - Date.now());
+        const totalSeconds = Math.ceil(timeLeft / 1000);
+
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        timerDisplay.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+
+        // 시간이 0이 되었을 때 
+        if (timeLeft <= 0) {
+            clearInterval(mypageTimer);
+            
+            // 입력창 및 확인 버튼 잠금
+            verifyInput.disabled = true;
+            btnConfirmVerify.disabled = true;
+            
+            // 재인증 유도 UI 처리
+            emailFeedback.className = 'small mt-1 text-danger fw-bold';
+            emailFeedback.textContent = '인증 시간이 만료되었습니다. 재인증을 진행해주세요.';
+            
+            btnEmailAction.disabled = false;
+            btnEmailAction.textContent = '재인증';
+            btnEmailAction.className = 'btn btn-outline-primary';
+        }
+    }
+
+    updateTimer(); // 즉시 1회 실행하여 03:00 표시
+    // setInterval이 브라우저 백그라운드에서 느려지더라도, 
+    // 계산 자체는 Date.now()를 쓰기 때문에 오차가 발생하지 않음 (0.5초마다 갱신하여 딜레이 최소화)
+    mypageTimer = setInterval(updateTimer, 500); 
+}
 document.addEventListener('DOMContentLoaded', function() {
 
     const editInfoModalEl = document.getElementById('mypageEditModal');
@@ -37,6 +90,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('verifyCodeArea').classList.add('d-none');
             document.getElementById('verifyCodeInput').value = '';
             generalFeedback.textContent = '';
+			
+			if (mypageTimer) clearInterval(mypageTimer); // 모달 열릴 때 타이머 초기화
+            document.getElementById('mypageTimerDisplay').classList.add('d-none');
+            document.getElementById('verifyCodeInput').disabled = false;
         });
     }
 
@@ -103,6 +160,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	                document.getElementById('btnConfirmVerify').disabled = false;
 	                document.getElementById('verifyCodeInput').value = '';
 	                document.getElementById('verifyCodeInput').classList.remove('is-invalid');
+					// 3분 타이머 시작
+					startMypageTimer(180);
                 } else {
 					// 발송 실패 시 다시 누를 수 있도록 복구
 	                this.disabled = false;
@@ -141,7 +200,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const resultText = await res.text();
 
             if (resultText === 'success') {
-				
+				// 타이머 정지 및 숨김
+                clearInterval(mypageTimer);
+                document.getElementById('mypageTimerDisplay').classList.add('d-none');
+                
                 verifyInputEl.classList.remove('is-invalid');
                 document.getElementById('verifyCodeArea').classList.add('d-none');
                 

@@ -370,13 +370,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 			}
 		}
 
-        if (isSuccess) {
+		if (isSuccess) {
             // 프로필 이미지 동기화
             try {
                 if (isProfileDeleted && finalUserId) {
                     // 삭제 대기 중이면 기존 이미지 지우기
                     await csrfFetch(`/admin/user/profile/${finalUserId}`, { method: "DELETE" });
-
                 } else if (pendingProfileFile && finalUserId) {
                     // 업로드 대기 중인 새 파일이 있으면 업로드하기
                     const formData = new FormData();
@@ -384,19 +383,34 @@ document.addEventListener('DOMContentLoaded', async function() {
                     formData.append("file", pendingProfileFile);
                     await csrfFetch("/admin/user/profile", { method: "POST", body: formData });
                 }
-
-                // 모든 작업 완료
-                alert(mode === 'insert' ? '회원 등록이 완료되었습니다.' : '회원 수정이 완료되었습니다.');
-                location.reload();
-
+                if (generalFeedback) {
+                    generalFeedback.className = 'small fw-bold text-success';
+                    generalFeedback.textContent = mode === 'insert' ? '회원 등록이 완료되었습니다. 잠시 후 창이 닫힙니다.' : '회원 수정이 완료되었습니다. 잠시 후 창이 닫힙니다.';
+                }
+                // 중복 클릭 방지를 위해 버튼 잠금
+                document.getElementById('saveBtn').disabled = true;
+                // 1.5초 대기 후 새로고침
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } catch (error) {
                 console.error(error);
-                alert("회원 정보는 저장되었으나, 프로필 이미지 처리에 실패했습니다.");
-                location.reload(); // 일단 정보는 저장되었으므로 리로드
+                if (generalFeedback) {
+                    generalFeedback.className = 'small fw-bold text-danger';
+                    generalFeedback.textContent = '회원 정보는 저장되었으나, 프로필 이미지 처리에 실패했습니다.';
+                }
+                document.getElementById('saveBtn').disabled = true;
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             }
 
         } else {
-            if(generalFeedback) generalFeedback.textContent = '처리 중 오류가 발생했습니다. 다시 시도해주세요.';
+            // 서버 통신은 성공했으나 내부 로직(isSuccess)이 실패한 경우
+            if(generalFeedback) {
+                generalFeedback.className = 'small fw-bold text-danger';
+                generalFeedback.textContent = '처리 중 오류가 발생했습니다. 다시 시도해주세요.';
+            }
         }
     });
 
