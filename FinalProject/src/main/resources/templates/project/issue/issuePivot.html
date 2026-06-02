@@ -6,143 +6,19 @@
 <meta charset="UTF-8">
 <title>이슈 통계</title>
 <th:block layout:fragment="head-content">
-<style>
-.issue-pivot-page {
-	max-width: 1200px;
-}
-
-.issue-pivot-page__title {
-	margin: 0 0 1.25rem;
-	font-size: 1.125rem;
-	font-weight: 700;
-	color: #222;
-}
-
-.issue-pivot-page__desc {
-	margin: -0.75rem 0 1.5rem;
-	font-size: 0.875rem;
-	color: #666;
-}
-
-.issue-pivot-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 1.5rem;
-	margin-bottom: 1.5rem;
-}
-
-.issue-pivot-grid--single {
-	grid-template-columns: 1fr;
-}
-
-.issue-pivot-panel {
-	border: 1px solid #d8dce6;
-	border-radius: 8px;
-	background: #fff;
-	overflow: hidden;
-}
-
-.issue-pivot-panel__title {
-	margin: 0;
-	padding: 0.75rem 1rem;
-	font-size: 0.9375rem;
-	font-weight: 700;
-	color: #333;
-	background: #f7f8fc;
-	border-bottom: 1px solid #e4e7ef;
-}
-
-.issue-pivot-table-wrap {
-	overflow-x: auto;
-}
-
-.issue-pivot-table {
-	width: 100%;
-	border-collapse: collapse;
-	font-size: 0.875rem;
-}
-
-.issue-pivot-table th,
-.issue-pivot-table td {
-	border: 1px solid #e0e4ee;
-	padding: 0.5rem 0.75rem;
-	text-align: center;
-	white-space: nowrap;
-}
-
-.issue-pivot-table thead th {
-	background: #eef2ff;
-	color: #333;
-	font-weight: 600;
-}
-
-.issue-pivot-table tbody th.pivot-row-label {
-	background: #fafbfe;
-	text-align: left;
-	font-weight: 600;
-	color: #444;
-	min-width: 6rem;
-}
-
-.issue-pivot-table tbody td.pivot-val {
-	color: #222;
-}
-
-.issue-pivot-table tfoot th,
-.issue-pivot-table tfoot td {
-	background: #f3f5fa;
-	font-weight: 700;
-	color: #333;
-}
-
-.issue-pivot-table .pivot-row-total,
-.issue-pivot-table .pivot-col-total,
-.issue-pivot-table .pivot-grand-total {
-	background: #eef2ff;
-}
-
-.issue-pivot-empty {
-	padding: 1.5rem;
-	text-align: center;
-	color: #888;
-	font-size: 0.875rem;
-}
-
-.issue-pivot-actions {
-	margin-top: 0.5rem;
-}
-
-.issue-pivot-back {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.45rem 1rem;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	background: #fff;
-	color: #444;
-	font-size: 0.875rem;
-	font-weight: 600;
-	text-decoration: none;
-}
-
-.issue-pivot-back:hover {
-	background: #f5f5f5;
-	color: #222;
-}
-
-@media (max-width: 900px) {
-	.issue-pivot-grid {
-		grid-template-columns: 1fr;
-	}
-}
-</style>
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+<link rel="stylesheet" th:href="@{/css/project/issue.css}" />
 </th:block>
 </head>
 <body>
 <div layout:fragment="content">
-	<div class="issue-pivot-page">
-		<h2 class="issue-pivot-page__title">통계</h2>
-		<p class="issue-pivot-page__desc">프로젝트 이슈를 우선순위·유형·담당자 기준으로 집계합니다.</p>
+	<div class="issue-shell">
+	<div id="wrapper">
+		<div class="issue-page-head">
+			<a th:href="@{/project/issue/list}" class="issue-page-back">← 이슈 목록</a>
+			<h1 class="issue-page-head__title">통계</h1>
+		</div>
+		<p class="issue-page-desc">프로젝트 이슈를 우선순위·유형·담당자 기준으로 집계합니다.</p>
 
 		<div class="issue-pivot-grid">
 			<div th:replace="~{project/issue/issuePivot :: pivotPanel(title='우선순위', rows=${pivotPriority}, valueCols=${priorityCols})}"></div>
@@ -153,9 +29,10 @@
 			<div th:replace="~{project/issue/issuePivot :: pivotPanel(title='담당자', rows=${pivotStatus}, valueCols=${statusCols})}"></div>
 		</div>
 
-		<div class="issue-pivot-actions">
-			<a th:href="@{/project/issue/list}" class="issue-pivot-back">이슈 목록으로</a>
+		<div class="issue-register-actions">
+			<a th:href="@{/project/issue/list}" class="issue-btn issue-btn--secondary search-cancel-btn">이슈 목록</a>
 		</div>
+	</div>
 	</div>
 
 	<script>

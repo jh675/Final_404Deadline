@@ -8,537 +8,207 @@
 <th:block layout:fragment="head-content">
 <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
 <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
-<style>
-.back-row {
-	margin-bottom: 16px;
-}
-
-.back-row a {
-	font-size: 13px;
-	color: #5b6cff;
-	text-decoration: none;
-}
-
-.back-row a:hover {
-	text-decoration: underline;
-}
-
-.page-title {
-	font-size: 22px;
-	font-weight: 700;
-	margin-bottom: 24px;
-	line-height: 1.35;
-}
-
-.req {
-	color: #d32f2f;
-	font-weight: 700;
-	margin-left: 2px;
-}
-
-.form-grid {
-	display: grid;
-	grid-template-columns: 140px 1fr;
-	gap: 14px 20px;
-	align-items: center;
-	margin-bottom: 18px;
-}
-
-.form-grid label {
-	font-size: 13px;
-	font-weight: 600;
-	color: #444;
-	justify-self: start;
-}
-
-.form-grid .field-wrap {
-	width: 100%;
-}
-
-.form-grid input[type="text"],
-.form-grid input[type="date"],
-.form-grid input[type="datetime-local"],
-.form-grid select,
-.form-grid textarea {
-	width: 100%;
-	max-width: 100%;
-	padding: 8px 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	font-size: 13px;
-	background: #fff;
-	color: #333;
-}
-
-.form-grid select:disabled {
-	background: #f5f5f5;
-	color: #666;
-	cursor: not-allowed;
-	opacity: 1;
-}
-
-.form-grid textarea {
-	min-height: 140px;
-	resize: vertical;
-	font-family: inherit;
-	line-height: 1.45;
-}
-
-.form-hint {
-	font-size: 12px;
-	color: #777;
-	margin-top: 6px;
-}
-
-.attach-section {
-	grid-column: 1 / -1;
-	border: 1px solid #e0e0e0;
-	border-radius: 6px;
-	padding: 14px 16px;
-	background: #fafafa;
-}
-
-.attach-head {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: 10px;
-	margin-bottom: 12px;
-}
-
-.attach-head span {
-	font-size: 13px;
-	font-weight: 600;
-	color: #444;
-}
-
-.attach-rows {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-}
-
-.attachment-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-}
-
-.attach-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 10px;
-	flex-wrap: wrap;
-	padding: 10px 12px;
-	border: 1px solid #ddd;
-	border-radius: 4px;
-	background: #fff;
-}
-
-.attach-file-name {
-	flex: 1;
-	min-width: 0;
-	font-size: 13px;
-	color: #333;
-	overflow-wrap: anywhere;
-}
-
-.attach-file-meta {
-	font-size: 12px;
-	color: #777;
-}
-
-.attach-hidden-input {
-	display: none;
-}
-
-.attach-row .btn-ghost {
-	font-size: 13px;
-}
-
-.btn-ghost {
-	padding: 6px 12px;
-	font-size: 12px;
-	border: 1px solid #ccc;
-	background: #fff;
-	border-radius: 4px;
-	cursor: pointer;
-	color: #444;
-}
-
-.btn-ghost:hover {
-	background: #f3f3f3;
-}
-
-.btn-primary {
-	padding: 10px 24px;
-	font-size: 14px;
-	font-weight: 600;
-	border: none;
-	border-radius: 4px;
-	background: #5b6cff;
-	color: #fff;
-	cursor: pointer;
-}
-
-.btn-primary:hover {
-	background: #4956d8;
-}
-
-.btn-secondary {
-	padding: 10px 24px;
-	font-size: 14px;
-	font-weight: 600;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	background: #fff;
-	color: #444;
-	cursor: pointer;
-}
-
-.btn-secondary:hover {
-	background: #f5f5f5;
-}
-
-.form-actions {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-top: 28px;
-	padding-top: 20px;
-	border-top: 1px solid #eee;
-}
-
-.err-msg {
-	font-size: 12px;
-	color: #c62828;
-	margin-top: 4px;
-	display: none;
-}
-
-.err-msg.is-visible {
-	display: block;
-}
-
-.form-grid .field-wrap.is-invalid input,
-.form-grid .field-wrap.is-invalid select,
-.form-grid .field-wrap.is-invalid textarea {
-	border-color: #c62828;
-}
-
-/* 썸 지름과 동일 — 트랙 끝과 눈금 정렬에 사용 */
-.progress-wrap {
-	--thumb-size: 18px;
-	display: grid;
-	grid-template-columns: 1fr auto;
-	grid-template-rows: auto auto;
-	align-items: center;
-	column-gap: 14px;
-	row-gap: 6px;
-	width: 100%;
-}
-
-.progress-wrap input[type="range"] {
-	grid-column: 1;
-	grid-row: 1;
-	width: 100%;
-	min-width: 0;
-	height: 6px;
-	border-radius: 3px;
-	accent-color: #5b6cff;
-	-webkit-appearance: none;
-	appearance: none;
-	background: transparent;
-}
-
-.progress-wrap input[type="range"]::-webkit-slider-runnable-track {
-	height: 6px;
-	border-radius: 3px;
-	background: linear-gradient(to right, #5b6cff 0%, #5b6cff var(--pct, 0%), #e4e6ef var(--pct, 0%), #e4e6ef 100%);
-}
-
-.progress-wrap input[type="range"]::-webkit-slider-thumb {
-	-webkit-appearance: none;
-	appearance: none;
-	width: var(--thumb-size);
-	height: var(--thumb-size);
-	margin-top: -6px;
-	border-radius: 50%;
-	background: #fff;
-	border: 2px solid #5b6cff;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-	cursor: pointer;
-}
-
-.progress-wrap input[type="range"]::-moz-range-track {
-	height: 6px;
-	border-radius: 3px;
-	background: #e4e6ef;
-}
-
-.progress-wrap input[type="range"]::-moz-range-progress {
-	height: 6px;
-	border-radius: 3px;
-	background: #5b6cff;
-}
-
-.progress-wrap input[type="range"]::-moz-range-thumb {
-	width: var(--thumb-size);
-	height: var(--thumb-size);
-	border-radius: 50%;
-	background: #fff;
-	border: 2px solid #5b6cff;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-	cursor: pointer;
-}
-
-.progress-wrap input[type="range"]:disabled {
-	opacity: 0.55;
-	cursor: not-allowed;
-}
-
-.progress-wrap input[type="range"]:disabled::-webkit-slider-thumb {
-	cursor: not-allowed;
-}
-
-.progress-wrap input[type="range"]:disabled::-moz-range-thumb {
-	cursor: not-allowed;
-}
-
-.progress-wrap .progress-value-pill {
-	grid-column: 2;
-	grid-row: 1;
-}
-
-.progress-value-pill {
-	flex-shrink: 0;
-	min-width: 52px;
-	padding: 6px 12px;
-	text-align: center;
-	font-size: 14px;
-	font-weight: 700;
-	color: #fff;
-	background: #5b6cff;
-	border-radius: 6px;
-}
-
-/* 눈금: 슬라이더(1열) 너비에만 맞추고, 썸 중심이 움직이는 구간에 맞춰 배치 */
-.progress-ticks {
-	grid-column: 1;
-	grid-row: 2;
-	position: relative;
-	height: 1.15em;
-	font-size: 11px;
-	color: #999;
-	user-select: none;
-}
-
-.progress-ticks span {
-	position: absolute;
-	top: 0;
-	transform: translateX(-50%);
-	white-space: nowrap;
-}
-
-.progress-ticks span:nth-child(1) {
-	left: calc(var(--thumb-size) / 2);
-}
-
-.progress-ticks span:nth-child(2) {
-	left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.2);
-}
-
-.progress-ticks span:nth-child(3) {
-	left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.4);
-}
-
-.progress-ticks span:nth-child(4) {
-	left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.6);
-}
-
-.progress-ticks span:nth-child(5) {
-	left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.8);
-}
-
-.progress-ticks span:nth-child(6) {
-	left: calc(100% - var(--thumb-size) / 2);
-}
-</style>
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+<link rel="stylesheet" th:href="@{/css/project/issue.css}" />
 </th:block>
 </head>
 <body>
 <div layout:fragment="content">
 <div class="issue-shell">
-<div class="issue-inner">
-	<div class="back-row">
-		<a href="javascript:history.back()">← 이전</a>
+<div id="wrapper">
+	<div class="issue-page-head">
+		<a th:href="@{/project/issue/list}" class="issue-page-back">← 이슈 목록</a>
+		<h1 class="issue-page-head__title"
+			th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'">이슈 등록</h1>
 	</div>
-
-	<h1 class="page-title" th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'">이슈 등록</h1>
 
 	<form id="issueRegistForm" th:action="@{/sign-up}">
 		<input type="hidden" id="issueId" name="id"
 			th:value="${issue != null and issue.id != null ? issue.id : ''}" />
-		<div class="form-grid">
-			<label for="subject">제목<span class="req">*</span></label>
-			<div class="field-wrap" id="wrap-subject">
-				<input type="text" id="subject" name="subject" maxlength="500"
-					placeholder="제목 입력"
-					th:value="${issue != null and issue.subject != null ? issue.subject : ''}" required />
-				<p class="err-msg" id="err-subject">제목을 입력해 주세요.</p>
-			</div>
 
-			<label for="memId">담당자</label>
-			<div class="field-wrap" id="wrap-memId">
-				<select id="memId" name="memId">
-					<option value=""
-						th:selected="${issue == null or issue.memId == null}">미정</option>
-					<option th:each="member : ${members}"
-						th:value="${member.userId}"
-						th:text="${member.userName}"
-						th:selected="${issue != null and issue.memId != null and issue.memId == member.userId}">담당자</option>
-				</select>
-				<p class="err-msg" id="err-memId">담당자를 선택해 주세요.</p>
-			</div>
-
-			<label for="estStartDate">시작예정일</label>
-			<div class="field-wrap">
-				<input type="date" id="estStartDate" name="estStartDate"
-					th:value="${issue != null and issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : (project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : '')}"
-					th:attr="min=${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : null},
-						max=${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : null}" />
-			</div>
-
-			<label for="dueDate">종료예정일</label>
-			<div class="field-wrap">
-				<input type="date" id="dueDate" name="dueDate"
-					th:value="${issue != null and issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : (project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : '')}"
-					th:attr="min=${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : null},
-						max=${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : null}" />
-			</div>
-
-			<label for="milestoneId">마일스톤</label>
-			<div class="field-wrap">
-				<select id="milestoneId" name="milestoneId">
-					<option value=""
-						th:disabled="${milestoneUnlinkBlocked}"
-						th:selected="${issue == null or issue.milestoneId == null}"
-						th:text="${milestoneUnlinkBlocked ? '없음 (타임라인 등록으로 해제 불가)' : '없음'}">없음</option>
-					<option th:each="milestone : ${milestones}"
-						th:value="${milestone.id}"
-						th:text="${milestone.name}"
-						th:attr="data-start=${milestone.startDate != null ? #dates.format(milestone.startDate, 'yyyy-MM-dd') : null},
-							data-end=${milestone.endDate != null ? #dates.format(milestone.endDate, 'yyyy-MM-dd') : null}"
-						th:selected="${issue != null and issue.milestoneId != null and issue.milestoneId == milestone.id}">마일스톤</option>
-				</select>
-				<p class="form-hint"
-					th:if="${milestoneUnlinkBlocked}">
-					등록된 타임라인이 있어 마일스톤을 「없음」으로 해제할 수 없습니다. 다른 마일스톤으로 변경하거나, 마일스톤 화면에서 타임라인을 삭제해 주세요.
-				</p>
-				<p class="form-hint"
-					th:if="${!milestoneUnlinkBlocked and !(@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE'))}">
-					마일스톤·이슈 수정 권한이 모두 있어야 변경할 수 있습니다. (현재 조회만 가능)
-				</p>
-			</div>
-
-			<label>첨부파일</label>
-			<div class="field-wrap attach-section">
-				<div class="attach-head">
-					<span>첨부 목록 (최대 5개, 합계 50MB 이하)</span>
-					<button type="button" class="btn-ghost" id="btnAddFile">파일추가</button>
-				</div>
-				<ul class="attachment-list" id="attachRows"></ul>
-				<input type="file" id="fileInput" name="attachments" class="attach-hidden-input" multiple accept="*/*" />
-				<p class="err-msg" id="err-attach">첨부 용량은 합계 50MB를 넘을 수 없습니다.</p>
-			</div>
-
-			<label for="parentIssue">상위 이슈</label>
-			<div class="field-wrap">
-				<select id="parentIssue" name="parentIssue">
-					<option value=""
-						th:selected="${issue == null or issue.parentIssue == null}">없음</option>
-					<option th:each="item : ${issueIds}"
-						th:value="${item.id}"
-						th:text="|${item.subject} #${item.id}|"
-						th:selected="${issue != null and issue.parentIssue != null and issue.parentIssue == item.id}">없음</option>
-				</select>
-			</div>
-
-			<label for="categoryCd">유형</label>
-			<div class="field-wrap">
-				<select id="categoryCd" name="categoryCd">
-					<option value="01ISSUECATE"
-						th:selected="${issue != null and issue.categoryCd == '01ISSUECATE'}">버그</option>
-					<option value="02ISSUECATE"
-						th:selected="${issue == null or issue.categoryCd == null or issue.categoryCd == '' or issue.categoryCd == '02ISSUECATE'}">기능</option>
-					<option value="03ISSUECATE"
-						th:selected="${issue != null and issue.categoryCd == '03ISSUECATE'}">작업</option>
-					<option value="04ISSUECATE"
-						th:selected="${issue != null and issue.categoryCd == '04ISSUECATE'}">개선</option>
-				</select>
-			</div>
-
-			<label for="priorityCd">우선순위</label>
-			<div class="field-wrap">
-				<select id="priorityCd" name="priorityCd">
-					<option value="01ISSUEPRI"
-						th:selected="${issue != null and issue.priorityCd == '01ISSUEPRI'}">최상</option>
-					<option value="02ISSUEPRI"
-						th:selected="${issue != null and issue.priorityCd == '02ISSUEPRI'}">상</option>
-					<option value="03ISSUEPRI"
-						th:selected="${issue == null or issue.priorityCd == null or issue.priorityCd == '' or issue.priorityCd == '03ISSUEPRI'}">중</option>
-					<option value="04ISSUEPRI"
-						th:selected="${issue != null and issue.priorityCd == '04ISSUEPRI'}">하</option>
-				</select>
-			</div>
-
-			<label for="statusCd">상태</label>
-			<div class="field-wrap">
-				<select id="statusCd" name="statusCd">
-					<option value="01ISSUESTAT"
-						th:selected="${issue == null or issue.statusCd == null or issue.statusCd == '' or issue.statusCd == '01ISSUESTAT'}">신규</option>
-					<option value="02ISSUESTAT"
-						th:selected="${issue != null and issue.statusCd == '02ISSUESTAT'}">진행중</option>
-					<option value="03ISSUESTAT"
-						th:selected="${issue != null and issue.statusCd == '03ISSUESTAT'}">검토</option>
-				</select>
-			</div>
-
-			<label for="doneRatio">진척율</label>
-			<div class="field-wrap">
-				<div class="progress-wrap">
-					<input type="range" id="doneRatio" name="doneRatio" min="0" max="100" step="10"
-						th:value="${issue != null and issue.doneRatio != null ? T(java.lang.Math).round(issue.doneRatio.doubleValue() / 10.0) * 10 : 0}" />
-					<span class="progress-value-pill" id="doneRatioDisplay">0%</span>
-					<div class="progress-ticks" aria-hidden="true">
-						<span>0</span>
-						<span>20</span>
-						<span>40</span>
-						<span>60</span>
-						<span>80</span>
-						<span>100</span>
+		<div class="issue-page-section">
+			<div class="issue-form-row">
+				<div class="search-item search-item--grow">
+					<label for="subject">제목<span class="req">*</span></label>
+					<div class="field-wrap" id="wrap-subject">
+						<input type="text" id="subject" name="subject" maxlength="500" class="form-control"
+							placeholder="제목 입력"
+							th:value="${issue != null and issue.subject != null ? issue.subject : ''}" required />
+						<p class="err-msg" id="err-subject">제목을 입력해 주세요.</p>
 					</div>
 				</div>
-				<p class="form-hint" id="progressStatusHint">상태에 따라 진척율 범위가 달라집니다.</p>
-				<p class="form-hint">10% 단위로만 조절됩니다.</p>
 			</div>
-
-			<label for="description">설명<span class="req">*</span></label>
-			<div class="field-wrap">
-				<textarea id="description" name="description" placeholder="설명 입력"
-					th:text="${issue != null and issue.description != null ? issue.description : ''}" required="required"></textarea>
+			<div class="issue-form-row">
+				<div class="search-item">
+					<label for="memId">담당자</label>
+					<div class="field-wrap" id="wrap-memId">
+						<select id="memId" name="memId" class="form-select">
+							<option value=""
+								th:selected="${issue == null or issue.memId == null}">미정</option>
+							<option th:each="member : ${members}"
+								th:value="${member.userId}"
+								th:text="${member.userName}"
+								th:selected="${issue != null and issue.memId != null and issue.memId == member.userId}">담당자</option>
+						</select>
+						<p class="err-msg" id="err-memId">담당자를 선택해 주세요.</p>
+					</div>
+				</div>
+				<div class="search-item">
+					<label for="categoryCd">유형</label>
+					<div class="field-wrap">
+						<select id="categoryCd" name="categoryCd" class="form-select">
+							<option value="01ISSUECATE"
+								th:selected="${issue != null and issue.categoryCd == '01ISSUECATE'}">버그</option>
+							<option value="02ISSUECATE"
+								th:selected="${issue == null or issue.categoryCd == null or issue.categoryCd == '' or issue.categoryCd == '02ISSUECATE'}">기능</option>
+							<option value="03ISSUECATE"
+								th:selected="${issue != null and issue.categoryCd == '03ISSUECATE'}">작업</option>
+							<option value="04ISSUECATE"
+								th:selected="${issue != null and issue.categoryCd == '04ISSUECATE'}">개선</option>
+						</select>
+					</div>
+				</div>
+				<div class="search-item">
+					<label for="priorityCd">우선순위</label>
+					<div class="field-wrap">
+						<select id="priorityCd" name="priorityCd" class="form-select">
+							<option value="01ISSUEPRI"
+								th:selected="${issue != null and issue.priorityCd == '01ISSUEPRI'}">최상</option>
+							<option value="02ISSUEPRI"
+								th:selected="${issue != null and issue.priorityCd == '02ISSUEPRI'}">상</option>
+							<option value="03ISSUEPRI"
+								th:selected="${issue == null or issue.priorityCd == null or issue.priorityCd == '' or issue.priorityCd == '03ISSUEPRI'}">중</option>
+							<option value="04ISSUEPRI"
+								th:selected="${issue != null and issue.priorityCd == '04ISSUEPRI'}">하</option>
+						</select>
+					</div>
+				</div>
+				<div class="search-item">
+					<label for="statusCd">상태</label>
+					<div class="field-wrap">
+						<select id="statusCd" name="statusCd" class="form-select">
+							<option value="01ISSUESTAT"
+								th:selected="${issue == null or issue.statusCd == null or issue.statusCd == '' or issue.statusCd == '01ISSUESTAT'}">신규</option>
+							<option value="02ISSUESTAT"
+								th:selected="${issue != null and issue.statusCd == '02ISSUESTAT'}">진행중</option>
+							<option value="03ISSUESTAT"
+								th:selected="${issue != null and issue.statusCd == '03ISSUESTAT'}">검토</option>
+						</select>
+					</div>
+				</div>
 			</div>
 		</div>
 
-		<div class="form-actions">
-			<button type="submit" class="btn-primary" id="btnSubmit"
-				th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'" required>이슈 등록</button>
-			<button type="button" class="btn-secondary" id="btnCancel">취소</button>
+		<div class="issue-page-section">
+			<div class="issue-form-row">
+				<div class="search-item">
+					<label for="estStartDate">시작예정일</label>
+					<div class="field-wrap">
+				<input type="date" id="estStartDate" name="estStartDate" class="form-control"
+					th:value="${issue != null and issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : (project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : '')}"
+					th:attr="min=${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : null},
+						max=${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : null}" />
+					</div>
+				</div>
+				<div class="search-item">
+					<label for="dueDate">종료예정일</label>
+					<div class="field-wrap">
+						<input type="date" id="dueDate" name="dueDate" class="form-control"
+							th:value="${issue != null and issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : (project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : '')}"
+							th:attr="min=${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : null},
+								max=${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : null}" />
+					</div>
+				</div>
+				<div class="search-item search-item--wide">
+					<label for="milestoneId">마일스톤</label>
+					<div class="field-wrap">
+						<select id="milestoneId" name="milestoneId" class="form-select">
+							<option value=""
+								th:disabled="${milestoneUnlinkBlocked}"
+								th:selected="${issue == null or issue.milestoneId == null}"
+								th:text="${milestoneUnlinkBlocked ? '없음 (타임라인 등록으로 해제 불가)' : '없음'}">없음</option>
+							<option th:each="milestone : ${milestones}"
+								th:value="${milestone.id}"
+								th:text="${milestone.name}"
+								th:attr="data-start=${milestone.startDate != null ? #dates.format(milestone.startDate, 'yyyy-MM-dd') : null},
+									data-end=${milestone.endDate != null ? #dates.format(milestone.endDate, 'yyyy-MM-dd') : null}"
+								th:selected="${issue != null and issue.milestoneId != null and issue.milestoneId == milestone.id}">마일스톤</option>
+						</select>
+						<p class="form-hint"
+							th:if="${milestoneUnlinkBlocked}">
+							등록된 타임라인이 있어 마일스톤을 「없음」으로 해제할 수 없습니다. 다른 마일스톤으로 변경하거나, 마일스톤 화면에서 타임라인을 삭제해 주세요.
+						</p>
+						<p class="form-hint"
+							th:if="${!milestoneUnlinkBlocked and !(@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE'))}">
+							마일스톤·이슈 수정 권한이 모두 있어야 변경할 수 있습니다. (현재 조회만 가능)
+						</p>
+					</div>
+				</div>
+				<div class="search-item search-item--wide">
+					<label for="parentIssue">상위 이슈</label>
+					<div class="field-wrap">
+						<select id="parentIssue" name="parentIssue" class="form-select">
+							<option value=""
+								th:selected="${issue == null or issue.parentIssue == null}">없음</option>
+							<option th:each="item : ${issueIds}"
+								th:value="${item.id}"
+								th:text="|${item.subject} #${item.id}|"
+								th:selected="${issue != null and issue.parentIssue != null and issue.parentIssue == item.id}">없음</option>
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="issue-page-section">
+			<div class="issue-form-row">
+				<div class="search-item search-item--range">
+					<label for="doneRatio">진척율</label>
+					<div class="field-wrap">
+						<div class="progress-wrap">
+							<input type="range" id="doneRatio" name="doneRatio" min="0" max="100" step="10"
+								th:value="${issue != null and issue.doneRatio != null ? T(java.lang.Math).round(issue.doneRatio.doubleValue() / 10.0) * 10 : 0}" />
+							<span class="progress-value-pill" id="doneRatioDisplay">0%</span>
+							<div class="progress-ticks" aria-hidden="true">
+								<span>0</span>
+								<span>20</span>
+								<span>40</span>
+								<span>60</span>
+								<span>80</span>
+								<span>100</span>
+							</div>
+						</div>
+						<p class="form-hint" id="progressStatusHint">상태에 따라 진척율 범위가 달라집니다.</p>
+						<p class="form-hint">10% 단위로만 조절됩니다.</p>
+					</div>
+				</div>
+			</div>
+			<div class="issue-form-row">
+				<div class="search-item search-item--grow">
+					<label for="description">설명<span class="req">*</span></label>
+					<div class="field-wrap">
+						<textarea id="description" name="description" class="form-control" placeholder="설명 입력"
+							th:text="${issue != null and issue.description != null ? issue.description : ''}" required="required"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="issue-form-row">
+				<div class="search-item attach-section">
+					<div class="attach-head">
+						<span>첨부파일 (최대 5개, 합계 50MB 이하)</span>
+						<button type="button" class="btn btn-info btn-sm" id="btnAddFile">파일추가</button>
+					</div>
+					<ul class="attachment-list" id="attachRows"></ul>
+					<input type="file" id="fileInput" name="attachments" class="attach-hidden-input" multiple accept="*/*" />
+					<p class="err-msg" id="err-attach">첨부 용량은 합계 50MB를 넘을 수 없습니다.</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="issue-register-actions">
+			<button type="submit" class="btn btn-primary" id="btnSubmit"
+				th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'">이슈 등록</button>
+			<a th:href="@{/project/issue/list}" class="btn btn-danger" id="btnCancel">취소</a>
 		</div>
 	</form>
 </div>
@@ -552,7 +222,6 @@
 	var attachRows = document.getElementById('attachRows');
 	var fileInput = document.getElementById('fileInput');
 	var btnAddFile = document.getElementById('btnAddFile');
-	var btnCancel = document.getElementById('btnCancel');
 	var errAttach = document.getElementById('err-attach');
 	var STATUS_NEW = '01ISSUESTAT';
 	var STATUS_PROGRESS = '02ISSUESTAT';
@@ -752,7 +421,7 @@
 
 			var del = document.createElement('button');
 			del.type = 'button';
-			del.className = 'btn-ghost';
+			del.className = 'btn btn-info btn-sm';
 			del.textContent = '첨부삭제';
 			del.addEventListener('click', function () {
 				selectedFiles.splice(index, 1);
@@ -830,10 +499,6 @@
 		}
 		return ok;
 	}
-
-	btnCancel.addEventListener('click', function () {
-		history.back();
-	});
 
 	form.addEventListener('submit', function (ev) {
 		ev.preventDefault();

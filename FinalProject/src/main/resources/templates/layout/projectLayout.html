@@ -18,17 +18,35 @@
 
 </head>
 
-<body>
-    <div class="container-fluid px-4">
+<body class="layout-tabler">
+    <div class="page">
+    <div class="page-wrapper">
+    <div class="page-body">
+    <div class="container-fluid px-4 py-3">
 
 		<div
 			th:replace="~{layout/fragments/navbar :: layoutNavbar(${roleName})}">
 		</div>
         
-        <div class="project-header mb-4">
+        <div class="project-header mb-4 p-3 p-lg-4">
             <!-- 프로젝트 제목 -->
-            <div class="d-flex justify-content-between align-items-end mb-3 border-bottom pb-2">
-                <h4 class="m-0 fw-bold" th:text="${session.project != null ? session.project.prjName : '프로젝트 명'}"></h4>
+            <div class="d-flex justify-content-between align-items-end mb-2 border-bottom pb-2">
+                <h3 class="m-0 fw-bold" th:text="${session.project != null ? session.project.prjName : '프로젝트 명'}"></h3>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="small text-secondary"
+                      th:text="${session.project != null and session.project.prjDesc != null and !#strings.isEmpty(session.project.prjDesc)} ? ${session.project.prjDesc} : '프로젝트 설명이 없습니다.'">
+                    프로젝트 설명이 없습니다.
+                </span>
+                <span class="badge text-bg-light border"
+                      th:text="${session.project != null and session.project.startDate != null} ? ${#dates.format(session.project.startDate, 'yyyy-MM-dd')} : '시작일 미정'">
+                    시작일 미정
+                </span>
+                <span class="text-secondary small">~</span>
+                <span class="badge text-bg-light border"
+                      th:text="${session.project != null and session.project.closedDate != null} ? ${#dates.format(session.project.closedDate, 'yyyy-MM-dd')} : '종료일 미정'">
+                    종료일 미정
+                </span>
             </div>
 
             <!-- 서브 메뉴 탭 -->
@@ -114,10 +132,16 @@
             </ul> 
         </div>
         <!-- 실제 본문(이슈, 위키 등)이 들어갈 영역 -->
-        <div layout:fragment="content">
+        <div class="card border-0 shadow-sm mb-4">
+            <div layout:fragment="content">
+            </div>
         </div>
 	<div th:replace="~{layout/fragments/footer :: yedam}"></div>
 		<th:block th:replace="~{layout/fragments/modal/aiModal :: aiModalFragment}"></th:block>
+  </div>
+  </div>
+  </div>
+  </div>
   </div>
 </body>
 </html>

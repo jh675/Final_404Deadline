@@ -5,11 +5,8 @@
 <body>
 
 <nav th:fragment="layoutNavbar(title)"
-     class="navbar navbar-expand-lg bg-body-tertiary border-top border-5"
-     th:classappend="${
-        title == '시스템관리자' ? 'border-danger' : 
-        (title == '기업관리자' ? 'border-primary' : 'border-secondary')
-     }">
+     class="navbar navbar-expand-lg bg-primary"
+     data-bs-theme="dark">
 
 	<div class="container-fluid">
 
@@ -161,7 +158,7 @@
 			    </span>
 				
 			    <form th:action="@{/logout}" method="post">
-			        <button type="submit" class="btn btn-outline-danger btn-sm">
+			        <button type="submit" class="btn btn-danger btn-sm">
 			            로그아웃
 			        </button>
 			    </form>
