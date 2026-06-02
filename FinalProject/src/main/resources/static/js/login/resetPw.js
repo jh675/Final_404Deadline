@@ -260,9 +260,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.text();
 
-            if (result === 'success') {
-                showResultmsg('비밀번호가 변경되었습니다.');
+			if (result === 'success') {
+                showResultmsg('비밀번호가 성공적으로 변경되었습니다. 잠시 후 창이 닫힙니다.');
                 confirmBtn.disabled = true;
+                
+                // 1.5초 대기 후 화면 새로고침하여 모달 닫기 및 초기화
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
                 showResultmsg('비밀번호 변경에 실패했습니다.');
                 confirmBtn.disabled = false;

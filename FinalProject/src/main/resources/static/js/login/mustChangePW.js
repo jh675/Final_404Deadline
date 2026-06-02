@@ -49,15 +49,27 @@ function changePassword() {
 	})
 	.then(response => response.text())
 	.then(result => {
-		if (result === 'success') {
-			// 성공 알림은 확인 버튼을 눌러야 넘어가도록 alert 유지 
-			alert('비밀번호가 성공적으로 변경되었습니다.');
-			window.location.href = '/'; // 메인 페이지로 이동
-		} else {
-			// 실패 시 화면 하단에 텍스트로 에러 표시
-			generalFeedback.textContent = '비밀번호 변경에 실패했습니다. 다시 시도해주세요.';
-		}
-	})
+			if (result === 'success') {
+				// 성공 시 화면 하단에 초록색 텍스트로 성공 표시
+				generalFeedback.className = 'small mt-2 text-success text-center fw-bold';
+				generalFeedback.textContent = '비밀번호가 성공적으로 변경되었습니다. 잠시 후 이동합니다.';
+				
+				// 인풋창과 버튼 비활성화 
+				newPasswordInput.disabled = true;
+				confirmPasswordInput.disabled = true;
+				document.querySelector('button[onclick="changePassword()"]').disabled = true;
+
+				// 1.5초 대기 후 메인 페이지로 이동
+				setTimeout(() => {
+					window.location.href = '/'; 
+				}, 1500);
+				
+			} else {
+				// 실패 시 화면 하단에 빨간색 텍스트로 에러 표시
+				generalFeedback.className = 'small mt-2 text-danger text-center fw-bold';
+				generalFeedback.textContent = '비밀번호 변경에 실패했습니다. 다시 시도해주세요.';
+			}
+		})
 	.catch(error => {
 		console.error('Error:', error);
 		// 서버 연결 실패 알림 (요청하신 대로 유지)

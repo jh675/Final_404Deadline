@@ -84,6 +84,7 @@
 	        EMAIL = #{email},
 	        STATUS_CD = #{statusCd},
 	        PRJ_MANAGER_CD = #{prjManagerCd},
+	        GENDER_CD = #{genderCd},
 	        HIRE_DATE = #{hireDate},
 	        MCP_CD = #{mcpCd}
 	    WHERE ID = #{id}
