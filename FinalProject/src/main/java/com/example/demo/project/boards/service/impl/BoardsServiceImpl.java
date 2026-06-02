@@ -29,13 +29,11 @@ public class BoardsServiceImpl implements BoardsService {
 			msgSearch.setBoardId(board.getId());
 			
 			List<MessagesVO> allMsgs = messagesMapper.selectAll(msgSearch);
-			
-			// 원글(parent가 없거나 0) 개수 계산
+
 			long topicCount = allMsgs.stream()
 									 .filter(m -> m.getFieldparentId() == null || m.getFieldparentId() == 0)
 									 .count();
-			
-			// setTopicsCount로 수정 (VO의 필드명과 일치시킴)
+
 			board.setTopicsCount(topicCount); 
 		}
 		return list;
