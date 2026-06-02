@@ -14,6 +14,7 @@ public class CalenderVO {
 	private String colorTagCd;
 	private String keyword;
 	private String calType;
+	private String memName;
 	
 	private String calStart;
 	private String  calEnd;

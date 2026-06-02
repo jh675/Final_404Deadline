@@ -57,7 +57,7 @@ public class Calendercontroller {
 	}
 
 	// 일정 수정
-	@PutMapping("/calendar/update")
+	@PostMapping("/calendar/update")
 	@ResponseBody
 	public int update(CalenderVO vo) {
 		return calenderService.update(vo);
@@ -71,11 +71,13 @@ public class Calendercontroller {
 	}
 
 	// 일정 삭제
-	@DeleteMapping("/calendar/delete")
+	@PostMapping("/calendar/delete")
 	@ResponseBody
 	public int delete(@RequestParam(name = "id") int id) {
-		int memId = getLoginUser().getId().intValue();
-		return calenderService.delete(id, memId);
+		CalenderVO vo = new CalenderVO();
+		vo.setId(id);
+		vo.setMemId(getLoginUser().getId().intValue());
+		return calenderService.delete(vo);
 	}
 
 	// 일정 검색
