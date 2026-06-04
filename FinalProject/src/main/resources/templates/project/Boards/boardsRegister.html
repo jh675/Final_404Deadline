@@ -47,13 +47,13 @@
                 <input type="hidden" name="prjId" th:value="${boards.prjId != null ? boards.prjId : 4}" />
 
                 <div class="mb-3">
-                    <label for="name" class="form-label-sm text-success-dark">게시판 이름 <span class="text-danger">*</span></label>
-                    <input type="text" id="name" th:field="*{name}" class="form-control form-control-sm" placeholder="게시판 이름을 입력하세요." required />
+                    <label for="name" class="form-label-sm text-success-dark">제목 <span class="text-danger">*</span></label>
+                    <input type="text" id="name" th:field="*{name}" class="form-control form-control-sm" placeholder="게시판 제목을 입력하세요." required />
                 </div>
                 
                 <div class="mb-3">
-                    <label for="description" class="form-label-sm text-success-dark">설명</label>
-                    <textarea id="description" th:field="*{description}" class="form-control form-control-sm" rows="5" placeholder="게시판에 대한 설명을 입력하세요." style="resize: none;"></textarea>
+                    <label for="description" class="form-label-sm text-success-dark">내용</label>
+                    <textarea id="description" th:field="*{description}" class="form-control form-control-sm" rows="5" placeholder="게시판에 대한 내용을 입력하세요." style="resize: none;"></textarea>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 pt-2 border-top">
