@@ -169,6 +169,9 @@
 
         function confirmDelete(btn) {
             if (btn.disabled) return;
+            if(confirm('위키를 삭제하시겠습니까?') == false) {   
+                return;
+            }
             var title = btn.getAttribute('data-wiki-title') || '';
             if (btn.disabled) {
                 alert('시작 페이지는 삭제할 수 없습니다.');

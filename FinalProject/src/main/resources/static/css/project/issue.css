@@ -1062,11 +1062,13 @@ table.data-table tbody tr:last-child td {
 	line-height: 1.4;
 }
 
-/* 검색 폼 — 한 줄 컴팩트 (크기 유지, 박스/배경 없음) */
+/* 검색 폼 — 한 줄 컴팩트, 전 항목 오른쪽 정렬 */
 .issue-filter-form {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
+	justify-content: flex-end;
+	width: 100%;
 	gap: 14px;
 }
 
@@ -1138,7 +1140,6 @@ table.data-table tbody tr:last-child td {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	margin-left: auto;
 	flex-shrink: 0;
 }
 
@@ -1147,10 +1148,7 @@ table.data-table tbody tr:last-child td {
 		flex-wrap: nowrap;
 		overflow-x: auto;
 		padding-bottom: 2px;
-	}
-
-	.issue-filter-buttons {
-		margin-left: 0;
+		justify-content: flex-end;
 	}
 }
 

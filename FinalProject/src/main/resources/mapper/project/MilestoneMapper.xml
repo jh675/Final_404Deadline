@@ -19,8 +19,13 @@
 		<result column="type_cd" property="typeCd" />
 	</resultMap>
 	<select id="selectMilestoneList" resultType="MilestoneVO">
-		select * from milestone 
-		where prj_id=#{id}
+		select id,
+		       prj_id prjId,
+		       name,
+		       start_date startDate,
+		       end_date endDate
+		  from milestone
+		 where prj_id = #{id}
 	</select>
 
 	<select id="selectMilestoneById" resultType="MilestoneVO">
@@ -73,7 +78,7 @@
 			SELECT ML_SEQ.NEXTVAL FROM DUAL
 		</selectKey>
 		insert into milestone (id, prj_id, name, start_date, end_date)
-		values (${id}, #{prjId}, #{name}, #{startDate}, #{endDate})
+		values (${id}, #{prjId}, #{name}, #{startDate, jdbcType=DATE}, #{endDate, jdbcType=DATE})
 	</insert>
 	
 	<insert id="insertMilestoneIssue">
@@ -92,7 +97,7 @@
 	</insert>
 	<update id="updateMilestone">
 		update milestone
-		set name=#{name}, start_date=#{startDate}, end_date=#{endDate}
+		set name=#{name}, start_date=#{startDate, jdbcType=DATE}, end_date=#{endDate, jdbcType=DATE}
 		where id=#{id}
 	</update>
 	<delete id="deleteMilestone">

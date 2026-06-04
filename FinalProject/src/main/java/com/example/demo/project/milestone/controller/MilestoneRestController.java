@@ -99,12 +99,15 @@ public class MilestoneRestController {
 	}
 
 	@PutMapping("/milestone")
-	public Long updateMilestone(@RequestBody MilestoneVO milestoneVO) {
-		try {
-			return service.updateMilestone(milestoneVO);
-		} catch (Exception e) {
-			return null;
+	public MilestoneVO updateMilestone(@RequestBody MilestoneVO milestoneVO) {
+		if (milestoneVO == null || milestoneVO.getId() == null) {
+			throw new MilestoneSyncException("수정할 마일스톤 ID가 없습니다.");
 		}
+		Long updated = service.updateMilestone(milestoneVO);
+		if (updated == null || updated <= 0) {
+			throw new MilestoneSyncException("마일스톤 수정에 실패했습니다.");
+		}
+		return service.selectMilestoneById(milestoneVO.getId());
 	}
 	
 	@DeleteMapping("/milestone/{id}")

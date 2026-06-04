@@ -6,6 +6,7 @@ import com.example.demo.project.issue.service.IssueSummaryVO;
 
 public interface MilestoneService {
 	List<MilestoneVO> selectMilestoneList(Long id);
+	MilestoneVO selectMilestoneById(Long id);
 	List<MilestoneIssueVO> selectMilestoneIssueList(Long id);
 	List<MilestoneTimelineVO> selectTimelineList(Long id);
 	Long insertMilestone(MilestoneVO milestoneVO);

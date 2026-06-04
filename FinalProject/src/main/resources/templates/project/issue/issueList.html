@@ -175,7 +175,14 @@
 				const d = new Date(value);
 				return !isNaN(d.getTime());
 			}
-
+			function hasIssueAssignee(row) {
+				if (!row) return false;
+				if (row.memId != null && row.memId !== '') return true;
+				const name = row.memName;
+				if (name == null || name === '') return false;
+				const trimmed = String(name).trim();
+				return trimmed !== '' && trimmed !== '—' && trimmed !== '-' && trimmed !== '미정';
+			}
 			/**
 			 * 우선순위 컬럼 커스텀 정렬 (사전순 X → 업무 순서)
 			 * - 화면에는 get_sub_code_name 결과(예: 최상, 상, 중, 하)가 올 수 있고,
@@ -205,8 +212,7 @@
 				status: [
 					{ code: '01ISSUESTAT', label: '신규' },
 					{ code: '02ISSUESTAT', label: '진행중' },
-					{ code: '03ISSUESTAT', label: '검토' },
-					{ code: '04ISSUESTAT', label: '완료' }
+					{ code: '03ISSUESTAT', label: '검토' }
 				],
 				priority: [
 					{ code: '01ISSUEPRI', label: '최상' },
@@ -508,6 +514,7 @@
 					getRowByIssueId: getRowByIssueId,
 					formatIssueLabel: formatIssueLabel,
 					hasIssueDate: hasIssueDate,
+					hasIssueAssignee: hasIssueAssignee,
 					quickValueOptions: QUICK_VALUE_OPTIONS
 				})
 				: null;

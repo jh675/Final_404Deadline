@@ -113,9 +113,12 @@
 					var period = "";
 					if (ms.startDate && ms.endDate) {
 						try {
-							var s = new Date(ms.startDate);
-							var e = new Date(ms.endDate);
-							period = " (" + s.toLocaleDateString("ko-KR") + " ~ " + e.toLocaleDateString("ko-KR") + ")";
+							var parse = window.MilestoneTimeline && window.MilestoneTimeline.parseWallClockDate;
+							var s = parse ? parse(ms.startDate) : new Date(ms.startDate);
+							var e = parse ? parse(ms.endDate) : new Date(ms.endDate);
+							if (s && e && !isNaN(s.getTime()) && !isNaN(e.getTime())) {
+								period = " (" + s.toLocaleDateString("ko-KR") + " ~ " + e.toLocaleDateString("ko-KR") + ")";
+							}
 						} catch (_) {}
 					}
 					opt.textContent = (ms.name || ("마일스톤 #" + ms.id)) + period;
