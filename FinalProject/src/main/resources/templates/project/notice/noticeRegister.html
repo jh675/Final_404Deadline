@@ -5,17 +5,45 @@
 <head>
     <meta charset="UTF-8">
     <title>공지사항 관리</title>
-    <style>
-        .form-control, .form-select { font-size: 0.85rem; padding: 0.4rem 0.75rem !important; }
-        textarea.form-control { font-size: 0.85rem; padding: 0.6rem 0.75rem !important; }
-        
-        .text-success-dark { color: #2e7d32 !important; }
+<style>
+    :root {
+        --primary-sky: #20a0e0;
+        --dark-sky: #1a8cc8;
+        --light-sky: #f5fbff;
+        --text-sky: #106699;
+    }
 
-        
-        .form-label { font-weight: 600; color: #495057; font-size: 0.825rem; margin-bottom: 0.3rem; }
-        .form-check-input:checked { background-color: #66bb6a; border-color: #66bb6a; }
-        .form-check-label { font-size: 0.85rem; }
-    </style>
+    .form-control, .form-select { 
+        font-size: 0.85rem; 
+        padding: 0.5rem 0.75rem !important;
+        border: 1px solid #ced4da;
+    }
+    .form-control:focus { 
+        border-color: var(--primary-sky); 
+        box-shadow: 0 0 0 0.2rem rgba(32, 160, 224, 0.25); 
+    }	
+    textarea.form-control { font-size: 0.85rem; padding: 0.6rem 0.75rem !important; }
+    
+    .text-success-dark { color: var(--text-sky) !important; }
+
+    .form-label { font-weight: 600; color: #495057; font-size: 0.825rem; margin-bottom: 0.4rem; }
+    
+    .form-check-input:checked { background-color: var(--primary-sky); border-color: var(--primary-sky); }
+    .form-check-label { font-size: 0.85rem; cursor: pointer; }
+
+    .card-body .btn.btn-success {
+        background-color: #20a0e0 !important;
+        border-color: #20a0e0 !important;
+        color: #ffffff !important;
+    }
+    .card-body .btn.btn-success:hover {
+        background-color: #1a8cc8 !important;
+        border-color: #1a8cc8 !important;
+    }
+    
+    .card { border-radius: 12px; }
+    .rounded-3 { border-radius: 8px !important; }
+</style>
 </head>
 <body>
 
