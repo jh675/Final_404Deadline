@@ -17,6 +17,15 @@
 	color: #0d6efd;
 	text-decoration: underline;
 }
+
+.grid-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
 </style>
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
@@ -32,6 +41,20 @@
 
 		<div id="wrapper" style="max-width: 1100px; margin: 0 auto;">
     <div id="grid"></div>
+    <div class="grid-bottom">
+    <div class="grid-actions">
+
+        <div class="pagination-wrap"></div>
+
+        <button class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#registerModal"
+                th:if="${@prjAuth.hasRole('ROLE_DOCS_CREATE')}">
+            등록
+        </button>
+
+    </div>
+</div>
 </div>
 
 		<script th:inline="javascript">
@@ -71,7 +94,7 @@
 				}
 			},
 			{ header: '작성자', name: 'memName', width: 150, align:'center', sortable: true },
-			{ header: '작성일', name: 'createdOn', width: 150, align:'left', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') }
+			{ header: '작성일', name: 'createdOn', width: 200, align:'center', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') }
 		];
 
 		// 수정 권한이 있을 경우에만 컬럼 배열에 추가
@@ -138,7 +161,9 @@ grid = new tui.Grid({
     perPage: 10
   }
 });
-        
+		
+
+		
 		grid.on('click', (ev) => {
             const row = grid.getRow(ev.rowKey);
             if (!row) return;
@@ -226,13 +251,7 @@ grid = new tui.Grid({
 
 
 </script>
-		<div class="d-flex justify-content-end my-3">
-
-			<button class="btn btn-primary" data-bs-toggle="modal"
-				data-bs-target="#registerModal"
-				th:if="${@prjAuth.hasRole('ROLE_DOCS_CREATE')}">등록</button>
-
-		</div>
+		
 
 		<div th:replace="~{project/docs/modal/delete :: deleteModal}"></div>
 		<div th:replace="~{project/docs/modal/register :: registerModal}"></div>

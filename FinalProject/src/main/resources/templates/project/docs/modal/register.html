@@ -3,43 +3,33 @@
 
 <div th:fragment="registerModal">
 
-	<div class="modal fade"
-		id="registerModal"
-		tabindex="-1"
+	<div class="modal fade" id="registerModal" tabindex="-1"
 		aria-hidden="true">
 
 		<div class="modal-dialog modal-lg">
 
 			<div class="modal-content">
 
-				<form th:action="@{/project/docs/register}"
-					method="post"
+				<form th:action="@{/project/docs/register}" method="post"
 					enctype="multipart/form-data">
 
 					<div class="modal-header">
 
 						<h5 class="modal-title">문서 등록</h5>
 
-						<button type="button"
-							class="btn-close"
-							data-bs-dismiss="modal">
+						<button type="button" class="btn-close" data-bs-dismiss="modal">
 						</button>
 
 					</div>
 
 					<div class="modal-body">
 
-						<input type="hidden"
-							name="prjId"
-							th:value="${prjId}">
+						<input type="hidden" name="prjId" th:value="${prjId}">
 
 						<div class="mb-3">
 
-							<label class="form-label">제목</label>
-
-							<input type="text"
-								name="title"
-								class="form-control-custom">
+							<label class="form-label">제목</label> <input type="text"
+								name="title" class="form-control form-control-lg w-100">
 
 						</div>
 
@@ -48,19 +38,14 @@
 							<label class="form-label">내용</label>
 
 							<textarea name="description"
-								class="form-control-custom textarea-custom">
-							</textarea>
+								class="form-control form-control-lg w-100" rows="6"></textarea>
 
 						</div>
 
 						<div class="mb-3">
 
-							<label class="form-label">첨부파일</label>
-
-							<input type="file"
-								name="attachments"
-								class="form-control"
-								multiple>
+							<label class="form-label">첨부파일</label> <input type="file"
+								name="attachments" class="form-control" multiple>
 
 						</div>
 
@@ -68,16 +53,10 @@
 
 					<div class="modal-footer">
 
-						<button type="button"
-							class="btn btn-secondary"
-							data-bs-dismiss="modal">
-							취소
-						</button>
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">취소</button>
 
-						<button type="submit"
-							class="btn btn-primary">
-							등록
-						</button>
+						<button type="submit" class="btn btn-primary">등록</button>
 
 					</div>
 
