@@ -1,30 +1,7 @@
 /**
- * 이슈 모듈 — 깔끔한 UI 톤 (gridTheme.js / containerSize.css 와 호환)
+ * 이슈 모듈 — 배치·간격·형태 (색상: theme-colors.css)
  */
 :root {
-	--issue-border: #e9ecef;
-	--issue-border-focus: #cbd5e1;
-	--issue-bg: #ffffff;
-	--issue-bg-muted: #f8f9fa;
-	--issue-bg-subtle: #fbfbfc;
-	--issue-hover: #f4f6f8;
-	--issue-label: #868e96;
-	--issue-text: #495057;
-	--issue-heading: #212529;
-	--issue-link: #4263eb;
-	--issue-accent: #5c7cfa;
-	--issue-accent-hover: #4c6ef5;
-	/* 버튼 — 밝은 톤 통일 */
-	--issue-btn-bg: #ffffff;
-	--issue-btn-bg-hover: #f4f6f8;
-	--issue-btn-border: #e9ecef;
-	--issue-btn-text: #495057;
-	--issue-btn-primary-bg: #f0f4ff;
-	--issue-btn-primary-bg-hover: #e3ebff;
-	--issue-btn-primary-border: #d6e4ff;
-	--issue-btn-primary-text: #3b5bdb;
-	--issue-btn-disabled-bg: #f1f3f5;
-	--issue-btn-disabled-text: #adb5bd;
 	--issue-radius: 8px;
 	--issue-radius-sm: 6px;
 	--issue-radius-xs: 4px;
@@ -48,19 +25,32 @@
 	max-width: none;
 	margin-left: 0;
 	margin-right: 0;
-	padding: 24px 28px 28px;
+	padding: 28px 32px 32px;
 	background: var(--issue-bg);
 	border: 1px solid var(--issue-border);
 	border-radius: var(--issue-radius);
 	box-shadow: var(--issue-shadow-sm);
 }
 
+/* ── 섹션 간격 (목록·상세 공통) ─────────────────────────── */
+.issue-section + .issue-section {
+	padding-top: 32px;
+	border-top: 1px solid var(--issue-border);
+}
+
+.issue-section--bulk:not(:has(.issue-bulk-bar.is-visible)) {
+	display: none;
+}
+
+.issue-section--bulk:has(.issue-bulk-bar.is-visible) {
+	padding-top: 24px;
+	border-top: 1px solid var(--issue-border);
+}
+
 .issue-shell input:not([type="checkbox"]):not([type="range"]):focus,
 .issue-shell select:focus,
 .issue-shell textarea:focus {
 	outline: none;
-	border-color: var(--issue-border-focus);
-	box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.08);
 }
 
 /* ── 상단 바 · 섹션 ─────────────────────────────────────── */
@@ -69,9 +59,14 @@
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 14px;
-	padding-bottom: 18px;
-	margin-bottom: 22px;
+	padding-bottom: 20px;
+	margin-bottom: 28px;
 	border-bottom: 1px solid var(--issue-border);
+}
+
+.issue-page-head__actions {
+	margin-left: auto;
+	flex-shrink: 0;
 }
 
 .issue-page-back {
@@ -108,8 +103,8 @@
 }
 
 .issue-page-section {
-	margin-bottom: 22px;
-	padding-bottom: 22px;
+	margin-bottom: 28px;
+	padding-bottom: 28px;
 	border-bottom: 1px solid var(--issue-border);
 }
 
@@ -123,11 +118,31 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-start;
-	gap: 12px;
+	gap: 16px 20px;
 }
 
 .issue-form-row + .issue-form-row {
-	margin-top: 12px;
+	margin-top: 16px;
+}
+
+/* 등록/수정 폼 — 세로 라벨, 외곽 박스 없음 */
+.issue-form-row .search-item {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 6px;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+	min-height: auto;
+}
+
+.issue-form-row .search-item > label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+	white-space: nowrap;
 }
 
 .search-item--grow {
@@ -138,6 +153,86 @@
 .search-item--wide {
 	flex: 1 1 320px;
 	min-width: 280px;
+}
+
+/* 등록/수정 폼 — 행별 그리드 배치 */
+.issue-form-row--assign {
+	display: grid;
+	grid-template-columns: minmax(200px, 1.4fr) minmax(148px, 1fr) minmax(168px, 1.15fr);
+	gap: 16px 24px;
+	align-items: start;
+}
+
+.issue-form-row--schedule {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(220px, 1fr));
+	gap: 16px 24px;
+	align-items: start;
+}
+
+.issue-form-row--schedule .search-item {
+	width: 100%;
+	min-width: 0;
+}
+
+.issue-form-row--schedule .search-item--date input[type="date"],
+.issue-form-row--schedule .search-item--ref select {
+	width: 100%;
+	min-width: 0;
+}
+
+.search-item--ref {
+	min-width: 0;
+}
+
+.search-item--category,
+.search-item--priority {
+	min-width: 0;
+}
+
+.search-item--compact {
+	min-width: 0;
+	max-width: 360px;
+}
+
+.search-item--compact .field-wrap select {
+	font-size: 13px;
+}
+
+.issue-form-row .search-item select.form-select,
+.issue-form-row .search-item select {
+	padding-right: 2.25rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.search-item--category select {
+	min-width: 148px;
+}
+
+.search-item--priority select {
+	min-width: 168px;
+}
+
+@media (max-width: 1100px) {
+	.issue-form-row--schedule {
+		grid-template-columns: repeat(2, minmax(280px, 1fr));
+		gap: 20px 28px;
+	}
+}
+
+@media (max-width: 768px) {
+	.issue-form-row--assign {
+		grid-template-columns: 1fr;
+	}
+
+	.issue-form-row--schedule {
+		grid-template-columns: 1fr;
+	}
+
+	.search-item--compact {
+		max-width: none;
+	}
 }
 
 .search-item .field-wrap {
@@ -184,6 +279,35 @@
 .search-item--range {
 	flex: 1 1 360px;
 	min-width: 280px;
+}
+
+/* 등록/수정 — 상태 + 진척율 세로 묶음 */
+.issue-form-row--status-progress {
+	flex-direction: column;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	gap: 18px;
+	width: 100%;
+	padding: 18px 22px;
+	border-radius: var(--issue-radius-sm);
+	box-sizing: border-box;
+}
+
+.issue-form-row--status-progress .search-item--status,
+.issue-form-row--status-progress .search-item--progress {
+	flex: none;
+	width: 100%;
+	min-width: 0;
+	max-width: none;
+}
+
+.issue-form-row--status-progress .progress-wrap {
+	width: 100%;
+	max-width: none;
+}
+
+.issue-form-row--status-progress .progress-wrap input[type="range"] {
+	min-width: 0;
 }
 
 .form-hint {
@@ -391,9 +515,9 @@
 .issue-meta-grid {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
-	gap: 14px 18px;
-	margin-bottom: 22px;
-	padding: 18px 20px;
+	gap: 16px 20px;
+	margin-bottom: 28px;
+	padding: 20px 24px;
 	background: var(--issue-bg-subtle);
 	border: 1px solid var(--issue-border);
 	border-radius: var(--issue-radius-sm);
@@ -405,10 +529,9 @@
 
 .meta-item label {
 	display: block;
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
-	letter-spacing: 0.02em;
-	text-transform: uppercase;
+	letter-spacing: 0;
 	color: var(--issue-label);
 	margin-bottom: 6px;
 }
@@ -459,8 +582,8 @@
 }
 
 .section-block {
-	margin-bottom: 20px;
-	padding-bottom: 20px;
+	margin-bottom: 28px;
+	padding-bottom: 28px;
 	border-bottom: 1px solid var(--issue-border);
 }
 
@@ -622,7 +745,7 @@ table.data-table tbody tr:last-child td {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px;
-	margin-bottom: 14px;
+	margin-bottom: 20px;
 	padding: 4px;
 	background: var(--issue-bg-muted);
 	border-radius: var(--issue-radius-sm);
@@ -632,35 +755,37 @@ table.data-table tbody tr:last-child td {
 
 .tab-btn {
 	padding: 8px 16px;
-	border: none;
+	border: 1px solid transparent;
 	border-radius: var(--issue-radius-xs);
 	background: transparent;
 	font-size: 13px;
 	font-weight: 500;
 	color: var(--issue-label);
 	cursor: pointer;
-	transition: background var(--issue-transition), color var(--issue-transition);
+	transition: background var(--issue-transition), color var(--issue-transition), border-color var(--issue-transition);
 }
 
 .tab-btn:hover {
-	background: rgba(255, 255, 255, 0.7);
+	background: var(--app-surface, #fff);
 	color: var(--issue-heading);
+	border-color: rgba(var(--issue-primary-rgb, 47, 164, 231), 0.18);
 }
 
 .tab-btn.is-active {
-	background: var(--issue-btn-primary-bg);
-	color: var(--issue-btn-primary-text);
+	background: var(--issue-primary-muted);
+	color: var(--issue-primary);
 	font-weight: 600;
 	box-shadow: none;
-	border: 1px solid var(--issue-btn-primary-border);
+	border: 1px solid rgba(var(--issue-primary-rgb, 47, 164, 231), 0.35);
 }
 
 .tab-panel-wrap {
 	background: var(--issue-bg);
 	border: 1px solid var(--issue-border);
 	border-radius: var(--issue-radius-sm);
-	padding: 18px 20px;
+	padding: 20px 24px;
 	min-height: 220px;
+	margin-top: 4px;
 }
 
 .tab-panel {
@@ -720,7 +845,7 @@ table.data-table tbody tr:last-child td {
 	resize: vertical;
 }
 
-.comment-form button {
+.comment-form .btn-issue-soft {
 	align-self: flex-end;
 }
 
@@ -740,17 +865,39 @@ table.data-table tbody tr:last-child td {
 }
 
 .reply-hint-row {
-	display: flex;
+	display: none;
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
 	font-size: 12px;
 	color: var(--issue-text);
 	margin-bottom: 8px;
-	padding: 8px 10px;
+	padding: 8px 12px;
 	background: var(--issue-bg-muted);
 	border: 1px solid var(--issue-border);
-	border-radius: 4px;
+	border-radius: var(--issue-radius-sm);
+}
+
+.reply-hint-row.is-active,
+.reply-hint-row:not([hidden]) {
+	display: flex;
+}
+
+.reply-hint-row[hidden] {
+	display: none !important;
+}
+
+.reply-hint-row__text {
+	flex: 1;
+	min-width: 0;
+	color: var(--issue-heading);
+	font-weight: 500;
+}
+
+.comment-thread .comment.is-reply-target {
+	border-color: rgba(var(--issue-primary-rgb, 47, 164, 231), 0.45);
+	background: var(--issue-primary-muted);
+	box-shadow: inset 0 0 0 1px rgba(var(--issue-primary-rgb, 47, 164, 231), 0.12);
 }
 
 .inner-table-title {
@@ -793,10 +940,7 @@ table.data-table tbody tr:last-child td {
 .issue-pivot-btn,
 .issue-bulk-btn,
 .issue-quick-btn,
-.issue-shell .btn-ghost,
-.issue-shell .comment-form button[type="submit"],
-.issue-shell .reply-hint-row button,
-.issue-shell .comment-actions .btn-reply {
+.issue-shell .btn-ghost {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -823,8 +967,7 @@ table.data-table tbody tr:last-child td {
 .issue-btn--primary,
 .search-btn,
 .issue-register-btn,
-.issue-bulk-btn-primary,
-.issue-shell .comment-form button[type="submit"] {
+.issue-bulk-btn-primary {
 	background-color: var(--issue-btn-primary-bg);
 	color: var(--issue-btn-primary-text);
 	border-color: var(--issue-btn-primary-border);
@@ -833,8 +976,7 @@ table.data-table tbody tr:last-child td {
 .issue-btn--primary:hover:not(:disabled),
 .search-btn:hover,
 .issue-register-btn:hover,
-.issue-bulk-btn-primary:hover:not(:disabled),
-.issue-shell .comment-form button[type="submit"]:hover {
+.issue-bulk-btn-primary:hover:not(:disabled) {
 	background-color: var(--issue-btn-primary-bg-hover);
 	border-color: #c5d9ff;
 	color: var(--issue-btn-primary-text);
@@ -846,8 +988,7 @@ table.data-table tbody tr:last-child td {
 .search-cancel-btn,
 .issue-pivot-btn,
 .issue-bulk-btn-ghost,
-#issueQuickCancelBtn,
-.issue-shell .reply-hint-row button {
+#issueQuickCancelBtn {
 	background-color: var(--issue-btn-bg);
 	color: var(--issue-btn-text);
 	border-color: var(--issue-btn-border);
@@ -857,8 +998,7 @@ table.data-table tbody tr:last-child td {
 .search-cancel-btn:hover,
 .issue-pivot-btn:hover,
 .issue-bulk-btn-ghost:hover,
-#issueQuickCancelBtn:hover,
-.issue-shell .reply-hint-row button:hover {
+#issueQuickCancelBtn:hover {
 	background-color: var(--issue-btn-bg-hover);
 	border-color: #dee2e6;
 	color: var(--issue-heading);
@@ -876,8 +1016,7 @@ table.data-table tbody tr:last-child td {
 
 .issue-btn--sm,
 .issue-quick-btn,
-.issue-shell .btn-ghost,
-.issue-shell .comment-actions .btn-reply {
+.issue-shell .btn-ghost {
 	height: 32px;
 	padding: 0 14px;
 	font-size: 12px;
@@ -888,98 +1027,13 @@ table.data-table tbody tr:last-child td {
 
 .issue-btn--sm:hover:not(:disabled),
 .issue-quick-btn:hover,
-.issue-shell .btn-ghost:hover,
-.issue-shell .comment-actions .btn-reply:hover {
+.issue-shell .btn-ghost:hover {
 	background-color: var(--issue-btn-bg-hover);
 	border-color: #dee2e6;
 	color: var(--issue-heading);
 }
 
-/* issue-btn--sm + primary 조합 */
-.issue-btn--sm.issue-btn--primary,
-.issue-shell .comment-actions .btn-reply.issue-btn--primary {
-	background-color: var(--issue-btn-primary-bg);
-	color: var(--issue-btn-primary-text);
-	border-color: var(--issue-btn-primary-border);
-}
-
-/* ── 버튼 역할별 색상 규칙 (요청 반영) ──────────────────── */
-/* 등록/검색 계열: Primary */
-.search-btn,
-.issue-register-btn,
-.issue-btn--primary,
-.issue-bulk-btn-primary,
-.issue-shell .comment-form button[type="submit"] {
-	background-color: #0d6efd;
-	border-color: #0d6efd;
-	color: #fff;
-}
-
-.search-btn:hover,
-.issue-register-btn:hover,
-.issue-btn--primary:hover:not(:disabled),
-.issue-bulk-btn-primary:hover:not(:disabled),
-.issue-shell .comment-form button[type="submit"]:hover {
-	background-color: #0b5ed7;
-	border-color: #0a58ca;
-	color: #fff;
-}
-
-/* 취소 계열: Danger */
-.search-cancel-btn,
-#btnCancel,
-#issueQuickCancelBtn,
-#issueBulkClearBtn,
-#cancelReplyBtn {
-	background-color: #dc3545;
-	border-color: #dc3545;
-	color: #fff;
-}
-
-.search-cancel-btn:hover,
-#btnCancel:hover,
-#issueQuickCancelBtn:hover,
-#issueBulkClearBtn:hover,
-#cancelReplyBtn:hover {
-	background-color: #bb2d3b;
-	border-color: #b02a37;
-	color: #fff;
-}
-
-/* 나머지 버튼: Info */
-.issue-btn--secondary,
-.issue-pivot-btn,
-.issue-bulk-btn-ghost,
-.issue-quick-btn,
-.issue-shell .btn-ghost,
-.issue-shell .comment-actions .btn-reply {
-	background-color: #0dcaf0;
-	border-color: #0dcaf0;
-	color: #073b4c;
-}
-
-.issue-btn--secondary:hover:not(:disabled),
-.issue-pivot-btn:hover,
-.issue-bulk-btn-ghost:hover,
-.issue-quick-btn:hover,
-.issue-shell .btn-ghost:hover,
-.issue-shell .comment-actions .btn-reply:hover {
-	background-color: #31d2f2;
-	border-color: #25cff2;
-	color: #052c37;
-}
-
-/* issueList에서 Bootstrap outline 버튼 사용 시 기존 issue 버튼톤이 덮지 않도록 보정 */
-.issue-shell .btn.btn-outline-primary,
-.issue-shell .btn.btn-outline-secondary,
-.issue-shell .btn.btn-outline-success,
-.issue-shell .btn.btn-outline-info,
-.issue-shell .btn.btn-outline-warning,
-.issue-shell .btn.btn-outline-danger,
-.issue-shell .btn.btn-outline-light,
-.issue-shell .btn.btn-outline-dark {
-	background-color: transparent;
-}
+/* 버튼 역할 색상 → theme-colors.css */
 
 #grid .btn.issue-quick-btn.btn-success {
 	height: auto;
@@ -987,52 +1041,50 @@ table.data-table tbody tr:last-child td {
 	font-size: 0.875rem;
 	line-height: 1.5;
 	border-radius: 0.375rem;
-	background-color: var(--bs-success, #78c2ad) !important;
-	color: #fff !important;
-	border-color: var(--bs-success, #78c2ad) !important;
 }
 
-#grid .btn.issue-quick-btn.btn-success:hover {
-	background-color: var(--bs-success, #78c2ad) !important;
-	filter: brightness(0.93);
-	color: #fff;
+/* ── 목록 페이지 ─────────────────────────────────────────── */
+.issue-list__header {
+	margin-bottom: 24px;
 }
 
-/* ── 목록: 검색 영역 ───────────────────────────────────── */
-.search-area {
+.issue-list__title {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--issue-heading);
+	line-height: 1.4;
+}
+
+/* 검색 폼 — 한 줄 컴팩트 (크기 유지, 박스/배경 없음) */
+.issue-filter-form {
 	display: flex;
-	flex-wrap: nowrap;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: 14px;
-	padding: 16px 18px;
-	margin-bottom: 20px;
-	background: #f3f7fc;
-	border: 1px solid #c9d7e8;
-	border-radius: var(--issue-radius-sm);
-	overflow-x: auto;
 }
 
-.search-item {
+.issue-field {
 	display: flex;
+	flex-direction: row;
 	align-items: center;
 	gap: 8px;
 	flex-shrink: 0;
-	background: #ffffff;
-	border: 1px solid #dbe4ef;
-	border-radius: 8px;
-	padding: 8px 10px;
-	min-height: 50px;
+	min-width: 0;
 }
 
-.search-item label {
-	font-weight: 500;
+.issue-field label {
 	font-size: 12px;
+	font-weight: 600;
 	color: var(--issue-label);
+	line-height: 1;
 	white-space: nowrap;
 }
 
-.search-item select,
-.search-item input[type="text"] {
+.issue-field select,
+.issue-field input[type="text"] {
+	width: auto;
 	height: 34px;
 	padding: 0 10px;
 	border: 1px solid var(--issue-border);
@@ -1040,38 +1092,144 @@ table.data-table tbody tr:last-child td {
 	font-size: 13px;
 	background-color: var(--issue-bg);
 	color: var(--issue-heading);
+	box-sizing: border-box;
+	transition: border-color var(--issue-transition), box-shadow var(--issue-transition);
+}
+
+.issue-field select {
 	min-width: 90px;
+}
+
+.issue-field input[type="text"] {
+	min-width: 160px;
+}
+
+.issue-field--subject {
+	flex-shrink: 1;
+}
+
+.issue-filter-check {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin: 0;
+	font-size: 13px;
+	color: var(--issue-text);
+	cursor: pointer;
+	white-space: nowrap;
+	flex-shrink: 0;
+	user-select: none;
+}
+
+.issue-filter-check input[type="checkbox"] {
+	width: auto;
+	height: auto;
+	margin: 0;
+	accent-color: var(--issue-primary);
+	cursor: pointer;
+}
+
+.issue-filter-buttons {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+@media (max-width: 992px) {
+	.issue-filter-form {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		padding-bottom: 2px;
+	}
+
+	.issue-filter-buttons {
+		margin-left: 0;
+	}
+}
+
+.issue-list-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.issue-list-footer__pagination {
+	flex: 1 1 200px;
+	min-width: 0;
+}
+
+.issue-list-footer__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+/* 레거시 search-area (다른 페이지 호환) */
+.search-area {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 16px 20px;
+	padding: 0;
+	margin-bottom: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+}
+
+.search-item {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 6px;
+	flex-shrink: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+	min-height: auto;
+}
+
+.search-item label {
+	font-weight: 600;
+	font-size: 12px;
+	color: var(--issue-label);
+	white-space: nowrap;
+}
+
+.search-item select,
+.search-item input[type="text"] {
+	height: 36px;
+	padding: 0 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	background-color: var(--issue-bg);
+	color: var(--issue-heading);
+	min-width: 0;
+	width: 100%;
 	transition: border-color var(--issue-transition), box-shadow var(--issue-transition);
 }
 
 .search-item input[type="text"] {
-	min-width: 160px;
+	min-width: 0;
 }
 
 .checkbox-item {
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	gap: 6px;
 	font-size: 13px;
 	color: var(--issue-text);
 	white-space: nowrap;
 	flex-shrink: 0;
-}
-
-.right-area {
-	margin-left: auto;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	flex-shrink: 0;
-	background: #e9f2ff;
-	border: 1px dashed #9ec5fe;
-	border-radius: 8px;
-	padding: 8px 10px;
-}
-
-.right-area .search-item {
-	border-color: #bfd0e6;
 }
 
 /* ── TOAST UI Grid ─────────────────────────────────────── */
@@ -1080,7 +1238,6 @@ table.data-table tbody tr:last-child td {
 #childIssueList {
 	width: 100%;
 	min-height: 100px;
-	margin-top: 4px;
 }
 
 .issue-shell .tui-grid-container {
@@ -1161,10 +1318,10 @@ table.data-table tbody tr:last-child td {
 	align-items: center;
 	gap: 12px;
 	flex-wrap: wrap;
-	margin: 0 0 16px;
-	padding: 12px 16px;
-	background: #f8fbff;
-	border: 1px solid #cfe2ff;
+	margin: 0;
+	padding: 14px 18px;
+	background: var(--issue-bg-muted);
+	border: 1px solid var(--issue-border);
 	border-radius: var(--issue-radius-sm);
 	font-size: 13px;
 	color: var(--issue-text);

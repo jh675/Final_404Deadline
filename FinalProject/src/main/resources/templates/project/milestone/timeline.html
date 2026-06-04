@@ -271,7 +271,7 @@
     #timeline {
       flex: 1;
       min-height: 0;
-      overflow: auto;
+      overflow: hidden;
     }
     .vis-labelset .issue-group-link {
       color: #0747a6;
@@ -393,6 +393,7 @@
       clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
     }
   </style>
+  <link rel="stylesheet" th:href="@{/css/project/milestone-ui.css}" />
   </th:block>
 </head>
 <body>
@@ -747,6 +748,28 @@
         return { groups: nextGroups, items: nextItems };
       }
 
+      var TIMELINE_AXIS_HEIGHT = 42;
+      var TIMELINE_ROW_HEIGHT = 36;
+      var timelineResizeObserver = null;
+
+      function calcTimelineContentHeight(groupCount) {
+        var n = Math.max(groupCount, 1);
+        return TIMELINE_AXIS_HEIGHT + n * TIMELINE_ROW_HEIGHT + Math.max(0, n - 1) + 4;
+      }
+
+      function syncTimelineViewport() {
+        if (!timeline || !container || container.hidden) return;
+        var viewH = container.clientHeight;
+        if (viewH <= 0) viewH = 200;
+        var groupCount = groups.length || 0;
+        var contentH = calcTimelineContentHeight(groupCount);
+        timeline.setOptions({
+          height: viewH + "px",
+          verticalScroll: contentH > viewH,
+        });
+        timeline.redraw();
+      }
+
       function ensureTimeline() {
         if (timeline) return;
         timeline = new vis.Timeline(container, items, groups, {
@@ -756,6 +779,7 @@
           editable: false,
           selectable: true,
           showCurrentTime: true,
+          verticalScroll: false,
           xss: {
             filterOptions: {
               whiteList: {
@@ -776,6 +800,17 @@
             openTimelineViewModal(it);
           }
         });
+
+        if (window.ResizeObserver) {
+          timelineResizeObserver = new ResizeObserver(function () {
+            syncTimelineViewport();
+          });
+          timelineResizeObserver.observe(container);
+        } else {
+          window.addEventListener("resize", syncTimelineViewport);
+        }
+
+        requestAnimationFrame(syncTimelineViewport);
       }
 
       function updatePeriodMarkers(ms) {
@@ -829,7 +864,7 @@
         // 마커는 다음 프레임 — 데이터+윈도우 갱신과 같은 redraw 사이클에 넣지 않음
         requestAnimationFrame(function () {
           updatePeriodMarkers(ms);
-          timeline.redraw();
+          syncTimelineViewport();
         });
       }
 
