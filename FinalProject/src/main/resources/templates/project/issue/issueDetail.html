@@ -28,7 +28,7 @@
 		<a th:href="@{/project/issue/list}" class="issue-page-back">← 이슈 목록</a>
 		<h1 class="issue-page-head__title"
 			th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
-		<div class="right-area" th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
+		<div class="issue-page-head__actions" th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
 			<a class="btn btn-primary btn-sm"
 				th:href="@{/project/issue/register(id=${issue.id})}">이슈 수정</a>
 		</div>
@@ -121,11 +121,11 @@
 	</div>
 
 	<div class="tab-row" role="tablist">
-		<button type="button" class="tab-btn btn btn-info btn-sm text-white is-active" role="tab" aria-selected="true" data-tab="comments">
+		<button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="comments">
 			댓글 <span class="badge-count" id="commentCountBadge">0</span>
 		</button>
-		<button type="button" class="tab-btn btn btn-outline-info btn-sm" role="tab" aria-selected="false" data-tab="related">연관된 이슈</button>
-		<button type="button" class="tab-btn btn btn-outline-info btn-sm" role="tab" aria-selected="false" data-tab="history" th:if="${@prjAuth.hasRole('ROLE_HISTORY_VIEW')}">히스토리</button>
+		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="related">연관된 이슈</button>
+		<button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="history" th:if="${@prjAuth.hasRole('ROLE_HISTORY_VIEW')}">히스토리</button>
 	</div>
 
 	<div class="tab-panel-wrap" id="tabPanels">
@@ -136,15 +136,15 @@
 				</div>
 			</div>
 			<div class="comment-form-wrap">
-				<div class="reply-hint-row" id="replyHintRow" hidden>
-					<span id="replyHintText"></span>
-					<button type="button" class="btn btn-danger btn-sm" id="cancelReplyBtn">답글 취소</button>
+				<div class="reply-hint-row" id="replyHintRow" hidden aria-live="polite">
+					<span id="replyHintText" class="reply-hint-row__text"></span>
+					<button type="button" class="btn btn-sm btn-issue-soft btn-reply-cancel" id="cancelReplyBtn">답글 취소</button>
 				</div>
 				<form class="comment-form" id="issueCommentForm" th:data-issue-id="${issue.id}">
 					<input type="hidden" name="issueId" th:value="${issue.id}" />
 					<input type="hidden" name="parentId" id="commentParentId" value="" />
 					<textarea name="content" placeholder="댓글 내용" required></textarea>
-					<button type="submit" class="btn btn-primary btn-sm">등록</button>
+					<button type="submit" class="btn btn-sm btn-issue-soft btn-issue-soft--accent">등록</button>
 				</form>
 			</div>
 		</div>
@@ -602,20 +602,40 @@
 		}
 		if (hintRow) {
 			hintRow.hidden = true;
+			hintRow.classList.remove('is-active');
 		}
+		threadScroll.querySelectorAll('.comment.is-reply-target').forEach(function (el) {
+			el.classList.remove('is-reply-target');
+		});
 	}
 
 	function setReplyTarget(commentId, commentNum) {
+		if (parentInput.value && String(parentInput.value) === String(commentId)) {
+			clearReplyTarget();
+			return;
+		}
+
 		parentInput.value = commentId;
+		threadScroll.querySelectorAll('.comment.is-reply-target').forEach(function (el) {
+			el.classList.remove('is-reply-target');
+		});
+		var targetBtn = threadScroll.querySelector('.btn-reply[data-comment-id="' + commentId + '"]');
+		if (targetBtn) {
+			var targetComment = targetBtn.closest('.comment');
+			if (targetComment) {
+				targetComment.classList.add('is-reply-target');
+			}
+		}
 		if (hintText) {
 			if (commentNum != null && String(commentNum).length) {
-				hintText.textContent = commentNum + '번 댓글에 댓글 작성중';
+				hintText.textContent = commentNum + '번 댓글에 댓글 작성 중';
 			} else {
-				hintText.textContent = '선택한 댓글에 댓글 작성중';
+				hintText.textContent = '선택한 댓글에 댓글 작성 중';
 			}
 		}
 		if (hintRow) {
 			hintRow.hidden = false;
+			hintRow.classList.add('is-active');
 		}
 		if (textarea) {
 			textarea.focus();
@@ -650,7 +670,7 @@
 			var content = escapeHtml(comment.content || '').replace(/\r?\n/g, '<br>');
 			var replyButton = comment.id != null
 				? '<div class="comment-actions">'
-					+ '<button type="button" class="btn btn-info btn-sm btn-reply" data-comment-id="' + escapeHtml(comment.id)
+					+ '<button type="button" class="btn btn-sm btn-issue-soft btn-reply" data-comment-id="' + escapeHtml(comment.id)
 					+ '" data-comment-num="' + (index + 1) + '">댓글달기</button>'
 				+ '</div>'
 				: '';
