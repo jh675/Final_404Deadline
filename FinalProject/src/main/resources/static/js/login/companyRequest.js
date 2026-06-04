@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-	// 폼 제출 시 비동기 처리 및 1.5초 대기 로직
+	// 폼 제출 시 비동기 처리 및 1초 대기 로직
     companyRequestForm.addEventListener('submit', async function(e) {
         e.preventDefault(); 
 
@@ -107,10 +107,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.className = 'btn btn-success px-5 py-2 fw-semibold';
                 submitBtn.textContent = '요청 완료';
                 
-                // 1.5초 대기 후 새로고침하여 모달 닫기
+                // 1초 대기 후 새로고침하여 모달 닫기
                 setTimeout(() => {
                     location.reload(); 
-                }, 1500);
+                }, 1000);
                 
             } else {
                 feedback.className = 'small fw-bold text-danger';
