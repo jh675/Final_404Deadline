@@ -84,7 +84,7 @@ public class mypageController {
 	public String mypage(Model model, HttpSession session) {
 		session.setAttribute("currentTopMenu", "mypage");
 		UserVO loginUser = getLoginUser();
-
+	
 		List<MypageVO> list = mypageService.selectMyProjectList(loginUser.getId());
 		model.addAttribute("projectList", list);
 

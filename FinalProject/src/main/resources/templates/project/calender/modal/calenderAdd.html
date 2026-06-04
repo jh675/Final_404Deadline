@@ -5,7 +5,7 @@
 	<!-- ===== 일정 수정 모달 ===== -->
 	<div class="modal fade" id="updateModalOverlay" tabindex="-1"
 		aria-labelledby="updateModalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-scrollable">
+		<div class="modal-dialog modal-dialog-scrollable" style="max-width: 550px;">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="updateModalLabel">일정변경/삭제</h5>
@@ -81,41 +81,37 @@
 							placeholder="텍스트를 입력해 주세요.">
 					</div>
 
-					<!-- 공유 유형 + 공유여부 한 줄 -->
+					<!-- 공유 유형 + 공유여부 -->
 					<div class="mb-3">
-						<div class="d-flex align-items-center gap-3 flex-wrap">
-							<div class="d-flex align-items-center gap-2">
-								<label class="form-label mb-0">공유 유형</label> <select
-									class="form-select" id="upd_typeCd" style="width: auto;">
-									<option value="">선택</option>
-									<option value="01CALTYPE">개인일정</option>
-									<option value="02CALTYPE">그룹일정</option>
-									<option value="03CALTYPE">회사일정</option>
-								</select>
+						<label class="form-label">공유 유형</label>
+						<div class="d-flex align-items-center gap-3">
+							<select class="form-select" id="upd_typeCd" style="width: 150px;">
+								<option value="">선택</option>
+								<option value="01CALTYPE">개인일정</option>
+								<option value="02CALTYPE">그룹일정</option>
+								<option value="03CALTYPE">회사일정</option>
+							</select> <label class="form-label mb-0 text-nowrap">공유여부</label>
+							<div class="form-check mb-0">
+								<input class="form-check-input" type="radio"
+									name="upd_sharingCd" id="upd_sharingMe" value="02CALSHARE"
+									checked> <label class="form-check-label text-nowrap"
+									for="upd_sharingMe">나만보기</label>
 							</div>
-							<div class="d-flex align-items-center gap-2">
-								<label class="form-label mb-0">공유여부</label>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio"
-										name="upd_sharingCd" id="upd_sharingMe" value="02CALSHARE"
-										checked> <label class="form-check-label"
-										for="upd_sharingMe">나만보기</label>
-								</div>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio"
-										name="upd_sharingCd" id="upd_sharingAll" value="01CALSHARE">
-									<label class="form-check-label" for="upd_sharingAll">전체
-										공유</label>
-								</div>
+							<div class="form-check mb-0">
+								<input class="form-check-input" type="radio"
+									name="upd_sharingCd" id="upd_sharingAll" value="01CALSHARE">
+								<label class="form-check-label text-nowrap" for="upd_sharingAll">전체
+									공유</label>
 							</div>
 						</div>
 					</div>
 
 					<!-- 일정 유형 -->
 					<div class="mb-3">
-						<div class="d-flex align-items-center gap-2">
-							<label class="form-label mb-0">일정 유형</label> <select
-								class="form-select" id="upd_calType" style="width: auto;">
+						<label class="form-label">일정 유형</label>
+						<div class="d-flex align-items-center">
+							<select class="form-select" id="upd_calType"
+								style="width: 150px;">
 								<option value="">선택</option>
 								<option value="01CALDETAIL">회의</option>
 								<option value="02CALDETAIL">행사</option>
@@ -125,8 +121,8 @@
 							</select>
 						</div>
 					</div>
-				</div>
-				<!-- modal-body 끝 -->
+				</div> <!-- modal-body 끝 -->
+				
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary"
 						data-bs-dismiss="modal">취소</button>
