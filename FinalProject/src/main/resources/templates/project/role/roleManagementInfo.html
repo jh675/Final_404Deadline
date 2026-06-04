@@ -160,19 +160,19 @@
                 aria-label="역할 보유 그룹 목록"
               ></div>
               <div id="roleGroupToolbar" class="role-group-toolbar" th:classappend="${registerMode} ? '' : ' is-hidden'">
-                <button type="button" class="role-group-toolbar__btn" id="btnManageRoleGroups">그룹 관리</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnManageRoleGroups">그룹 관리</button>
               </div>
             </div>
           </div>
         </section>
-        <div class="role-actions" th:if="${registerMode}">
-          <button type="button" class="role-actions__btn" id="btnRoleSave">저장</button>
-          <button type="button" class="role-actions__btn role-actions__btn--secondary" id="btnRoleCancel">취소</button>
+        <div class="issue-register-actions role-actions" th:if="${registerMode}">
+          <button type="button" class="btn btn-primary" id="btnRoleSave">저장</button>
+          <button type="button" class="btn btn-secondary" id="btnRoleCancel">취소</button>
         </div>
 
-        <div class="role-actions" th:if="${!registerMode and currentRole != null}">
-          <button type="button" class="role-actions__btn" id="btnRoleEdit" data-label-edit="수정" data-label-save="저장">수정</button>
-          <button type="button" class="role-actions__btn role-actions__btn--secondary is-hidden" id="btnRoleCancelEdit">취소</button>
+        <div class="issue-register-actions role-actions" th:if="${!registerMode and currentRole != null}">
+          <button type="button" class="btn btn-primary" id="btnRoleEdit" data-label-edit="수정" data-label-save="저장">수정</button>
+          <button type="button" class="btn btn-secondary is-hidden" id="btnRoleCancelEdit">취소</button>
         </div>
 
       </th:block>
@@ -187,7 +187,7 @@
       </th:block>
 
       <script
-        th:if="${menuSections != null and !menuSections.isEmpty() and (registerMode or currentRole != null)}"
+        th:if="${registerMode or currentRole != null}"
         th:inline="javascript"
       >
         /*<![CDATA[*/
@@ -199,12 +199,11 @@
         /*]]>*/
       </script>
       <script
-        th:if="${menuSections != null and !menuSections.isEmpty() and (registerMode or currentRole != null)}"
-        th:src="@{/js/role/roleManagementInfo.js(v=2)}"
+        th:if="${registerMode or currentRole != null}"
+        th:src="@{/js/role/roleManagementInfo.js(v=3)}"
       ></script>
         </div>
       </div>
     </div>
   </body>
-</html>
 </html>

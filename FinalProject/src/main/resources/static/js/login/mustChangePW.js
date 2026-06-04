@@ -59,10 +59,10 @@ function changePassword() {
 				confirmPasswordInput.disabled = true;
 				document.querySelector('button[onclick="changePassword()"]').disabled = true;
 
-				// 1.5초 대기 후 메인 페이지로 이동
+				// 1초 대기 후 메인 페이지로 이동
 				setTimeout(() => {
 					window.location.href = '/'; 
-				}, 1500);
+				}, 1000);
 				
 			} else {
 				// 실패 시 화면 하단에 빨간색 텍스트로 에러 표시

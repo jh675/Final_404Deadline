@@ -42,9 +42,12 @@ public class Calendercontroller {
 	@GetMapping("/calendar/listJson")
 	@ResponseBody
 	public List<CalenderVO> calenderListJson(@RequestParam(name = "typeCd", defaultValue = "") String typeCd) {
+		 System.out.println("===== 캘린더 조회 시작 =====");
 		CalenderVO vo = new CalenderVO();
 		vo.setTypeCd(typeCd);
 		vo.setMemId(getLoginUser().getId().intValue());
+		vo.setBizNo(getLoginUser().getBizNo());
+		  System.out.println("bizNo: " + getLoginUser().getBizNo());
 		return calenderService.getList(vo);
 	}
 

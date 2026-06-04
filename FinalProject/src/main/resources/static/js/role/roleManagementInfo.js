@@ -301,8 +301,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
           var cfg = window.roleManagementInfoPageConfig || {};
-          if (cfg.registerMode) return;
-          var isRegisterMode = false;
+          var isRegisterMode = !!cfg.registerMode;
           var prjId = cfg.prjId;
           var roleCd = cfg.roleCd;
           var roleEditMode = false;

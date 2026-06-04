@@ -131,6 +131,8 @@
       display: flex;
       flex-direction: column;
       min-width: 0;
+      min-height: 0;
+      overflow: hidden;
     }
     .timeline-header {
       display: flex;
@@ -268,6 +270,27 @@
       height: 400px;
       overflow: hidden;
     }
+    /* 이슈 행 높이 고정 — 등록 이슈가 적어도 행이 컨테이너 높이만큼 늘어나지 않음 */
+    .milestone-timeline-page #timeline {
+      --timeline-row-height: 40px;
+    }
+    .milestone-timeline-page .vis-panel.vis-left .vis-label,
+    .milestone-timeline-page .vis-panel.vis-left .vis-label .vis-inner {
+      height: var(--timeline-row-height);
+      min-height: var(--timeline-row-height);
+      max-height: var(--timeline-row-height);
+      box-sizing: border-box;
+    }
+    .milestone-timeline-page .vis-panel.vis-left .vis-label .vis-inner {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.25;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
     .vis-labelset .issue-group-link {
       color: #0747a6;
       font-weight: 600;
@@ -303,8 +326,9 @@
     }
     .timeline-status {
       flex-shrink: 0;
-      margin-top: 12px;
-      padding: 10px 14px;
+      margin: 0;
+      padding: 8px 14px;
+      border-top: 1px solid #ebecf0;
       background: #fafbfc;
       border: 1px solid #ebecf0;
       border-radius: 6px;
@@ -474,15 +498,14 @@
 
       <div id="timeline"></div>
       <p class="empty-hint" id="emptyHint" hidden>이 마일스톤에 등록된 이슈가 없습니다.</p>
+      <p class="timeline-status" id="timelineStatus" role="status"
+         th:text="${@prjAuth.hasRole('ROLE_TIMELINE_VIEW')
+           ? '타임라인 이벤트를 클릭하면 상세 내용을 확인할 수 있습니다.'
+           : '마일스톤과 등록 이슈 목록을 확인할 수 있습니다.'}">
+        타임라인 이벤트를 클릭하면 상세 내용을 확인할 수 있습니다.
+      </p>
     </section>
   </div>
-
-    <p class="timeline-status" id="timelineStatus" role="status"
-       th:text="${@prjAuth.hasRole('ROLE_TIMELINE_VIEW')
-         ? '타임라인 이벤트를 클릭하면 상세 내용을 확인할 수 있습니다.'
-         : '마일스톤과 등록 이슈 목록을 확인할 수 있습니다.'}">
-      타임라인 이벤트를 클릭하면 상세 내용을 확인할 수 있습니다.
-    </p>
   </main>
 
   <div th:if="${@prjAuth.hasRole('ROLE_MILESTONE_CREATE') or @prjAuth.hasRole('ROLE_MILESTONE_UPDATE')}"
@@ -744,12 +767,16 @@
       }
 
       var TIMELINE_HEIGHT = "400px";
+      var TIMELINE_ROW_HEIGHT = 40;
 
       function ensureTimeline() {
         if (timeline) return;
+        container.style.setProperty("--timeline-row-height", TIMELINE_ROW_HEIGHT + "px");
         timeline = new vis.Timeline(container, items, groups, {
           stack: true,
           height: TIMELINE_HEIGHT,
+          groupHeightMode: "fixed",
+          margin: { axis: 8, item: { horizontal: 8, vertical: 4 } },
           zoomMin: 1000 * 60 * 60 * 6,
           zoomMax: 1000 * 60 * 60 * 24 * 31 * 6,
           editable: false,
@@ -796,7 +823,8 @@
           hasStartMarker = true;
         }
         if (e) {
-          timeline.addCustomTime(e, "ms-end");
+          var endMarker = new Date(e.getFullYear(), e.getMonth(), e.getDate(), 23, 59, 59);
+          timeline.addCustomTime(endMarker, "ms-end");
           timeline.setCustomTimeMarker("마감", "ms-end", false);
           hasEndMarker = true;
         }
@@ -1122,7 +1150,20 @@
             milestones[idx] = Object.assign({}, milestones[idx], ms);
             renderSidebar();
             selectMilestone(milestoneKey(milestones[idx]));
+          } else {
+            this.refreshMilestones().then(function () {
+              selectMilestone(milestoneKey(ms));
+            });
           }
+        },
+        refreshMilestones: function () {
+          if (prjId == null || prjId === "" || Number.isNaN(Number(prjId))) {
+            return Promise.resolve();
+          }
+          return fetchMilestones().then(function (list) {
+            milestones = list || [];
+            renderSidebar();
+          });
         },
         removeMilestoneLocal: function (id) {
           milestones = milestones.filter(function (m) { return String(m.id) !== String(id); });
@@ -1239,10 +1280,10 @@
           var min = "";
           var max = "";
           if (typeof projectStartDate !== "undefined" && projectStartDate) {
-            min = projectStartDate + "T00:00";
+            min = projectStartDate;
           }
           if (typeof projectClosedDate !== "undefined" && projectClosedDate) {
-            max = projectClosedDate + "T23:59";
+            max = projectClosedDate;
           }
           return { min: min, max: max };
         },
@@ -1267,10 +1308,10 @@
           var b = this.getProjectMilestoneBounds();
           if (!b.min && !b.max) return "";
           if (b.min && b.max) {
-            return "프로젝트 기간: " + b.min.replace("T", " ") + " ~ " + b.max.replace("T", " ");
+            return "프로젝트 기간: " + b.min + " ~ " + b.max;
           }
-          if (b.min) return "프로젝트 시작일 이후만 선택 가능 (" + b.min.replace("T", " ") + " ~)";
-          return "프로젝트 종료일 이전만 선택 가능 (~ " + b.max.replace("T", " ") + ")";
+          if (b.min) return "프로젝트 시작일 이후만 선택 가능 (" + b.min + " ~)";
+          return "프로젝트 종료일 이전만 선택 가능 (~ " + b.max + ")";
         },
         isMilestoneDateInProjectBounds: function (value) {
           var b = this.getProjectMilestoneBounds();

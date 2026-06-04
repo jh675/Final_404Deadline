@@ -257,7 +257,7 @@
 		</div>
 
 		<!-- ===== 내 정보 수정 모달 ===== -->
-		<div th:replace="~{mypage/modal/mypageUserEdit :: mypageEditModal}"></div>
+		<div th:replace="~{mypage/modal/myPageUserEdit :: mypageEditModal}"></div>
 		<script th:src="@{/js/mypage/mypage.js}"></script>
 		<script>
 	
@@ -424,6 +424,9 @@
 	    extras.forEach(el => el.style.display = isHidden ? 'block' : 'none');
 	    btn.textContent = isHidden ? `▲ 접기` : `▼ 더보기 (${count}개)`;
 	}
+
+
+	
 
 	    //=========================================================================================
 	    // 2. 간트차트 불러오기

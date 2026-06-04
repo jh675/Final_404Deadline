@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 generalFeedback.className = 'small fw-bold text-success';
                 generalFeedback.textContent = '내 정보가 성공적으로 수정되었습니다.';
                 
-                setTimeout(() => location.reload(), 1500);
+                setTimeout(() => location.reload(), 1000);
                 return; 
             } else {
                 generalFeedback.className = 'small fw-bold text-danger';

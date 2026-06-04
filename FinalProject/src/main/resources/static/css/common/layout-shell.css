@@ -108,4 +108,9 @@ body.layout-tabler .project-content {
 	overflow: auto;
 }
 
+/* 마일스톤: 워크스페이스 본문(오른쪽 끝) 세로 스크롤만 제거 — 사이드·타임라인 내부 스크롤은 유지 */
+body.layout-tabler .project-workspace:has(.milestone-timeline-page) .project-content {
+	overflow: hidden;
+}
+
 /* 이슈·위키·마일스톤: 본문은 콘텐츠 높이만 사용 (뷰포트 flex 채움 규칙 없음) */

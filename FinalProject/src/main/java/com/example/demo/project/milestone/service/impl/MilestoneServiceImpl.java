@@ -34,6 +34,11 @@ public class MilestoneServiceImpl implements MilestoneService {
 	}
 
 	@Override
+	public MilestoneVO selectMilestoneById(Long id) {
+		return mapper.selectMilestoneById(id);
+	}
+
+	@Override
 	public List<MilestoneIssueVO> selectMilestoneIssueList(Long id) {
 		return mapper.selectMilestoneIssueList(id);
 	}

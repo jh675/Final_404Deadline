@@ -88,16 +88,8 @@ public class mypageController {
 		List<MypageVO> list = mypageService.selectMyProjectList(loginUser.getId());
 		model.addAttribute("projectList", list);
 
-		// 캘린더 목록
-		CalenderVO calvo = new CalenderVO();
-		calvo.setMemId(loginUser.getId().intValue());
-		List<CalenderVO> callist = calenderService.selectAll(calvo);
-		model.addAttribute("calenderList", callist);
-
-		// 공휴일 목록
-		int year = java.time.LocalDate.now().getYear();
-		List<HolidayVO> holiday = holidayService.getHolidays(year);
-		model.addAttribute("holidayList", holiday);
+		// 캘린더/공휴일 목록은 화면에서 JS(/calendar/listJson, /holiday/list)로 비동기 로딩하므로
+		// 여기서 미리 조회하지 않는다. (불필요한 대용량 메모리 적재/지연 제거)
 
 		return "mypage/myPage";
 	}

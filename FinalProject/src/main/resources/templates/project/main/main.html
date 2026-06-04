@@ -8,184 +8,224 @@
 <title>프로젝트 개요</title>
 
 <!-- ① Toast UI 스타일시트 (Grid + Pagination) -->
-<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 
 <style>
-  /* ── 전체 레이아웃 ─────────────────────────── */
-  #overview-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-    padding: 24px;
-    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-  }
+/* ── 전체 레이아웃 ─────────────────────────── */
+#overview-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 24px;
+	font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+}
 
-  /* ── 섹션 공통 ────────────────────────────── */
-  .section-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: #1e293b;
-    margin: 0 0 12px;
-    padding-left: 10px;
-    border-left: 4px solid #4f80ff;
-    line-height: 1.4;
-  }
+/* 상단: 공지사항 (전체 너비) */
+#overview-top {
+	width: 100%;
+}
 
-  /* ── 이슈 카운트 테이블 ───────────────────── */
-  #issuetable table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  #issuetable th,
-  #issuetable td {
-    border: 1px solid #e2e8f0;
-    padding: 10px 14px;
-    text-align: center;
-  }
-  #issuetable thead th {
-    background: #f1f5f9;
-    font-weight: 700;
-    color: #475569;
-  }
-  #issuetable tbody th {
-    background: #f8fafc;
-    font-weight: 600;
-    color: #334155;
-  }
-  #issuetable tbody td a {
-    display: inline-block;
-    min-width: 28px;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 13px;
-    text-decoration: none;
-  }
-  /* 진행중 - 파란 뱃지 */
-  #issuetable tbody tr td:nth-child(2) a {
-    background: #dbeafe;
-    color: #1d4ed8;
-  }
-  /* 완료 - 초록 뱃지 */
-  #issuetable tbody tr td:nth-child(3) a {
-    background: #dcfce7;
-    color: #15803d;
-  }
+/* 하단: 이슈 현황 + 그룹 현황 좌우 분할 */
+#overview-bottom {
+	display: flex;
+	gap: 20px;
+	align-items: flex-start;
+}
 
-  /* ── 이슈 바로가기 링크 ───────────────────── */
-  .issue-links {
-    margin-top: 10px;
-    display: flex;
-    gap: 12px;
-  }
-  .issue-links a {
-    font-size: 13px;
-    color: #4f80ff;
-    text-decoration: none;
-    padding: 5px 12px;
-    border: 1px solid #c7d7ff;
-    border-radius: 6px;
-    transition: background 0.15s;
-  }
-  .issue-links a:hover {
-    background: #eef2ff;
-  }
+#overview-bottom .bottom-left {
+	flex: 1;
+	min-width: 0;
+}
 
-  /* ── Toast UI Grid 래퍼 ───────────────────── */
-  #noticeGrid,
-  #groupGrid {
-    width: 100%;
-  }
+#overview-bottom .bottom-right {
+	flex: 1;
+	min-width: 0;
+}
 
-  /* Grid 내부 링크 스타일 */
-  .tui-grid-cell a {
-    color: #1d4ed8;
-    text-decoration: none;
-  }
-  .tui-grid-cell a:hover {
-    text-decoration: underline;
-  }
+/* ── 섹션 공통 ────────────────────────────── */
+.section-title {
+	font-size: 15px;
+	font-weight: 700;
+	color: #1e293b;
+	margin: 0 0 12px;
+	padding-left: 10px;
+	border-left: 4px solid #4f80ff;
+	line-height: 1.4;
+}
+
+/* ── 이슈 카운트 테이블 ───────────────────── */
+#issuetable table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+#issuetable th, #issuetable td {
+	border: 1px solid #e2e8f0;
+	padding: 10px 14px;
+	text-align: center;
+}
+
+#issuetable thead th {
+	background: #f1f5f9;
+	font-weight: 700;
+	color: #475569;
+}
+
+#issuetable tbody th {
+	background: #f8fafc;
+	font-weight: 600;
+	color: #334155;
+}
+
+#issuetable tbody td a {
+	display: inline-block;
+	min-width: 28px;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-weight: 700;
+	font-size: 13px;
+	text-decoration: none;
+}
+/* 진행중 - 파란 뱃지 */
+#issuetable tbody tr td:nth-child(2) a {
+	background: #dbeafe;
+	color: #1d4ed8;
+}
+/* 완료 - 초록 뱃지 */
+#issuetable tbody tr td:nth-child(3) a {
+	background: #dcfce7;
+	color: #15803d;
+}
+
+/* ── 이슈 바로가기 링크 ───────────────────── */
+.issue-links {
+	margin-top: 10px;
+	display: flex;
+	gap: 12px;
+}
+
+.issue-links a {
+	font-size: 13px;
+	color: #4f80ff;
+	text-decoration: none;
+	padding: 5px 12px;
+	border: 1px solid #c7d7ff;
+	border-radius: 6px;
+	transition: background 0.15s;
+}
+
+.issue-links a:hover {
+	background: #eef2ff;
+}
+
+/* ── Toast UI Grid 래퍼 ───────────────────── */
+#noticeGrid, #groupGrid {
+	width: 100%;
+}
+
+/* Grid 내부 링크 스타일 */
+.tui-grid-cell a {
+	color: #1d4ed8;
+	text-decoration: none;
+}
+
+.tui-grid-cell a:hover {
+	text-decoration: underline;
+}
 </style>
 </head>
 
 <body>
-<div layout:fragment="content">
-<div id="overview-wrap">
+	<div layout:fragment="content">
+		<div id="overview-wrap">
 
-  <!-- ====================================================
-       1. 이슈 카운트 섹션 (카테고리별 진행중/완료 링크)
+			<!-- ====================================================
+       상단: 공지사항 (전체 너비)
        ==================================================== -->
-  <section>
-    <p class="section-title">이슈 현황</p>
-    <div id="issuetable">
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>진행중인 이슈</th>
-            <th>완료된 이슈</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>버그</th>
-            <td><a th:text="${count.bGoCount}"
-                   th:href="@{/project/issue/list(categoryCd='01ISSUECATE',priorityCd='',statusCd='',memId='',subject='')}"></a></td>
-            <td><a th:text="${count.bEndCount}"
-                   th:href="@{/project/issue/list(categoryCd='01ISSUECATE',priorityCd='',statusCd='04ISSUESTAT',memId='',subject='')}"></a></td>
-          </tr>
-          <tr>
-            <th>기능</th>
-            <td><a th:text="${count.fGoCount}"
-                   th:href="@{/project/issue/list(categoryCd='02ISSUECATE',priorityCd='',statusCd='',memId='',subject='')}"></a></td>
-            <td><a th:text="${count.fEndCount}"
-                   th:href="@{/project/issue/list(categoryCd='02ISSUECATE',priorityCd='',statusCd='04ISSUESTAT',memId='',subject='')}"></a></td>
-          </tr>
-          <tr>
-            <th>작업</th>
-            <td><a th:text="${count.wGoCount}"
-                   th:href="@{/project/issue/list(categoryCd='03ISSUECATE',priorityCd='',statusCd='',memId='',subject='')}"></a></td>
-            <td><a th:text="${count.wEndCount}"
-                   th:href="@{/project/issue/list(categoryCd='03ISSUECATE',priorityCd='',statusCd='04ISSUESTAT',memId='',subject='')}"></a></td>
-          </tr>
-          <tr>
-            <th>개선</th>
-            <td><a th:text="${count.iGoCount}"
-                   th:href="@{/project/issue/list(categoryCd='04ISSUECATE',priorityCd='',statusCd='',memId='',subject='')}"></a></td>
-            <td><a th:text="${count.iEndCount}"
-                   th:href="@{/project/issue/list(categoryCd='04ISSUECATE',priorityCd='',statusCd='04ISSUESTAT',memId='',subject='')}"></a></td>
-          </tr>
-        </tbody>
-      </table>
+			<div id="overview-top">
+				<section>
+					<p class="section-title">공지사항</p>
+					<div id="noticeGrid"></div>
+				</section>
+			</div>
 
-      <div class="issue-links">
-        <a th:href="@{/project/issue/list}">모든 이슈 보기</a>
-        <a th:href="@{/project/issue/pivot}">이슈 통계 보기</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====================================================
-       2. 공지사항 섹션 — Toast UI Grid
+			<!-- ====================================================
+       하단: 이슈 현황(좌) + 그룹 현황(우)
        ==================================================== -->
-  <section>
-    <p class="section-title">공지사항</p>
-    <div id="noticeGrid"></div>
-  </section>
+			<div id="overview-bottom">
 
-  <!-- ====================================================
-       3. 그룹 섹션 — Toast UI Grid
-       ==================================================== -->
-  <section>
-    <p class="section-title">그룹 현황</p>
-    <div id="groupGrid"></div>
-  </section>
+				<!-- 왼쪽: 이슈 현황 -->
+				<div class="bottom-left">
+					<section>
+						<p class="section-title">이슈 현황</p>
+						<div id="issuetable">
+							<table>
+								<thead>
+									<tr>
+										<th></th>
+										<th>진행중인 이슈</th>
+										<th>완료된 이슈</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<th>버그</th>
+										<td><a th:text="${count.bGoCount}"
+											th:href="@{/project/issue/list(categoryCd='01ISSUECATE',priorityCd='',statusCd='',memId='',subject='')}"></a></td>
+										<td><a th:text="${count.bEndCount}"
+											th:href="@{/project/issue/list(categoryCd='01ISSUECATE',priorityCd='',statusCd='04ISSUESTAT',memId='',subject='')}"></a></td>
+									</tr>
+									<tr>
+										<th>기능</th>
+										<td><a th:text="${count.fGoCount}"
+											th:href="@{/project/issue/list(categoryCd='02ISSUECATE',priorityCd='',statusCd='',memId='',subject='')}"></a></td>
+										<td><a th:text="${count.fEndCount}"
+											th:href="@{/project/issue/list(categoryCd='02ISSUECATE',priorityCd='',statusCd='04ISSUESTAT',memId='',subject='')}"></a></td>
+									</tr>
+									<tr>
+										<th>작업</th>
+										<td><a th:text="${count.wGoCount}"
+											th:href="@{/project/issue/list(categoryCd='03ISSUECATE',priorityCd='',statusCd='',memId='',subject='')}"></a></td>
+										<td><a th:text="${count.wEndCount}"
+											th:href="@{/project/issue/list(categoryCd='03ISSUECATE',priorityCd='',statusCd='04ISSUESTAT',memId='',subject='')}"></a></td>
+									</tr>
+									<tr>
+										<th>개선</th>
+										<td><a th:text="${count.iGoCount}"
+											th:href="@{/project/issue/list(categoryCd='04ISSUECATE',priorityCd='',statusCd='',memId='',subject='')}"></a></td>
+										<td><a th:text="${count.iEndCount}"
+											th:href="@{/project/issue/list(categoryCd='04ISSUECATE',priorityCd='',statusCd='04ISSUESTAT',memId='',subject='')}"></a></td>
+									</tr>
+								</tbody>
+							</table>
+							<div class="issue-links">
+								<a th:href="@{/project/issue/list}">모든 이슈 보기</a> <a
+									th:href="@{/project/issue/pivot}">이슈 통계 보기</a>
+							</div>
+						</div>
+					</section>
+				</div>
 
-</div><!-- /overview-wrap -->
-<!-- ② Thymeleaf → JavaScript 데이터 주입 -->
-<script th:inline="javascript">
+				<!-- 오른쪽: 그룹 현황 -->
+				<div class="bottom-right">
+					<section>
+						<p class="section-title">그룹 현황</p>
+						<div id="groupGrid"></div>
+					</section>
+				</div>
+
+			</div>
+			<!-- /overview-bottom -->
+
+		</div>
+		<!-- /overview-wrap -->
+
+		<!-- ② Thymeleaf → JavaScript 데이터 주입 -->
+		<script th:inline="javascript">
   /*<![CDATA[*/
   // 공지사항: 최신 3건만 서버에서 내려주거나, 전체를 받아 JS에서 slicing
   const noticeData = /*[[${notice}]]*/ [];
@@ -194,12 +234,12 @@
   /*]]>*/
 </script>
 
+		<!-- ③ Toast UI 스크립트 (Pagination → Grid 순서 중요) -->
+		<script
+			src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 
-<!-- ③ Toast UI 스크립트 (Pagination → Grid 순서 중요) -->
-<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-
-<script>
+		<script>
 document.addEventListener('DOMContentLoaded', function () {
 
   /* ──────────────────────────────────────────
@@ -319,6 +359,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-</div><!-- /layout:fragment -->
+	</div>
+	<!-- /layout:fragment -->
 </body>
 </html>
