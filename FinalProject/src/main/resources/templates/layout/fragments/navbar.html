@@ -4,17 +4,16 @@
 
 <body>
 
-<nav th:fragment="layoutNavbar(title)"
-     class="navbar navbar-expand-lg bg-primary"
-     data-bs-theme="dark">
+	<nav th:fragment="layoutNavbar(title)"
+		class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
 
-	<div class="container-fluid">
+		<div class="container-fluid">
 
-		<a class="navbar-brand" th:text="${title}"></a>
+			<a class="navbar-brand" th:text="${title}"></a>
 
-		<div class="collapse navbar-collapse">
+			<div class="collapse navbar-collapse">
 
-			<ul class="navbar-nav me-auto">
+				<ul class="navbar-nav me-auto">
 
 				<th:block sec:authorize="isAnonymous()">
 					<li class="nav-item">
@@ -33,39 +32,23 @@
 					</li>
 				</th:block>
 
-				<th:block sec:authorize="hasRole('ADMIN')">
-					<li class="nav-item">
-						<a class="nav-link px-3" 
-						   th:classappend="${session.currentTopMenu == 'company'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-						   th:href="@{/admin/company/list}">
-							기업관리
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link px-3" 
-						   th:classappend="${session.currentTopMenu == 'user'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-						   th:href="@{/admin/userList}">
-							회원관리
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link px-3" 
-						   th:classappend="${session.currentTopMenu == 'project'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-						   th:href="@{/management/project}">
-							프로젝트 관리
-						</a>
-					</li>
-				</th:block>
+					<th:block sec:authorize="hasRole('ADMIN')">
+						<li class="nav-item"><a class="nav-link px-3"
+							th:classappend="${session.currentTopMenu == 'company'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+							th:href="@{/admin/company/list}"> 기업관리 </a></li>
+						<li class="nav-item"><a class="nav-link px-3"
+							th:classappend="${session.currentTopMenu == 'user'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+							th:href="@{/admin/userList}"> 회원관리 </a></li>
+						<li class="nav-item"><a class="nav-link px-3"
+							th:classappend="${session.currentTopMenu == 'project'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+							th:href="@{/management/project}"> 프로젝트 관리 </a></li>
+					</th:block>
 
-				<th:block sec:authorize="hasRole('USER')">
-					<li class="nav-item">
-						<a class="nav-link px-3" 
-						   th:classappend="${session.currentTopMenu == 'project'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-						   th:href="@{/management/project}">
-							프로젝트 목록
-						</a>
-					</li>
-				</th:block>
+					<th:block sec:authorize="hasRole('USER')">
+						<li class="nav-item"><a class="nav-link px-3"
+							th:classappend="${session.currentTopMenu == 'project'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+							th:href="@{/management/project}"> 프로젝트 목록 </a></li>
+					</th:block>
 
 				<th:block sec:authorize="hasRole('CADMIN')">
 					<li class="nav-item">
@@ -100,77 +83,101 @@
 				</li>
 			</ul>
 
-			<!-- 공통 영역 -->
+				<!-- 공통 영역 -->
 
-			<div class="d-flex align-items-center gap-2" sec:authorize="isAuthenticated()">
-			    <div class="position-relative me-2" style="width: 300px;">
-			        <div class="input-group input-group-sm">
-			            <span class="input-group-text bg-gradient text-white" style="background-color: #5b6cff;">✨ AI</span>
-			            <input type="text" id="aiSearchInput" class="form-control" placeholder="지금 내가 해야할 일은?">
-			            <button class="btn btn-outline-primary" type="button" id="aiSearchBtn">묻기</button>
-			        </div>
-			    </div>
-				
-				<input type="hidden" id="loginUserId" 
-       				   th:value="${#authentication != null and #authentication.principal != 'anonymousUser' ? #authentication.principal.username : 0}"/>
-				<!-- 🔔 알림 버튼 드롭다운 -->
-				<div class="dropdown me-2">
-				    <button class="btn btn-outline-secondary btn-sm position-relative" 
-				            type="button" 
-				            id="notificationBtn"
-				            data-bs-toggle="dropdown" 
-				            data-bs-auto-close="outside"
-				            aria-expanded="false">
-				        🔔
-				        <!-- 읽지 않은 알림 개수 뱃지 -->
-				        <span id="notificationBadge" 
-				              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-				              style="display:none; font-size:10px;">
-				            0
-				        </span>
-				    </button>
-				
-				    <!-- 드롭다운 알림 목록 -->
-				    <ul class="dropdown-menu dropdown-menu-end p-0"
-				        style="width:350px; max-height:400px; overflow-y:auto;">
-				
-				        <!-- 헤더 -->
-				        <li class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom bg-light">
-				            <strong>🔔 알림</strong>
-				            <button class="btn btn-sm btn-link text-muted p-0" id="clearAllBtn">
-				                전체 삭제
-				            </button>
-				        </li>
-				
-				        <!-- 알림 목록 -->
-				        <div id="notificationList">
-				            <li class="text-center text-muted py-4" id="emptyNoti">
-				                새로운 알림이 없습니다
-				            </li>
-				        </div>
-				
-				    </ul>
+				<div class="d-flex align-items-center gap-2"
+					sec:authorize="isAuthenticated()">
+					<div class="position-relative me-2" style="width: 300px;">
+						<div class="input-group input-group-sm">
+							<span class="input-group-text bg-gradient text-white"
+								style="background-color: #5b6cff;">✨ AI</span> <input
+								type="text" id="aiSearchInput" class="form-control"
+								placeholder="지금 내가 해야할 일은?">
+							<button class="btn btn-outline-primary" type="button"
+								id="aiSearchBtn">묻기</button>
+						</div>
+					</div>
+
+					<input type="hidden" id="loginUserId"
+						th:value="${#authentication != null and #authentication.principal != 'anonymousUser' ? #authentication.principal.username : 0}" />
+
+					<!-- 🔔 알림 버튼 드롭다운 -->
+					<div class="dropdown me-2">
+						<button class="btn btn-outline-secondary btn-sm position-relative"
+							type="button" id="notificationBtn" data-bs-toggle="dropdown"
+							data-bs-auto-close="outside" aria-expanded="false">
+							🔔 <span id="notificationBadge"
+								class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+								style="display: none; font-size: 10px;"> 0 </span>
+						</button>
+
+						<ul class="dropdown-menu dropdown-menu-end p-0"
+							data-bs-theme="light"
+							style="width: 350px; max-height: 400px; overflow-y: auto; background: #fff; color: #212529;">
+
+							<!-- 헤더 -->
+							<li
+								class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom"
+								style="background: #f8f9fa; color: #212529;"><strong>🔔
+									알림</strong>
+								<button class="btn btn-sm btn-link text-muted p-0"
+									id="clearAllBtn">전체 삭제</button></li>
+
+							<!-- 알림 목록 -->
+							<div id="notificationList">
+								<li class="text-center text-muted py-4" id="emptyNoti">새로운
+									알림이 없습니다</li>
+							</div>
+
+						</ul>
+					</div>
+
+					<!-- ✅ 알림 아이템 스타일 오버라이드 -->
+					<style>
+/* 기본 상태에서도 글자가 잘 보이도록 */
+#notificationList .dropdown-item {
+	background-color: #fff !important;
+	color: #212529 !important;
+}
+
+#notificationList .dropdown-item small {
+	color: #212529 !important;
+}
+/* 호버 시 살짝 강조만 */
+#notificationList .dropdown-item:hover {
+	background-color: #f0f6ff !important;
+	color: #212529 !important;
+}
+/* 삭제 버튼 */
+#notificationList .delete-btn {
+	color: #aaa !important;
+}
+
+#notificationList .delete-btn:hover {
+	color: #e74c3c !important;
+}
+/* 시간 텍스트 */
+#notificationList .text-muted {
+	color: #888 !important;
+}
+</style>
+
+					<span> <strong sec:authentication="principal.name"></strong>님
+					</span>
+
+					<form th:action="@{/logout}" method="post">
+						<button type="submit" class="btn btn-danger btn-sm">로그아웃
+						</button>
+					</form>
 				</div>
-				
-			    <span>
-			        <strong sec:authentication="principal.name"></strong>님
-			    </span>
-				
-			    <form th:action="@{/logout}" method="post">
-			        <button type="submit" class="btn btn-danger btn-sm">
-			            로그아웃
-			        </button>
-			    </form>
-			</div>
-			
-			<!-- SSE 연결 스크립트 -->
-			<script th:inline="javascript">
+
+				<!-- SSE 연결 스크립트 -->
+				<script th:inline="javascript">
 			document.addEventListener('DOMContentLoaded', function () {
 			
 				const userId = String(document.getElementById('loginUserId').value);
 				if (!userId || userId === "0") return;
 			
-			    // 비로그인이면 SSE 연결 안 함
 			    if (!userId) return;
 			
 			    const badge       = document.getElementById('notificationBadge');
@@ -201,16 +208,19 @@
 			        item.className = 'dropdown-item border-bottom py-2 px-3';
 			        item.style.whiteSpace = 'normal';
 			        item.style.cursor = 'default';
+			        // ✅ 인라인 스타일로 기본 배경/글자색 강제 지정
+			        item.style.backgroundColor = '#fff';
+			        item.style.color = '#212529';
 			        item.innerHTML = `
 			            <div class="d-flex justify-content-between align-items-start">
 			                <div>
 			                    <span>${icon}</span>
-			                    <small class="ms-1">${message}</small>
+			                    <small class="ms-1" style="color:#212529;">${message}</small>
 			                </div>
-			                <button class="btn btn-sm btn-link text-muted p-0 ms-2 delete-btn" 
-			                        style="font-size:12px; flex-shrink:0;">✕</button>
+			                <button class="btn btn-sm btn-link p-0 ms-2 delete-btn" 
+			                        style="font-size:12px; flex-shrink:0; color:#aaa;">✕</button>
 			            </div>
-			            <div class="text-muted mt-1" style="font-size:11px;">${time}</div>
+			            <div style="font-size:11px; color:#888; margin-top:4px;">${time}</div>
 			        `;
 			
 			        item.querySelector('.delete-btn').addEventListener('click', function () {
@@ -219,7 +229,15 @@
 			            updateBadge();
 			            checkEmpty();
 			        });
-			
+
+			        // 호버 효과 JS로 처리
+			        item.addEventListener('mouseenter', function() {
+			            item.style.backgroundColor = '#f0f6ff';
+			        });
+			        item.addEventListener('mouseleave', function() {
+			            item.style.backgroundColor = '#fff';
+			        });
+
 			        list.prepend(item);
 			        unreadCount++;
 			        updateBadge();
@@ -261,7 +279,6 @@
 			        Notification.requestPermission();
 			    }
 			
-			    // SSE 연결
 			    const eventSource = new EventSource(`/api/notifications/subscribe?userId=${userId}`);
 			
 			    eventSource.addEventListener('notification', function (event) {
@@ -273,9 +290,9 @@
 			    };
 			});
 			</script>
+			</div>
 		</div>
-	</div>
-</nav>
+	</nav>
 
 </body>
 </html>
