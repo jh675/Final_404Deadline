@@ -84,16 +84,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 width: 100,
                 align: 'center',
 
-                formatter: ({ row }) => {
-                    return `
-				        <button
-				            type="button"
-				            class="btn btn-sm btn-outline-primary edit-btn"
-				            data-id="${row.id}">
-				            수정
-				        </button>
-				    `;
-                }
+				formatter: ({ row }) => {
+				    return `<button type="button" 
+									class="btn btn-sm btn-outline-success edit-btn" 
+									data-id="${row.id}">
+									수정</button>`;
+				}
             }
         ],
         rowHeaders: ['checkbox', 'rowNum'],
@@ -242,13 +238,21 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // 필수 항목 유효성 검사 (빈칸 체크)
         let isValid = true;
-
+		let firstInvalidEl = null; // 스크롤 이동을 위해 첫 번째 빈칸 요소를 추적할 변수
+		
         const loginInput = document.getElementById('login');
         const nameInput = document.getElementById('name');
         const hireDateInput = document.getElementById('hireDate');
         const adminCdSelect = document.getElementById('adminCd');
         const bizNoSelect = document.getElementById('bizNo');
 
+		// 에러 처리 및 첫 번째 요소 추적 함수
+        function setInvalid(el) {
+            el.classList.add('is-invalid');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = el;
+        }
+	
         // 아이디 검사
         if (!loginInput.value.trim()) {
             loginInput.classList.add('is-invalid');
@@ -280,6 +284,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         // 하나라도 비어있다면 폼 제출 중단
 		if (!isValid) {
 	        if(generalFeedback) generalFeedback.textContent = '필수 입력 항목을 확인해주세요.';
+			
+			// 첫 번째 에러 요소로 부드럽게 스크롤 후 포커스
+            if (firstInvalidEl) {
+                firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => firstInvalidEl.focus(), 300); // 스크롤 이동 시간 고려 0.3초 뒤 포커스
+            }
 	        return;
 	    }
 

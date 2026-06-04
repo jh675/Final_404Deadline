@@ -277,4 +277,19 @@ public class mypageController {
 		return mypageService.selectWeeklyIssueList(prjIdList);
 
 	}
+	
+	// 마이페이지 - 현재 비밀번호 확인
+	@PostMapping("/mypage/check-password")
+	@ResponseBody
+	public Map<String, Boolean> checkPassword(@RequestBody Map<String, String> body) {
+		UserVO loginUser = getLoginUser();
+		String inputPassword = body.get("password");
+		
+		// 입력받은 비밀번호와 현재 로그인한 유저의 암호화된 비밀번호 비교
+		boolean isValid = passwordEncoder.matches(inputPassword, loginUser.getPassword());
+		
+		Map<String, Boolean> response = new HashMap<>();
+		response.put("valid", isValid);
+		return response;
+	}
 }

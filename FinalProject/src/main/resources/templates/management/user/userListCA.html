@@ -23,7 +23,6 @@
 				      th:object="${filter01}"
 				      class="d-flex align-items-end gap-3 mb-3 flex-wrap">
 	
-				    <!-- 권한 -->
 				    <div class="d-flex align-items-center gap-2">
 				        <label for="categoryCd" 
 				        	   class="form-label mb-0 text-nowrap text-muted small">역할</label>
@@ -39,7 +38,6 @@
 				    
 				    <div class="vr mx-1 text-secondary"></div> 
 				
-				    <!-- 검색 종류 -->
 				    <div class="d-flex align-items-center gap-2">
 				        <label  for="searchType" 
 				        		class="form-label mb-0 text-nowrap text-muted small">검색 조건</label>
@@ -53,7 +51,6 @@
 				            <option value="email">이메일</option>
 				        </select>
 				    </div>
-				    <!-- 검색어 -->
 				    <div>
 				        <input type="text"
 				               id="keyword"
@@ -62,7 +59,6 @@
 				               placeholder="검색어 입력"
 				               style="width: 180px;">
 				    </div>
-				    <!-- 버튼 -->
 				    <div class="d-flex gap-2">
 					    <button type="submit"
 					            class="btn btn-sm btn-dark px-3">
@@ -94,15 +90,15 @@
 				        <option value="prjManager_01ACTIVE">PM 역할 부여</option>
 				        <option value="prjManager_02ACTIVE">PM 역할 해제</option>
 				    </select>
-				    <button type="button" class="btn btn-sm btn-secondary" id="bulkApplyBtn">적용</button>
-				    <button type="button" class="btn btn-sm btn-light" id="cancelBulkModeBtn">취소</button>
+				    <button type="button" class="btn btn-sm btn-success" id="bulkApplyBtn">적용</button>
+				    <button type="button" class="btn btn-sm btn-secondary" id="cancelBulkModeBtn">취소</button>
 				    
 				    <span id="bulkFeedback" class="small fw-bold text-danger ms-2"></span>
 				</div>
 		    </div>
 		    
 		    <div>
-		        <button type="button" class="btn btn-sm btn-primary" onclick="openInsertModal()">회원 등록</button>
+		    	<button type="button" class="btn btn-sm btn-success" onclick="openInsertModal()">회원 등록</button>
 		    </div>
 		</div>
 
@@ -114,7 +110,6 @@
 		    const currentCaBizNo = /*[[${#authentication.principal.bizNo}]]*/ '';
 		</script>
 
-		<!-- pagination JS가 grid JS보다 먼저 -->
 		<script
 			src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
