@@ -4,12 +4,402 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layout/defaultLayout}">
 <head>
-    <meta charset="UTF-8">
-    <title>프로젝트 수정</title>
-    <style>
-        .form-group { margin-bottom: 15px; }
-        .module-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 300px; }
-    </style>
+<meta charset="UTF-8">
+<title>프로젝트 수정</title>
+
+<!-- Toast UI Grid CSS -->
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+
+<!-- Flatpickr 날짜 피커 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+
+<style>
+    /* ── CSS 변수 (헤더 파란색 기준) ───────── */
+    :root {
+        --blue:       #1b87c9;
+        --blue-dark:  #1570aa;
+        --blue-light: #e8f4fb;
+        --blue-mid:   #cce5f5;
+        --border:     #c9e0ef;
+        --text:       #1a2f3f;
+        --text-sub:   #4a6070;
+        --bg-input:   #f5fafd;
+    }
+
+    /* ── 페이지 배경 ────────────────────────── */
+    body > div,
+    [layout\:fragment="content"] {
+        background: #f0f7fc;
+    }
+
+    /* ── 폼 카드 래퍼 ───────────────────────── */
+    .prj-form-wrap {
+        max-width: 640px;
+        margin: 32px auto;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0;
+        font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+        font-size: 13px;
+        color: var(--text);
+        box-shadow: 0 2px 12px rgba(27,135,201,0.08);
+        overflow: hidden;
+    }
+
+    /* 카드 상단 파란 헤더 띠 */
+    .prj-form-wrap h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+        padding: 16px 28px;
+        background: var(--blue);
+        letter-spacing: -0.3px;
+    }
+
+    /* 카드 본문 */
+    .prj-form-body {
+        padding: 28px 32px 32px;
+    }
+
+    /* ── 에러 메시지 ────────────────────────── */
+    .prj-error-msg {
+        color: #c0392b;
+        background: #fff0f0;
+        border: 1px solid #ffcccc;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-bottom: 16px;
+        font-size: 13px;
+    }
+
+    /* ── 폼 그룹 ────────────────────────────── */
+    .form-group {
+        margin-bottom: 16px;
+        position: relative;
+    }
+
+    .form-group label,
+    .form-group > span.fg-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-sub);
+        margin-bottom: 5px;
+        letter-spacing: 0.1px;
+    }
+
+    /* ── 인풋 공통 ──────────────────────────── */
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 8px 11px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 13px;
+        color: var(--text);
+        background: var(--bg-input);
+        box-sizing: border-box;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        outline: none;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group input[type="date"]:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(27,135,201,0.13);
+        background: #fff;
+    }
+
+    /* disabled 인풋 (식별자) */
+    .form-group input:disabled {
+        background: #eaf2f8;
+        color: var(--text-sub);
+        cursor: not-allowed;
+        border-color: var(--border);
+    }
+
+    .form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    /* ── 날짜 행 ────────────────────────────── */
+    .date-row {
+        display: flex;
+        gap: 16px;
+    }
+    .date-row .date-field { flex: 1; }
+    .date-row .date-field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-sub);
+        margin-bottom: 5px;
+    }
+
+    /* ── 매니저 검색 드롭다운 ───────────────── */
+    #userDropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 0 0 5px 5px;
+        z-index: 9999;
+        max-height: 200px;
+        overflow-y: auto;
+        color: var(--text);
+        box-shadow: 0 4px 12px rgba(27,135,201,0.12);
+    }
+
+    .manager-hint {
+        font-size: 11px;
+        color: #e67e22;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    /* ── 체크박스 모듈 그리드 ───────────────── */
+    .module-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 6px;
+    }
+
+    .module-container label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--text);
+        padding: 7px 10px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        cursor: pointer;
+        background: var(--bg-input);
+        transition: background 0.12s, border-color 0.12s;
+    }
+    .module-container label:hover {
+        background: var(--blue-light);
+        border-color: var(--blue);
+    }
+    .module-container input[type="checkbox"] {
+        accent-color: var(--blue);
+        width: 14px;
+        height: 14px;
+    }
+
+    /* ── Flatpickr 커스텀 ───────────────────── */
+    .date-input-wrap {
+        position: relative;
+    }
+    .date-input-wrap input {
+        width: 100%;
+        padding: 8px 36px 8px 11px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 13px;
+        color: var(--text);
+        background: var(--bg-input);
+        box-sizing: border-box;
+        cursor: pointer;
+        caret-color: transparent;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        outline: none;
+    }
+    .date-input-wrap input:hover {
+        border-color: var(--blue);
+    }
+    .date-input-wrap input.flatpickr-input.active {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(27,135,201,0.13);
+        background: #fff;
+    }
+    .date-input-wrap::after {
+        content: '';
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 15px;
+        height: 15px;
+        pointer-events: none;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%231b87c9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E") no-repeat center center;
+    }
+    .flatpickr-calendar {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 6px 24px rgba(27,135,201,0.15);
+        font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+        font-size: 13px;
+        overflow: hidden;
+    }
+    .flatpickr-day.selected,
+    .flatpickr-day.selected:hover {
+        background: var(--blue);
+        border-color: var(--blue);
+    }
+    .flatpickr-day:hover {
+        background: var(--blue-light);
+    }
+    .flatpickr-months .flatpickr-month {
+        background: var(--blue);
+        color: #fff;
+    }
+    .flatpickr-months .flatpickr-prev-month svg,
+    .flatpickr-months .flatpickr-next-month svg {
+        fill: #fff;
+    }
+    .flatpickr-months .flatpickr-prev-month:hover svg,
+    .flatpickr-months .flatpickr-next-month:hover svg {
+        fill: var(--blue-mid);
+    }
+    .flatpickr-current-month input.cur-year,
+    .flatpickr-current-month .flatpickr-monthDropdown-months {
+        color: #fff;
+    }
+    span.flatpickr-weekday {
+        color: var(--blue);
+        font-weight: 700;
+        background: var(--blue-light);
+    }
+    .flatpickr-weekdays { background: var(--blue-light); }
+    .flatpickr-day.today {
+        border-color: var(--blue);
+        color: var(--blue);
+        font-weight: 700;
+    }
+    .flatpickr-day.today.selected { color: #fff; }
+
+    /* ── 커스텀 셀렉트 (상위 프로젝트) ─────── */
+    .custom-select-wrap { position: relative; }
+
+    .custom-select-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 8px 11px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 13px;
+        color: var(--text);
+        background: var(--bg-input);
+        cursor: pointer;
+        box-sizing: border-box;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        user-select: none;
+    }
+    .custom-select-trigger:hover {
+        border-color: var(--blue);
+    }
+    .custom-select-trigger.open {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(27,135,201,0.13);
+        background: #fff;
+        border-radius: 5px 5px 0 0;
+    }
+    .custom-select-arrow {
+        color: var(--text-sub);
+        transition: transform 0.2s;
+        flex-shrink: 0;
+    }
+    .custom-select-trigger.open .custom-select-arrow {
+        transform: rotate(180deg);
+        color: var(--blue);
+    }
+
+    .custom-select-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border: 1px solid var(--blue);
+        border-top: none;
+        border-radius: 0 0 5px 5px;
+        z-index: 9999;
+        max-height: 200px;
+        overflow-y: auto;
+        box-shadow: 0 6px 16px rgba(27,135,201,0.13);
+    }
+    .custom-select-dropdown.open { display: block; }
+
+    .custom-select-item {
+        padding: 9px 12px;
+        font-size: 13px;
+        color: var(--text);
+        cursor: pointer;
+        border-bottom: 1px solid var(--blue-light);
+        transition: background 0.1s;
+    }
+    .custom-select-item:last-child { border-bottom: none; }
+    .custom-select-item:hover {
+        background: var(--blue-light);
+        color: var(--blue);
+    }
+    .custom-select-item.selected {
+        background: var(--blue-light);
+        color: var(--blue);
+        font-weight: 600;
+    }
+
+
+
+    /* ── 구분선 ─────────────────────────────── */
+    .form-divider {
+        border: none;
+        border-top: 1px solid var(--blue-mid);
+        margin: 20px 0;
+    }
+
+    /* ── 버튼 영역 ──────────────────────────── */
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+    .btn-submit {
+        padding: 9px 26px;
+        background: var(--blue);
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .btn-submit:hover { background: var(--blue-dark); }
+
+    .btn-cancel {
+        padding: 9px 20px;
+        background: #fff;
+        color: var(--text-sub);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: background 0.15s;
+    }
+    .btn-cancel:hover { background: var(--blue-light); }
+</style>
 </head>
 <body>
 <span><strong sec:authentication="principal.name"></strong>님</span>
@@ -17,113 +407,271 @@
 <form th:action="@{/management/projectupdate}" method="post">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
     <input type="hidden" name="id" th:value="${editProject.id}" />
-    <h3>프로젝트 수정</h3>
 
-    <!-- 에러 메시지 -->
-    <div th:if="${errorMessage}"
-         th:text="${errorMessage}"
-         style="color: red; background: #fff0f0; border: 1px solid #ffcccc;
-                padding: 8px 12px; border-radius: 4px; margin-bottom: 12px;">
-    </div>
+    <div class="prj-form-wrap">
+        <h3>프로젝트 수정</h3>
+        <div class="prj-form-body">
 
-    <div class="form-group">
-        이름 <input type="text" class="form-control" name="prjName" required autocomplete="off"
-           th:value="${editProject.prjName}">
-    </div>
-    <div class="form-group">
-        식별자 <input type="text" class="form-control" name="prjIdentifier" required autocomplete="off"
-             th:value="${editProject.prjIdentifier}" disabled>
-    </div>
-    <div class="form-group" style="position: relative;">
-        프로젝트 매니저
-        <input type="text" id="managerSearch" class="form-control" placeholder="이름 입력..." autocomplete="off">
-        <small style="color: #e67e22; font-weight: bold; font-size: 0.85em;">
-            ※ 입력 시 나오는 아이디를 클릭해주세요
-        </small>
-        <!-- managerId로 변경 -->
-        <input type="hidden" name="managerId" id="realUserId">
-        <div id="userDropdown" style="
-            display:none;
-            position:absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background:white;
-            border:1px solid #ccc;
-            z-index: 9999;
-            max-height:200px;
-            overflow-y:auto;
-            color: black;
-        "></div>
-    </div>
-    <div class="form-group">
-        설명 <textarea class="form-control" name="prjDesc"
-              th:text="${editProject.prjDesc}"></textarea>
-    </div>
-    <div class="form-group">
-        상위프로젝트
-        <select name="prjParId">
-            <option value="" selected>=== 없음 ===</option>
-            <option th:each="p : ${projectList}"
-                th:value="${p.id}"
-                th:text="${p.prjName}"
-                th:if="${p.bizNo == #authentication.principal.bizNo 
-                        and p.id != editProject.id 
-                        and p.prjStatusCd != '04PROSTAT' 
-                        and p.prjStatusCd != '05PROSTAT'
-                        and p.prjHide != 'Y'
-                        and not (p.prjLft > editProject.prjLft and p.prjRgt < editProject.prjRgt)}"
-                th:selected="${p.id == editProject.prjParId}">프로젝트명</option>
-        </select>
-    </div>
-    <div>
-       예상 프로젝트 시작일: <input type="date" name="startDate" id="startDate">
-       예상 프로젝트 종료일: <input type="date" name="closedDate" id="closedDate" required>
-    </div>
-    <div class="form-group">
-        프로젝트 상태
-        <select name="prjStatusCd" class="form-control">
-            <option value="01PROSTAT" th:selected="${editProject.prjStatusCd == '01PROSTAT'}">기획</option>
-            <option value="02PROSTAT" th:selected="${editProject.prjStatusCd == '02PROSTAT'}">진행중</option>
-            <option value="03PROSTAT" th:selected="${editProject.prjStatusCd == '03PROSTAT'}">검수</option>
-            <option value="04PROSTAT" th:selected="${editProject.prjStatusCd == '04PROSTAT'}">완료</option>
-            <option value="05PROSTAT" th:selected="${editProject.prjStatusCd == '05PROSTAT'}">중단</option>
-        </select>
-    </div>
-    <div class="form-group">
-        기본 모듈
-        <div class="module-container">
-            <label><input type="checkbox" name="moduleList" value="GANTT"> 간트차트</label>
-            <label><input type="checkbox" name="moduleList" value="CALENDAR"> 캘린더</label>
-            <label><input type="checkbox" name="moduleList" value="BOARD"> 게시판</label>
-            <label><input type="checkbox" name="moduleList" value="ISSUE"> 이슈</label>
-            <label><input type="checkbox" name="moduleList" value="WIKI"> 위키</label>
-            <label><input type="checkbox" name="moduleList" value="MILESTONE"> 마일스톤</label>
-            <label><input type="checkbox" name="moduleList" value="DOCS"> 문서</label>
-            <label><input type="checkbox" name="moduleList" value="NOTICE"> 공지사항</label>
-        </div>
-    </div>
+            <!-- 에러 메시지 -->
+            <div th:if="${errorMessage}" th:text="${errorMessage}" class="prj-error-msg"></div>
 
-    <button type="submit">수정</button>
-    <a th:href="@{/management/project}">취소</a>
+            <!-- 이름 -->
+            <div class="form-group">
+                <span class="fg-label">이름</span>
+                <input type="text" class="form-control" name="prjName" required
+                       autocomplete="off" th:value="${editProject.prjName}">
+            </div>
+
+            <!-- 식별자 (disabled) -->
+            <div class="form-group">
+                <span class="fg-label">식별자</span>
+                <input type="text" class="form-control" name="prjIdentifier" required
+                       autocomplete="off" th:value="${editProject.prjIdentifier}" disabled>
+            </div>
+
+            <!-- 프로젝트 매니저 -->
+            <div class="form-group">
+                <span class="fg-label">프로젝트 매니저</span>
+                <input type="text" id="managerSearch" class="form-control"
+                       placeholder="이름 입력..." autocomplete="off">
+                <p class="manager-hint">※ 입력 시 나오는 아이디를 클릭해주세요</p>
+                <input type="hidden" name="managerId" id="realUserId">
+                <div id="userDropdown"></div>
+            </div>
+
+            <!-- 설명 -->
+            <div class="form-group">
+                <span class="fg-label">설명</span>
+                <textarea class="form-control" name="prjDesc"
+                          th:text="${editProject.prjDesc}"></textarea>
+            </div>
+
+            <!-- 상위 프로젝트 (커스텀 드롭다운) -->
+            <div class="form-group custom-select-wrap" id="prjParWrap">
+                <span class="fg-label">상위 프로젝트</span>
+                <input type="hidden" name="prjParId" id="prjParId" value="">
+                <div class="custom-select-trigger" id="prjParTrigger">
+                    <span id="prjParLabel">=== 없음 ===</span>
+                    <svg class="custom-select-arrow" xmlns="http://www.w3.org/2000/svg"
+                         width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="custom-select-dropdown" id="prjParDropdown">
+                    <div class="custom-select-item" data-value="">=== 없음 ===</div>
+                    <th:block th:each="p : ${projectList}">
+                        <div class="custom-select-item"
+                             th:if="${p.bizNo == #authentication.principal.bizNo
+                                      and p.id != editProject.id
+                                      and p.prjStatusCd != '04PROSTAT'
+                                      and p.prjStatusCd != '05PROSTAT'
+                                      and p.prjHide != 'Y'
+                                      and not (p.prjLft > editProject.prjLft and p.prjRgt < editProject.prjRgt)}"
+                             th:data-value="${p.id}"
+                             th:classappend="${p.id == editProject.prjParId} ? 'selected' : ''"
+                             th:text="${p.prjName}">프로젝트명</div>
+                    </th:block>
+                </div>
+            </div>
+
+            <!-- 날짜 (Flatpickr) -->
+            <div class="date-row">
+                <div class="date-field">
+                    <label>예상 프로젝트 시작일</label>
+                    <div class="date-input-wrap">
+                        <input type="text" name="startDate" id="startDate"
+                               placeholder="날짜 선택" autocomplete="off" readonly>
+                    </div>
+                </div>
+                <div class="date-field">
+                    <label>예상 프로젝트 종료일</label>
+                    <div class="date-input-wrap">
+                        <input type="text" name="closedDate" id="closedDate"
+                               placeholder="날짜 선택" autocomplete="off" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 프로젝트 상태 (커스텀 드롭다운) -->
+            <div class="form-group custom-select-wrap" style="margin-top: 16px;" id="statusWrap">
+                <span class="fg-label">프로젝트 상태</span>
+                <input type="hidden" name="prjStatusCd" id="prjStatusCd" th:value="${editProject.prjStatusCd}">
+                <div class="custom-select-trigger" id="statusTrigger">
+                    <span id="statusLabel">선택</span>
+                    <svg class="custom-select-arrow" xmlns="http://www.w3.org/2000/svg"
+                         width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="custom-select-dropdown" id="statusDropdown">
+                    <div class="custom-select-item" data-value="01PROSTAT">기획</div>
+                    <div class="custom-select-item" data-value="02PROSTAT">진행중</div>
+                    <div class="custom-select-item" data-value="03PROSTAT">검수</div>
+                    <div class="custom-select-item" data-value="04PROSTAT">완료</div>
+                    <div class="custom-select-item" data-value="05PROSTAT">중단</div>
+                </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- 기본 모듈 -->
+            <div class="form-group">
+                <span class="fg-label">기본 모듈</span>
+                <div class="module-container">
+                    <label><input type="checkbox" name="moduleList" value="GANTT"> 간트차트</label>
+                    <label><input type="checkbox" name="moduleList" value="CALENDAR"> 캘린더</label>
+                    <label><input type="checkbox" name="moduleList" value="BOARD"> 게시판</label>
+                    <label><input type="checkbox" name="moduleList" value="ISSUE"> 이슈</label>
+                    <label><input type="checkbox" name="moduleList" value="WIKI"> 위키</label>
+                    <label><input type="checkbox" name="moduleList" value="MILESTONE"> 마일스톤</label>
+                    <label><input type="checkbox" name="moduleList" value="DOCS"> 문서</label>
+                    <label><input type="checkbox" name="moduleList" value="NOTICE"> 공지사항</label>
+                </div>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">수정</button>
+                <a th:href="@{/management/project}" class="btn-cancel">취소</a>
+            </div>
+
+        </div><!-- /prj-form-body -->
+    </div><!-- /prj-form-wrap -->
 </form>
 
 <script th:inline="javascript">
+    // ── 커스텀 셀렉트 초기화 (상위 프로젝트) ──
+    (function() {
+        const trigger  = document.getElementById('prjParTrigger');
+        const dropdown = document.getElementById('prjParDropdown');
+        const hidden   = document.getElementById('prjParId');
+        const label    = document.getElementById('prjParLabel');
+        if (!trigger) return;
+
+        // 기존 선택값이 있으면 라벨·hidden 세팅
+        const preSelected = dropdown.querySelector('.custom-select-item.selected');
+        if (preSelected && preSelected.getAttribute('data-value')) {
+            hidden.value   = preSelected.getAttribute('data-value');
+            label.textContent = preSelected.textContent.trim();
+        }
+
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = dropdown.classList.toggle('open');
+            trigger.classList.toggle('open', isOpen);
+        });
+
+        dropdown.addEventListener('click', function(e) {
+            const item = e.target.closest('.custom-select-item');
+            if (!item) return;
+            dropdown.querySelectorAll('.custom-select-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+            hidden.value       = item.getAttribute('data-value') || '';
+            label.textContent  = item.textContent.trim();
+            dropdown.classList.remove('open');
+            trigger.classList.remove('open');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+                trigger.classList.remove('open');
+            }
+        });
+    })();
+
+    // ── 커스텀 셀렉트 초기화 (프로젝트 상태) ──
+    (function() {
+        const trigger  = document.getElementById('statusTrigger');
+        const dropdown = document.getElementById('statusDropdown');
+        const hidden   = document.getElementById('prjStatusCd');
+        const label    = document.getElementById('statusLabel');
+        if (!trigger) return;
+
+        const statusMap = {
+            '01PROSTAT': '기획',
+            '02PROSTAT': '진행중',
+            '03PROSTAT': '검수',
+            '04PROSTAT': '완료',
+            '05PROSTAT': '중단'
+        };
+
+        // 기존 값으로 라벨·selected 초기화
+        const currentVal = hidden.value;
+        if (currentVal && statusMap[currentVal]) {
+            label.textContent = statusMap[currentVal];
+            dropdown.querySelectorAll('.custom-select-item').forEach(item => {
+                if (item.getAttribute('data-value') === currentVal) {
+                    item.classList.add('selected');
+                }
+            });
+        }
+
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = dropdown.classList.toggle('open');
+            trigger.classList.toggle('open', isOpen);
+        });
+
+        dropdown.addEventListener('click', function(e) {
+            const item = e.target.closest('.custom-select-item');
+            if (!item) return;
+            dropdown.querySelectorAll('.custom-select-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+            hidden.value      = item.getAttribute('data-value');
+            label.textContent = item.textContent.trim();
+            dropdown.classList.remove('open');
+            trigger.classList.remove('open');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+                trigger.classList.remove('open');
+            }
+        });
+    })();
     const managerSearch = document.getElementById('managerSearch');
-    const realUserId = document.getElementById('realUserId');
-    const dropdown = document.getElementById('userDropdown');
+    const realUserId    = document.getElementById('realUserId');
+    const userDropdown  = document.getElementById('userDropdown');
 
     // 기존 날짜 값 세팅
-    const startDate = /*[[${editProject.startDate != null ? #dates.format(editProject.startDate, 'yyyy-MM-dd') : ''}]]*/ '';
-    const closedDate = /*[[${editProject.closedDate != null ? #dates.format(editProject.closedDate, 'yyyy-MM-dd') : ''}]]*/ '';
-    document.getElementById('startDate').value = startDate;
-    document.getElementById('closedDate').value = closedDate;
+    const startDateVal  = /*[[${editProject.startDate  != null ? #dates.format(editProject.startDate,  'yyyy-MM-dd') : ''}]]*/ '';
+    const closedDateVal = /*[[${editProject.closedDate != null ? #dates.format(editProject.closedDate, 'yyyy-MM-dd') : ''}]]*/ '';
+
+    // ── Flatpickr 날짜 피커 초기화 ──────────
+    const commonOpts = {
+        locale: 'ko',
+        dateFormat: 'Y-m-d',
+        allowInput: false,
+        disableMobile: true
+    };
+
+    const startPicker = flatpickr(document.getElementById('startDate'), {
+        ...commonOpts,
+        defaultDate: startDateVal || null,
+        onChange: function(selectedDates) {
+            if (selectedDates[0]) {
+                endPicker.set('minDate', selectedDates[0]);
+            }
+        }
+    });
+
+    const endPicker = flatpickr(document.getElementById('closedDate'), {
+        ...commonOpts,
+        defaultDate: closedDateVal || null,
+        minDate: startDateVal || null
+    });
 
     // 기존 매니저 세팅
-    const existingUserId = /*[[${editProject.userId}]]*/ null;
+    const existingUserId      = /*[[${editProject.userId}]]*/ null;
     const existingManagerName = /*[[${editProject.managerName}]]*/ '';
     if (existingUserId) {
-        realUserId.value = existingUserId;
+        realUserId.value    = existingUserId;
         managerSearch.value = existingManagerName;
     }
 
@@ -131,60 +679,47 @@
     const existingModules = /*[[${editProject.enaId != null ? editProject.enaId : ''}]]*/ '';
     if (existingModules) {
         const moduleArr = existingModules.split(',');
-        document.querySelectorAll('input[name="moduleList"]').forEach(checkbox => {
-            checkbox.checked = moduleArr.includes(checkbox.value);
+        document.querySelectorAll('input[name="moduleList"]').forEach(cb => {
+            cb.checked = moduleArr.includes(cb.value);
         });
     }
 
     function handleSearch(value) {
         const term = value.trim();
-        if (term.length < 1) {
-            dropdown.style.display = 'none';
-            return;
-        }
+        if (term.length < 1) { userDropdown.style.display = 'none'; return; }
         const searchUrl = /*[[@{/management/searchUsers}]]*/ '/management/searchUsers';
         fetch(`${searchUrl}?term=${encodeURIComponent(term)}`)
-            .then(response => {
-                if (!response.ok) throw new Error('서버 에러 발생');
-                return response.json();
-            })
+            .then(res => { if (!res.ok) throw new Error('서버 에러'); return res.json(); })
             .then(data => {
-                dropdown.innerHTML = '';
+                userDropdown.innerHTML = '';
                 if (data && data.length > 0) {
                     data.forEach(user => {
                         const item = document.createElement('div');
                         item.textContent = `${user.name}/${user.login}`;
-                        item.style.padding = '8px 12px';
-                        item.style.cursor = 'pointer';
-                        item.style.borderBottom = '1px solid #eee';
-                        item.onmouseover = () => item.style.backgroundColor = '#f8f9fa';
-                        item.onmouseout = () => item.style.backgroundColor = 'white';
+                        item.style.cssText = 'padding:8px 12px;cursor:pointer;border-bottom:1px solid #eee;font-size:13px;';
+                        item.onmouseover = () => item.style.backgroundColor = '#e8f4fb';
+                        item.onmouseout  = () => item.style.backgroundColor = 'white';
                         item.onclick = function() {
                             managerSearch.value = `${user.login}`;
-                            realUserId.value = user.id;
-                            dropdown.style.display = 'none';
+                            realUserId.value    = user.id;
+                            userDropdown.style.display = 'none';
                         };
-                        dropdown.appendChild(item);
+                        userDropdown.appendChild(item);
                     });
-                    dropdown.style.display = 'block';
+                    userDropdown.style.display = 'block';
                 } else {
-                    dropdown.style.display = 'none';
+                    userDropdown.style.display = 'none';
                 }
             })
             .catch(err => console.error('검색 중 오류 발생:', err));
     }
 
-    managerSearch.addEventListener('input', function() {
-        handleSearch(this.value);
-    });
-
-    managerSearch.addEventListener('compositionend', function() {
-        handleSearch(this.value);
-    });
+    managerSearch.addEventListener('input',          function() { handleSearch(this.value); });
+    managerSearch.addEventListener('compositionend', function() { handleSearch(this.value); });
 
     document.addEventListener('click', function(e) {
-        if (!managerSearch.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.style.display = 'none';
+        if (!managerSearch.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.style.display = 'none';
         }
     });
 </script>
