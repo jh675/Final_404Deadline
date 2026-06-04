@@ -1,9 +1,23 @@
+/**
+ * 레거시 페이지용 #wrapper (공지·게시판 등)
+ * 이슈/마일스톤 모듈은 issue.css · milestone.css 가 덮어씀
+ */
 #wrapper {
 	width: 100%;
-    max-width: 1306px;
-    margin: 0 auto;
-    overflow-x: auto;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    padding: 12px;
+	max-width: 1306px;
+	margin: 0 auto;
+	overflow-x: auto;
+	border: 1px solid #dee2e6;
+	border-radius: 6px;
+	padding: 12px;
+	box-sizing: border-box;
+}
+
+/* containerSize #wrapper 가 모듈 셸에 적용되지 않도록 */
+.issue-shell > #wrapper,
+.milestone-shell > #wrapper {
+	max-width: none;
+	margin-left: 0;
+	margin-right: 0;
+	overflow-x: visible;
 }
