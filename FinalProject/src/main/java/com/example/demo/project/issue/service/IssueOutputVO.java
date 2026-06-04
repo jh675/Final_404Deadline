@@ -28,6 +28,7 @@ public class IssueOutputVO {
 	private Date closedDate;
 	private Long parentIssue;
 	private Long rootIssue;
+	private Long memId;
 	private	String memName;
 	private Long lft;
 	private Long rgt;

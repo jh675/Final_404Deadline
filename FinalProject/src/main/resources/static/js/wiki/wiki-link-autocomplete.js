@@ -147,15 +147,89 @@ var WikiLinkAutocomplete = (function () {
             state.open = false;
         }
 
-        /** 에디터 바로 아래에 드롭다운 배치 (뷰포트 높이 연동 없음) */
+        var DROPDOWN_GAP = 8;
+        var DROPDOWN_MIN_WIDTH = 260;
+        var DROPDOWN_MAX_WIDTH = 320;
+        var DROPDOWN_TOP_FALLBACK = 48;
+
+        function getEditorRoot() {
+            return anchorSelector ? document.querySelector(anchorSelector) : null;
+        }
+
+        /** 마크다운/위지윅 입력 영역 (세로 미리보기 시 왼쪽 패널) */
+        function getInputPane(root) {
+            if (!root) return null;
+            return root.querySelector('.toastui-editor-md-container')
+                || root.querySelector('.toastui-editor-ww-container');
+        }
+
+        /** 커서 줄 근처 세로 위치 (없으면 null) */
+        function getCaretTop(root) {
+            if (!root) return null;
+            var cmWrap = root.querySelector('.CodeMirror');
+            if (cmWrap && cmWrap.CodeMirror) {
+                return cmWrap.CodeMirror.cursorCoords(true, 'window').top;
+            }
+            var pm = root.querySelector('.ProseMirror');
+            if (pm && typeof window.getSelection === 'function') {
+                var sel = window.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    var rangeRect = sel.getRangeAt(0).getBoundingClientRect();
+                    if (rangeRect.height || rangeRect.width) {
+                        return rangeRect.top;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /** 입력 패널 오른쪽(미리보기 쪽)에 드롭다운 배치 */
         function positionDropdown() {
-            var anchor = anchorSelector ? document.querySelector(anchorSelector) : null;
-            if (!anchor) return;
-            var rect = anchor.getBoundingClientRect();
-            dropdown.style.left = Math.max(8, rect.left) + 'px';
-            dropdown.style.top = (rect.bottom + 4) + 'px';
-            dropdown.style.minWidth = Math.min(Math.max(rect.width, 280), 480) + 'px';
-            dropdown.style.maxWidth = '480px';
+            var root = getEditorRoot();
+            if (!root) return;
+
+            var pane = getInputPane(root) || root;
+            var paneRect = pane.getBoundingClientRect();
+            var panelWidth = Math.min(
+                DROPDOWN_MAX_WIDTH,
+                Math.max(DROPDOWN_MIN_WIDTH, Math.round(paneRect.width * 0.42))
+            );
+
+            dropdown.style.minWidth = panelWidth + 'px';
+            dropdown.style.maxWidth = panelWidth + 'px';
+
+            var caretTop = getCaretTop(root);
+            var top = caretTop != null
+                ? caretTop + 4
+                : paneRect.top + DROPDOWN_TOP_FALLBACK;
+
+            var left = paneRect.right + DROPDOWN_GAP;
+            if (left + panelWidth > window.innerWidth - DROPDOWN_GAP) {
+                left = Math.max(DROPDOWN_GAP, paneRect.right - panelWidth);
+            }
+
+            var dropdownHeight = dropdown.offsetHeight || 240;
+            if (top + dropdownHeight > window.innerHeight - DROPDOWN_GAP) {
+                top = Math.max(DROPDOWN_GAP, window.innerHeight - dropdownHeight - DROPDOWN_GAP);
+            }
+            top = Math.max(DROPDOWN_GAP, top);
+
+            dropdown.style.left = left + 'px';
+            dropdown.style.top = top + 'px';
+
+            var listMax = Math.min(220, window.innerHeight - top - 40);
+            list.style.maxHeight = (listMax > 80 ? listMax : 220) + 'px';
+        }
+
+        function bindScrollReposition() {
+            var root = getEditorRoot();
+            if (!root || root.__wikiAcScrollBound) return;
+            root.__wikiAcScrollBound = true;
+            root.querySelectorAll('.toastui-editor-main, .CodeMirror-scroll').forEach(function (el) {
+                el.addEventListener('scroll', function () {
+                    if (state.open) positionDropdown();
+                }, { passive: true });
+            });
         }
 
         function setHeader(trigger) {
@@ -328,7 +402,10 @@ var WikiLinkAutocomplete = (function () {
         function onEditorInput() {
             if (Date.now() < state.suppressUntil) return;
             clearTimeout(state.debounceTimer);
-            state.debounceTimer = setTimeout(refreshSuggestions, 120);
+            state.debounceTimer = setTimeout(function () {
+                if (state.open) positionDropdown();
+                refreshSuggestions();
+            }, 120);
         }
 
         function isNavigationKey(key) {
@@ -388,6 +465,9 @@ var WikiLinkAutocomplete = (function () {
         window.addEventListener('resize', function () {
             if (state.open) positionDropdown();
         });
+
+        bindScrollReposition();
+        setTimeout(bindScrollReposition, 300);
 
         hideHandlers.push(function (force) {
             state.pointerInside = false;

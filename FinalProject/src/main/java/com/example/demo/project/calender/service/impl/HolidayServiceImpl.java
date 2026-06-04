@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,15 @@ import lombok.extern.slf4j.Slf4j;
 public class HolidayServiceImpl implements HolidayService {
 
     private final HolidayMapper holidayMapper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = createRestTemplate();
+
+    // 외부 공휴일 API가 응답하지 않을 때 요청 스레드가 무한 대기하지 않도록 타임아웃 설정
+    private static RestTemplate createRestTemplate() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(3000);
+        factory.setReadTimeout(5000);
+        return new RestTemplate(factory);
+    }
 
     @Value("${openapi.holiday.service-key}")
     private String serviceKey;

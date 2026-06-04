@@ -98,18 +98,35 @@ public class IssueRestController {
 	
 	@PutMapping("/start-date")
 	public ResponseEntity<Map<String, Object>> registerStartDate(@RequestBody IssueVulkVO vulkVO) {
-		
 		UserVO loginUser = getLoginUser();
 		if(loginUser == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(Map.of("ok", false, "message", "로그인이 필요합니다."));
 		}
+		if (vulkVO == null || vulkVO.getIds() == null || vulkVO.getIds().isEmpty()) {
+			return ResponseEntity.badRequest()
+					.body(Map.of("ok", false, "message", "등록할 이슈를 선택해 주세요."));
+		}
+		int requested = vulkVO.getIds().size();
 		vulkVO.setUpdater(loginUser.getId());
 		Long count = issueService.registerStartDate(vulkVO);
 		if(count == null) {
 			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
 		}
-		return ResponseEntity.ok(Map.of("ok", true, "message", count+"개의 이슈의의 시작일이 등록되었습니다."));
+		long updated = count;
+		long skipped = Math.max(0, requested - updated);
+		if (updated == 0) {
+			return ResponseEntity.badRequest().body(Map.of(
+					"ok", false,
+					"message", "담당자가 없거나 이미 시작일이 등록된 이슈는 시작일을 등록할 수 없습니다.",
+					"updated", 0,
+					"skipped", skipped));
+		}
+		return ResponseEntity.ok(Map.of(
+				"ok", true,
+				"message", updated + "개의 이슈의 시작일이 등록되었습니다.",
+				"success", updated,
+				"skipped", skipped));
 	}
 
 	@PutMapping("/closed-date")
@@ -133,11 +150,29 @@ public class IssueRestController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(Map.of("ok", false, "message", "로그인이 필요합니다."));
 		}
+		if (vulkVO == null || vulkVO.getIds() == null || vulkVO.getIds().isEmpty()) {
+			return ResponseEntity.badRequest()
+					.body(Map.of("ok", false, "message", "변경할 이슈를 선택해 주세요."));
+		}
+		int requested = vulkVO.getIds().size();
 		vulkVO.setUpdater(loginUser.getId());
 		Long count = issueService.updateVulk(vulkVO);
 		if(count == null) {
 			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
 		}
-		return ResponseEntity.ok(Map.of("ok", true, "message", count+"개의 이슈가 수정되었습니다."));
+		long updated = count;
+		long skipped = Math.max(0, requested - updated);
+		if (vulkVO.getStatusCd() != null && !vulkVO.getStatusCd().isBlank() && updated == 0) {
+			return ResponseEntity.badRequest().body(Map.of(
+					"ok", false,
+					"message", "담당자가 없는 이슈는 상태를 변경할 수 없습니다.",
+					"updated", 0,
+					"skipped", skipped));
+		}
+		return ResponseEntity.ok(Map.of(
+				"ok", true,
+				"message", updated + "개의 이슈가 수정되었습니다.",
+				"updated", updated,
+				"skipped", skipped));
 	}
 }
