@@ -19,15 +19,17 @@
 
 </head>
 
-<body>
-	<div class="container-fluid px-4">
+<body class="layout-app">
+	<div class="container-fluid layout-app__shell">
 		<div
 			th:replace="~{layout/fragments/navbar :: layoutNavbar('에러페이지')}">
 		</div>
-		<div class="card mt-3">
+		<div class="layout-app__main">
+		<div class="card">
 			<div class="card-body">
 				<div layout:fragment="content"></div>
 			</div>
+		</div>
 		</div>
 		<div th:replace="~{layout/fragments/footer :: yedam}"></div>
 	</div>

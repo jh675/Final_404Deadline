@@ -2,71 +2,56 @@
  * 프로젝트 레이아웃 — 배치·간격·형태 (색상: theme-colors.css)
  */
 :root {
-	--layout-section-gap: 18px;
+	--project-workspace-header-inset: 16px 20px 0;
+	--project-body-inset: 16px 20px 20px;
 }
 
 .layout-tabler .page-wrapper,
-.layout-tabler .page-body {
+.layout-tabler .page > .page-wrapper > .page-body {
 	background: transparent;
 }
 
-.layout-tabler .page-body {
+.layout-tabler .page > .page-wrapper > .page-body {
 	margin: 0 !important;
 	padding: 0 !important;
 }
 
-.layout-tabler .page-body > .container-fluid {
+.layout-tabler .page > .page-wrapper > .page-body > .container-fluid {
 	display: flex;
 	flex-direction: column;
 	gap: var(--layout-section-gap);
-	padding: 16px 20px 24px !important;
+	padding: var(--project-page-gutter) !important;
 }
 
-.layout-tabler .page-body > .container-fluid > .navbar,
-.layout-tabler .page-body > .container-fluid > .project-header,
-.layout-tabler .page-body > .container-fluid > .project-content,
-.layout-tabler .page-body > .container-fluid > .card {
+.layout-tabler .page > .page-wrapper > .page-body > .container-fluid > .navbar,
+.layout-tabler .page > .page-wrapper > .page-body > .container-fluid > .project-workspace,
+.layout-tabler .page > .page-wrapper > .page-body > .container-fluid > .card {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
 }
 
-/* ── navbar 형태 ──────────────────────────────────────── */
-.layout-tabler .navbar.bg-primary {
+/* ── project workspace (메뉴·본문 공통 영역) ───────────── */
+.layout-tabler .project-workspace {
 	border-radius: 12px;
+	overflow: hidden;
 }
 
-.layout-tabler .navbar .navbar-brand {
-	font-weight: 700;
-	letter-spacing: -0.01em;
+.layout-tabler .project-workspace .project-header {
+	border-radius: 0;
+	padding: var(--project-workspace-header-inset);
 }
 
-.layout-tabler .navbar .nav-link {
-	border-radius: 999px;
-	font-weight: 500;
-	transition: background-color 0.15s ease, color 0.15s ease;
+.layout-tabler .project-workspace .project-content {
+	padding: var(--project-body-inset);
 }
 
-.layout-tabler .navbar .input-group .input-group-text {
-	font-weight: 700;
-}
-
-.layout-tabler .navbar > .container-fluid > .collapse > .d-flex > span {
-	font-size: 0.9375rem;
-}
-
-.layout-tabler .navbar .dropdown-menu {
-	border-radius: 10px;
-}
-
-.layout-tabler .navbar #notificationList .dropdown-item {
-	white-space: normal;
+.layout-tabler .project-workspace:has(.issue-shell) .project-content,
+.layout-tabler .project-workspace:has(.wiki-shell) .project-content,
+.layout-tabler .project-workspace:has(.milestone-timeline-page) .project-content {
+	padding: 0;
 }
 
 /* ── project header 형태 ──────────────────────────────── */
-.layout-tabler .project-header {
-	border-radius: 12px;
-}
-
 .layout-tabler .project-header h3 {
 	font-size: 1.35rem;
 	letter-spacing: -0.02em;
@@ -89,7 +74,7 @@
 .layout-tabler .project-header .nav-tabs .nav-link {
 	font-weight: 500;
 	border-radius: 8px 8px 0 0;
-	padding: 0.55rem 0.9rem;
+	padding: 0.45rem 0.75rem;
 	margin-bottom: -1px;
 }
 
@@ -98,20 +83,24 @@
 	font-weight: 700 !important;
 }
 
+.layout-tabler .project-workspace:has(.issue-shell) .project-content > div,
+.layout-tabler .project-workspace:has(.wiki-shell) .project-content > div {
+	padding: 0;
+}
+
+.layout-tabler .project-workspace:has(.milestone-timeline-page) .project-content > div {
+	padding: 0;
+}
+
 /* ── content card 형태 ────────────────────────────────── */
 .layout-tabler .card {
 	border-radius: 12px !important;
 }
 
-.layout-tabler .card:has(.issue-shell) > [layout\\:fragment="content"],
-.layout-tabler .card:has(.issue-shell) > div {
-	padding: 0;
-}
-
 /* ── issue shell 형태 (layout-tabler) ─────────────────── */
-.layout-tabler .issue-shell > #wrapper {
-	border-radius: 12px;
-	padding: 28px 32px 32px;
+.layout-tabler .project-workspace .issue-shell > #wrapper {
+	border-radius: 0;
+	padding: var(--project-body-inset);
 }
 
 .layout-tabler .issue-shell .tab-row .tab-btn {

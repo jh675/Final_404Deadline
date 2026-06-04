@@ -5,7 +5,7 @@
 .milestone-timeline-page {
 	box-sizing: border-box;
 	width: 100%;
-	padding: 28px 32px 32px;
+	padding: var(--project-body-inset, 16px 20px 20px);
 	background: var(--app-surface);
 	border: 1px solid var(--app-border);
 	border-radius: 8px;
@@ -20,15 +20,14 @@
 	box-shadow: none;
 }
 
-.layout-tabler .card:has(.milestone-timeline-page) {
+.layout-tabler .project-workspace:has(.milestone-timeline-page) .milestone-timeline-page {
 	background: transparent;
-	border: none !important;
-	box-shadow: none !important;
+	border: none;
+	box-shadow: none;
+	border-radius: 0;
 }
 
-.layout-tabler .card:has(.milestone-timeline-page) > div {
-	padding: 0;
-}
+/* .project-content > div padding:0 은 tabler-bridge.css 에 단일 정의 (중복 제거) */
 
 /* ── 헤더 · 본문 톤 ───────────────────────────────────── */
 .milestone-timeline-page .milestone-page-head {
@@ -47,15 +46,26 @@
 	color: var(--app-text-muted) !important;
 }
 
-.milestone-timeline-page .page-body {
+.milestone-timeline-page .milestone-page-body {
 	background: var(--app-surface);
 	border-color: var(--app-border);
 	border-radius: 8px;
+	max-height: 32rem;
+	overflow: hidden;
 }
 
 .milestone-timeline-page .milestone-sidebar {
 	background: var(--app-surface-muted);
 	border-right-color: var(--app-border);
+	min-height: 0;
+	overflow: hidden;
+}
+
+.milestone-timeline-page .milestone-list {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
 }
 
 .milestone-timeline-page .milestone-sidebar h2 {
@@ -142,6 +152,32 @@
 .milestone-timeline-page .btn-primary:focus {
 	background-color: var(--app-primary-hover);
 	border-color: var(--app-primary-hover);
+	color: #fff;
+}
+
+.milestone-timeline-page .btn-secondary {
+	background-color: var(--issue-btn-bg-hover, var(--app-surface-muted));
+	border-color: var(--issue-btn-border, var(--app-border));
+	color: var(--app-heading);
+}
+
+.milestone-timeline-page .btn-secondary:hover,
+.milestone-timeline-page .btn-secondary:focus {
+	background-color: #e2e8f0;
+	border-color: #cbd5e1;
+	color: var(--app-heading);
+}
+
+.milestone-timeline-page .btn-danger {
+	background-color: var(--app-danger);
+	border-color: var(--app-danger);
+	color: #fff;
+}
+
+.milestone-timeline-page .btn-danger:hover,
+.milestone-timeline-page .btn-danger:focus {
+	filter: brightness(0.95);
+	border-color: var(--app-danger);
 	color: #fff;
 }
 

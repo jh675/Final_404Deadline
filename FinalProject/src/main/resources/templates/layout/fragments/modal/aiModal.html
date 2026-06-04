@@ -12,17 +12,17 @@
                         <h5 class="modal-title fw-bold" id="aiResultModalLabel">✨ AI 프로젝트 비서 답변</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
                     </div>
-                    <div class="modal-body">
-                        <div id="aiLoading" class="text-center my-4">
-                            <div class="spinner-border text-primary" role="status"></div>
-                            <p class="mt-2 text-muted">프로젝트 데이터를 분석 중입니다. 잠시만 기다려주세요...</p>
+                    <div class="modal-body ai-modal-body">
+                        <div class="ai-modal-stage">
+                            <div id="aiLoading" class="ai-modal-loading" hidden>
+                                <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+                                <p class="mt-2 text-muted mb-0">프로젝트 데이터를 분석 중입니다. 잠시만 기다려주세요...</p>
+                            </div>
+                            <article id="aiAnswerContent" class="ai-modal-answer" hidden>
+                                <div id="aiAnswerViewer"></div>
+                                <p id="aiAnswerEmpty" class="ai-modal-empty" hidden>내용이 없습니다.</p>
+                            </article>
                         </div>
-                        <article id="aiAnswerContent" class="wiki-body" style="display:none; line-height:1.7; font-size:14px;">
-                            <div id="aiAnswerViewer"></div>
-                            <p id="aiAnswerEmpty" class="wiki-body-empty" style="display:none; color:#888; margin:0;">
-                                내용이 없습니다.
-                            </p>
-                        </article>
                     </div>
                 </div>
             </div>
@@ -52,13 +52,13 @@
 
                     const md = (markdown || '').toString().trim();
                     if (!md) {
-                        viewerEl.style.display = 'none';
-                        emptyEl.style.display = 'block';
+                        viewerEl.hidden = true;
+                        emptyEl.hidden = false;
                         return;
                     }
 
-                    emptyEl.style.display = 'none';
-                    viewerEl.style.display = '';
+                    emptyEl.hidden = true;
+                    viewerEl.hidden = false;
 
                     function mountAiViewer() {
                         if (window.toastui && window.toastui.Editor) {
@@ -89,8 +89,8 @@
                         return;
                     }
 
-                    contentDiv.style.display = 'none';
-                    loadingDiv.style.display = 'block';
+                    contentDiv.hidden = true;
+                    loadingDiv.hidden = false;
                     modal.show();
 
                     csrfFetch('/ai/assistant', {
@@ -103,14 +103,14 @@
                             return res.text();
                         })
                         .then(function (data) {
-                            loadingDiv.style.display = 'none';
                             renderAiAnswer(data);
-                            contentDiv.style.display = 'block';
+                            loadingDiv.hidden = true;
+                            contentDiv.hidden = false;
                         })
                         .catch(function (err) {
-                            loadingDiv.style.display = 'none';
                             renderAiAnswer('오류가 발생했습니다: ' + err.message);
-                            contentDiv.style.display = 'block';
+                            loadingDiv.hidden = true;
+                            contentDiv.hidden = false;
                         });
                 }
 

@@ -108,101 +108,19 @@ body.layout-tabler {
 	color: var(--app-text);
 }
 
-/* ── Navbar ───────────────────────────────────────────── */
-.layout-tabler .navbar.bg-primary {
-	box-shadow: 0 2px 10px rgba(var(--app-primary-rgb), 0.22);
-	border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.layout-tabler .navbar .nav-link:hover {
-	background: rgba(255, 255, 255, 0.14);
-}
-
-.layout-tabler .navbar .nav-link.active,
-.layout-tabler .navbar .nav-link.fw-bold {
-	background: rgba(255, 255, 255, 0.2) !important;
-	color: #ffffff !important;
-}
-
-.layout-tabler .navbar #aiSearchInput {
-	border-color: rgba(255, 255, 255, 0.35);
-	background: rgba(255, 255, 255, 0.95);
-	color: var(--app-heading);
-}
-
-.layout-tabler .navbar #aiSearchInput::placeholder {
-	color: var(--app-text-muted);
-}
-
-.layout-tabler .navbar #aiSearchInput:focus {
-	border-color: #ffffff;
-	box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.28);
-}
-
-.layout-tabler .navbar .input-group .input-group-text {
-	border-color: rgba(255, 255, 255, 0.25);
-	background: rgba(255, 255, 255, 0.18) !important;
-}
-
-.layout-tabler .navbar #aiSearchBtn {
-	border-color: rgba(255, 255, 255, 0.55);
-	color: #ffffff;
-	background: transparent;
-}
-
-.layout-tabler .navbar #aiSearchBtn:hover {
-	background: rgba(255, 255, 255, 0.18);
-	border-color: #ffffff;
-	color: #ffffff;
-}
-
-.layout-tabler .navbar #notificationBtn {
-	border-color: rgba(255, 255, 255, 0.45);
-	background: rgba(255, 255, 255, 0.12);
-	color: #ffffff;
-}
-
-.layout-tabler .navbar #notificationBtn:hover,
-.layout-tabler .navbar #notificationBtn:focus {
-	background: rgba(255, 255, 255, 0.22);
-	border-color: #ffffff;
-	color: #ffffff;
-}
-
-.layout-tabler .navbar #notificationBadge {
-	background: var(--app-danger) !important;
-}
-
-.layout-tabler .navbar .dropdown-menu {
+/* ── Project workspace ────────────────────────────────── */
+.layout-tabler .project-workspace {
+	background: var(--app-surface);
 	border: 1px solid var(--app-border);
-	box-shadow: 0 12px 24px var(--app-shadow-color-lg);
-}
-
-.layout-tabler .navbar #notificationList .dropdown-item {
+	box-shadow: 0 1px 4px var(--app-shadow-color);
 	color: var(--app-text);
-}
-
-.layout-tabler .navbar #notificationList .dropdown-item:hover {
-	background: var(--app-surface-muted);
-}
-
-.layout-tabler .navbar #clearAllBtn {
-	color: var(--app-text-muted) !important;
-}
-
-.layout-tabler .navbar #clearAllBtn:hover {
-	color: var(--app-primary) !important;
-}
-
-.layout-tabler .navbar > .container-fluid > .collapse > .d-flex > span {
-	color: rgba(255, 255, 255, 0.92);
 }
 
 /* ── Project header ───────────────────────────────────── */
 .layout-tabler .project-header {
-	background: var(--app-surface);
-	border: 1px solid var(--app-border);
-	box-shadow: 0 1px 4px var(--app-shadow-color);
+	background: transparent;
+	border: none;
+	box-shadow: none;
 }
 
 .layout-tabler .project-header h3 {
@@ -256,18 +174,28 @@ body.layout-tabler {
 	color: var(--app-text);
 }
 
-.layout-tabler .card:has(.issue-shell) {
+.layout-tabler .project-workspace .project-content {
 	background: transparent;
-	border: none !important;
-	box-shadow: none !important;
+	border: none;
+	border-top: 1px solid var(--app-border);
+	box-shadow: none;
 }
 
-/* ── Issue shell (layout-tabler scope) ────────────────── */
-.layout-tabler .issue-shell {
+.layout-tabler .project-workspace:has(.issue-shell) .issue-shell > #wrapper,
+.layout-tabler .project-workspace:has(.wiki-shell) .wiki-shell > #wrapper {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+}
+
+/* ── Issue / Wiki shell (layout-tabler scope) ─────────── */
+.layout-tabler .issue-shell,
+.layout-tabler .wiki-shell {
 	color: var(--app-text);
 }
 
-.layout-tabler .issue-shell > #wrapper {
+.layout-tabler .issue-shell > #wrapper,
+.layout-tabler .wiki-shell > #wrapper {
 	background: var(--app-surface);
 	border: 1px solid var(--app-border);
 	box-shadow: none;
@@ -277,20 +205,28 @@ body.layout-tabler {
 .layout-tabler .issue-shell .issue-page-section,
 .layout-tabler .issue-shell .section-block,
 .layout-tabler .issue-shell .tab-panel-wrap,
-.layout-tabler .issue-shell .issue-page-head {
+.layout-tabler .issue-shell .issue-page-head,
+.layout-tabler .wiki-shell .wiki-page-section,
+.layout-tabler .wiki-shell .wiki-page-head,
+.layout-tabler .wiki-shell .wiki-panel,
+.layout-tabler .wiki-shell .wiki-aside {
 	border-color: var(--app-border);
 }
 
 .layout-tabler .issue-shell .issue-list__title,
 .layout-tabler .issue-shell .issue-page-head__title,
 .layout-tabler .issue-shell .section-head,
-.layout-tabler .issue-shell .inner-table-title {
+.layout-tabler .issue-shell .inner-table-title,
+.layout-tabler .wiki-shell .wiki-page-head__title,
+.layout-tabler .wiki-shell .wiki-section-head,
+.layout-tabler .wiki-shell .wiki-aside__title {
 	color: var(--app-heading);
 }
 
 .layout-tabler .issue-shell .issue-field label,
 .layout-tabler .issue-shell .search-item label,
-.layout-tabler .issue-shell .meta-item label {
+.layout-tabler .issue-shell .meta-item label,
+.layout-tabler .wiki-shell .search-item label {
 	color: var(--app-text-muted);
 }
 
@@ -355,30 +291,66 @@ body.layout-tabler {
 	color: var(--app-primary);
 }
 
-.layout-tabler .issue-shell .btn-primary {
+.layout-tabler .issue-shell .btn-secondary,
+.layout-tabler .wiki-shell .btn-secondary {
+	background-color: var(--issue-btn-bg-hover);
+	border-color: var(--issue-btn-border);
+	color: var(--issue-heading);
+}
+
+.layout-tabler .issue-shell .btn-secondary:hover,
+.layout-tabler .issue-shell .btn-secondary:focus,
+.layout-tabler .wiki-shell .btn-secondary:hover,
+.layout-tabler .wiki-shell .btn-secondary:focus {
+	background-color: #e2e8f0;
+	border-color: #cbd5e1;
+	color: var(--issue-heading);
+}
+
+.layout-tabler .issue-shell .btn-primary,
+.layout-tabler .wiki-shell .btn-primary {
 	background-color: var(--app-primary);
 	border-color: var(--app-primary);
 }
 
 .layout-tabler .issue-shell .btn-primary:hover,
-.layout-tabler .issue-shell .btn-primary:focus {
+.layout-tabler .issue-shell .btn-primary:focus,
+.layout-tabler .wiki-shell .btn-primary:hover,
+.layout-tabler .wiki-shell .btn-primary:focus {
 	background-color: var(--app-primary-hover);
 	border-color: var(--app-primary-hover);
 }
 
-.layout-tabler .issue-shell .btn-info {
+.layout-tabler .wiki-shell .btn-success {
+	background-color: var(--app-success);
+	border-color: var(--app-success);
+	color: #1e3a2f;
+}
+
+.layout-tabler .wiki-shell .btn-success:hover,
+.layout-tabler .wiki-shell .btn-success:focus {
+	filter: brightness(0.92);
+	border-color: var(--app-success);
+	color: #1a3329;
+}
+
+.layout-tabler .issue-shell .btn-info,
+.layout-tabler .wiki-shell .btn-info {
 	background-color: rgba(var(--app-primary-rgb), 0.85);
 	border-color: rgba(var(--app-primary-rgb), 0.85);
 	color: #ffffff;
 }
 
-.layout-tabler .issue-shell .btn-outline-info {
+.layout-tabler .issue-shell .btn-outline-info,
+.layout-tabler .wiki-shell .btn-outline-info {
 	color: var(--app-primary);
 	border-color: rgba(var(--app-primary-rgb), 0.45);
+	background-color: transparent;
 }
 
 .layout-tabler .issue-shell .btn-outline-info:hover,
-.layout-tabler .issue-shell .tab-btn.btn-outline-info.is-active {
+.layout-tabler .issue-shell .tab-btn.btn-outline-info.is-active,
+.layout-tabler .wiki-shell .btn-outline-info:hover {
 	background-color: var(--app-primary-soft);
 	border-color: rgba(var(--app-primary-rgb), 0.45);
 	color: var(--app-primary);
@@ -612,7 +584,64 @@ body.layout-tabler {
 	color: var(--app-heading);
 }
 
-#aiResultModal .modal-body {
+#aiResultModal .modal-body,
+#aiResultModal .ai-modal-body {
 	background: var(--app-surface);
 	color: var(--app-text);
+}
+
+#aiResultModal .ai-modal-stage {
+	position: relative;
+	min-height: 280px;
+}
+
+#aiResultModal .ai-modal-loading {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	background: var(--app-surface);
+}
+
+#aiResultModal .ai-modal-loading[hidden] {
+	display: none !important;
+}
+
+#aiResultModal .ai-modal-answer {
+	min-height: 280px;
+	line-height: 1.7;
+	font-size: 14px;
+}
+
+#aiResultModal .ai-modal-answer[hidden] {
+	display: none !important;
+}
+
+#aiResultModal #aiAnswerViewer {
+	min-height: 120px;
+}
+
+#aiResultModal #aiAnswerViewer .toastui-editor-spinner {
+	display: none !important;
+}
+
+/* 이슈 · 위키 — 에디터/뷰어 로딩 스피너 */
+.issue-shell .toastui-editor-spinner,
+.wiki-shell .toastui-editor-spinner,
+.issue-shell .toastui-editor-md-preview .toastui-editor-spinner,
+.wiki-shell .toastui-editor-md-preview .toastui-editor-spinner,
+#issue-grid .toastui-editor-spinner,
+#childIssueList .toastui-editor-spinner,
+#wikiViewer .toastui-editor-spinner {
+	display: none !important;
+}
+
+#aiResultModal .ai-modal-empty {
+	margin: 0;
+	color: var(--app-muted-fg);
+	font-size: 13px;
 }

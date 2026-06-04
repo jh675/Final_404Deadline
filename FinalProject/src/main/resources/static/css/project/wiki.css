@@ -1,0 +1,932 @@
+/**
+ * 위키 모듈 — 이슈 모듈(issue.css)과 동일 톤·레이아웃
+ */
+:root {
+	--wiki-radius: var(--issue-radius, 8px);
+	--wiki-radius-sm: var(--issue-radius-sm, 6px);
+	--wiki-shadow-sm: var(--issue-shadow-sm, 0 1px 2px rgba(16, 24, 40, 0.04));
+	--wiki-transition: var(--issue-transition, 0.16s ease);
+}
+
+/* ── 레이아웃 셸 ───────────────────────────────────────── */
+.wiki-shell {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "맑은 고딕", sans-serif;
+	color: var(--issue-text);
+	width: 100%;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+.wiki-shell > #wrapper {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: var(--project-body-inset, 16px 20px 20px);
+	background: var(--issue-bg);
+	border: 1px solid var(--issue-border);
+	border-radius: var(--wiki-radius);
+	box-shadow: var(--wiki-shadow-sm);
+}
+
+.wiki-shell input:not([type="checkbox"]):not([type="range"]):focus,
+.wiki-shell select:focus,
+.wiki-shell textarea:focus {
+	outline: none;
+	border-color: var(--issue-border-focus);
+	box-shadow: 0 0 0 3px var(--app-focus-ring);
+}
+
+/* ── 2단 레이아웃 ─────────────────────────────────────── */
+.wiki-layout {
+	display: flex;
+	gap: 24px;
+	align-items: flex-start;
+}
+
+.wiki-main {
+	flex: 1;
+	min-width: 0;
+}
+
+.wiki-aside {
+	width: 220px;
+	flex-shrink: 0;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--wiki-radius-sm);
+	background: var(--issue-bg-subtle);
+	padding: 16px 18px;
+}
+
+.wiki-aside__title {
+	font-size: 14px;
+	font-weight: 600;
+	margin: 0 0 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--issue-border);
+	color: var(--issue-heading);
+}
+
+.wiki-aside__kicker {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+	margin-bottom: 8px;
+}
+
+.wiki-aside ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.wiki-aside li + li {
+	margin-top: 6px;
+}
+
+.wiki-aside a {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--issue-link);
+	text-decoration: none;
+	transition: color var(--wiki-transition);
+}
+
+.wiki-aside a:hover,
+.wiki-aside a.is-active {
+	color: var(--issue-primary-hover);
+	text-decoration: underline;
+}
+
+.wiki-aside a.is-active {
+	font-weight: 600;
+}
+
+/* ── 페이지 헤더 ───────────────────────────────────────── */
+.wiki-breadcrumb {
+	font-size: 13px;
+	color: var(--issue-label);
+	margin-bottom: 12px;
+	line-height: 1.55;
+}
+
+.wiki-breadcrumb a {
+	color: var(--issue-link);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.wiki-breadcrumb a:hover {
+	text-decoration: underline;
+}
+
+.wiki-breadcrumb .sep {
+	margin: 0 6px;
+	color: var(--app-muted-fg);
+}
+
+.wiki-page-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	padding-bottom: 20px;
+	margin-bottom: 24px;
+	border-bottom: 1px solid var(--issue-border);
+}
+
+.wiki-page-head__title {
+	flex: 1;
+	min-width: 0;
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	line-height: 1.35;
+	color: var(--issue-heading);
+}
+
+.wiki-page-head__title small {
+	font-size: 0.85em;
+	font-weight: 500;
+	color: var(--issue-label);
+}
+
+.wiki-page-head > div:first-child {
+	flex: 1;
+	min-width: 0;
+}
+
+.wiki-page-head__actions {
+	margin-left: auto;
+	flex-shrink: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.wiki-page-kicker {
+	margin: 0 0 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+	text-transform: none;
+}
+
+.wiki-page-desc {
+	margin: 8px 0 0;
+	font-size: 13px;
+	color: var(--issue-label);
+	line-height: 1.55;
+}
+
+/* ── 탭 (색인) ─────────────────────────────────────────── */
+.wiki-tab-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 20px;
+	padding: 4px;
+	border-radius: var(--wiki-radius-sm);
+	background: var(--issue-bg-subtle);
+	border: 1px solid var(--issue-border);
+}
+
+.wiki-tab-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 34px;
+	padding: 0 14px;
+	border: 1px solid transparent;
+	border-radius: var(--wiki-radius-sm);
+	background: transparent;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--issue-label);
+	text-decoration: none;
+	transition: background var(--wiki-transition), color var(--wiki-transition), border-color var(--wiki-transition);
+}
+
+.wiki-tab-btn:hover {
+	color: var(--issue-heading);
+	background: var(--issue-bg);
+}
+
+.wiki-tab-btn.is-active {
+	color: var(--issue-primary);
+	border-color: rgba(var(--issue-primary-rgb), 0.35);
+	background: var(--issue-primary-soft);
+	font-weight: 600;
+}
+
+/* ── 섹션 · 패널 ───────────────────────────────────────── */
+.wiki-page-section {
+	margin-bottom: 28px;
+	padding-bottom: 28px;
+	border-bottom: 1px solid var(--issue-border);
+}
+
+.wiki-page-section:last-child {
+	margin-bottom: 0;
+	padding-bottom: 0;
+	border-bottom: none;
+}
+
+.wiki-panel {
+	border: 1px solid var(--issue-border);
+	border-radius: var(--wiki-radius-sm);
+	background: var(--issue-bg);
+	padding: 20px 22px;
+}
+
+.wiki-panel--flush {
+	padding: 0;
+	border: none;
+	background: transparent;
+}
+
+.wiki-section-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--issue-heading);
+}
+
+/* ── 폼 (이슈 search-item 패턴) ───────────────────────── */
+.wiki-shell .search-item {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 6px;
+	margin-bottom: 20px;
+}
+
+.wiki-shell .search-item > label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+}
+
+.wiki-shell .search-item .req {
+	color: var(--app-error);
+	font-weight: 700;
+	margin-left: 2px;
+}
+
+.wiki-shell .search-item input[type="text"],
+.wiki-shell .search-item select {
+	width: 100%;
+	max-width: 480px;
+	min-width: 0;
+	height: 34px;
+	padding: 0 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--wiki-radius-sm);
+	font-size: 13px;
+	background-color: var(--issue-bg);
+	color: var(--issue-heading);
+	box-sizing: border-box;
+	transition: border-color var(--wiki-transition), box-shadow var(--wiki-transition);
+}
+
+.wiki-shell .search-item--grow {
+	max-width: none;
+}
+
+.wiki-title-row {
+	display: flex;
+	gap: 8px;
+	align-items: stretch;
+	max-width: 480px;
+}
+
+.wiki-title-row input[type="text"] {
+	flex: 1;
+	max-width: none;
+}
+
+.wiki-shell .btn-title-check {
+	flex-shrink: 0;
+	height: 34px;
+	padding: 0 14px;
+	font-size: 13px;
+	font-weight: 500;
+	border: 1px solid var(--issue-btn-primary-border);
+	color: var(--issue-btn-primary-text);
+	background: var(--issue-btn-primary-bg);
+	border-radius: var(--wiki-radius-sm);
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background var(--wiki-transition);
+}
+
+.wiki-shell .btn-title-check:hover:not(:disabled) {
+	background: var(--issue-btn-primary-bg-hover);
+}
+
+.wiki-shell .btn-title-check:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.wiki-title-msg {
+	font-size: 12px;
+	margin: 6px 0 0;
+	color: var(--issue-label);
+}
+
+.wiki-title-msg.is-success {
+	color: var(--app-success);
+}
+
+.wiki-title-msg.is-error {
+	color: var(--app-error);
+}
+
+.btn-title-reset {
+	margin-top: 6px;
+	padding: 0;
+	border: none;
+	background: none;
+	font-size: 12px;
+	color: var(--issue-label);
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.btn-title-reset:hover {
+	color: var(--issue-heading);
+}
+
+.wiki-link-hint {
+	font-size: 12px;
+	color: var(--issue-label);
+	margin: 0 0 8px;
+	line-height: 1.55;
+}
+
+.wiki-link-hint code {
+	background: var(--issue-bg-muted);
+	padding: 1px 5px;
+	border-radius: 3px;
+	font-size: 11px;
+	color: var(--issue-heading);
+}
+
+/* TOAST UI Editor 형태 — 마운트 전후 높이 고정(로드 시 오버슈트 방지) */
+.wiki-shell #wikiEditor {
+	height: 420px;
+	min-height: 420px;
+	max-height: 420px;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+#wikiEditor .toastui-editor-defaultUI {
+	height: 420px !important;
+	min-height: 420px !important;
+	max-height: 420px !important;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--wiki-radius-sm);
+	box-sizing: border-box;
+}
+
+.wiki-shell #wikiEditor .toastui-editor-main,
+.wiki-shell #wikiEditor .toastui-editor-md-container,
+.wiki-shell #wikiEditor .toastui-editor-ww-container {
+	min-height: 0;
+}
+
+.wiki-form-actions {
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid var(--issue-border);
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+/* 첨부 (이슈 issueRegist 와 동일) */
+.wiki-shell .search-item.attach-section {
+	flex: 1 1 100%;
+	width: 100%;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--wiki-radius-sm);
+	padding: 16px 18px;
+	background: var(--issue-bg-subtle);
+	box-sizing: border-box;
+}
+
+.wiki-shell .attach-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.wiki-shell .attach-head span {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--issue-text);
+}
+
+.wiki-shell .attachment-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.wiki-shell .attach-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	flex-wrap: wrap;
+	padding: 10px 12px;
+	border: 1px solid var(--issue-border);
+	border-radius: 4px;
+	background: var(--issue-bg);
+}
+
+.wiki-shell .attach-file-name {
+	flex: 1;
+	min-width: 0;
+	font-size: 13px;
+	color: var(--issue-text);
+	overflow-wrap: anywhere;
+}
+
+.wiki-shell .attach-file-meta {
+	font-size: 12px;
+	color: var(--app-muted-fg);
+}
+
+.wiki-shell .attach-hidden-input {
+	display: none;
+}
+
+.wiki-shell .attach-subsection {
+	margin-bottom: 14px;
+	padding-bottom: 14px;
+	border-bottom: 1px dashed var(--issue-border);
+}
+
+.wiki-shell .attach-subsection:last-of-type {
+	border-bottom: none;
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+.wiki-shell .form-hint,
+.wiki-shell .attachment-empty {
+	font-size: 12px;
+	color: var(--app-muted-fg);
+	margin: 6px 0 0;
+}
+
+.wiki-shell .attachment-empty {
+	margin-bottom: 8px;
+}
+
+/* ── 본문 뷰어 ─────────────────────────────────────────── */
+.wiki-body-panel {
+	border: 1px solid var(--issue-border);
+	border-radius: var(--wiki-radius-sm);
+	background: var(--issue-bg);
+	padding: 24px 28px;
+	min-height: 200px;
+}
+
+.wiki-body-panel .wiki-body-empty {
+	color: var(--issue-label);
+	margin: 0;
+	font-size: 13px;
+}
+
+#wikiViewer .toastui-editor-contents {
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--issue-text);
+}
+
+#wikiViewer .toastui-editor-defaultUI {
+	border: none;
+}
+
+.wiki-body-panel a.wiki-link {
+	color: var(--issue-link);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.wiki-body-panel a.wiki-link:hover {
+	text-decoration: underline;
+}
+
+.wiki-body-panel a.external-link,
+.wiki-body-panel a.issue-link {
+	color: var(--issue-primary);
+}
+
+.wiki-version-notice {
+	margin: 0 0 20px;
+	padding: 12px 16px;
+	border: 1px solid var(--app-warn-border);
+	border-radius: var(--wiki-radius-sm);
+	background: var(--app-warn-bg);
+	color: var(--app-warn-text);
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.wiki-version-notice a {
+	color: var(--issue-link);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.wiki-version-notice a:hover {
+	text-decoration: underline;
+}
+
+.wiki-shell .section-block {
+	margin-bottom: 28px;
+	padding-bottom: 28px;
+	border-bottom: 1px solid var(--issue-border);
+}
+
+.wiki-shell .section-block:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+	margin-bottom: 0;
+}
+
+.wiki-shell .section-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 10px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--issue-heading);
+}
+
+.wiki-shell .badge-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 7px;
+	font-size: 11px;
+	font-weight: 600;
+	background: var(--issue-bg);
+	color: var(--issue-label);
+	border: 1px solid var(--issue-border);
+	border-radius: 999px;
+}
+
+.wiki-attachments {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: none;
+}
+
+.wiki-attachments a {
+	color: var(--issue-link);
+	font-size: 13px;
+	text-decoration: none;
+}
+
+.wiki-attachments a:hover {
+	text-decoration: underline;
+}
+
+/* ── 색인 ─────────────────────────────────────────────── */
+.wiki-empty {
+	margin: 0;
+	color: var(--issue-label);
+	font-size: 13px;
+}
+
+.wiki-tree-list {
+	list-style: none;
+	margin: 0;
+	padding-left: 20px;
+	position: relative;
+}
+
+.wiki-tree-root {
+	padding-left: 0;
+}
+
+.wiki-tree-item {
+	position: relative;
+	margin: 0;
+	padding: 6px 0 0 16px;
+}
+
+.wiki-tree-item::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 16px;
+	width: 10px;
+	border-top: 1px solid var(--issue-border);
+}
+
+.wiki-tree-list .wiki-tree-item::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	border-left: 1px solid var(--issue-border);
+}
+
+.wiki-tree-list > .wiki-tree-item:last-child::after {
+	bottom: auto;
+	height: 16px;
+}
+
+.wiki-tree-root > .wiki-tree-item {
+	padding-left: 0;
+}
+
+.wiki-tree-root > .wiki-tree-item::before,
+.wiki-tree-root > .wiki-tree-item::after {
+	display: none;
+}
+
+.wiki-tree-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	min-height: 28px;
+}
+
+.wiki-tree-link {
+	color: var(--issue-heading);
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.wiki-tree-link:hover {
+	color: var(--issue-link);
+	text-decoration: underline;
+}
+
+.wiki-tree-meta {
+	font-size: 12px;
+	color: var(--issue-label);
+}
+
+.wiki-date-group + .wiki-date-group {
+	margin-top: 24px;
+	padding-top: 24px;
+	border-top: 1px solid var(--issue-border);
+}
+
+.wiki-date-heading {
+	margin: 0 0 12px;
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: var(--issue-heading);
+}
+
+.wiki-date-list {
+	margin: 0;
+	padding-left: 20px;
+}
+
+.wiki-date-list li + li {
+	margin-top: 8px;
+}
+
+.wiki-date-link {
+	color: var(--issue-link);
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.wiki-date-link:hover {
+	text-decoration: underline;
+}
+
+.wiki-date-summary {
+	margin-top: 4px;
+	font-size: 12px;
+	color: var(--issue-label);
+	line-height: 1.5;
+}
+
+/* ── 문서 역사 ───────────────────────────────────────── */
+.wiki-history-summary {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
+	margin-bottom: 20px;
+}
+
+.wiki-history-stat {
+	border: 1px solid var(--issue-border);
+	border-radius: var(--wiki-radius-sm);
+	background: var(--issue-bg);
+	padding: 14px 16px;
+}
+
+.wiki-history-stat-label {
+	display: block;
+	font-size: 12px;
+	color: var(--issue-label);
+	margin-bottom: 4px;
+}
+
+.wiki-history-stat strong {
+	font-size: 1.1rem;
+	color: var(--issue-heading);
+}
+
+.wiki-history-toolbar {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	align-items: center;
+	flex-wrap: wrap;
+	margin-bottom: 16px;
+}
+
+.wiki-revision-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.wiki-revision-item {
+	display: grid;
+	grid-template-columns: 28px minmax(0, 1fr);
+	gap: 12px;
+	align-items: flex-start;
+	padding: 14px 0;
+	border-top: 1px solid var(--issue-border);
+}
+
+.wiki-revision-item:first-child {
+	border-top: 0;
+	padding-top: 0;
+}
+
+.wiki-revision-item.is-latest {
+	background: var(--issue-primary-muted);
+	border-radius: var(--wiki-radius-sm);
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+.wiki-revision-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 4px;
+	font-size: 13px;
+}
+
+.wiki-revision-time {
+	color: var(--issue-heading);
+	font-weight: 600;
+}
+
+.wiki-revision-links a {
+	color: var(--issue-link);
+	font-size: 12px;
+	text-decoration: none;
+}
+
+.wiki-revision-links a:hover {
+	text-decoration: underline;
+}
+
+.wiki-revision-tag {
+	font-weight: 600;
+	color: var(--issue-heading);
+}
+
+.wiki-revision-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: var(--issue-primary-soft);
+	color: var(--issue-primary);
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.wiki-revision-author {
+	color: var(--issue-link);
+	font-weight: 500;
+}
+
+.wiki-revision-summary {
+	margin: 0;
+	font-size: 13px;
+	color: var(--issue-label);
+	line-height: 1.55;
+}
+
+/* ── 링크 자동완성 ───────────────────────────────────── */
+.wiki-link-autocomplete {
+	position: fixed;
+	z-index: 1040;
+	background: var(--issue-bg);
+	border: 1px solid var(--issue-border);
+	border-radius: var(--wiki-radius-sm);
+	box-shadow: 0 4px 16px var(--app-shadow-color-lg);
+	overflow: hidden;
+}
+
+.wiki-link-autocomplete-header {
+	padding: 8px 12px;
+	font-size: 11px;
+	color: var(--issue-label);
+	background: var(--issue-bg-subtle);
+	border-bottom: 1px solid var(--issue-border);
+}
+
+.wiki-link-autocomplete-list {
+	max-height: 220px;
+	overflow-y: auto;
+}
+
+.wiki-link-autocomplete-item {
+	display: block;
+	width: 100%;
+	text-align: left;
+	padding: 8px 12px;
+	border: none;
+	background: var(--issue-bg);
+	font-size: 13px;
+	cursor: pointer;
+	color: var(--issue-text);
+}
+
+.wiki-link-autocomplete-item:hover,
+.wiki-link-autocomplete-item.is-active {
+	background: var(--issue-primary-soft);
+}
+
+.wiki-link-autocomplete-item.is-issue {
+	color: var(--issue-primary);
+}
+
+.wiki-link-autocomplete-item.is-wiki {
+	color: var(--issue-link);
+}
+
+.wiki-link-autocomplete-empty {
+	padding: 10px 12px;
+	font-size: 12px;
+	color: var(--issue-label);
+}
+
+@media (max-width: 900px) {
+	.wiki-history-summary {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 768px) {
+	.wiki-layout {
+		flex-direction: column;
+	}
+
+	.wiki-aside {
+		width: 100%;
+	}
+
+	.wiki-shell .search-item input[type="text"],
+	.wiki-shell .search-item select,
+	.wiki-title-row {
+		max-width: none;
+	}
+
+	.wiki-body-panel {
+		padding: 18px;
+	}
+}
