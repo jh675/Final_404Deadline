@@ -15,19 +15,15 @@ function startMypageTimer(durationInSeconds) {
     const btnEmailAction = document.getElementById('btnEmailAction');
     const emailFeedback = document.getElementById('emailFeedback');
 
-    // 기존 타이머가 있다면 초기화
     if (mypageTimer) clearInterval(mypageTimer);
     
-    // UI 초기화
     timerDisplay.classList.remove('d-none');
     verifyInput.disabled = false;
     btnConfirmVerify.disabled = false;
 
-    // 현재 시간 기준으로 정확히 3분 뒤의 시간(밀리초) 기록
     const endTime = Date.now() + (durationInSeconds * 1000);
 
     function updateTimer() {
-        // 남은 시간 = 종료 시간 - 현재 시간
         const timeLeft = Math.max(0, endTime - Date.now());
         const totalSeconds = Math.ceil(timeLeft / 1000);
 
@@ -35,15 +31,11 @@ function startMypageTimer(durationInSeconds) {
         const s = totalSeconds % 60;
         timerDisplay.textContent = `${m}:${s.toString().padStart(2, '0')}`;
 
-        // 시간이 0이 되었을 때 
         if (timeLeft <= 0) {
             clearInterval(mypageTimer);
-            
-            // 입력창 및 확인 버튼 잠금
             verifyInput.disabled = true;
             btnConfirmVerify.disabled = true;
             
-            // 재인증 유도 UI 처리
             emailFeedback.className = 'small mt-1 text-danger fw-bold';
             emailFeedback.textContent = '인증 시간이 만료되었습니다. 재인증을 진행해주세요.';
             
@@ -53,11 +45,10 @@ function startMypageTimer(durationInSeconds) {
         }
     }
 
-    updateTimer(); // 즉시 1회 실행하여 03:00 표시
-    // setInterval이 브라우저 백그라운드에서 느려지더라도, 
-    // 계산 자체는 Date.now()를 쓰기 때문에 오차가 발생하지 않음 (0.5초마다 갱신하여 딜레이 최소화)
+    updateTimer(); 
     mypageTimer = setInterval(updateTimer, 500); 
 }
+
 document.addEventListener('DOMContentLoaded', function() {
 
     const editInfoModalEl = document.getElementById('mypageEditModal');
@@ -70,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         editInfoModalEl.addEventListener('show.bs.modal', function () {
             loadMyProfileImage();
             
-            // 이메일 영역 완전 초기화 (잠금 상태로 복구)
+            // 이메일 영역 완전 초기화 
             emailInput.value = emailInput.getAttribute('data-original');
             emailInput.setAttribute('readonly', true);
             emailInput.classList.add('bg-light');
@@ -78,28 +69,96 @@ document.addEventListener('DOMContentLoaded', function() {
             btnEmailAction.textContent = '수정';
             btnEmailAction.className = 'btn btn-outline-secondary';
 			document.getElementById('btnConfirmVerify').disabled = false;
-			
             isEmailVerified = true;
             
-            document.getElementById('currentPassword').value = '';
+            // 비밀번호 영역 UI 초기화
+            const currentPwd = document.getElementById('currentPassword');
+            const btnCheckCurrentPwd = document.getElementById('btnCheckCurrentPwd');
+            const newPasswordArea = document.getElementById('newPasswordArea');
+            
+            currentPwd.value = '';
+            currentPwd.readOnly = false;
+            currentPwd.classList.remove('is-valid');
             document.getElementById('newPassword').value = '';
             document.getElementById('newPasswordConfirm').value = '';
             
+            if(btnCheckCurrentPwd) {
+                btnCheckCurrentPwd.disabled = false;
+                btnCheckCurrentPwd.textContent = '확인';
+                btnCheckCurrentPwd.className = 'btn btn-outline-secondary';
+            }
+            if(newPasswordArea) {
+                newPasswordArea.classList.add('d-none');
+            }
+            document.getElementById('currentPwdSuccess').classList.add('d-none');
+
             document.querySelectorAll('#mypageForm .is-invalid').forEach(el => el.classList.remove('is-invalid'));
             document.getElementById('emailFeedback').textContent = '';
             document.getElementById('verifyCodeArea').classList.add('d-none');
             document.getElementById('verifyCodeInput').value = '';
             generalFeedback.textContent = '';
 			
-			if (mypageTimer) clearInterval(mypageTimer); // 모달 열릴 때 타이머 초기화
+			if (mypageTimer) clearInterval(mypageTimer); 
             document.getElementById('mypageTimerDisplay').classList.add('d-none');
             document.getElementById('verifyCodeInput').disabled = false;
         });
     }
 
-    // 토글 버튼 이벤트
+    // 현재 비밀번호 확인
+    const btnCheckCurrentPwd = document.getElementById('btnCheckCurrentPwd');
+    if(btnCheckCurrentPwd) {
+        btnCheckCurrentPwd.addEventListener('click', async function() {
+            const currentPwd = document.getElementById('currentPassword');
+            const pwdVal = currentPwd.value;
+            
+            if (!pwdVal) {
+                currentPwd.classList.add('is-invalid');
+                document.getElementById('currentPasswordError').textContent = '현재 비밀번호를 입력해주세요.';
+                return;
+            }
+
+            this.disabled = true;
+            this.textContent = '확인중...';
+
+            try {
+                // 컨트롤러에 새로 추가한 API 호출
+                const res = await csrfFetch('/mypage/check-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwdVal })
+                });
+                const result = await res.json(); 
+
+                if (result.valid) {
+                    currentPwd.classList.remove('is-invalid');
+                    currentPwd.classList.add('is-valid');
+                    currentPwd.readOnly = true; // 확인 완료 후 수정 못하게 잠금
+                    this.textContent = '확인완료';
+                    this.classList.replace('btn-outline-secondary', 'btn-success');
+                    
+                    document.getElementById('currentPwdSuccess').classList.remove('d-none');
+                    
+                    // 새 비밀번호 창 열고 부드럽게 스크롤
+                    const newPasswordArea = document.getElementById('newPasswordArea');
+                    newPasswordArea.classList.remove('d-none');
+                    newPasswordArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    currentPwd.classList.add('is-invalid');
+                    document.getElementById('currentPasswordError').textContent = '현재 비밀번호가 일치하지 않습니다.';
+                    this.disabled = false;
+                    this.textContent = '확인';
+                }
+            } catch (e) {
+                currentPwd.classList.add('is-invalid');
+                document.getElementById('currentPasswordError').textContent = '서버 오류가 발생했습니다.';
+                this.disabled = false;
+                this.textContent = '확인';
+            }
+        });
+    }
+
+    // 이메일 토글 버튼 이벤트
     btnEmailAction.addEventListener('click', async function() {
-        // '수정' 버튼 상태인 경우 -> 수정 모드로 개방
         if (emailInput.hasAttribute('readonly')) {
             emailInput.removeAttribute('readonly');
             emailInput.classList.remove('bg-light');
@@ -113,12 +172,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('emailFeedback').textContent = '변경할 이메일을 입력 후 인증발송을 눌러주세요.';
             isEmailVerified = false;
         } 
-        // '인증발송' 버튼 상태인 경우 -> 발송 로직 처리
         else {
             const email = emailInput.value.trim();
             const originalEmail = emailInput.getAttribute('data-original');
 
-            // 변경사항이 없이 원래 이메일과 똑같다면 원상복구
             if (email === originalEmail) {
                 emailInput.setAttribute('readonly', true);
                 emailInput.classList.add('bg-light');
@@ -134,7 +191,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // 인증 메일 발송 API 호출
             this.disabled = true;
             this.textContent = '발송중...';
 
@@ -150,24 +206,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 const resultText = await res.text();
 
                 if (resultText === 'success') {
-					// 발송 성공시
 	                this.textContent = '발송완료';
 	                this.className = 'btn btn-secondary';
-					
                     document.getElementById('emailFeedback').className = 'small mt-1 text-success';
                     document.getElementById('emailFeedback').textContent = '인증번호가 발송되었습니다. 3분 안에 입력해주세요.';
 					document.getElementById('verifyCodeArea').classList.remove('d-none');
 	                document.getElementById('btnConfirmVerify').disabled = false;
 	                document.getElementById('verifyCodeInput').value = '';
 	                document.getElementById('verifyCodeInput').classList.remove('is-invalid');
-					// 3분 타이머 시작
 					startMypageTimer(180);
                 } else {
-					// 발송 실패 시 다시 누를 수 있도록 복구
 	                this.disabled = false;
 	                this.textContent = '재인증';
 	                this.className = 'btn btn-outline-primary';
-					
                     document.getElementById('emailFeedback').className = 'small mt-1 text-danger';
                     document.getElementById('emailFeedback').textContent = '인증번호 발송에 실패했습니다.';
                 }
@@ -200,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const resultText = await res.text();
 
             if (resultText === 'success') {
-				// 타이머 정지 및 숨김
                 clearInterval(mypageTimer);
                 document.getElementById('mypageTimerDisplay').classList.add('d-none');
                 
@@ -213,21 +263,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 isEmailVerified = true;
                 
-                // 인증 완료 후 다시 안전하게 잠금 (수정하려면 다시 수정버튼을 누르게 유도)
                 emailInput.setAttribute('readonly', true);
                 emailInput.classList.add('bg-light');
-                // 인증 성공한 이메일을 새로운 오리지널로 임시 지정하여 저장 시 통과되도록 함
                 emailInput.setAttribute('data-original', email);
 				btnEmailAction.disabled = false;
                 btnEmailAction.textContent = '수정';
                 btnEmailAction.className = 'btn btn-outline-secondary';
                 
             } else {
-				// 실패 처리 
 	            verifyInputEl.classList.add('is-invalid');
 	            document.getElementById('verifyCodeError').textContent = '인증번호가 일치하지 않거나 3분이 초과되었습니다.';
 	            
-	            // 현재 확인 버튼 잠금 & 재인증 유도
 	            this.disabled = true; 
 	            
 	            btnEmailAction.disabled = false;
@@ -242,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 저장 버튼 검증
+    // 최종 저장 버튼 로직
     document.getElementById('btnSaveMyInfo').addEventListener('click', async function() {
         document.querySelectorAll('#mypageForm .is-invalid').forEach(el => el.classList.remove('is-invalid'));
         generalFeedback.textContent = '';
@@ -255,7 +301,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentPwd = document.getElementById('currentPassword');
         const newPwd = document.getElementById('newPassword');
         const newPwdConfirm = document.getElementById('newPasswordConfirm');
+        const newPasswordArea = document.getElementById('newPasswordArea');
 
+        // 기본 정보 유효성 검사
         if (!loginId.value.trim()) { loginId.classList.add('is-invalid'); isValid = false; }
         if (!name.value.trim()) { name.classList.add('is-invalid'); isValid = false; }
         if (!emailInput.value.trim()) { emailInput.classList.add('is-invalid'); isValid = false; }
@@ -263,7 +311,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentEmailVal = emailInput.value.trim();
         const originalEmailVal = emailInput.getAttribute('data-original');
         
-        // input의 값이 변경되었는데 isEmailVerified가 false인 경우 
         if (currentEmailVal !== originalEmailVal || !isEmailVerified) {
             emailInput.classList.add('is-invalid');
             document.getElementById('emailFeedback').className = 'small mt-1 text-danger fw-bold';
@@ -271,11 +318,19 @@ document.addEventListener('DOMContentLoaded', function() {
             isValid = false;
         }
 
-        if (currentPwd.value || newPwd.value || newPwdConfirm.value) {
-            if (!currentPwd.value) { currentPwd.classList.add('is-invalid'); isValid = false; }
-            if (!newPwd.value) { newPwd.classList.add('is-invalid'); isValid = false; }
+        // 새 비밀번호 영역이 열려있는 경우에만 패스워드 검증
+        const isPwdChanging = newPasswordArea && !newPasswordArea.classList.contains('d-none');
+
+        if (isPwdChanging) {
+            if (!newPwd.value) { 
+                newPwd.classList.add('is-invalid'); 
+                isValid = false; 
+            }
             if (newPwd.value !== newPwdConfirm.value) {
                 newPwdConfirm.classList.add('is-invalid');
+                // 기존 HTML에 있던 newPasswordConfirmError 영역에 메시지 표시
+                const confirmError = document.getElementById('newPasswordConfirmError');
+                if(confirmError) confirmError.textContent = '비밀번호가 일치하지 않습니다.';
                 isValid = false;
             }
         }
@@ -289,7 +344,8 @@ document.addEventListener('DOMContentLoaded', function() {
             tel: tel.value.trim()
         };
 
-      if (currentPwd.value) {
+        // 비밀번호를 변경하는 중이라면 payload에 추가 
+        if (isPwdChanging) {
             payload.currentPassword = currentPwd.value;
             payload.newPassword = newPwd.value;
         }
@@ -317,9 +373,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 generalFeedback.className = 'small fw-bold text-success';
                 generalFeedback.textContent = '내 정보가 성공적으로 수정되었습니다.';
                 
-                // 1.5초 뒤 페이지 새로고침하여 적용된 정보 보여주기
                 setTimeout(() => location.reload(), 1500);
-                return; // 성공 시 여기서 멈춤 (버튼 활성화 복구 안함)
+                return; 
             } else {
                 generalFeedback.className = 'small fw-bold text-danger';
                 generalFeedback.textContent = '수정 중 오류가 발생했습니다.';
@@ -329,12 +384,10 @@ document.addEventListener('DOMContentLoaded', function() {
             generalFeedback.textContent = '서버 통신 중 오류가 발생했습니다.';
         }
         
-        // 에러 발생 시 버튼 원상복구
         this.disabled = false;
         this.textContent = '저장';
     });
 
-    // 프로필 이미지 로직 (Cropper.js 연동)
     document.getElementById('btnUploadProfile').addEventListener('click', () => {
         document.getElementById('myProfileImage').click();
     });
@@ -389,7 +442,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('myEmptyImageText').style.display = "";
     });
 
-    // 입력창 타이핑 시 빨간 에러 CSS 삭제
     document.querySelectorAll('#mypageForm input').forEach(input => {
         input.addEventListener('input', function() {
             this.classList.remove('is-invalid');
@@ -397,7 +449,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// 프로필 이미지 서버에서 불러오기
 async function loadMyProfileImage() {
     const img = document.getElementById("myProfilePreview");
     const emptyText = document.getElementById("myEmptyImageText");
@@ -421,13 +472,11 @@ async function loadMyProfileImage() {
         }
     } catch (e) {}
 
-    // 실패 시 초기화
     img.src = "";
     img.classList.add("d-none");
     emptyText.style.display = "";
 }
 
-// 정보 저장 후 이미지 서버 전송 로직 
 async function handleMyProfileUpload() {
     if (myIsProfileDeleted) {
         await csrfFetch(`/mypage/profile`, { method: "DELETE" });
