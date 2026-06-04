@@ -58,12 +58,12 @@ public class LoginController {
 
 	        // 기업 관리자
 	        if(roles.contains("ROLE_CADMIN")) {
-	            return "redirect:/management/project";
+	            return "redirect:/cadmin/userList";
 	        }
 
 	        // 일반 사용자
 	        if(roles.contains("ROLE_USER")) {
-	            return "redirect:/calendar/list";
+	            return "redirect:/management/project";
 	        }
 
 	        // 권한이 없는 경우

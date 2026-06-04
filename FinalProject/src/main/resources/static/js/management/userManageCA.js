@@ -301,10 +301,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // 중복 클릭 방지를 위해 버튼 잠금
                 document.getElementById('saveBtn').disabled = true;
                 
-                // 1.5초 대기 후 새로고침
+                // 1초 대기 후 새로고침
                 setTimeout(() => {
                     location.reload();
-                }, 1500);
+                }, 1000);
 
             } catch (error) {
                 console.error(error);

@@ -65,16 +65,16 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
-                       th:classappend="${session.currentMenu == 'member' ? 'active fw-bold' : ''}"
-                       th:href="@{/project/member/list}">
-                        구성원
+                       th:classappend="${session.currentMenu == 'group' ? 'active fw-bold' : ''}"
+                       th:href="@{/project/group/list}">
+                        그룹
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
-                       th:classappend="${session.currentMenu == 'group' ? 'active fw-bold' : ''}"
-                       th:href="@{/project/group/list}">
-                        그룹
+                       th:classappend="${session.currentMenu == 'member' ? 'active fw-bold' : ''}"
+                       th:href="@{/project/member/list}">
+                        구성원
                     </a>
                 </li>
                 <li class="nav-item">
