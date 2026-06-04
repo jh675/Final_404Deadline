@@ -61,7 +61,7 @@
             <div class="grp-grid-panel">
               <div id="grpMembersGrid" class="grp-grid-host" role="region" aria-label="구성원 목록"></div>
               <div id="grpMemberToolbar" class="grp-member-toolbar" th:if="${registerMode or !groupNotFound}" th:classappend="${!registerMode} ? 'is-hidden' : ''">
-                <button type="button" class="grp-member-toolbar__btn" id="btnAddMember">구성원 관리</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnAddMember">구성원 관리</button>
               </div>
             </div>
           </div>
@@ -73,20 +73,20 @@
             <div class="grp-grid-panel">
               <div id="grpRolesGrid" class="grp-grid-host" role="region" aria-label="보유 권한 목록"></div>
               <div id="grpRoleToolbar" class="grp-member-toolbar" th:classappend="${!registerMode} ? 'is-hidden' : ''">
-                <button type="button" id="btnManageRoles" class="grp-member-toolbar__btn">권한 관리</button>
+                <button type="button" id="btnManageRoles" class="btn btn-secondary btn-sm">권한 관리</button>
               </div>
             </div>
           </div>
         </section>
 
-        <div class="grp-actions" th:if="${registerMode}">
-          <button type="button" class="grp-actions__btn" id="btnGroupSave">등록</button>
-          <a class="grp-actions__btn grp-actions__btn--secondary" th:href="@{/project/group/list}">취소</a>
+        <div class="issue-register-actions grp-actions" th:if="${registerMode}">
+          <button type="button" class="btn btn-primary" id="btnGroupSave">등록</button>
+          <a class="btn btn-secondary" th:href="@{/project/group/list}">취소</a>
         </div>
-        <div class="grp-actions" th:unless="${registerMode}">
-          <button type="button" class="grp-actions__btn" id="btnGroupEdit">수정</button>
-          <button type="button" id="btnGroupSave" class="grp-actions__btn is-hidden">저장</button>
-          <button type="button" id="btnGroupCancel" class="grp-actions__btn grp-actions__btn--secondary is-hidden">취소</button>
+        <div class="issue-register-actions grp-actions" th:unless="${registerMode}">
+          <button type="button" class="btn btn-primary" id="btnGroupEdit">수정</button>
+          <button type="button" id="btnGroupSave" class="btn btn-primary is-hidden">저장</button>
+          <button type="button" id="btnGroupCancel" class="btn btn-secondary is-hidden">취소</button>
         </div>
       </th:block>
 
