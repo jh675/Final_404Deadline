@@ -47,6 +47,8 @@ public class CompanyController {
 	// ⭕ [신규 개설] 오직 등록/수정 모달창에서 들어오는 데이터를 원스톱으로 받아서 처리하는 저장 전용 API 주소입니다.
 	@PostMapping("/company/save")
 	public String companysave(CompanyVO company, UserManageVO user) {
+		
+		company.setTel(formatPhone(company.getTel()));
 	    
 	    // 기업 등록 여부 확인 (기존 비즈니스 로직 연동 보존)
 	    if(companyService.selectOne(company.getBizNo()) == null) {
@@ -68,7 +70,41 @@ public class CompanyController {
 		return companyService.selectOne(bizNo);
 	}
 
+	private String formatPhone(String tel) {
 
+	    if (tel == null || tel.isBlank()) {
+	        return tel;
+	    }
+
+	    // 숫자만 남김
+	    tel = tel.replaceAll("[^0-9]", "");
+
+	    // 서울 지역번호
+	    if (tel.startsWith("02")) {
+
+	        if (tel.length() == 9) {
+	            return tel.replaceFirst("(\\d{2})(\\d{3})(\\d{4})", "$1-$2-$3");
+	        }
+
+	        if (tel.length() == 10) {
+	            return tel.replaceFirst("(\\d{2})(\\d{4})(\\d{4})", "$1-$2-$3");
+	        }
+	    }
+
+	    // 휴대폰 및 일반 지역번호
+	    else {
+
+	        if (tel.length() == 10) {
+	            return tel.replaceFirst("(\\d{3})(\\d{3})(\\d{4})", "$1-$2-$3");
+	        }
+
+	        if (tel.length() == 11) {
+	            return tel.replaceFirst("(\\d{3})(\\d{4})(\\d{4})", "$1-$2-$3");
+	        }
+	    }
+
+	    return tel;
+	}
 	
 
 }

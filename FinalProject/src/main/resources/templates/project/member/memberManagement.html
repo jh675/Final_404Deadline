@@ -1,231 +1,61 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" 
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/projectLayout}" >
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/projectLayout}">
   <head>
     <meta charset="UTF-8" />
-    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
-    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>프로젝트 멤버 관리</title>
-    <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
-    <link rel="stylesheet" href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css" />
-    <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
-    <script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.js"></script>
-
-    <style>
-      .menu-role-page {
-        max-width: 100%;
-      }
-      .menu-role-page__head {
-        margin-bottom: 1.25rem;
-      }
-      .menu-role-page__title {
-        margin: 0 0 0.35rem;
-        font-size: 1.15rem;
-        font-weight: 600;
-        color: #222;
-      }
-      .menu-role-page__rule {
-        height: 3px;
-        background: #333;
-        border: 0;
-        margin: 0 0 0.75rem;
-      }
-      .menu-role-page__section-title {
-        margin: 0 0 0.5rem;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #222;
-        padding-bottom: 0.35rem;
-        border-bottom: 3px solid #333;
-      }
-      .menu-role-page__search {
-        margin-bottom: 1.25rem;
-      }
-      .menu-role-page__list {
-        margin-top: 0.5rem;
-      }
-      .menu-role-page__grid-wrap {
-        margin-top: 0.25rem;
-      }
-      .menu-role-page__grid-host {
-        min-height: 120px;
-      }
-      .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-      }
-
-      .role-search {
-        display: flex;
-        align-items: center;
-        gap: 0;
-        padding: 1rem 1.25rem;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        background: #fafafa;
-      }
-      .role-search__bar {
-        display: flex;
-        flex-wrap: nowrap;
-        align-items: center;
-        gap: 0.75rem 1.25rem;
-        flex: 1;
-        min-width: 0;
-        overflow-x: auto;
-      }
-      .role-search__inline {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 0.4rem;
-        flex-wrap: nowrap;
-        flex-shrink: 0;
-      }
-      .role-search__inline label {
-        font-size: 0.8125rem;
-        color: #444;
-        white-space: nowrap;
-      }
-      .role-search__inline input[type="text"],
-      .role-search__inline input[type="date"] {
-        min-width: 10rem;
-        padding: 0.35rem 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      .role-search__inline--date-range input[type="date"] {
-        min-width: 9.5rem;
-      }
-      .role-search__tilde {
-        color: #444;
-        font-size: 0.875rem;
-        user-select: none;
-      }
-      .role-search__actions {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        flex-shrink: 0;
-      }
-      .role-search__actions button {
-        padding: 0.4rem 1rem;
-        border-radius: 4px;
-        cursor: pointer;
-        border: 1px solid #1976d2;
-        background: #1976d2;
-        color: #fff;
-        font-size: 0.875rem;
-      }
-      .role-search__actions button[type="button"] {
-        background: #fff;
-        color: #333;
-        border-color: #ccc;
-      }
-
-      .role-grid-toolbar {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 2px 0.25rem;
-        box-sizing: border-box;
-      }
-      .role-grid-toolbar__btn {
-        padding: 0.35rem 0.95rem;
-        border-radius: 4px;
-        font-size: 0.875rem;
-        cursor: pointer;
-        line-height: 1.25;
-      }
-      .role-grid-toolbar__btn--register {
-        border: 1px solid #1565c0;
-        background: #1976d2;
-        color: #fff;
-      }
-      .role-grid-toolbar__btn--register:hover {
-        background: #1565c0;
-      }
-      .role-grid-toolbar__btn--delete {
-        border: 1px solid #c62828;
-        background: #e53935;
-        color: #fff;
-      }
-      .role-grid-toolbar__btn--delete:hover {
-        background: #c62828;
-      }
-      .role-grid-toolbar__btn--remove {
-        border: 1px solid #6a1b9a;
-        background: #7b1fa2;
-        color: #fff;
-      }
-      .role-grid-toolbar__btn--remove:hover {
-        background: #6a1b9a;
-      }
-      .role-grid-toolbar__btn--cancel-delete {
-        border: 1px solid #999;
-        background: #fff;
-        color: #333;
-      }
-      .role-grid-toolbar__btn--cancel-delete:hover {
-        background: #f5f5f5;
-      }
-    </style>
-
-    <script th:inline="javascript">
-      /*<![CDATA[*/
-      const prjId = /*[[${session.currentProjectId}]]*/ "";
-            const projectMemberRows = /*[[${rows}]]*/ [];
-      /*]]>*/
-    </script>
+    <th:block layout:fragment="head-content">
+      <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+      <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
+      <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+      <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+      <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+      <link rel="stylesheet" th:href="@{/css/project/issue.css}" />
+      <link rel="stylesheet" th:href="@{/css/project/projectAdmin.css}" />
+      <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+      <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+      <script th:src="@{/js/common/gridTheme.js}"></script>
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        const prjId = /*[[${session.currentProjectId}]]*/ "";
+        const projectMemberRows = /*[[${rows}]]*/ [];
+        /*]]>*/
+      </script>
+    </th:block>
   </head>
   <body>
     <div layout:fragment="content">
-      <main class="menu-role-page">
-        <header class="menu-role-page__head">
-          <h1 class="menu-role-page__title">프로젝트 멤버 관리</h1>
-          <hr class="menu-role-page__rule" />
-        </header>
+      <div class="issue-shell issue-shell--list">
+        <div id="wrapper" class="issue-list">
+          <header class="issue-list__header">
+            <h1 class="issue-list__title">프로젝트 멤버 관리</h1>
+          </header>
 
-        <section class="menu-role-page__search" aria-labelledby="member-search-heading">
-          <h2 id="member-search-heading" class="visually-hidden">멤버 검색</h2>
-          <form class="role-search" id="memberSearchForm" method="get" th:action="@{/project/member/list}">
-            <div class="role-search__bar">
-              <div class="role-search__inline">
+          <section class="issue-section issue-section--filter" aria-label="멤버 검색">
+            <form id="memberSearchForm" method="get" th:action="@{/project/member/list}" class="issue-filter-form">
+              <div class="issue-field">
                 <label for="memberName">이름</label>
                 <input type="text" id="memberName" name="memberName" th:value="${memberName}" placeholder="이름" autocomplete="off"/>
               </div>
-              <div class="role-search__inline">
+              <div class="issue-field">
                 <label for="grpName">소속</label>
                 <input type="text" id="grpName" name="grpName" th:value="${grpName}" placeholder="소속 그룹명" autocomplete="off"/>
               </div>
-              <div class="role-search__actions">
-                <button type="submit">검색</button>
+              <div class="issue-filter-buttons">
+                <button type="submit" class="btn btn-primary">검색</button>
+                <a th:href="@{/project/member/list}" class="btn btn-secondary">취소</a>
               </div>
-            </div>
-          </form>
-        </section>
+            </form>
+          </section>
 
-        <section class="menu-role-page__list"
-          aria-labelledby="member-list-heading">
-          <h2 class="menu-role-page__section-title" id="member-list-heading">
-            프로젝트 멤버 목록
-          </h2>
-          <div class="menu-role-page__grid-wrap">
-            <div id="memberGrid" class="menu-role-page__grid-host" role="region" aria-label="프로젝트 멤버 그리드"></div>
-          </div>
-        </section>
-      </main>
+          <section class="issue-section issue-section--grid" aria-label="프로젝트 멤버 목록">
+            <div id="memberGrid" role="region" aria-label="프로젝트 멤버 그리드"></div>
+          </section>
+        </div>
+      </div>
 
       <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModal}"></th:block>
       <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModalScript}"></th:block>
-
       <script th:src="@{/js/member/memberManagement.js}"></script>
     </div>
   </body>

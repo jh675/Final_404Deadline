@@ -72,10 +72,17 @@
 							<div class="vr mx-2"></div>
 
 							<!-- 소속 프로젝트 -->
-							<span class="text-muted small fw-bold me-1">소속 프로젝트</span> <span
-								th:if="${#lists.isEmpty(projectList)}" class="text-muted small">참여
-								중인 프로젝트 없음</span> <span th:each="p : ${projectList}"
-								class="badge bg-primary me-1" th:text="${p.prjName}"></span>
+							<span th:if="${#lists.isEmpty(projectList)}" class="text-muted small">참여 중인 프로젝트 없음</span>
+							<!-- 최대 3개만 표시 -->
+							<span th:each="p, iterStat : ${projectList}"
+							      th:if="${iterStat.index < 3}"
+							      class="badge bg-primary me-1"
+							      th:text="${p.prjName}"></span>
+							
+							<!-- 3개 초과 시 +N개 표시 -->
+							<span th:if="${#lists.size(projectList) > 3}"
+							      class="badge bg-secondary me-1"
+							      th:text="'+ ' + (${#lists.size(projectList)} - 3) + '개'"></span>
 						</div>
 
 					</div>
@@ -339,23 +346,24 @@
 	        return;
 	    }
 
-	    // 날짜별 그룹핑 (누락된 push 추가)
 	    const grouped = {};
 	    events.forEach(item => {
 	        const startObj = new Date(item.calStart);
 	        const dateKey = `${startObj.getFullYear()}-${String(startObj.getMonth()+1).padStart(2,'0')}-${String(startObj.getDate()).padStart(2,'0')}`;
 	        if (!grouped[dateKey]) grouped[dateKey] = [];
-	        grouped[dateKey].push(item);  // ← 이게 빠져있었음!
+	        grouped[dateKey].push(item);
 	    });
 
 	    let html = '';
-	    Object.keys(grouped).forEach(dateKey => {
+	    Object.keys(grouped).forEach((dateKey, groupIndex) => {
 	        const dateObj = new Date(dateKey);
 	        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
 	        const isToday = dateObj.getFullYear() === new Date().getFullYear() &&
 	                        dateObj.getMonth() === new Date().getMonth() &&
 	                        dateObj.getDate() === new Date().getDate();
 	        const dateLabel = `${dateObj.getMonth() + 1}월 ${dateObj.getDate()}일 (${dayNames[dateObj.getDay()]})`;
+	        const items = grouped[dateKey];
+	        const showMore = items.length > 3;
 
 	        html += `
 	            <div class="mb-3">
@@ -364,7 +372,7 @@
 	                    ${isToday ? '<span class="badge bg-primary ms-1" style="font-size:11px;">오늘</span>' : ''}
 	                </div>`;
 
-	        grouped[dateKey].forEach(item => {
+	        items.forEach((item, idx) => {
 	            const startObj2 = new Date(item.calStart);
 	            const endObj2 = new Date(item.calEnd);
 	            const startTime = `${String(startObj2.getHours()).padStart(2,'0')}:${String(startObj2.getMinutes()).padStart(2,'0')}`;
@@ -372,33 +380,49 @@
 
 	            let typeLabel = '개인';
 	            let typeColor = '#ff6b6b';
+	            if (item.typeCd === 'holiday') { typeLabel = '공휴일'; typeColor = '#ff4d4d'; }
+	            else if (item.typeCd === '01CALTYPE') { typeLabel = '개인'; typeColor = '#ff6b6b'; }
+	            else if (item.typeCd === '02CALTYPE') { typeLabel = '그룹'; typeColor = '#51cf66'; }
+	            else if (item.typeCd === '03CALTYPE') { typeLabel = '회사'; typeColor = '#339af0'; }
 
-	            if (item.typeCd === 'holiday') {
-	                typeLabel = '공휴일'; typeColor = '#ff4d4d';
-	            } else if (item.typeCd === '01CALTYPE') {
-	                typeLabel = '개인'; typeColor = '#ff6b6b';
-	            } else if (item.typeCd === '02CALTYPE') {
-	                typeLabel = '그룹'; typeColor = '#51cf66';
-	            } else if (item.typeCd === '03CALTYPE') {
-	                typeLabel = '회사'; typeColor = '#339af0';
-	            }
+	            // 3개 초과분은 숨김 처리
+	            const hideClass = (showMore && idx >= 3) ? `class="extra-item-${groupIndex}" style="display:none;"` : '';
 
 	            html += `
-	                <div class="p-2 mb-1 rounded"
-	                     style="background:#f8f9fa; border-left: 4px solid ${typeColor};">
-	                    <div class="d-flex align-items-center gap-2">
-	                        <span style="font-size: 13px; color: #555;">🕐 ${startTime} ~ ${endTime}</span>
-	                        <span class="fw-bold" style="font-size: 14px;">${item.calText || '제목없음'}</span>
-	                        <span class="badge ms-1" style="background-color:${typeColor}; font-size:11px;">${typeLabel}</span>
+	                <div ${hideClass}>
+	                    <div class="p-2 mb-1 rounded" style="background:#f8f9fa; border-left: 4px solid ${typeColor};">
+	                        <div class="d-flex align-items-center gap-2">
+	                            <span style="font-size: 13px; color: #555;">🕐 ${startTime} ~ ${endTime}</span>
+	                            <span class="fw-bold" style="font-size: 14px;">${item.calText || '제목없음'}</span>
+	                            <span class="badge ms-1" style="background-color:${typeColor}; font-size:11px;">${typeLabel}</span>
+	                        </div>
+	                        ${item.place ? `<div class="text-muted ms-4" style="font-size: 12px;">📍 ${item.place}</div>` : ''}
 	                    </div>
-	                    ${item.place ? `<div class="text-muted ms-4" style="font-size: 12px;">📍 ${item.place}</div>` : ''}
 	                </div>`;
 	        });
+
+	        // 더보기 버튼
+	        if (showMore) {
+	            html += `
+	                <button class="btn btn-outline-secondary btn-sm mt-1"
+	                    onclick="toggleMore(${groupIndex}, ${items.length - 3}, this)">
+	                    ▼ 더보기 (${items.length - 3}개)
+	                </button>`;
+	        }
 
 	        html += `</div>`;
 	    });
 
 	    container.innerHTML = html;
+	}
+
+	// 더보기 토글 함수
+	function toggleMore(groupIndex, count, btn) {
+	    const extras = document.querySelectorAll(`.extra-item-${groupIndex}`);
+	    const isHidden = extras[0].style.display === 'none';
+
+	    extras.forEach(el => el.style.display = isHidden ? 'block' : 'none');
+	    btn.textContent = isHidden ? `▲ 접기` : `▼ 더보기 (${count}개)`;
 	}
 
 	    //=========================================================================================

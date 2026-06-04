@@ -66,9 +66,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 name: 'edit',
                 width: 100,
                 align: 'center',
-                formatter: ({ row }) => {
-                    return `<button type="button" class="btn btn-sm btn-outline-primary edit-btn" data-id="${row.id}">수정</button>`;
-                }
+				formatter: ({ row }) => {
+				    return `<button type="button" 
+									class="btn btn-sm btn-outline-success edit-btn" 
+									data-id="${row.id}">
+									수정</button>`;
+				}
             }
         ],
 		rowHeaders: ['checkbox', 'rowNum'],
@@ -181,11 +184,18 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // 필수 항목 유효성 검사 (빈칸 체크)
         let isValid = true;
+		let firstInvalidEl = null; // 스크롤 이동 타겟
 		
         // 필수 항목 유효성 검사 (빈칸 체크)
         const loginInput = document.getElementById('login');
         const nameInput = document.getElementById('name');
         const hireDateInput = document.getElementById('hireDate');
+		
+		function setInvalid(el) {
+	        el.classList.add('is-invalid');
+	        isValid = false;
+	        if (!firstInvalidEl) firstInvalidEl = el;
+	    }
 
         // 아이디 검사
         if (!loginInput.value.trim()) {
@@ -208,6 +218,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 		// 하나라도 비어있다면 폼 제출 중단
 		if (!isValid) {
 	        if(generalFeedback) generalFeedback.textContent = '필수 입력 항목을 확인해주세요.';
+			if (firstInvalidEl) {
+                firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => firstInvalidEl.focus(), 300);
+            }
 	        return;
 	    }
 		

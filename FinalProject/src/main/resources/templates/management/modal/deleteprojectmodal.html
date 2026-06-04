@@ -1,31 +1,216 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org"
-	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
-	<div th:fragment="deleteproject">
-		<div class="modal fade" id="deleteproject" tabindex="-1"
-			aria-hidden="true">
-			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content">
-					<h3>해당 프로젝트를 삭제하겠습니까?</h3>
-					<form  method="post" onsubmit="console.log('폼 전송됨')">
-					  <input type="hidden"
-					           th:name="${_csrf.parameterName}"
-					           th:value="${_csrf.token}" />
-						<input type="hidden" id="projectHide" name="id" value="" />
-						
-						<div th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
-							<button type="submit" formaction="/management/delete">완전삭제</button>
-						</div>
-						<div>
-							<button type="submit" formaction="/management/hide">삭제</button>
-							<button type="button" class="btn btn-secondary"
-									data-bs-dismiss="modal">취소</button>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
+<div th:fragment="deleteproject">
+
+  <style>
+    /* ── 삭제 모달 스타일 ── */
+    #deleteproject .modal-content {
+      border: none;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(27,135,201,0.15);
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    }
+
+    /* 상단 파란 헤더 */
+    #deleteproject .modal-header-bar {
+      background: #1b87c9;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #deleteproject .modal-header-bar h5 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+    #deleteproject .modal-header-bar .btn-close-white {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+    #deleteproject .modal-header-bar .btn-close-white:hover {
+      opacity: 1;
+    }
+    #deleteproject .modal-header-bar .btn-close-white svg {
+      width: 16px;
+      height: 16px;
+      fill: #fff;
+    }
+
+    /* 본문 */
+    #deleteproject .modal-body-area {
+      padding: 28px 24px 8px;
+      background: #fff;
+    }
+
+    /* 경고 아이콘 영역 */
+    #deleteproject .delete-icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      background: #fff0f0;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+    }
+    #deleteproject .delete-icon-wrap svg {
+      width: 26px;
+      height: 26px;
+      color: #e53935;
+    }
+
+    #deleteproject .delete-title {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a2f3f;
+      margin-bottom: 8px;
+    }
+    #deleteproject .delete-desc {
+      text-align: center;
+      font-size: 13px;
+      color: #6b7c8d;
+      margin-bottom: 0;
+      line-height: 1.6;
+    }
+
+    /* 구분선 */
+    #deleteproject .modal-divider {
+      border: none;
+      border-top: 1px solid #cce5f5;
+      margin: 20px 0 0;
+    }
+
+    /* 푸터 버튼 영역 */
+    #deleteproject .modal-footer-area {
+      padding: 16px 24px 20px;
+      background: #fff;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    /* 취소 버튼 */
+    #deleteproject .btn-modal-cancel {
+      padding: 9px 22px;
+      background: #fff;
+      color: #4a6070;
+      border: 1px solid #c9e0ef;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #deleteproject .btn-modal-cancel:hover {
+      background: #e8f4fb;
+    }
+
+    /* 삭제(숨김) 버튼 */
+    #deleteproject .btn-modal-hide {
+      padding: 9px 22px;
+      background: #fff;
+      color: #e53935;
+      border: 1px solid #ffb3b3;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    #deleteproject .btn-modal-hide:hover {
+      background: #fff0f0;
+    }
+
+    /* 완전삭제 버튼 (시스템관리자 전용) */
+    #deleteproject .btn-modal-delete {
+      padding: 9px 22px;
+      background: #e53935;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #deleteproject .btn-modal-delete:hover {
+      background: #c62828;
+    }
+  </style>
+
+  <div class="modal fade" id="deleteproject" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+      <div class="modal-content">
+
+        <!-- 파란 헤더 -->
+        <div class="modal-header-bar">
+          <h5>프로젝트 삭제</h5>
+          <button type="button" class="btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M18 6L6 18M6 6l12 12" stroke="#fff" stroke-width="2.5"
+                    stroke-linecap="round" fill="none"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- 본문 -->
+        <div class="modal-body-area">
+          <!-- 경고 아이콘 -->
+          <div class="delete-icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 fill="none" stroke="#e53935" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              <path d="M10 11v6M14 11v6"></path>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+            </svg>
+          </div>
+          <p class="delete-title">프로젝트를 삭제하겠습니까?</p>
+          <p class="delete-desc">
+            삭제된 프로젝트는 복구가 어려울 수 있습니다.<br>
+            신중하게 진행해 주세요.
+          </p>
+          <hr class="modal-divider">
+        </div>
+
+        <!-- 푸터 버튼 -->
+        <form method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <input type="hidden" id="projectHide" name="id" value="" />
+
+          <div class="modal-footer-area">
+            <!-- 완전삭제 (시스템관리자만) -->
+            <div th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
+              <button type="submit" class="btn-modal-delete" formaction="/management/delete">완전삭제</button>
+            </div>
+            <!-- 삭제 (숨김) -->
+            <button type="submit" class="btn-modal-hide" formaction="/management/hide">삭제</button>
+            <!-- 취소 -->
+            <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">취소</button>
+
+
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+</div>
 </body>
 </html>
