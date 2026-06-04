@@ -581,20 +581,6 @@
 			.replace(/'/g, '&#39;');
 	}
 
-	function layoutCommentThreadScroll() {
-		var items = threadScroll.querySelectorAll(':scope > .comment');
-		if (items.length <= 3) {
-			threadScroll.style.maxHeight = '';
-			threadScroll.style.overflowY = '';
-			return;
-		}
-		var r0 = items[0].getBoundingClientRect();
-		var r2 = items[2].getBoundingClientRect();
-		var h = r2.bottom - r0.top;
-		threadScroll.style.maxHeight = Math.ceil(h) + 'px';
-		threadScroll.style.overflowY = 'auto';
-	}
-
 	function clearReplyTarget() {
 		parentInput.value = '';
 		if (hintText) {
@@ -648,7 +634,6 @@
 		if (countBadge) {
 			countBadge.textContent = '0';
 		}
-		layoutCommentThreadScroll();
 	}
 
 	function formatCommentDate(value) {
@@ -690,7 +675,6 @@
 		if (countBadge) {
 			countBadge.textContent = String(comments.length);
 		}
-		layoutCommentThreadScroll();
 	}
 
 	function parseError(res) {
@@ -788,7 +772,6 @@
 			});
 	});
 
-	window.addEventListener('resize', layoutCommentThreadScroll);
 	loadComments();
 })();
 
@@ -796,18 +779,6 @@
 	var ATTACH_COLS = 3;
 	var ATTACH_VISIBLE_ROWS = 2;
 	var ATTACH_MAX_VISIBLE = ATTACH_COLS * ATTACH_VISIBLE_ROWS;
-
-	function getCollapsedHeight(wrap) {
-		var items = wrap.querySelectorAll('.attach-item');
-		if (items.length <= ATTACH_MAX_VISIBLE) return null;
-		var top = items[0].getBoundingClientRect().top;
-		var bottom = items[0].getBoundingClientRect().bottom;
-		var limit = Math.min(ATTACH_MAX_VISIBLE, items.length);
-		for (var i = 1; i < limit; i++) {
-			bottom = Math.max(bottom, items[i].getBoundingClientRect().bottom);
-		}
-		return Math.ceil(bottom - top);
-	}
 
 	function updateToggleLabel(btn, total, expanded) {
 		if (expanded) {
@@ -831,7 +802,6 @@
 
 		if (total <= ATTACH_MAX_VISIBLE) {
 			wrap.classList.remove('is-collapsed', 'is-expanded');
-			wrap.style.maxHeight = '';
 			if (btn) btn.hidden = true;
 			return;
 		}
@@ -842,13 +812,13 @@
 		}
 
 		if (expanded) {
-			wrap.style.maxHeight = '';
+			wrap.classList.remove('is-collapsed');
+			wrap.classList.add('is-expanded');
 			return;
 		}
 
+		wrap.classList.remove('is-expanded');
 		wrap.classList.add('is-collapsed');
-		var h = getCollapsedHeight(wrap);
-		if (h) wrap.style.maxHeight = h + 'px';
 	}
 
 	function initAttachListToggle() {
@@ -873,7 +843,6 @@
 	} else {
 		initAttachListToggle();
 	}
-	window.addEventListener('resize', layoutAttachList);
 })();
 
 (function () {

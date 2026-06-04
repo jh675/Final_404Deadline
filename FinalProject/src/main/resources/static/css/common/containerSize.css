@@ -15,7 +15,7 @@
 
 /* containerSize #wrapper 가 모듈 셸에 적용되지 않도록 */
 .issue-shell > #wrapper,
-.milestone-shell > #wrapper {
+.wiki-shell > #wrapper {
 	max-width: none;
 	margin-left: 0;
 	margin-right: 0;

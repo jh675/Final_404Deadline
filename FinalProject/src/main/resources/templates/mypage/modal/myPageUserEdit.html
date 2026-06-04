@@ -3,9 +3,9 @@
 <body>
 	<div th:fragment="mypageEditModal">
 		<div class="modal fade" id="mypageEditModal" tabindex="-1" aria-hidden="true">
-			<div class="modal-dialog modal-xl modal-dialog-centered">
-				<div class="modal-content">
-					<div class="modal-header">
+			<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+				<div class="modal-content border-0 shadow">
+					<div class="modal-header bg-light">
 						<h5 class="modal-title fw-bold">내 정보 수정</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 					</div>
@@ -24,84 +24,78 @@
 										</div>
 									</div>
 									<div class="row mb-4 align-items-center">
-										<label class="col-sm-3 col-form-label fw-semibold text-muted">역할</label>
+										<label class="col-sm-3 col-form-label fw-semibold text-muted">아이디</label>
 										<div class="col-sm-9">
-											<input type="text" class="form-control bg-light" 
-												   th:value="${#authentication.principal.prjManagerCd == '01ACTIVE' ? '프로젝트 매니저' : '사원'}" disabled>
+											<input type="text" class="form-control bg-light" id="myLoginId" th:value="${#authentication.principal.login}" disabled>
 										</div>
 									</div>
 
-									<h6 class="fw-bold mb-3 text-secondary border-bottom pb-2">기본 정보</h6>
+									<h6 class="fw-bold mb-3 text-secondary border-bottom pb-2 mt-4">기본 정보</h6>
 									<div class="row mb-3 align-items-center">
-										<label class="col-sm-3 col-form-label fw-semibold">아이디 <span class="text-danger">*</span></label>
-										<div class="col-sm-9">
-											<input type="text" id="myLoginId" class="form-control" th:value="${#authentication.principal.login}">
-											<div class="invalid-feedback" id="myLoginIdError">아이디를 입력해주세요.</div>
-										</div>
-									</div>
-									<div class="row mb-3 align-items-center">
-										<label class="col-sm-3 col-form-label fw-semibold">이름 <span class="text-danger">*</span></label>
+										<label class="col-sm-3 col-form-label fw-semibold text-muted">이름 <span class="text-danger">*</span></label>
 										<div class="col-sm-9">
 											<input type="text" id="myName" class="form-control" th:value="${#authentication.principal.name}">
 											<div class="invalid-feedback">이름을 입력해주세요.</div>
 										</div>
 									</div>
-									<div class="row mb-4 align-items-center">
-										<label class="col-sm-3 col-form-label fw-semibold">전화번호</label>
+									
+									<div class="row mb-3 align-items-center">
+										<label class="col-sm-3 col-form-label fw-semibold text-muted">이메일</label>
 										<div class="col-sm-9">
-											<input type="text" id="myTel" class="form-control" maxlength="13" th:value="${#authentication.principal.tel}">
+											<div class="input-group">
+												<input type="email" id="myEmail" class="form-control bg-light" th:value="${#authentication.principal.email}" th:data-original="${#authentication.principal.email}" readonly>
+												<button class="btn btn-outline-secondary" type="button" id="btnEmailAction">수정</button>
+											</div>
+											<div id="emailFeedback" class="small mt-1"></div>
+										</div>
+									</div>
+									
+									<div id="verifyCodeArea" class="row mb-3 align-items-center d-none">
+										<label class="col-sm-3 col-form-label fw-semibold text-muted">인증번호</label>
+										<div class="col-sm-9">
+											<div class="input-group">
+												<input type="text" id="verifyCodeInput" class="form-control" placeholder="6자리 입력">
+												<span class="input-group-text text-danger fw-bold d-none" id="mypageTimerDisplay" style="width: 65px; justify-content: center;">03:00</span>
+												<button type="button" id="btnConfirmVerify" class="btn btn-success flex-shrink-0 text-nowrap">인증</button>
+												<div class="invalid-feedback" id="verifyCodeError">인증번호를 입력해주세요.</div>
+											</div>
 										</div>
 									</div>
 
-									<h6 class="fw-bold mb-3 text-secondary border-bottom pb-2">이메일 인증</h6>
-									<div class="row mb-2 align-items-center">
-									    <label class="col-sm-3 col-form-label fw-semibold">이메일 <span class="text-danger">*</span></label>
-									    <div class="col-sm-9">
-									        <div class="input-group">
-									            <input type="email" id="myEmail" class="form-control bg-light" 
-									                   th:value="${#authentication.principal.email}" 
-									                   th:data-original="${#authentication.principal.email}" readonly>
-									                   
-									            <button class="btn btn-outline-secondary" type="button" id="btnEmailAction">수정</button>
-									        </div>
-									        <div class="invalid-feedback" id="myEmailError">이메일을 입력해주세요.</div>
-									        
-									        <div id="emailFeedback" class="small mt-1"></div> 
-									    </div>
-									</div>
-									
-									<div class="row mb-4 align-items-center d-none" id="verifyCodeArea">
-									    <label class="col-sm-3 col-form-label fw-semibold"></label>
-									    <div class="col-sm-9">
-									        <div class="input-group">
-									            <input type="text" id="verifyCodeInput" class="form-control" placeholder="인증번호 6자리 입력">
-									            <span class="input-group-text text-danger fw-bold d-none" id="mypageTimerDisplay" style="width: 65px; justify-content: center;">03:00</span>
-									            <button class="btn btn-secondary" type="button" id="btnConfirmVerify">인증확인</button>
-									        </div>
-									        <div class="invalid-feedback" id="verifyCodeError">인증에 실패했습니다.</div>
-									    </div>
-									</div>
-									
-									<h6 class="fw-bold mb-3 text-secondary border-bottom pb-2">비밀번호 변경 (선택)</h6>
 									<div class="row mb-3 align-items-center">
-										<label class="col-sm-3 col-form-label fw-semibold">현재 비밀번호</label>
+										<label class="col-sm-3 col-form-label fw-semibold text-muted">전화번호</label>
 										<div class="col-sm-9">
-											<input type="password" id="currentPassword" class="form-control" placeholder="비밀번호 변경 시 입력" autocomplete="off">
-											<div class="invalid-feedback" id="currentPasswordError">현재 비밀번호가 일치하지 않습니다.</div>
+											<input type="text" id="myTel" class="form-control" th:value="${#authentication.principal.tel}" maxlength="13">
 										</div>
 									</div>
+									
+									<h6 class="fw-bold mb-3 text-secondary border-bottom pb-2 mt-4">비밀번호 변경</h6>
 									<div class="row mb-3 align-items-center">
-										<label class="col-sm-3 col-form-label fw-semibold">새 비밀번호</label>
+										<label class="col-sm-3 col-form-label fw-semibold text-muted">현재 비밀번호</label>
 										<div class="col-sm-9">
-											<input type="password" id="newPassword" class="form-control" placeholder="새 비밀번호 입력" autocomplete="off">
-											<div class="invalid-feedback">새 비밀번호를 입력해주세요.</div>
+											<div class="input-group">
+												<input type="password" id="currentPassword" class="form-control bg-light" placeholder="비밀번호 변경 시 입력" autocomplete="off">
+												<button class="btn btn-outline-secondary" type="button" id="btnCheckCurrentPwd">확인</button>
+												<div class="invalid-feedback" id="currentPasswordError">현재 비밀번호를 입력해주세요.</div>
+												<div id="currentPwdSuccess" class="valid-feedback fw-bold d-none">비밀번호가 확인되었습니다.</div>
+											</div>
 										</div>
 									</div>
-									<div class="row mb-3 align-items-center">
-										<label class="col-sm-3 col-form-label fw-semibold">새 비밀번호 확인</label>
-										<div class="col-sm-9">
-											<input type="password" id="newPasswordConfirm" class="form-control" placeholder="새 비밀번호 재입력" autocomplete="off">
-											<div class="invalid-feedback" id="newPasswordConfirmError">비밀번호가 일치하지 않습니다.</div>
+									
+									<div id="newPasswordArea" class="d-none border-top pt-3 mt-3">
+										<div class="row mb-3 align-items-center">
+											<label class="col-sm-3 col-form-label fw-semibold text-muted">새 비밀번호</label>
+											<div class="col-sm-9">
+												<input type="password" id="newPassword" class="form-control" placeholder="새 비밀번호 입력" autocomplete="off">
+												<div class="invalid-feedback">새 비밀번호를 입력해주세요.</div>
+											</div>
+										</div>
+										<div class="row mb-3 align-items-center">
+											<label class="col-sm-3 col-form-label fw-semibold text-muted">새 비밀번호 확인</label>
+											<div class="col-sm-9">
+												<input type="password" id="newPasswordConfirm" class="form-control" placeholder="새 비밀번호 재입력" autocomplete="off">
+												<div class="invalid-feedback" id="newPasswordConfirmError">비밀번호가 일치하지 않습니다.</div>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -110,50 +104,55 @@
 									<h6 class="fw-bold mb-3 text-secondary text-center">프로필 이미지</h6>
 									<div class="border rounded p-3 text-center bg-white shadow-sm">
 										<div class="border d-flex justify-content-center align-items-center mb-3 overflow-hidden rounded"
-        									 style="width: 150px; aspect-ratio: 3/4; margin: 0 auto; background-color: #f8f9fa;">
+											 style="width: 150px; aspect-ratio: 3/4; margin: 0 auto; background-color: #f8f9fa;">
 											<img id="myProfilePreview" src="" class="d-none" style="width: 100%; height: 100%; object-fit: cover;">
 											<span id="myEmptyImageText" class="text-muted small">이미지 없음</span>
 										</div>
-										<div class="small text-muted mb-3">사진을 가로 3 : 세로 4 비율로 <br>조정할 수 있습니다.</div>
+										<div class="small text-muted mb-3">사진을 가로 3 : 세로 4 비율로<br>조정할 수 있습니다.</div>
 										<input type="file" id="myProfileImage" class="form-control d-none" accept="image/*">
 										<div class="d-flex justify-content-center gap-2">
-											<button type="button" class="btn btn-sm btn-outline-primary px-3" id="btnUploadProfile">변경</button>
+											<button type="button" class="btn btn-sm btn-outline-success px-3" id="btnUploadProfile">변경</button>
 											<button type="button" class="btn btn-sm btn-outline-danger px-3" id="btnDeleteProfile">삭제</button>
 										</div>
 									</div>
 								</div>
 							</div>
-
+							
 							<div class="modal fade" id="myCropModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-							    <div class="modal-dialog modal-dialog-centered">
-							        <div class="modal-content border-0 shadow">
-							            <div class="modal-header bg-light">
-							                <h6 class="modal-title fw-bold">프로필 이미지 자르기</h6>
-							                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-							            </div>
-							            <div class="modal-body text-center p-0">
-							                <div style="max-height: 450px; overflow: hidden; background-color: #212529;">
-							                    <img id="myImageToCrop" src="" style="max-width: 100%; display: block;">
-							                </div>
-							            </div>
-							            <div class="modal-footer justify-content-center border-0">
-							                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">취소</button>
-							                <button type="button" id="btnApplyCrop" class="btn btn-primary px-4">적용</button>
-							            </div>
-							        </div>
-							    </div>
+								<div class="modal-dialog modal-dialog-centered">
+									<div class="modal-content border-0 shadow">
+										<div class="modal-header bg-light">
+											<h6 class="modal-title fw-bold">프로필 이미지 편집</h6>
+											<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+										</div>
+										<div class="modal-body text-center p-0">
+											<div style="max-height: 450px; overflow: hidden; background-color: #212529;">
+												<img id="myImageToCrop" src="" style="max-width: 100%; display: block;">
+											</div>
+										</div>
+										<div class="modal-footer justify-content-center border-0">
+											<button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">취소</button>
+											<button type="button" id="btnApplyCrop" class="btn btn-success px-4">적용</button>
+										</div>
+									</div>
+								</div>
 							</div>
 						</form>
 					</div>
 					
 					<div class="modal-footer flex-column bg-light">
-					    <div class="w-100 text-center mb-1">
-					        <span id="generalFeedback" class="small fw-bold"></span>
-					    </div>
-					    <div class="d-flex justify-content-center w-100 gap-2">
-					        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">닫기</button>
-					        <button type="button" id="btnSaveMyInfo" class="btn btn-primary px-5 fw-bold">저장</button>
-					    </div>
+						<div class="w-100 text-center mb-1">
+							<span id="generalFeedback" class="small fw-bold"></span>
+						</div>
+						<div class="w-100 text-center mb-2">
+						  <span class="small text-muted" style="letter-spacing: -0.5px;">
+							  <span class="text-primary fw-bold">↓</span> 스크롤을 내려 모든 항목을 확인해 주세요.
+						  </span>
+						</div>
+						<div class="d-flex justify-content-center w-100 gap-2">
+							<button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">닫기</button>
+							<button type="button" id="btnSaveMyInfo" class="btn btn-success px-5 fw-bold">저장</button>
+						</div>
 					</div>
 				</div>
 			</div>

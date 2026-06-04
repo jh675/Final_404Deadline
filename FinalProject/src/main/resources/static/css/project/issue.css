@@ -25,7 +25,7 @@
 	max-width: none;
 	margin-left: 0;
 	margin-right: 0;
-	padding: 28px 32px 32px;
+	padding: var(--project-body-inset, 16px 20px 20px);
 	background: var(--issue-bg);
 	border: 1px solid var(--issue-border);
 	border-radius: var(--issue-radius);
@@ -671,14 +671,19 @@
 	color: #c33;
 }
 
-.attach-list-scroll-wrap {
+.attach-list-scroll-wrap.is-collapsed {
+	max-height: 11rem;
 	overflow: hidden;
-	min-height: 0;
 }
 
 .attach-list-scroll-wrap.is-expanded {
-	max-height: none !important;
+	max-height: none;
 	overflow: visible;
+}
+
+.comment-thread-scroll {
+	max-height: 280px;
+	overflow-y: auto;
 }
 
 .attach-list.attach-list--grid {
@@ -1149,6 +1154,14 @@ table.data-table tbody tr:last-child td {
 	}
 }
 
+.issue-section.issue-section--grid {
+	padding-top: 20px;
+}
+
+.issue-section.issue-section--footer {
+	padding-top: 20px;
+}
+
 .issue-list-footer {
 	display: flex;
 	flex-wrap: wrap;
@@ -1169,19 +1182,6 @@ table.data-table tbody tr:last-child td {
 	justify-content: flex-end;
 	gap: 8px;
 	flex-shrink: 0;
-}
-
-/* 레거시 search-area (다른 페이지 호환) */
-.search-area {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: flex-end;
-	gap: 16px 20px;
-	padding: 0;
-	margin-bottom: 0;
-	background: transparent;
-	border: none;
-	border-radius: 0;
 }
 
 .search-item {

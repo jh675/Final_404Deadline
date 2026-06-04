@@ -1,95 +1,78 @@
 <!DOCTYPE html>
-
 <html xmlns:th="https://www.thymeleaf.org">
-
 <body>
 	<div th:fragment="resetPwModal">
-		<div class="modal fade" id="resetPwModal" tabindex="-1"
-			aria-hidden="true">
-			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">비밀번호 재설정</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal">
-						</button>
+		<div class="modal fade" id="resetPwModal" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+				<div class="modal-content border-0 shadow">
+					<div class="modal-header bg-light">
+						<h5 class="modal-title fw-bold">비밀번호 재설정</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 					</div>
-					<div class="modal-body">
+					<div class="modal-body p-4">
 
-						<!-- 기업번호 -->
 						<div class="mb-3 position-relative">
-						   <label class="form-label">소속 기업명</label> 
-						   <!-- 화면에 보여지는 검색창 -->
-						   <input type="text" id="resetCompanyNameInput" class="form-control" placeholder="기업명을 검색하세요" autocomplete="off">
-						   <!-- 실제 전송되는 기업번호 (hidden) -->
+						   <label class="form-label fw-semibold text-muted small">소속 기업명</label> 
+						   <input type="text" id="resetCompanyNameInput" class="form-control bg-light" placeholder="기업명을 검색하세요" autocomplete="off">
 						   <input type="hidden" id="resetBizNo">
-						   <!-- 자동완성 드롭다운 -->
-						   <ul id="resetCompanyDropdown" class="list-group position-absolute w-100 shadow" 
+						   <ul id="resetCompanyDropdown" class="list-group position-absolute w-100 shadow-sm" 
 						       style="display: none; z-index: 1100; max-height: 200px; overflow-y: auto;">
 						    </ul>
 						    <small id="bizNoError" class="text-danger d-none"></small>
 						</div>
 
-						<!-- 아이디 -->
 						<div class="mb-3">
-							<label class="form-label">아이디</label> <input type="text"
-								id="login" class="form-control"> <small id="loginError"
-								class="text-danger d-none"></small>
+							<label class="form-label fw-semibold text-muted small">아이디</label> 
+							<input type="text" id="login" class="form-control"> 
+							<small id="loginError" class="text-danger d-none"></small>
 						</div>
 
-						<!-- 이메일 -->
 						<div class="mb-3">
-							<label class="form-label">이메일</label>
-							<div class="d-flex gap-2">
+							<label class="form-label fw-semibold text-muted small">이메일</label>
+							<div class="input-group">
 								<input type="email" id="email" class="form-control">
-								<button type="button" id="sendCodeBtn" class="btn btn-primary flex-shrink-0 text-nowrap">
-									인증요청</button>
+								<button type="button" id="sendCodeBtn" class="btn btn-outline-primary">인증요청</button>
 							</div>
 							<small id="emailError" class="text-danger d-none"></small>
 						</div>
 
-						<!-- 공통 메시지 -->
-						<div id="messageArea" class="alert d-none mb-3" role="alert">
-						</div>
+						<div id="messageArea" class="alert d-none mb-3 py-2 small" role="alert"></div>
 
-						<!-- 인증번호 -->
 						<div id="verifyArea" class="mb-3 d-none">
-							<label class="form-label">인증번호</label>
-							<div class="d-flex gap-2">
-								<input type="text" id="verifyNum" class="form-control">
-								<span class="input-group-text text-danger fw-bold d-none" id="resetPwTimerDisplay" style="width: 65px; justify-content: center;">03:00</span>
-								<button type="button" id="verifyBtn" class="btn btn-success flex-shrink-0 text-nowrap">
-									인증</button>
+							<label class="form-label fw-semibold text-muted small">인증번호</label>
+							<div class="input-group">
+								<input type="text" id="verifyNum" class="form-control" placeholder="6자리 입력">
+								<span class="input-group-text text-danger fw-bold d-none bg-white" id="resetPwTimerDisplay" style="width: 65px; justify-content: center;">03:00</span>
+								<button type="button" id="verifyBtn" class="btn btn-success">인증확인</button>
 							</div>
 							<small id="verifyError" class="text-danger d-none"></small>
 						</div>
 
-						<!-- 비밀번호 -->
-						<div id="passwordArea" class="d-none">
+						<div id="passwordArea" class="d-none border-top pt-3 mt-3">
 							<div class="mb-3">
-								<label class="form-label">새 비밀번호</label> <input type="password"
-									id="newPassword" autocomplete="new-password"
-									class="form-control">
+								<label class="form-label fw-semibold text-muted small">새 비밀번호</label> 
+								<input type="password" id="newPassword" autocomplete="new-password" class="form-control">
 							</div>
-							<div class="mb-3">
-								<label class="form-label">비밀번호 확인</label> <input type="password"
-									id="newPasswordCheck" autocomplete="new-password"
-									class="form-control"> <small id="passwordError"
-									class="text-danger d-none"></small>
+							<div class="mb-2">
+								<label class="form-label fw-semibold text-muted small">비밀번호 확인</label> 
+								<input type="password" id="newPasswordCheck" autocomplete="new-password" class="form-control"> 
+								<small id="passwordError" class="text-danger d-none"></small>
 							</div>
 						</div>
-						<small id="resultMsg" class="text-success d-none"></small>
+						
+						<div class="text-center">
+							<small id="resultMsg" class="text-success fw-bold d-none"></small>
+						</div>
+						
 					</div>
 
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary"
-							data-bs-dismiss="modal">닫기</button>
-						<button type="button" id="confirmBtn"
-							class="btn btn-primary d-none">확인</button>
+					<div class="modal-footer bg-light justify-content-center">
+						<button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">닫기</button>
+						<button type="button" id="confirmBtn" class="btn btn-success px-4 fw-bold d-none">비밀번호 변경</button>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </body>
-
 </html>

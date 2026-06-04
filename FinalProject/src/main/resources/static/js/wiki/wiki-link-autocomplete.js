@@ -147,18 +147,13 @@ var WikiLinkAutocomplete = (function () {
             state.open = false;
         }
 
-        /** 에디터 하단(또는 공간 부족 시 상단)에 드롭다운 고정 배치 */
+        /** 에디터 바로 아래에 드롭다운 배치 (뷰포트 높이 연동 없음) */
         function positionDropdown() {
             var anchor = anchorSelector ? document.querySelector(anchorSelector) : null;
             if (!anchor) return;
             var rect = anchor.getBoundingClientRect();
-            var top = rect.bottom + 4;
-            var maxH = 260;
-            if (top + maxH > window.innerHeight - 8) {
-                top = Math.max(8, rect.top - maxH - 4);
-            }
             dropdown.style.left = Math.max(8, rect.left) + 'px';
-            dropdown.style.top = top + 'px';
+            dropdown.style.top = (rect.bottom + 4) + 'px';
             dropdown.style.minWidth = Math.min(Math.max(rect.width, 280), 480) + 'px';
             dropdown.style.maxWidth = '480px';
         }
