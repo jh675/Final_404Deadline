@@ -24,92 +24,103 @@
 </head>
 <body>
 <div layout:fragment="content">
-	<div class="issue-shell">
-	<div id="wrapper">
-		<!-- 1. 검색 영역 (form 으로 감싸서 GET submit) -->
+	<div class="issue-shell issue-shell--list">
+	<div id="wrapper" class="issue-list">
+		<header class="issue-list__header">
+			<h1 class="issue-list__title">이슈 목록</h1>
+		</header>
+
+		<!-- 검색 조건 -->
+		<section class="issue-section issue-section--filter" aria-label="검색 조건">
 		<form id="searchForm" th:action="@{/project/issue/list}" method="get"
-			th:object="${filter}" class="search-area mb-0">
-			<div class="search-item">
+			th:object="${filter}" class="issue-filter-form">
+			<div class="issue-field">
 				<label for="categoryCd">유형</label>
 				<select id="categoryCd" th:field="*{categoryCd}">
-					<option value="">미선택</option>
+					<option value="">전체</option>
 					<option value="01ISSUECATE">버그</option>
 					<option value="02ISSUECATE">기능</option>
 					<option value="03ISSUECATE">작업</option>
 					<option value="04ISSUECATE">개선</option>
 				</select>
 			</div>
-			<div class="search-item">
+			<div class="issue-field">
 				<label for="priorityCd">우선순위</label>
 				<select id="priorityCd" th:field="*{priorityCd}">
-					<option value="">미선택</option>
+					<option value="">전체</option>
 					<option value="01ISSUEPRI">최상</option>
 					<option value="02ISSUEPRI">상</option>
 					<option value="03ISSUEPRI">중</option>
 					<option value="04ISSUEPRI">하</option>
 				</select>
 			</div>
-
-			<div class="search-item">
+			<div class="issue-field">
 				<label for="statusCd">상태</label>
 				<select id="statusCd" th:field="*{statusCd}">
-					<option value="">미선택</option>
+					<option value="">전체</option>
 					<option value="01ISSUESTAT">신규</option>
 					<option value="02ISSUESTAT">진행중</option>
 					<option value="03ISSUESTAT">검토</option>
 					<option value="04ISSUESTAT">완료</option>
 				</select>
 			</div>
-
-			<div class="search-item">
+			<div class="issue-field">
 				<label for="memId">담당자</label>
 				<select id="memId" th:field="*{memId}">
-					<option value="">미선택</option>
+					<option value="">전체</option>
 					<option th:each="member : ${members}"
 						th:value="${member.userId}"
 						th:text="${member.userName + '(' + member.login + ')'}">담당자</option>
 				</select>
 			</div>
-
-			<div class="right-area d-flex flex-wrap align-items-end gap-2">
-				<div class="search-item">
-					<label for="subject">제목</label>
-					<input type="text" id="subject" th:field="*{subject}"
-						placeholder="텍스트를 입력해 주세요." />
-				</div>
-
-				<label class="checkbox-item">
-					<input type="checkbox" id="myIssue" name="myIssue" value="Y"
-						th:checked="*{myIssue == 'Y'}" /> 내가 맡은 이슈
-				</label>
-
+			<div class="issue-field issue-field--subject">
+				<label for="subject">제목</label>
+				<input type="text" id="subject" th:field="*{subject}"
+					placeholder="텍스트를 입력해 주세요." />
+			</div>
+			<label class="issue-filter-check">
+				<input type="checkbox" id="myIssue" name="myIssue" value="Y"
+					th:checked="*{myIssue == 'Y'}" />
+				<span>내가 맡은 이슈</span>
+			</label>
+			<div class="issue-filter-buttons">
 				<button type="submit" class="btn btn-primary">검색</button>
-				<a th:href="@{/project/issue/list}" class="btn btn-secondary">취소</a>
+				<a th:href="@{/project/issue/list}" class="btn btn-secondary">초기화</a>
 			</div>
 		</form>
+		</section>
 
-		<!-- 1건 이상 선택 시 표시 · 일괄 빠른수정 -->
+		<!-- 일괄 빠른수정 -->
+		<section class="issue-section issue-section--bulk" aria-label="일괄 작업">
 		<div id="issueBulkBar" class="issue-bulk-bar" aria-live="polite"
 			th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
 			<span class="bulk-count" id="issueBulkCount">0건 선택</span>
-			<button type="button" class="btn btn-success" id="issueBulkQuickBtn" disabled>
+			<button type="button" class="btn btn-success btn-sm" id="issueBulkQuickBtn" disabled>
 				빠른수정
 			</button>
-			<button type="button" class="btn btn-secondary" id="issueBulkClearBtn">
+			<button type="button" class="btn btn-outline-secondary btn-sm" id="issueBulkClearBtn">
 				선택 해제
 			</button>
 		</div>
+		</section>
 
+		<!-- 목록 -->
+		<section class="issue-section issue-section--grid" aria-label="이슈 목록">
 		<div id="grid"></div>
-		<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
-			<div id="issuePaginationSlot" class="flex-grow-1"></div>
-			<div class="issue-register-actions d-flex justify-content-end gap-2 mt-0 pt-0 border-0">
-			<a th:href="@{/project/issue/pivot}" class="btn btn-info"
+		</section>
+
+		<!-- 하단: 페이징 · 액션 -->
+		<section class="issue-section issue-section--footer">
+		<div class="issue-list-footer">
+			<div id="issuePaginationSlot" class="issue-list-footer__pagination"></div>
+			<div class="issue-list-footer__actions">
+				<a th:href="@{/project/issue/pivot}" class="btn btn-outline-primary btn-sm"
 					th:if="${@prjAuth.hasRole('ROLE_ISSUE_VIEW')}">통계</a>
-			<a th:href="@{/project/issue/register}" class="btn btn-success"
+				<a th:href="@{/project/issue/register}" class="btn btn-primary btn-sm"
 					th:if="${@prjAuth.hasRole('ROLE_ISSUE_CREATE')}">이슈 등록</a>
 			</div>
 		</div>
+		</section>
 	</div>
 	</div>
 

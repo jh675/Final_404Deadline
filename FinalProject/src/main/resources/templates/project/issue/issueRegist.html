@@ -38,8 +38,8 @@
 					</div>
 				</div>
 			</div>
-			<div class="issue-form-row">
-				<div class="search-item">
+			<div class="issue-form-row issue-form-row--assign">
+				<div class="search-item search-item--mem">
 					<label for="memId">담당자</label>
 					<div class="field-wrap" id="wrap-memId">
 						<select id="memId" name="memId" class="form-select">
@@ -53,7 +53,7 @@
 						<p class="err-msg" id="err-memId">담당자를 선택해 주세요.</p>
 					</div>
 				</div>
-				<div class="search-item">
+				<div class="search-item search-item--category">
 					<label for="categoryCd">유형</label>
 					<div class="field-wrap">
 						<select id="categoryCd" name="categoryCd" class="form-select">
@@ -68,7 +68,7 @@
 						</select>
 					</div>
 				</div>
-				<div class="search-item">
+				<div class="search-item search-item--priority">
 					<label for="priorityCd">우선순위</label>
 					<div class="field-wrap">
 						<select id="priorityCd" name="priorityCd" class="form-select">
@@ -83,34 +83,21 @@
 						</select>
 					</div>
 				</div>
-				<div class="search-item">
-					<label for="statusCd">상태</label>
-					<div class="field-wrap">
-						<select id="statusCd" name="statusCd" class="form-select">
-							<option value="01ISSUESTAT"
-								th:selected="${issue == null or issue.statusCd == null or issue.statusCd == '' or issue.statusCd == '01ISSUESTAT'}">신규</option>
-							<option value="02ISSUESTAT"
-								th:selected="${issue != null and issue.statusCd == '02ISSUESTAT'}">진행중</option>
-							<option value="03ISSUESTAT"
-								th:selected="${issue != null and issue.statusCd == '03ISSUESTAT'}">검토</option>
-						</select>
-					</div>
-				</div>
 			</div>
 		</div>
 
 		<div class="issue-page-section">
-			<div class="issue-form-row">
-				<div class="search-item">
+			<div class="issue-form-row issue-form-row--schedule">
+				<div class="search-item search-item--date">
 					<label for="estStartDate">시작예정일</label>
 					<div class="field-wrap">
-				<input type="date" id="estStartDate" name="estStartDate" class="form-control"
-					th:value="${issue != null and issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : (project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : '')}"
-					th:attr="min=${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : null},
-						max=${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : null}" />
+						<input type="date" id="estStartDate" name="estStartDate" class="form-control"
+							th:value="${issue != null and issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : (project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : '')}"
+							th:attr="min=${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : null},
+								max=${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : null}" />
 					</div>
 				</div>
-				<div class="search-item">
+				<div class="search-item search-item--date">
 					<label for="dueDate">종료예정일</label>
 					<div class="field-wrap">
 						<input type="date" id="dueDate" name="dueDate" class="form-control"
@@ -119,7 +106,7 @@
 								max=${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : null}" />
 					</div>
 				</div>
-				<div class="search-item search-item--wide">
+				<div class="search-item search-item--ref">
 					<label for="milestoneId">마일스톤</label>
 					<div class="field-wrap">
 						<select id="milestoneId" name="milestoneId" class="form-select">
@@ -144,7 +131,7 @@
 						</p>
 					</div>
 				</div>
-				<div class="search-item search-item--wide">
+				<div class="search-item search-item--ref">
 					<label for="parentIssue">상위 이슈</label>
 					<div class="field-wrap">
 						<select id="parentIssue" name="parentIssue" class="form-select">
@@ -161,8 +148,21 @@
 		</div>
 
 		<div class="issue-page-section">
-			<div class="issue-form-row">
-				<div class="search-item search-item--range">
+			<div class="issue-form-row issue-form-row--status-progress">
+				<div class="search-item search-item--status">
+					<label for="statusCd">상태</label>
+					<div class="field-wrap">
+						<select id="statusCd" name="statusCd" class="form-select">
+							<option value="01ISSUESTAT"
+								th:selected="${issue == null or issue.statusCd == null or issue.statusCd == '' or issue.statusCd == '01ISSUESTAT'}">신규</option>
+							<option value="02ISSUESTAT"
+								th:selected="${issue != null and issue.statusCd == '02ISSUESTAT'}">진행중</option>
+							<option value="03ISSUESTAT"
+								th:selected="${issue != null and issue.statusCd == '03ISSUESTAT'}">검토</option>
+						</select>
+					</div>
+				</div>
+				<div class="search-item search-item--progress">
 					<label for="doneRatio">진척율</label>
 					<div class="field-wrap">
 						<div class="progress-wrap">
