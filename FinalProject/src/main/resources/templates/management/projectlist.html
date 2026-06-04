@@ -8,399 +8,462 @@
 <title>Insert title here</title>
 
 <!-- Toast UI Grid CSS -->
-<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 
 <style>
-  .numbered-table tbody {
-    counter-reset: myIndex 0;
-  }
-  .numbered-table tbody tr:not([style*="display: none"]) {
-    counter-increment: myIndex;
-  }
-  .row-index::before {
-    content: counter(myIndex);
-  }
-  .table td.text-center {
-    vertical-align: middle;
-  }
-  .btn-group {
-    display: inline-flex;
-    justify-content: center;
-  }
-  .project-search-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin: 1rem 0;
-    align-items: flex-end;
-    overflow: visible;
-    position: relative;
-    z-index: 100;
-  }
-  .search-autocomplete {
-    position: relative;
-    min-width: 260px;
-    flex: 1;
-    max-width: 360px;
-    overflow: visible;
-  }
-  .search-input-group {
-    display: flex;
-    gap: 0.35rem;
-  }
-  .search-input-group .form-control {
-    flex: 1;
-  }
-  .search-autocomplete label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
-  .search-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: white;
-    border: 1px solid #ccc;
-    z-index: 9999;
-    max-height: 200px;
-    overflow-y: auto;
-    color: black;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  .search-dropdown-item {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-  }
-  .search-dropdown-item:hover {
-    background-color: #f8f9fa;
-  }
+.numbered-table tbody {
+	counter-reset: myIndex 0;
+}
 
-  /* 테이블 래퍼 */
-  .tui-grid-table-wrap {
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    width: 100%;
-    max-height: 600px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: relative;
-  }
+.numbered-table tbody tr:not([style*="display: none"]) {
+	counter-increment: myIndex;
+}
 
-  /* 테이블 자체 */
-  .tui-style-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    table-layout: auto;
-  }
+.row-index::before {
+	content: counter(myIndex);
+}
 
-  /* 헤더 행 */
-  .tui-style-table thead tr {
-    background-color: #f7f7f7;
-    border-bottom: 2px solid #e0e0e0;
-  }
-  .tui-style-table thead th {
-    padding: 10px 12px;
-    font-weight: 600;
-    font-size: 13px;
-    color: #333;
-    text-align: center;
-    border-right: 1px solid #e0e0e0;
-    white-space: nowrap;
-    user-select: none;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: #f7f7f7;
-  }
-  .tui-style-table thead th:last-child {
-    border-right: none;
-  }
+.table td.text-center {
+	vertical-align: middle;
+}
 
-  /* 바디 행 */
-  .tui-style-table tbody tr {
-    border-bottom: 1px solid #ebebeb;
-    transition: background-color 0.1s;
-  }
-  .tui-style-table tbody tr:last-child {
-    border-bottom: none;
-  }
-  .tui-style-table tbody tr:hover {
-    background-color: #f0f6ff;
-  }
+.btn-group {
+	display: inline-flex;
+	justify-content: center;
+}
 
-  /* 바디 셀 */
-  .tui-style-table tbody td,
-  .tui-style-table tbody th {
-    padding: 9px 12px;
-    font-size: 13px;
-    color: #333;
-    border-right: 1px solid #ebebeb;
-    vertical-align: middle;
-    font-weight: normal;
-  }
-  .tui-style-table tbody td:last-child,
-  .tui-style-table tbody th:last-child {
-    border-right: none;
-  }
+.search-autocomplete {
+	position: relative;
+	min-width: 200px;
+	flex: 1;
+	max-width: 300px;
+	overflow: visible;
+}
 
-  /* No 컬럼 */
-  .tui-style-table .row-index {
-    text-align: center;
-    color: #888;
-    width: 48px;
-  }
+.search-input-group {
+	display: flex;
+	gap: 0.35rem;
+}
 
-  /* 프로젝트명 링크 */
-  .tui-style-table tbody td a {
-    color: #1a73e8;
-    text-decoration: none;
-    font-weight: 500;
-  }
-  .tui-style-table tbody td a:hover {
-    text-decoration: underline;
-  }
+.search-input-group .form-control {
+	flex: 1;
+}
 
-  /* 들여쓰기 화살표 */
-  .prj-indent {
-    color: #aaa;
-    margin-right: 2px;
-  }
+.search-autocomplete label {
+	display: block;
+	margin-bottom: 0.25rem;
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: #555;
+}
 
-  /* 설정 버튼 셀 */
-  .tui-style-table td.text-center {
-    text-align: center;
-  }
+.search-dropdown {
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 100%;
+	background: white;
+	border: 1px solid #ccc;
+	z-index: 9999;
+	max-height: 200px;
+	overflow-y: auto;
+	color: black;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
-  /* 커스텀 컨텍스트 드롭다운 */
-  #ctxMenu {
-    position: fixed;
-    z-index: 9999;
-    display: none;
-    min-width: 100px;
-  }
+.search-dropdown-item {
+	padding: 8px 12px;
+	cursor: pointer;
+	border-bottom: 1px solid #eee;
+}
 
-  /* ── 상태 필터 커스텀 드롭다운 ── */
-  .status-filter-wrap {
-    display: inline-block;
-    position: relative;
-    vertical-align: middle;
-  }
-  .status-filter-trigger {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 12px;
-    background: #fff;
-    border: 1px solid #c9e0ef;
-    border-radius: 5px;
-    font-size: 13px;
-    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    color: #1a2f3f;
-    cursor: pointer;
-    user-select: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    white-space: nowrap;
-  }
-  .status-filter-trigger:hover {
-    border-color: #1b87c9;
-    color: #1b87c9;
-  }
-  .status-filter-trigger.open {
-    border-color: #1b87c9;
-    box-shadow: 0 0 0 3px rgba(27,135,201,0.13);
-    color: #1b87c9;
-  }
-  .status-filter-trigger svg {
-    transition: transform 0.2s;
-    flex-shrink: 0;
-  }
-  .status-filter-trigger.open svg {
-    transform: rotate(180deg);
-  }
-  .status-filter-dropdown {
-    display: none;
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    min-width: 100%;
-    background: #fff;
-    border: 1px solid #1b87c9;
-    border-radius: 5px;
-    z-index: 9999;
-    box-shadow: 0 6px 16px rgba(27,135,201,0.13);
-    overflow: hidden;
-  }
-  .status-filter-dropdown.open { display: block; }
-  .status-filter-item {
-    padding: 9px 14px;
-    font-size: 13px;
-    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    color: #1a2f3f;
-    cursor: pointer;
-    border-bottom: 1px solid #e8f4fb;
-    white-space: nowrap;
-    transition: background 0.1s;
-  }
-  .status-filter-item:last-child { border-bottom: none; }
-  .status-filter-item:hover {
-    background: #e8f4fb;
-    color: #1b87c9;
-  }
-  .status-filter-item.selected {
-    background: #e8f4fb;
-    color: #1b87c9;
-    font-weight: 600;
-  }
+.search-dropdown-item:hover {
+	background-color: #f8f9fa;
+}
+
+/* ── 툴바 ── */
+.prj-toolbar {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 14px;
+	flex-wrap: wrap;
+}
+
+.prj-toolbar-left {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-shrink: 0;
+}
+
+.prj-toolbar-right {
+	display: flex;
+	align-items: flex-end;
+	gap: 10px;
+	flex: 1;
+	justify-content: flex-end;
+	overflow: visible;
+	position: relative;
+	z-index: 100;
+}
+
+.prj-toolbar-right .search-autocomplete {
+	max-width: 260px;
+}
+
+/* ── 테이블 래퍼 ── */
+.tui-grid-table-wrap {
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	width: 100%;
+	max-height: 600px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	position: relative;
+}
+
+.tui-style-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+	font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+	table-layout: auto;
+}
+
+.tui-style-table thead tr {
+	background-color: #f7f7f7;
+	border-bottom: 2px solid #e0e0e0;
+}
+
+.tui-style-table thead th {
+	padding: 10px 12px;
+	font-weight: 600;
+	font-size: 13px;
+	color: #333;
+	text-align: center;
+	border-right: 1px solid #e0e0e0;
+	white-space: nowrap;
+	user-select: none;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background-color: #f7f7f7;
+}
+
+.tui-style-table thead th:last-child {
+	border-right: none;
+}
+
+.tui-style-table tbody tr {
+	border-bottom: 1px solid #ebebeb;
+	transition: background-color 0.1s;
+}
+
+.tui-style-table tbody tr:last-child {
+	border-bottom: none;
+}
+
+.tui-style-table tbody tr:hover {
+	background-color: #f0f6ff;
+}
+
+.tui-style-table tbody td, .tui-style-table tbody th {
+	padding: 9px 12px;
+	font-size: 13px;
+	color: #333;
+	border-right: 1px solid #ebebeb;
+	vertical-align: middle;
+	font-weight: normal;
+}
+
+.tui-style-table tbody td:last-child, .tui-style-table tbody th:last-child
+	{
+	border-right: none;
+}
+
+.tui-style-table .row-index {
+	text-align: center;
+	color: #888;
+	width: 48px;
+}
+
+.tui-style-table tbody td a {
+	color: #1a73e8;
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.tui-style-table tbody td a:hover {
+	text-decoration: underline;
+}
+
+.prj-indent {
+	color: #aaa;
+	margin-right: 2px;
+}
+
+.tui-style-table td.text-center {
+	text-align: center;
+}
+
+/* 컨텍스트 메뉴 */
+#ctxMenu {
+	position: fixed;
+	z-index: 9999;
+	display: none;
+	min-width: 100px;
+}
+
+/* ── 상태 필터 커스텀 드롭다운 ── */
+.status-filter-wrap {
+	display: inline-block;
+	position: relative;
+	vertical-align: middle;
+}
+
+.status-filter-trigger {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 12px;
+	background: #fff;
+	border: 1px solid #c9e0ef;
+	border-radius: 5px;
+	font-size: 13px;
+	font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+	color: #1a2f3f;
+	cursor: pointer;
+	user-select: none;
+	transition: border-color 0.15s, box-shadow 0.15s;
+	white-space: nowrap;
+}
+
+.status-filter-trigger:hover {
+	border-color: #1b87c9;
+	color: #1b87c9;
+}
+
+.status-filter-trigger.open {
+	border-color: #1b87c9;
+	box-shadow: 0 0 0 3px rgba(27, 135, 201, 0.13);
+	color: #1b87c9;
+}
+
+.status-filter-trigger svg {
+	transition: transform 0.2s;
+	flex-shrink: 0;
+}
+
+.status-filter-trigger.open svg {
+	transform: rotate(180deg);
+}
+
+.status-filter-dropdown {
+	display: none;
+	position: absolute;
+	top: calc(100% + 4px);
+	left: 0;
+	min-width: 100%;
+	background: #fff;
+	border: 1px solid #1b87c9;
+	border-radius: 5px;
+	z-index: 9999;
+	box-shadow: 0 6px 16px rgba(27, 135, 201, 0.13);
+	overflow: hidden;
+}
+
+.status-filter-dropdown.open {
+	display: block;
+}
+
+.status-filter-item {
+	padding: 9px 14px;
+	font-size: 13px;
+	font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+	color: #1a2f3f;
+	cursor: pointer;
+	border-bottom: 1px solid #e8f4fb;
+	white-space: nowrap;
+	transition: background 0.1s;
+}
+
+.status-filter-item:last-child {
+	border-bottom: none;
+}
+
+.status-filter-item:hover {
+	background: #e8f4fb;
+	color: #1b87c9;
+}
+
+.status-filter-item.selected {
+	background: #e8f4fb;
+	color: #1b87c9;
+	font-weight: 600;
+}
 </style>
 </head>
 <body>
-<div layout:fragment="content">
-  <h2>프로젝트</h2>
+	<div layout:fragment="content">
+		<h2>프로젝트</h2>
 
-  <!-- 토스트 메시지 -->
-  <div th:if="${errorMsg}" id="errorToast"
-       class="toast align-items-center text-bg-danger border-0 position-fixed bottom-0 end-0 m-3"
-       role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body" th:text="${errorMsg}">이미 사용중인 식별자입니다.</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto"
-              data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  </div>
-  <div th:if="${successMsg}" id="successToast"
-       class="toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3"
-       role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body" th:text="${successMsg}">복구 성공했습니다.</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto"
-              data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  </div>
+		<!-- 토스트 메시지 -->
+		<div th:if="${errorMsg}" id="errorToast"
+			class="toast align-items-center text-bg-danger border-0 position-fixed bottom-0 end-0 m-3"
+			role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="d-flex">
+				<div class="toast-body" th:text="${errorMsg}">이미 사용중인 식별자입니다.</div>
+				<button type="button" class="btn-close btn-close-white me-2 m-auto"
+					data-bs-dismiss="toast" aria-label="Close"></button>
+			</div>
+		</div>
+		<div th:if="${successMsg}" id="successToast"
+			class="toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3"
+			role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="d-flex">
+				<div class="toast-body" th:text="${successMsg}">복구 성공했습니다.</div>
+				<button type="button" class="btn-close btn-close-white me-2 m-auto"
+					data-bs-dismiss="toast" aria-label="Close"></button>
+			</div>
+		</div>
 
-  <a th:if="${#authentication.principal.adminNm == '기업관리자' || #authentication.principal.statusCd == '01ACTIVE'}"
-     href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
+		<!-- ── 툴바: 왼쪽(생성+필터) / 오른쪽(검색) ── -->
+		<div class="prj-toolbar">
 
-  <div class="status-filter-wrap">
-    <div class="status-filter-trigger" id="statusFilterTrigger">
-      <span id="statusFilterLabel">진행중인 프로젝트</span>
-      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
-           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    </div>
-    <div class="status-filter-dropdown" id="statusFilterDropdown">
-      <div class="status-filter-item selected" data-value="progress">진행중인 프로젝트</div>
-      <div class="status-filter-item" data-value="complete">종료된 프로젝트</div>
-    </div>
-    <select id="projectStatusSelect" style="display:none">
-      <option value="progress">진행중인 프로젝트</option>
-      <option value="complete">종료된 프로젝트</option>
-    </select>
-  </div>
+			<!-- 왼쪽: 프로젝트 생성 버튼 + 상태 필터 -->
+			<div class="prj-toolbar-left">
+				<a
+					th:if="${#authentication.principal.adminNm == '기업관리자' || #authentication.principal.prjManagerCd == '01ACTIVE'}"
+					href="/management/projectcreate" class="btn btn-primary">프로젝트
+					생성</a>
 
-  <!-- 검색용 데이터 store -->
-  <div id="searchDataStore" class="d-none" aria-hidden="true">
-    <span th:each="c : ${companyList}" class="search-company-data"
-          th:attr="data-biz-no=${c.bizNo}, data-name=${c.companyName}"></span>
-    <span th:each="p : ${projectinfo.list}" class="search-project-data"
-          th:attr="data-prj-name=${p.prjName}, data-biz-no=${p.bizNo}"></span>
-  </div>
+				<div class="status-filter-wrap">
+					<div class="status-filter-trigger" id="statusFilterTrigger">
+						<span id="statusFilterLabel">진행중인 프로젝트</span>
+						<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+							viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+					</div>
+					<div class="status-filter-dropdown" id="statusFilterDropdown">
+						<div class="status-filter-item selected" data-value="progress">진행중인
+							프로젝트</div>
+						<div class="status-filter-item" data-value="complete">종료된
+							프로젝트</div>
+					</div>
+					<select id="projectStatusSelect" style="display: none">
+						<option value="progress">진행중인 프로젝트</option>
+						<option value="complete">종료된 프로젝트</option>
+					</select>
+				</div>
+			</div>
 
-  <!-- 검색바 -->
-  <div class="project-search-bar">
-    <div class="search-autocomplete"
-         th:if="${#authentication.principal.adminNm == '시스템관리자'}">
-      <label for="companySearch">회사명</label>
-      <input type="text" id="companySearch" class="form-control form-control-sm"
-             placeholder="회사명 입력..." autocomplete="off">
-      <input type="hidden" id="selectedBizNo">
-      <div id="companyDropdown" class="search-dropdown"></div>
-    </div>
-    <div class="search-autocomplete">
-      <label for="projectSearch">프로젝트명</label>
-      <div class="search-input-group">
-        <input type="text" id="projectSearch" class="form-control form-control-sm"
-               placeholder="프로젝트명 입력..." autocomplete="off">
-        <button type="button" id="listSearchBtn" class="btn btn-sm btn-primary">검색</button>
-      </div>
-      <div id="projectDropdown" class="search-dropdown"></div>
-    </div>
-  </div>
+			<!-- 오른쪽: 검색바 -->
+			<div class="prj-toolbar-right">
+				<div class="search-autocomplete"
+					th:if="${#authentication.principal.adminNm == '시스템관리자'}">
+					<label for="companySearch">회사명</label> <input type="text"
+						id="companySearch" class="form-control form-control-sm"
+						placeholder="회사명 입력..." autocomplete="off"> <input
+						type="hidden" id="selectedBizNo">
+					<div id="companyDropdown" class="search-dropdown"></div>
+				</div>
+				<div class="search-autocomplete">
+					<label for="projectSearch">프로젝트명</label>
+					<div class="search-input-group">
+						<input type="text" id="projectSearch"
+							class="form-control form-control-sm" placeholder="프로젝트명 입력..."
+							autocomplete="off">
+						<button type="button" id="listSearchBtn"
+							class="btn btn-sm btn-primary">검색</button>
+					</div>
+					<div id="projectDropdown" class="search-dropdown"></div>
+				</div>
+			</div>
 
-  <!-- 테이블 -->
-  <div style="width: 100%;">
-    <div class="tui-grid-table-wrap">
-      <table class="tui-style-table numbered-table">
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>프로젝트명</th>
-            <th>식별자</th>
-            <th th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">회사명</th>
-            <th>설명</th>
-            <th>생성일</th>
-            <th>종료일</th>
-            <th class="text-center"
-                th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">설정</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="pro : ${projectinfo.list}"
-              th:if="${#authentication.principal.adminNm == '시스템관리자'
+		</div>
+		<!-- /prj-toolbar -->
+
+		<!-- 검색용 데이터 store -->
+		<div id="searchDataStore" class="d-none" aria-hidden="true">
+			<span th:each="c : ${companyList}" class="search-company-data"
+				th:attr="data-biz-no=${c.bizNo}, data-name=${c.companyName}"></span>
+			<span th:each="p : ${projectinfo.list}" class="search-project-data"
+				th:attr="data-prj-name=${p.prjName}, data-biz-no=${p.bizNo}"></span>
+		</div>
+
+		<!-- 테이블 -->
+		<div style="width: 100%;">
+			<div class="tui-grid-table-wrap">
+				<table class="tui-style-table numbered-table">
+					<thead>
+						<tr>
+							<th>No</th>
+							<th>프로젝트명</th>
+							<th>식별자</th>
+							<th
+								th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">회사명</th>
+							<th>설명</th>
+							<th>생성일</th>
+							<th>종료일</th>
+							<th class="text-center"
+								th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자' || #authentication.principal.prjManagerCd == '01ACTIVE'}">설정</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="pro : ${projectinfo.list}"
+							th:if="${#authentication.principal.adminNm == '시스템관리자'
                   or (#authentication.principal.adminNm == '사원' and pro.prjHide == 'N')
                   or (pro.bizNo == #authentication.principal.bizNo and pro.prjHide == 'N')}"
-              th:data-status="${pro.prjStatusCd == '04PROSTAT' || pro.prjStatusCd == '05PROSTAT' ? 'complete' : 'progress'}"
-              th:attr="data-prj-name=${pro.prjName}, data-biz-no=${pro.bizNo}, data-par-id=${pro.prjParId}, data-prj-id=${pro.id}">
-            <td class="row-index"></td>
-            <td>
-              <span th:if="${pro.prjParId != null}" class="prj-indent"></span>
-              <a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a>
-            </td>
-            <td th:text="${pro.prjIdentifier}"></td>
-            <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
-              <th:block th:each="c : ${companyList}">
-                <span th:if="${pro.bizNo == c.bizNo}" th:text="${c.companyName}"></span>
-              </th:block>
-            </td>
-            <td th:text="${pro.prjDesc}"></td>
-            <td th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"></td>
-            <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
-            <td class="text-center"
-                th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">
-              <!-- 커스텀 컨텍스트 버튼 -->
-              <button type="button" class="btn btn-sm btn-outline-secondary ctx-btn"
-                      th:data-id="${pro.id}"
-                      th:data-hide="${pro.prjHide}"
-                      th:data-is-admin="${#authentication.principal.adminNm == '시스템관리자' ? 'Y' : 'N'}">
-                ...
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+							th:data-status="${pro.prjStatusCd == '04PROSTAT' || pro.prjStatusCd == '05PROSTAT' ? 'complete' : 'progress'}"
+							th:attr="data-prj-name=${pro.prjName}, data-biz-no=${pro.bizNo}, data-par-id=${pro.prjParId}, data-prj-id=${pro.id}">
+							<td class="row-index"></td>
+							<td><span th:if="${pro.prjParId != null}" class="prj-indent"></span>
+								<a th:text="${pro.prjName}"
+								th:href="@{/project/{id}(id=${pro.id})}"></a></td>
+							<td th:text="${pro.prjIdentifier}"></td>
+							<td
+								th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
+								<th:block th:each="c : ${companyList}">
+									<span th:if="${pro.bizNo == c.bizNo}"
+										th:text="${c.companyName}"></span>
+								</th:block>
+							</td>
+							<td th:text="${pro.prjDesc}"></td>
+							<td
+								th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"></td>
+							<td
+								th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
+							<td class="text-center"
+								th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자' || #authentication.principal.prjManagerCd == '01ACTIVE'}">
+								<button type="button"
+									class="btn btn-sm btn-outline-secondary ctx-btn"
+									th:data-id="${pro.id}" th:data-hide="${pro.prjHide}"
+									th:data-is-admin="${#authentication.principal.adminNm == '시스템관리자' ? 'Y' : 'N'}">
+									...</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 
-    <div th:replace="~{management/modal/reprojectmodal :: reproject}"></div>
-    <div th:replace="~{management/modal/deleteprojectmodal :: deleteproject}"></div>
-  </div>
+			<div th:replace="~{management/modal/reprojectmodal :: reproject}"></div>
+			<div
+				th:replace="~{management/modal/deleteprojectmodal :: deleteproject}"></div>
+		</div>
 
-  <!-- 커스텀 드롭다운 메뉴 (body 기준 fixed 렌더링) -->
-  <ul id="ctxMenu" class="dropdown-menu shadow-sm"></ul>
+		<ul id="ctxMenu" class="dropdown-menu shadow-sm"></ul>
 
-  <script>
-    /* ── 커스텀 컨텍스트 드롭다운 ── */
+		<script>
     (function () {
       const menu = document.getElementById('ctxMenu');
-
       document.addEventListener('click', function (e) {
         const btn = e.target.closest('.ctx-btn');
         if (btn) {
@@ -408,25 +471,18 @@
           const id      = btn.getAttribute('data-id');
           const isAdmin = btn.getAttribute('data-is-admin') === 'Y';
           const isHide  = btn.getAttribute('data-hide') === 'Y';
-
           menu.innerHTML = '';
           if (isAdmin && isHide) {
-            menu.innerHTML += `<li><a class="dropdown-item" href="#"
-              onclick="doReproject('${id}'); return false;">복구</a></li>`;
+            menu.innerHTML += `<li><a class="dropdown-item" href="#" onclick="doReproject('${id}'); return false;">복구</a></li>`;
           }
-          menu.innerHTML += `<li><a class="dropdown-item" href="#"
-            onclick="editProject('${id}'); return false;">수정</a></li>`;
-          menu.innerHTML += `<li><a class="dropdown-item" href="#"
-            onclick="copyProject('${id}'); return false;">복사</a></li>`;
+          menu.innerHTML += `<li><a class="dropdown-item" href="#" onclick="editProject('${id}'); return false;">수정</a></li>`;
+          menu.innerHTML += `<li><a class="dropdown-item" href="#" onclick="copyProject('${id}'); return false;">복사</a></li>`;
           menu.innerHTML += `<li><hr class="dropdown-divider"></li>`;
-          menu.innerHTML += `<li><button class="dropdown-item text-danger"
-            onclick="doDelete('${id}')">삭제</button></li>`;
-
-          // 위치 계산 (뷰포트 fixed 기준)
+          menu.innerHTML += `<li><button class="dropdown-item text-danger" onclick="doDelete('${id}')">삭제</button></li>`;
           menu.style.display = 'block';
-          const rect   = btn.getBoundingClientRect();
-          const menuW  = menu.offsetWidth;
-          const menuH  = menu.offsetHeight;
+          const rect  = btn.getBoundingClientRect();
+          const menuW = menu.offsetWidth;
+          const menuH = menu.offsetHeight;
           let top  = rect.bottom + 2;
           let left = rect.right - menuW;
           if (top + menuH > window.innerHeight) top = rect.top - menuH - 2;
@@ -437,8 +493,6 @@
           menu.style.display = 'none';
         }
       });
-
-      // 스크롤·리사이즈 시 닫기
       window.addEventListener('scroll', () => { menu.style.display = 'none'; }, true);
       window.addEventListener('resize', () => { menu.style.display = 'none'; });
     })();
@@ -455,7 +509,6 @@
       new bootstrap.Modal(document.getElementById('deleteproject')).show();
     }
 
-    /* ── 깊이/들여쓰기 계산 ── */
     function calcDepthAndIndent() {
       const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-id]");
       const depthMap = {};
@@ -487,15 +540,11 @@
     }
   </script>
 
-  <script th:inline="javascript">
-    let selectedBizNo = '';
-    let selectedPrjName = '';
-    let appliedBizNo = '';
-    let appliedPrjName = '';
-    let appliedCompanyTerm = '';
-    let appliedProjectTerm = '';
-    let companyData = [];
-    let projectData = [];
+		<script th:inline="javascript">
+    let selectedBizNo = '', selectedPrjName = '';
+    let appliedBizNo = '', appliedPrjName = '';
+    let appliedCompanyTerm = '', appliedProjectTerm = '';
+    let companyData = [], projectData = [];
     let searchTimer = null;
     const isAdmin   = /*[[${#authentication.principal.adminNm}]]*/ '';
     const userBizNo = /*[[${#authentication.principal.bizNo}]]*/ '';
@@ -506,7 +555,6 @@
         searchTimer = setTimeout(() => fn.apply(this, args), delay);
       };
     }
-
     function loadSearchData() {
       companyData = Array.from(document.querySelectorAll('.search-company-data')).map(el => ({
         bizNo: el.getAttribute('data-biz-no') || '',
@@ -517,39 +565,29 @@
         bizNo: el.getAttribute('data-biz-no') || ''
       }));
     }
-
     function includesTerm(text, term) {
       if (!text || !term) return false;
       return text.toLowerCase().includes(term.toLowerCase());
     }
-
     function applyAllFilters() {
       const selectValue = document.getElementById("projectStatusSelect").value;
       const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-name]");
       const matchedIds = new Set();
-
       rows.forEach(row => {
         const status  = row.getAttribute("data-status");
         const bizNo   = row.getAttribute("data-biz-no") || '';
         const prjName = row.getAttribute("data-prj-name") || '';
         let matched = status === selectValue;
-        if (appliedBizNo) {
-          matched = matched && bizNo === appliedBizNo;
-        } else if (appliedCompanyTerm) {
-          const matchedBizNos = companyData
-            .filter(c => includesTerm(c.companyName, appliedCompanyTerm))
-            .map(c => c.bizNo);
+        if (appliedBizNo) { matched = matched && bizNo === appliedBizNo; }
+        else if (appliedCompanyTerm) {
+          const matchedBizNos = companyData.filter(c => includesTerm(c.companyName, appliedCompanyTerm)).map(c => c.bizNo);
           matched = matched && matchedBizNos.includes(bizNo);
         }
-        if (appliedPrjName) {
-          matched = matched && prjName === appliedPrjName;
-        } else if (appliedProjectTerm) {
-          matched = matched && includesTerm(prjName, appliedProjectTerm);
-        }
+        if (appliedPrjName) { matched = matched && prjName === appliedPrjName; }
+        else if (appliedProjectTerm) { matched = matched && includesTerm(prjName, appliedProjectTerm); }
         row._matched = matched;
         if (matched) matchedIds.add(row.getAttribute("data-prj-id"));
       });
-
       rows.forEach(row => {
         if (!row._matched) return;
         let parId = row.getAttribute("data-par-id");
@@ -562,20 +600,14 @@
           parId = parentRow.getAttribute("data-par-id");
         }
       });
-
       rows.forEach(row => {
         const parId = row.getAttribute("data-par-id");
         if (!row._matched && parId && matchedIds.has(parId)) row._matched = true;
       });
-
-      rows.forEach(row => {
-        row.style.display = row._matched ? "" : "none";
-      });
+      rows.forEach(row => { row.style.display = row._matched ? "" : "none"; });
       calcDepthAndIndent();
     }
-
     function filterProjects() { applyAllFilters(); }
-
     function executeListSearch() {
       const companyInput = document.getElementById('companySearch');
       const projectInput = document.getElementById('projectSearch');
@@ -585,7 +617,6 @@
       appliedPrjName = selectedPrjName;
       applyAllFilters();
     }
-
     function renderDropdown(dropdownEl, matches, inputEl, onSelect) {
       dropdownEl.innerHTML = '';
       if (!matches.length) {
@@ -609,7 +640,6 @@
       });
       dropdownEl.style.display = 'block';
     }
-
     function showAutocomplete(inputEl, dropdownEl, getItems, onSelect) {
       if (!inputEl || !dropdownEl) return;
       const term = inputEl.value.trim();
@@ -617,7 +647,6 @@
       if (term.length < 1) { dropdownEl.style.display = 'none'; return; }
       renderDropdown(dropdownEl, getItems(term), inputEl, onSelect);
     }
-
     function setupAutocomplete(inputEl, dropdownEl, getItems, onSelect) {
       if (!inputEl || !dropdownEl) return;
       const debouncedSearch = debounce(function (value) {
@@ -632,13 +661,11 @@
       loadSearchData();
       calcDepthAndIndent();
 
-      const companySearch     = document.getElementById('companySearch');
-      const companyDropdown   = document.getElementById('companyDropdown');
+      const companySearch      = document.getElementById('companySearch');
+      const companyDropdown    = document.getElementById('companyDropdown');
       const selectedBizNoInput = document.getElementById('selectedBizNo');
-
       if (companySearch && companyDropdown) {
-        setupAutocomplete(
-          companySearch, companyDropdown,
+        setupAutocomplete(companySearch, companyDropdown,
           function (term) {
             const seen = new Set();
             return companyData
@@ -655,10 +682,8 @@
 
       const projectSearch   = document.getElementById('projectSearch');
       const projectDropdown = document.getElementById('projectDropdown');
-
       if (projectSearch && projectDropdown) {
-        setupAutocomplete(
-          projectSearch, projectDropdown,
+        setupAutocomplete(projectSearch, projectDropdown,
           function (term) {
             const seen = new Set();
             return projectData
@@ -684,17 +709,12 @@
         const cDrop   = document.getElementById('companyDropdown');
         const pSearch = document.getElementById('projectSearch');
         const pDrop   = document.getElementById('projectDropdown');
-        if (cSearch && cDrop && !cSearch.contains(e.target) && !cDrop.contains(e.target)) {
-          cDrop.style.display = 'none';
-        }
-        if (pSearch && pDrop && !pSearch.contains(e.target) && !pDrop.contains(e.target)) {
-          pDrop.style.display = 'none';
-        }
+        if (cSearch && cDrop && !cSearch.contains(e.target) && !cDrop.contains(e.target)) cDrop.style.display = 'none';
+        if (pSearch && pDrop && !pSearch.contains(e.target) && !pDrop.contains(e.target)) pDrop.style.display = 'none';
       });
 
       applyAllFilters();
 
-      // 토스트
       const errorToastEl   = document.getElementById('errorToast');
       if (errorToastEl)   new bootstrap.Toast(errorToastEl).show();
       const successToastEl = document.getElementById('successToast');
@@ -704,20 +724,18 @@
     const serverMessage = /*[[${msg}]]*/ null;
     if (serverMessage) alert(serverMessage);
 
-    /* ── 상태 필터 커스텀 드롭다운 초기화 ── */
+    /* ── 상태 필터 커스텀 드롭다운 ── */
     (function () {
       const trigger  = document.getElementById('statusFilterTrigger');
       const dropdown = document.getElementById('statusFilterDropdown');
       const label    = document.getElementById('statusFilterLabel');
       const select   = document.getElementById('projectStatusSelect');
       if (!trigger) return;
-
       trigger.addEventListener('click', function (e) {
         e.stopPropagation();
         const isOpen = dropdown.classList.toggle('open');
         trigger.classList.toggle('open', isOpen);
       });
-
       dropdown.addEventListener('click', function (e) {
         const item = e.target.closest('.status-filter-item');
         if (!item) return;
@@ -729,7 +747,6 @@
         trigger.classList.remove('open');
         filterProjects();
       });
-
       document.addEventListener('click', function (e) {
         if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
           dropdown.classList.remove('open');
@@ -738,6 +755,6 @@
       });
     })();
   </script>
-</div>
+	</div>
 </body>
 </html>
