@@ -15,6 +15,7 @@ public class CalenderVO {
 	private String keyword;
 	private String calType;
 	private String memName;
+	private String bizNo;
 	
 	private String calStart;
 	private String  calEnd;

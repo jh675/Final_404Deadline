@@ -12,7 +12,8 @@
 <style>
 #gantt_here {
 	width: 100%;
-	height: 600px;
+	height: calc(100vh - 200px);
+	overflow: hidden;
 }
 
 .gantt_cell {
@@ -45,6 +46,10 @@
 .status-done .gantt_task_progress, .status-done.gantt_task_line {
 	background-color: #27ae60;
 	border-color: #1e8449;
+}
+
+body, html {
+	overflow-y: hidden;
 }
 </style>
 
@@ -213,6 +218,11 @@
 			gantt.config.bar_height  = 18;  // 막대 높이
 			gantt.config.min_column_width = 30; // 날짜 칸 너비 (좁게)
 			gantt.config.grid_width = 750; 
+
+			// 막대 부분만 스크롤 되게 설정
+			gantt.config.scroll_size = 10;
+			gantt.config.autofit = false;
+			gantt.config.fit_tasks = false;
 		
 			
 			// 2) 진척도의 날짜헤더 (년+월/ 일)
@@ -239,7 +249,28 @@
 			// 간트차트 막대 클릭 시 나오는 팝업창 안열리게 설정 
 			gantt.config.details_on_dblclick = false; // 더블클릭 시 팝업 끄기
 			gantt.config.allow_click_for_details = false; // 클릭 시 팝업 끄기
-
+			gantt.config.layout = {
+				    css: "gantt_container",
+				    rows: [
+				        {
+				            cols: [
+				                {
+				                    view: "grid",
+				                },
+				                { resizer: true, width: 1 },
+				                {
+				                    rows: [
+				                        {
+				                            view: "timeline",
+				                            scrollX: "scrollHor"
+				                        },
+				                        { view: "scrollbar", id: "scrollHor", height: 10 }
+				                    ]
+				                }
+				            ]
+				        }
+				    ]
+				};
 			// 4) 초기화 
 			gantt.init("gantt_here");
 			

@@ -485,19 +485,23 @@
 	document.getElementById('ins_typeCd').addEventListener('change', function() {
    		const selectBox = this.value;
    		
-   	    // 라디오 버튼 활성화(초기화) 
-   	    const radios = document.getElementsByName('sharingCd');
-   	    
-   	    // 선택 값에 따라 특정 라디오버튼 비활성화 
-   	    // 개인일정 선택 시 => 나만보기, 전체공유 둘다 보이기 
-   	    // 그룹일정, 회사일정 선택 시 => 전체공유만 활성화 나만보기 비활성화 
-   	    
+   	    const sharingMe = document.getElementById('ins_sharingMe');
+        const sharingAll = document.getElementById('ins_sharingAll');
+
    	    // 1. 개인일정 => 나만보기, 전체공유 둘다 보기
    	    if(selectBox == '01CALTYPE') {
-   	        document.getElementById('ins_sharingMe').disabled = false;
-   	        document.getElementById('ins_sharingAll').disabled = false;
+   	    	sharingMe.disabled = false;
+   	        sharingAll.disabled = false;
+   	        sharingMe.checked = true; // 기본값 나만보기
 		} else if (selectBox == '02CALTYPE'|| selectBox == '03CALTYPE') {
-			document.getElementById('ins_sharingAll').disabled = false;
+			sharingMe.disabled = true;
+		    sharingAll.disabled = false;
+		    sharingAll.checked = true; // 기본값 나만보기
+		} else {
+			sharingMe.disabled = false;
+	        sharingAll.disabled = false;
+	        sharingMe.checked = true; // 기본값 나만보기
+		
 		}
 
 	});    
