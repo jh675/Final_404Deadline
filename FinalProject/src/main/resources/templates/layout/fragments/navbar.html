@@ -15,19 +15,22 @@
 
 				<ul class="navbar-nav me-auto">
 
-					<li class="nav-item" sec:authorize="isAuthenticated()"><a
-						class="nav-link px-3"
-						th:classappend="${session.currentTopMenu == 'calendar'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-						th:href="@{/calendar/list}"> 일정 </a></li>
-
-					<th:block sec:authorize="isAnonymous()">
-						<li class="nav-item"><a class="nav-link px-3"
-							th:classappend="${session.currentTopMenu == 'home'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-							th:href="@{/}"> 홈화면 </a></li>
-						<li class="nav-item"><a class="nav-link px-3"
-							th:classappend="${session.currentTopMenu == 'login'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-							th:href="@{/login}"> 로그인 </a></li>
-					</th:block>
+				<th:block sec:authorize="isAnonymous()">
+					<li class="nav-item">
+						<a class="nav-link px-3" 
+						   th:classappend="${session.currentTopMenu == 'home'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+						   th:href="@{/}">
+							홈화면
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link px-3" 
+						   th:classappend="${session.currentTopMenu == 'login'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+						   th:href="@{/login}">
+							로그인
+						</a>
+					</li>
+				</th:block>
 
 					<th:block sec:authorize="hasRole('ADMIN')">
 						<li class="nav-item"><a class="nav-link px-3"
@@ -47,20 +50,38 @@
 							th:href="@{/management/project}"> 프로젝트 목록 </a></li>
 					</th:block>
 
-					<th:block sec:authorize="hasRole('CADMIN')">
-						<li class="nav-item"><a class="nav-link px-3"
-							th:classappend="${session.currentTopMenu == 'project'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-							th:href="@{/management/project}"> 프로젝트관리 </a></li>
-						<li class="nav-item"><a class="nav-link px-3"
-							th:classappend="${session.currentTopMenu == 'user'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-							th:href="@{/cadmin/userList}"> 회원 관리 </a></li>
-					</th:block>
+				<th:block sec:authorize="hasRole('CADMIN')">
+					<li class="nav-item">
+						<a class="nav-link px-3" 
+						   th:classappend="${session.currentTopMenu == 'user'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+						   th:href="@{/cadmin/userList}">
+							회원 관리
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link px-3" 
+						   th:classappend="${session.currentTopMenu == 'project'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+						   th:href="@{/management/project}">
+							프로젝트관리
+						</a>
+					</li>
+				</th:block>
 
-					<li class="nav-item" sec:authorize="isAuthenticated()"><a
-						class="nav-link px-3"
-						th:classappend="${session.currentTopMenu == 'mypage'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
-						th:href="@{/mypage}"> 마이페이지 </a></li>
-				</ul>
+				<li class="nav-item" sec:authorize="isAuthenticated()">
+					<a class="nav-link px-3" 
+					   th:classappend="${session.currentTopMenu == 'calendar'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+					   th:href="@{/calendar/list}">
+						일정
+					</a>
+				</li>
+				<li class="nav-item" sec:authorize="isAuthenticated()">
+					<a class="nav-link px-3" 
+					   th:classappend="${session.currentTopMenu == 'mypage'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+					   th:href="@{/mypage}">
+						마이페이지
+					</a>
+				</li>
+			</ul>
 
 				<!-- 공통 영역 -->
 

@@ -57,8 +57,8 @@
 	        #{email},
 	        #{adminCd},
 	        #{statusCd},
-	        #{mcpCd},
 	        #{prjManagerCd},
+	        #{mcpCd},
 			#{hireDate, jdbcType=DATE},
         	#{genderCd},
         	
