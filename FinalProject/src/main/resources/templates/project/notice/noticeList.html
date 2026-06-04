@@ -6,105 +6,53 @@
 <meta charset="UTF-8">
 <title>공지사항 관리</title>
 <style>
-#noticeListArea, #noticeDetailArea {
-	font-size: 0.875rem;
-}
+    .btn-sky { 
+        background-color: #20a0e0; 
+        border-color: #20a0e0; 
+        color: #fff; 
+        padding: 0.35rem 1.8rem; /* 세로 패딩을 0.35rem으로 줄여 높이 감소 */
+        font-weight: 600; 
+        margin-right: 20px; 
+    }
+    .btn-sky:hover { background-color: #1a8cc8; color: #fff; }
 
-#noticeListArea .table {
-	font-size: 0.85rem;
-}
-
-#noticeListArea .table th, #noticeListArea .table td {
-	padding: 0.5rem 0.75rem !important;
-}
-
-.bg-light-green {
-	background-color: #f1f8e9 !important;
-}
-
-.bg-mint-highlight {
-	background-color: #e8f5e9 !important;
-	border-left: 4px solid #66bb6a !important;
-}
-
-.text-success-dark {
-	color: #2e7d32 !important;
-}
-
-.notice-click-title {
-	cursor: pointer;
-	text-decoration: none;
-	color: #212529;
-	font-weight: 500;
-}
-
-.notice-click-title:hover {
-	color: #2e7d32;
-	text-decoration: underline;
-}
-
-.detail-view-box {
-	white-space: pre-wrap;
-	word-break: break-all;
-	min-height: 200px;
-	background-color: #ffffff;
-	border: 1px solid #dee2e6;
-	border-radius: 12px;
-	padding: 1.25rem;
-	line-height: 1.5;
-	color: #333;
-	font-size: 0.875rem;
-}
-
-.detail-label {
-	font-weight: 600;
-	color: #6c757d;
-	font-size: 0.8rem;
-	margin-bottom: 0.3rem;
-	display: block;
-}
-
-.pagination {
-	gap: 6px;
-	border: none;
-}
-
-.pagination .page-link {
-	border: 1px solid #dee2e6;
-	color: #555;
-	background-color: #fff;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-	text-decoration: none;
-	font-size: 0.8rem;
-}
-
-.pagination .page-item:first-child .page-link, .pagination .page-item:last-child .page-link
-	{
-	border-radius: 50px !important;
-	padding: 5px 14px;
-	font-weight: 500;
-}
-
-.pagination .page-item:not(:first-child):not(:last-child) .page-link {
-	border-radius: 6px !important;
-	min-width: 32px;
-	height: 32px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.pagination .page-item.active .page-link {
-	background-color: #66bb6a !important;
-	border-color: #66bb6a !important;
-	color: white !important;
-}
-
-.pagination .page-item.disabled .page-link {
-	background-color: #f8f9fa;
-	color: #ccc;
-	pointer-events: none;
-}
+    :root {
+        --primary-sky: #20a0e0;
+        --dark-sky: #1a8cc8;
+        --light-sky: #f5fbff;
+        --text-sky: #106699;
+        --muted-text: #6c757d;
+    }
+    #noticeListArea, #noticeDetailArea { font-size: 0.875rem; }
+    #noticeListArea .table { font-size: 0.85rem; }
+    #noticeListArea .table th, #noticeListArea .table td { padding: 0.75rem !important; }
+    .text-success-dark { color: var(--text-sky) !important; }
+    .bg-light-green { background-color: var(--light-sky) !important; }
+    .bg-mint-highlight {
+        background-color: #eef8ff !important;
+        border-left: 4px solid var(--primary-sky) !important;
+    }
+    .btn-outline-success { color: var(--primary-sky); border-color: var(--primary-sky); }
+    .btn-outline-success:hover { background-color: var(--primary-sky); color: #fff; }
+    .btn-outline-danger { border-color: #dc3545; color: #dc3545; }
+    .btn-outline-danger:hover { background-color: #dc3545; color: #fff; }
+    .notice-click-title { cursor: pointer; color: #212529; font-weight: 500; }
+    .notice-click-title:hover { color: var(--primary-sky); text-decoration: underline; }
+    .detail-view-box {
+        background-color: #fdfefe;
+        border: 1px solid #d1e7f0;
+        border-left: 4px solid var(--primary-sky);
+        padding: 1.5rem;
+        min-height: 250px;
+        line-height: 1.6;
+    }
+    .detail-label { font-weight: 600; color: var(--muted-text); font-size: 0.8rem; margin-bottom: 0.3rem; display: block; }
+    .table thead { border-top: 2px solid var(--primary-sky); background-color: var(--light-sky); }
+    .pagination .page-item.active .page-link {
+        background-color: var(--primary-sky) !important;
+        border-color: var(--primary-sky) !important;
+        color: white !important;
+    }
 </style>
 </head>
 <body>
@@ -113,8 +61,8 @@
 		<div id="noticeListArea">
 			<div class="d-flex justify-content-between align-items-center mb-3">
 				<h4 class="fw-bold text-success-dark mb-0">공지사항 관리</h4>
-				<button type="button" class="btn btn-success shadow-sm"
-					th:onclick="|location.href='@{/project/notice/register}'|">공지사항 등록</button>
+				<button type="button" class="btn btn-sky shadow-sm"
+        th:onclick="|location.href='@{/project/notice/register}'|">등록</button>
 			</div>
 
 			<div class="card border-0 shadow-sm mb-3">

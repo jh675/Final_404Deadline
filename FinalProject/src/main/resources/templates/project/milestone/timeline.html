@@ -14,12 +14,6 @@
   <style>
     .milestone-timeline-page {
       color: #172b4d;
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 11.5rem);
-      max-height: calc(100vh - 11.5rem);
-      min-height: 320px;
-      overflow: hidden;
     }
     .milestone-page-head {
       flex-shrink: 0;
@@ -36,15 +30,15 @@
       margin: 0;
       font-size: 0.875rem;
     }
-    .page-body {
+    .milestone-page-body {
       display: flex;
       align-items: stretch;
-      flex: 1;
-      min-height: 0;
       background: #fff;
       border: 1px solid #dfe1e6;
       border-radius: 6px;
       overflow: hidden;
+      /* 타임라인(400px)+헤더 높이에 맞춰 본문 영역 고정 → 왼쪽 목록 스크롤 가능 */
+      max-height: 32rem;
     }
     .milestone-sidebar {
       flex: 0 0 240px;
@@ -73,8 +67,11 @@
       list-style: none;
       margin: 0;
       padding: 8px;
+      flex: 1 1 auto;
+      min-height: 0;
       overflow-y: auto;
-      flex: 1;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
     .milestone-add-wrap {
       border-top: 1px solid #ebecf0;
@@ -134,8 +131,6 @@
       display: flex;
       flex-direction: column;
       min-width: 0;
-      min-height: 0;
-      overflow: hidden;
     }
     .timeline-header {
       display: flex;
@@ -269,8 +264,8 @@
       color: #5e6c84;
     }
     #timeline {
-      flex: 1;
-      min-height: 0;
+      min-height: 400px;
+      height: 400px;
       overflow: hidden;
     }
     .vis-labelset .issue-group-link {
@@ -404,17 +399,17 @@
       <p class="text-muted">마일스톤별 등록 이슈와 타임라인 이벤트를 확인·관리합니다.</p>
     </header>
 
-    <div class="page-body">
+    <div class="milestone-page-body">
     <aside class="milestone-sidebar">
       <h2>마일스톤</h2>
       <ul class="milestone-list" id="milestoneList"></ul>
       <div class="milestone-add-wrap"
            th:if="${@prjAuth.hasRole('ROLE_MILESTONE_CREATE') or @prjAuth.hasRole('ROLE_MILESTONE_UPDATE')}">
-        <button type="button" class="btn btn-outline-primary btn-sm"
+        <button type="button" class="btn btn-primary btn-sm"
                 th:if="${@prjAuth.hasRole('ROLE_MILESTONE_CREATE')}"
                 data-bs-toggle="modal" data-bs-target="#milestoneAddModal"
                 data-mode="add">마일스톤 추가</button>
-        <button type="button" class="btn btn-outline-secondary btn-sm"
+        <button type="button" class="btn btn-secondary btn-sm"
                 th:if="${@prjAuth.hasRole('ROLE_MILESTONE_UPDATE')}"
                 data-bs-toggle="modal" data-bs-target="#milestoneAddModal"
                 data-mode="edit">마일스톤 관리</button>
@@ -434,17 +429,17 @@
                     data-bs-toggle="modal" data-bs-target="#timelineAddModal">
               타임라인 추가
             </button>
-            <button type="button" class="btn btn-outline-primary btn-sm"
+            <button type="button" class="btn btn-primary btn-sm"
                     th:if="${@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE')}"
                     data-bs-toggle="modal" data-bs-target="#issueRegistModal">
               이슈 등록
             </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm"
+            <button type="button" class="btn btn-secondary btn-sm"
                     th:if="${@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE')}"
                     data-bs-toggle="modal" data-bs-target="#issueMoveModal">
               이슈 이동
             </button>
-            <button type="button" class="btn btn-outline-danger btn-sm"
+            <button type="button" class="btn btn-danger btn-sm"
                     th:if="${@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE')}"
                     data-bs-toggle="modal" data-bs-target="#issueDelistModal">
               이슈 해제
@@ -748,38 +743,19 @@
         return { groups: nextGroups, items: nextItems };
       }
 
-      var TIMELINE_AXIS_HEIGHT = 42;
-      var TIMELINE_ROW_HEIGHT = 36;
-      var timelineResizeObserver = null;
-
-      function calcTimelineContentHeight(groupCount) {
-        var n = Math.max(groupCount, 1);
-        return TIMELINE_AXIS_HEIGHT + n * TIMELINE_ROW_HEIGHT + Math.max(0, n - 1) + 4;
-      }
-
-      function syncTimelineViewport() {
-        if (!timeline || !container || container.hidden) return;
-        var viewH = container.clientHeight;
-        if (viewH <= 0) viewH = 200;
-        var groupCount = groups.length || 0;
-        var contentH = calcTimelineContentHeight(groupCount);
-        timeline.setOptions({
-          height: viewH + "px",
-          verticalScroll: contentH > viewH,
-        });
-        timeline.redraw();
-      }
+      var TIMELINE_HEIGHT = "400px";
 
       function ensureTimeline() {
         if (timeline) return;
         timeline = new vis.Timeline(container, items, groups, {
           stack: true,
+          height: TIMELINE_HEIGHT,
           zoomMin: 1000 * 60 * 60 * 6,
           zoomMax: 1000 * 60 * 60 * 24 * 31 * 6,
           editable: false,
           selectable: true,
           showCurrentTime: true,
-          verticalScroll: false,
+          verticalScroll: true,
           xss: {
             filterOptions: {
               whiteList: {
@@ -800,17 +776,6 @@
             openTimelineViewModal(it);
           }
         });
-
-        if (window.ResizeObserver) {
-          timelineResizeObserver = new ResizeObserver(function () {
-            syncTimelineViewport();
-          });
-          timelineResizeObserver.observe(container);
-        } else {
-          window.addEventListener("resize", syncTimelineViewport);
-        }
-
-        requestAnimationFrame(syncTimelineViewport);
       }
 
       function updatePeriodMarkers(ms) {
@@ -836,12 +801,16 @@
           hasEndMarker = true;
         }
 
-        requestAnimationFrame(function () {
-          var startBar = container.querySelector('.vis-custom-time[data-id="ms-start"]');
-          var endBar   = container.querySelector('.vis-custom-time[data-id="ms-end"]');
-          if (startBar) { startBar.classList.add("milestone-start"); if (s) startBar.setAttribute("data-label", "시작"); }
-          if (endBar)   { endBar.classList.add("milestone-end");     if (e) endBar.setAttribute("data-label", "마감"); }
-        });
+        var startBar = container.querySelector('.vis-custom-time[data-id="ms-start"]');
+        var endBar = container.querySelector('.vis-custom-time[data-id="ms-end"]');
+        if (startBar) {
+          startBar.classList.add("milestone-start");
+          if (s) startBar.setAttribute("data-label", "시작");
+        }
+        if (endBar) {
+          endBar.classList.add("milestone-end");
+          if (e) endBar.setAttribute("data-label", "마감");
+        }
       }
 
       function replaceDataSet(ds, nextRows) {
@@ -860,12 +829,7 @@
         replaceDataSet(groups, built.groups);
         replaceDataSet(items, built.items);
         timeline.setWindow(win.start, win.end, { animation: false });
-
-        // 마커는 다음 프레임 — 데이터+윈도우 갱신과 같은 redraw 사이클에 넣지 않음
-        requestAnimationFrame(function () {
-          updatePeriodMarkers(ms);
-          syncTimelineViewport();
-        });
+        updatePeriodMarkers(ms);
       }
 
       function setStatus(message) {

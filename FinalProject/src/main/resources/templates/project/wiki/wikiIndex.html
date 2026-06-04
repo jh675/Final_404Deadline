@@ -6,340 +6,47 @@
     <meta charset="UTF-8">
     <title>위키 색인</title>
     <th:block layout:fragment="head-content">
-        <style>
-            .wiki-index-page {
-                font-family: "Malgun Gothic", "맑은 고딕", -apple-system, sans-serif;
-                color: #333;
-            }
-
-            .wiki-index-layout {
-                display: flex;
-                gap: 24px;
-                align-items: flex-start;
-            }
-
-            .wiki-index-main {
-                flex: 1;
-                min-width: 0;
-            }
-
-            .wiki-index-sidebar {
-                width: 220px;
-                flex-shrink: 0;
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                background: #fafafa;
-                padding: 16px 18px;
-            }
-
-            .wiki-index-sidebar h3 {
-                font-size: 14px;
-                font-weight: 700;
-                margin: 0 0 12px;
-                padding-bottom: 8px;
-                border-bottom: 1px solid #e0e0e0;
-            }
-
-            .wiki-index-sidebar .index-title {
-                font-size: 12px;
-                font-weight: 600;
-                color: #666;
-                margin-bottom: 8px;
-            }
-
-            .wiki-index-sidebar ul {
-                list-style: none;
-                margin: 0;
-                padding: 0;
-            }
-
-            .wiki-index-sidebar li + li {
-                margin-top: 6px;
-            }
-
-            .wiki-index-sidebar a {
-                font-size: 13px;
-                color: #2e7d32;
-                text-decoration: none;
-            }
-
-            .wiki-index-sidebar a:hover,
-            .wiki-index-sidebar a.is-active {
-                text-decoration: underline;
-                font-weight: 600;
-            }
-
-            .wiki-index-header {
-                display: flex;
-                justify-content: space-between;
-                gap: 16px;
-                align-items: flex-start;
-                flex-wrap: wrap;
-                margin-bottom: 20px;
-            }
-
-            .wiki-index-kicker {
-                margin: 0 0 8px;
-                font-size: 12px;
-                font-weight: 700;
-                color: #2e7d32;
-            }
-
-            .wiki-index-title {
-                margin: 0;
-                font-size: 28px;
-                font-weight: 700;
-                line-height: 1.35;
-            }
-
-            .wiki-index-desc {
-                margin: 10px 0 0;
-                font-size: 14px;
-                color: #666;
-                line-height: 1.6;
-            }
-
-            .wiki-index-actions {
-                display: flex;
-                gap: 8px;
-                align-items: center;
-            }
-
-            .wiki-btn {
-                display: inline-block;
-                padding: 8px 20px;
-                border-radius: 50px;
-                font-size: 13px;
-                font-weight: 600;
-                text-decoration: none;
-                border: 1px solid transparent;
-                background: #fff;
-                cursor: pointer;
-            }
-
-            .wiki-btn-create {
-                border-color: #66bb6a;
-                color: #2e7d32;
-            }
-
-            .wiki-btn-create:hover {
-                background: #f1f8e9;
-                color: #1b5e20;
-            }
-
-            .wiki-index-tabs {
-                display: flex;
-                gap: 10px;
-                margin-bottom: 18px;
-                flex-wrap: wrap;
-            }
-
-            .wiki-index-tab {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                min-width: 92px;
-                padding: 8px 16px;
-                border: 1px solid #d5d5d5;
-                border-radius: 999px;
-                background: #fff;
-                font-size: 13px;
-                font-weight: 600;
-                color: #666;
-                text-decoration: none;
-            }
-
-            .wiki-index-tab:hover {
-                border-color: #66bb6a;
-                color: #2e7d32;
-            }
-
-            .wiki-index-tab.is-active {
-                background: #f1f8e9;
-                border-color: #66bb6a;
-                color: #1b5e20;
-            }
-
-            .wiki-index-card {
-                border: 1px solid #e0e0e0;
-                border-radius: 6px;
-                background: #fff;
-                padding: 24px 28px;
-                min-height: 320px;
-            }
-
-            .wiki-empty {
-                margin: 0;
-                color: #888;
-                font-size: 14px;
-            }
-
-            .wiki-tree-list {
-                list-style: none;
-                margin: 0;
-                padding-left: 24px;
-                position: relative;
-            }
-
-            .wiki-tree-root {
-                padding-left: 0;
-            }
-
-            .wiki-tree-item {
-                position: relative;
-                margin: 0;
-                padding: 8px 0 0 18px;
-            }
-
-            .wiki-tree-item::before {
-                content: "";
-                position: absolute;
-                left: 0;
-                top: 18px;
-                width: 10px;
-                border-top: 1px solid #d8d8d8;
-            }
-
-            .wiki-tree-list .wiki-tree-item::after {
-                content: "";
-                position: absolute;
-                left: 0;
-                top: 0;
-                bottom: 0;
-                border-left: 1px solid #e1e1e1;
-            }
-
-            .wiki-tree-list > .wiki-tree-item:last-child::after {
-                bottom: auto;
-                height: 18px;
-            }
-
-            .wiki-tree-root > .wiki-tree-item {
-                padding-left: 0;
-            }
-
-            .wiki-tree-root > .wiki-tree-item::before,
-            .wiki-tree-root > .wiki-tree-item::after {
-                display: none;
-            }
-
-            .wiki-tree-row {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                flex-wrap: wrap;
-                min-height: 28px;
-            }
-
-            .wiki-tree-link {
-                color: #222;
-                text-decoration: none;
-                font-size: 15px;
-                line-height: 1.5;
-            }
-
-            .wiki-tree-link:hover {
-                color: #2e7d32;
-                text-decoration: underline;
-            }
-
-            .wiki-tree-meta {
-                font-size: 12px;
-                color: #888;
-            }
-
-            .wiki-date-group + .wiki-date-group {
-                margin-top: 28px;
-                padding-top: 24px;
-                border-top: 1px solid #f0f0f0;
-            }
-
-            .wiki-date-heading {
-                margin: 0 0 14px;
-                font-size: 26px;
-                font-weight: 700;
-                line-height: 1.2;
-                color: #222;
-            }
-
-            .wiki-date-list {
-                margin: 0;
-                padding-left: 24px;
-            }
-
-            .wiki-date-list li + li {
-                margin-top: 10px;
-            }
-
-            .wiki-date-link {
-                color: #222;
-                text-decoration: underline;
-                font-size: 15px;
-            }
-
-            .wiki-date-link:hover {
-                color: #2e7d32;
-            }
-
-            .wiki-date-summary {
-                margin-top: 4px;
-                font-size: 13px;
-                color: #777;
-                line-height: 1.5;
-            }
-
-            @media (max-width: 768px) {
-                .wiki-index-layout {
-                    flex-direction: column;
-                }
-
-                .wiki-index-sidebar {
-                    width: 100%;
-                }
-
-                .wiki-index-card {
-                    padding: 20px;
-                }
-            }
-        </style>
+        <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+        <link rel="stylesheet" th:href="@{/css/project/wiki.css}" />
     </th:block>
 </head>
 <body>
-<div layout:fragment="content" class="wiki-index-page py-2"
+<div layout:fragment="content"
      th:with="currentType=${type != null and !#strings.isEmpty(type) ? type : 'title'}">
-
-    <div class="wiki-index-layout">
-        <div class="wiki-index-main">
-            <div class="wiki-index-header">
+<div class="wiki-shell">
+<div id="wrapper">
+    <div class="wiki-layout">
+        <div class="wiki-main">
+            <div class="wiki-page-head">
                 <div>
-                    <p class="wiki-index-kicker">위키 색인</p>
-                    <h1 class="wiki-index-title"
+                    <p class="wiki-page-kicker">위키 색인</p>
+                    <h1 class="wiki-page-head__title"
                         th:text="${currentType == 'date' ? '날짜별 색인' : '제목별 색인'}">제목별 색인</h1>
-                    <p class="wiki-index-desc"
+                    <p class="wiki-page-desc"
                        th:if="${currentType == 'title'}">
                         작성된 위키를 부모-자식 관계의 트리 구조로 보여줍니다.
                     </p>
-                    <p class="wiki-index-desc"
+                    <p class="wiki-page-desc"
                        th:if="${currentType == 'date'}">
                         작성일 또는 수정일 기준으로 묶어서 위키 목록을 보여줍니다.
                     </p>
                 </div>
-                <div class="wiki-index-actions">
-                    <a class="wiki-btn wiki-btn-create" th:href="@{/project/wiki/register}"
+                <div class="wiki-page-head__actions">
+                    <a class="btn btn-primary btn-sm" th:href="@{/project/wiki/register}"
                        th:if="${@prjAuth.hasRole('ROLE_WIKI_CREATE')}">작성</a>
                 </div>
             </div>
 
-            <nav class="wiki-index-tabs" aria-label="위키 색인 구분">
-                <a class="wiki-index-tab"
+            <nav class="wiki-tab-row" aria-label="위키 색인 구분">
+                <a class="wiki-tab-btn"
                    th:classappend="${currentType == 'title'} ? ' is-active' : ''"
                    th:href="@{/project/wiki/index(type='title')}">제목별</a>
-                <a class="wiki-index-tab"
+                <a class="wiki-tab-btn"
                    th:classappend="${currentType == 'date'} ? ' is-active' : ''"
                    th:href="@{/project/wiki/index(type='date')}">날짜별</a>
             </nav>
 
-            <section class="wiki-index-card" th:if="${currentType == 'title'}">
+            <section class="wiki-panel" th:if="${currentType == 'title'}">
                 <th:block th:if="${titleTree != null and !titleTree.isEmpty()}">
                     <th:block th:replace="~{::wikiTree(nodes=${titleTree}, root=${true})}"></th:block>
                 </th:block>
@@ -348,7 +55,7 @@
                 </p>
             </section>
 
-            <section class="wiki-index-card" th:if="${currentType == 'date'}">
+            <section class="wiki-panel" th:if="${currentType == 'date'}">
                 <th:block th:if="${dateGroups != null and !dateGroups.isEmpty()}">
                     <div class="wiki-date-group" th:each="group : ${dateGroups}">
                         <h2 class="wiki-date-heading"
@@ -371,9 +78,8 @@
             </section>
         </div>
 
-        <aside class="wiki-index-sidebar">
-            <h3>사이드바</h3>
-            <div class="index-title">색인</div>
+        <aside class="wiki-aside">
+            <h3 class="wiki-aside__title">색인</h3>
             <ul>
                 <li><a th:href="@{/project/wiki}">첫페이지</a></li>
                 <li>
@@ -387,6 +93,8 @@
             </ul>
         </aside>
     </div>
+</div>
+</div>
 
     <th:block th:fragment="wikiTree(nodes, root)">
         <ul class="wiki-tree-list"

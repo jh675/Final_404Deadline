@@ -3,617 +3,741 @@
 	xmlns:th="https://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layout/defaultLayout}">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Insert title here</title>
-    <style>
-   	/* 테이블 바디의 번호를 초기화 */
-	.numbered-table tbody {
-	    counter-reset: myIndex 0;
-	}
-	
-	/* 화면에 보이는(display되지 않는) 행만 숫자를 증가시키도록 수정 */
-	.numbered-table tbody tr:not([style*="display: none"]) {
-	    counter-increment: myIndex;
-	}
-	
-	/* 3. td 안의 가상 요소에 숫자를 표시 */
-	.row-index::before {
-	    content: counter(myIndex);
-	}
-	
-	.table td.text-center {
-	    vertical-align: middle; /* 높이 중앙 맞춤 */
-	}
-	
-	.btn-group {
-	    display: inline-flex;
-	    justify-content: center;
-	}
+<head>
+<meta charset="UTF-8" />
+<title>Insert title here</title>
 
-	.project-search-bar {
-	    display: flex;
-	    flex-wrap: wrap;
-	    gap: 1rem;
-	    margin: 1rem 0;
-	    align-items: flex-end;
-	    overflow: visible;
-	    position: relative;
-	    z-index: 100;
-	}
+<!-- Toast UI Grid CSS -->
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 
-	.search-autocomplete {
-	    position: relative;
-	    min-width: 260px;
-	    flex: 1;
-	    max-width: 360px;
-	    overflow: visible;
-	}
+<style>
+  .numbered-table tbody {
+    counter-reset: myIndex 0;
+  }
+  .numbered-table tbody tr:not([style*="display: none"]) {
+    counter-increment: myIndex;
+  }
+  .row-index::before {
+    content: counter(myIndex);
+  }
+  .table td.text-center {
+    vertical-align: middle;
+  }
+  .btn-group {
+    display: inline-flex;
+    justify-content: center;
+  }
+  .project-search-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1rem 0;
+    align-items: flex-end;
+    overflow: visible;
+    position: relative;
+    z-index: 100;
+  }
+  .search-autocomplete {
+    position: relative;
+    min-width: 260px;
+    flex: 1;
+    max-width: 360px;
+    overflow: visible;
+  }
+  .search-input-group {
+    display: flex;
+    gap: 0.35rem;
+  }
+  .search-input-group .form-control {
+    flex: 1;
+  }
+  .search-autocomplete label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .search-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    z-index: 9999;
+    max-height: 200px;
+    overflow-y: auto;
+    color: black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .search-dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+  }
+  .search-dropdown-item:hover {
+    background-color: #f8f9fa;
+  }
 
-	.search-input-group {
-	    display: flex;
-	    gap: 0.35rem;
-	}
+  /* 테이블 래퍼 */
+  .tui-grid-table-wrap {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    width: 100%;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+  }
 
-	.search-input-group .form-control {
-	    flex: 1;
-	}
+  /* 테이블 자체 */
+  .tui-style-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    table-layout: auto;
+  }
 
-	.search-autocomplete label {
-	    display: block;
-	    margin-bottom: 0.25rem;
-	    font-size: 0.875rem;
-	    font-weight: 500;
-	}
+  /* 헤더 행 */
+  .tui-style-table thead tr {
+    background-color: #f7f7f7;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  .tui-style-table thead th {
+    padding: 10px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+    text-align: center;
+    border-right: 1px solid #e0e0e0;
+    white-space: nowrap;
+    user-select: none;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #f7f7f7;
+  }
+  .tui-style-table thead th:last-child {
+    border-right: none;
+  }
 
-	.search-dropdown {
-	    display: none;
-	    position: absolute;
-	    top: 100%;
-	    left: 0;
-	    width: 100%;
-	    background: white;
-	    border: 1px solid #ccc;
-	    z-index: 9999;
-	    max-height: 200px;
-	    overflow-y: auto;
-	    color: black;
-	    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-	}
+  /* 바디 행 */
+  .tui-style-table tbody tr {
+    border-bottom: 1px solid #ebebeb;
+    transition: background-color 0.1s;
+  }
+  .tui-style-table tbody tr:last-child {
+    border-bottom: none;
+  }
+  .tui-style-table tbody tr:hover {
+    background-color: #f0f6ff;
+  }
 
-	.search-dropdown-item {
-	    padding: 8px 12px;
-	    cursor: pointer;
-	    border-bottom: 1px solid #eee;
-	}
+  /* 바디 셀 */
+  .tui-style-table tbody td,
+  .tui-style-table tbody th {
+    padding: 9px 12px;
+    font-size: 13px;
+    color: #333;
+    border-right: 1px solid #ebebeb;
+    vertical-align: middle;
+    font-weight: normal;
+  }
+  .tui-style-table tbody td:last-child,
+  .tui-style-table tbody th:last-child {
+    border-right: none;
+  }
 
-	.search-dropdown-item:hover {
-	    background-color: #f8f9fa;
-	}
-    </style>
-  </head>
-  <body>
-  <div layout:fragment="content">
-    <h2>프로젝트</h2>
-    <div th:if="${errorMsg}" id="errorToast" class="toast align-items-center text-bg-danger border-0 position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true">
-	    <div class="d-flex">
-	        <div class="toast-body" th:text="${errorMsg}">
-	            이미 사용중인 식별자입니다.
-	        </div>
-	        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-	    </div>
-	</div>
-	
-	<div th:if="${successMsg}" id="successToast" class="toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true">
-	    <div class="d-flex">
-	        <div class="toast-body" th:text="${successMsg}">
-	            복구 성공했습니다.
-	        </div>
-	        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-	    </div>
-	</div>
-    
-    <a th:if="${#authentication.principal.adminNm == '기업관리자' || #authentication.principal.statusCd == '01ACTIVE'}"
-       href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
-    
-    <!-- 1. id와 onchange 이벤트 추가 -->
-    <select id="projectStatusSelect" onchange="filterProjects()">
-	    <option value="progress">진행중인 프로젝트</option>
-	    <option value="complete">종료된 프로젝트</option>
-	</select>
+  /* No 컬럼 */
+  .tui-style-table .row-index {
+    text-align: center;
+    color: #888;
+    width: 48px;
+  }
 
-	<!-- 검색용 데이터 (Thymeleaf → DOM, JS에서 읽음) -->
-	<div id="searchDataStore" class="d-none" aria-hidden="true">
-	    <span th:each="c : ${companyList}" class="search-company-data"
-	          th:attr="data-biz-no=${c.bizNo}, data-name=${c.companyName}"></span>
-	    <span th:each="p : ${projectinfo.list}" class="search-project-data"
-	          th:attr="data-prj-name=${p.prjName}, data-biz-no=${p.bizNo}"></span>
-	</div>
+  /* 프로젝트명 링크 */
+  .tui-style-table tbody td a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .tui-style-table tbody td a:hover {
+    text-decoration: underline;
+  }
 
-	<div class="project-search-bar">
-	    <div class="search-autocomplete"
-	         th:if="${#authentication.principal.adminNm == '시스템관리자'}">
-	        <label for="companySearch">회사명</label>
-	        <input type="text" id="companySearch" class="form-control form-control-sm"
-	               placeholder="회사명 입력..." autocomplete="off">
-	        <input type="hidden" id="selectedBizNo">
-	        <div id="companyDropdown" class="search-dropdown"></div>
-	    </div>
-	    <div class="search-autocomplete">
-	        <label for="projectSearch">프로젝트명</label>
-	        <div class="search-input-group">
-	            <input type="text" id="projectSearch" class="form-control form-control-sm"
-	                   placeholder="프로젝트명 입력..." autocomplete="off">
-	            <button type="button" id="listSearchBtn" class="btn btn-sm btn-primary">검색</button>
-	        </div>
-	        <div id="projectDropdown" class="search-dropdown"></div>
-	    </div>
-	</div>
+  /* 들여쓰기 화살표 */
+  .prj-indent {
+    color: #aaa;
+    margin-right: 2px;
+  }
 
-    <div style="width: 100%;">
-    <table border="1" class="table numbered-table">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>프로젝트명</th>
-          <th>식별자</th>
-          <th th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">회사명</th>
-          <th>설명</th>
-          <th>생성일</th>
-          <th>종료일</th>
-          <th class="text-center" th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">설정</th>
-        </tr>
-      </thead>
-<tbody>
-    <tr th:each="pro : ${projectinfo.list}"
-        th:if="${#authentication.principal.adminNm == '시스템관리자'
-            or (#authentication.principal.adminNm == '사원' and pro.prjHide == 'N')
-            or (pro.bizNo == #authentication.principal.bizNo and pro.prjHide == 'N')}"
-        th:data-status="${pro.prjStatusCd == '04PROSTAT' || pro.prjStatusCd == '05PROSTAT' ? 'complete' : 'progress'}"
-        th:attr="data-prj-name=${pro.prjName}, data-biz-no=${pro.bizNo}, data-par-id=${pro.prjParId}, data-prj-id=${pro.id}">
-      <td class="row-index"></td>
-      <td>
-	      <span th:if="${pro.prjParId != null}" class="prj-indent"></span>
-	      <a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a>
-	  </td>
-      <td th:text="${pro.prjIdentifier}"></td>
-      <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
-          <th:block th:each="c : ${companyList}">
-              <span th:if="${pro.bizNo == c.bizNo}" th:text="${c.companyName}"></span>
-          </th:block>
-      </td>
-      <td th:text="${pro.prjDesc}"></td>
-      <td th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"></td>
-      <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
-      <td class="text-center" th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">
-          <div class="btn-group dropend">
-              <button type="button" class="btn btn-sm btn-outline-secondary"
-                  data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false">
-                  ...
-              </button>
-              <ul class="dropdown-menu shadow-sm">
-              	  <li><a class="dropdown-item" href="#"
-                         th:data-id="${pro.id}"
-                         onclick="openReprojectModal(this); return false;"
-                         data-bs-toggle="modal" data-bs-target="#reproject"
-                         th:if="${#authentication.principal.adminNm == '시스템관리자' and pro.prjHide == 'Y'}">복구</a></li>
-                  <li><a class="dropdown-item" href="#"
-                         th:data-id="${pro.id}"
-                         onclick="editProject(this); return false;">수정</a></li>
-                  <li><a class="dropdown-item" href="#"
-                         th:data-id="${pro.id}"
-                         onclick="copyProject(this); return false;">복사</a></li>
-                  <li><hr class="dropdown-divider" /></li>
-                  <li><button type="button" class="dropdown-item text-danger"
-                              data-bs-toggle="modal"
-                              data-bs-target="#deleteproject"
-                              th:data-id="${pro.id}"
-                              onclick="openDeleteModal(this)">삭제</button></li>
-              </ul>
-          </div>
-      </td>
-    </tr>
-</tbody>
-    </table>
-    		<div th:replace="~{management/modal/reprojectmodal :: reproject}"></div>
-            <div th:replace="~{management/modal/deleteprojectmodal :: deleteproject}"></div>
-	</div>
-	
-    
-    
-    <script>
-    var dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-    dropdownElements.forEach(function(el) {
-      new bootstrap.Dropdown(el);
-    });
-    
-    function copyProject(el) {
-        const id = el.getAttribute('data-id');
-        location.href = '/management/projectcreate?copyFrom=' + id;
-    }
-    
-    function editProject(el) {
-        const id = el.getAttribute('data-id');
-        location.href = '/management/projectupdate?id=' + id;
-    }
-    
-    function calcDepthAndIndent() {
-        const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-id]");
-        
-        // id → depth 맵 구성
-        const depthMap = {};
-        rows.forEach(row => {
-            const prjId = row.getAttribute("data-prj-id");
-            const parId = row.getAttribute("data-par-id");
-            if (!parId) {
-                depthMap[prjId] = 0;
-            }
-        });
+  /* 설정 버튼 셀 */
+  .tui-style-table td.text-center {
+    text-align: center;
+  }
 
-        // 부모 depth 기반으로 자식 depth 계산 (반복)
-        let changed = true;
-        while (changed) {
-            changed = false;
-            rows.forEach(row => {
-                const prjId = row.getAttribute("data-prj-id");
-                const parId = row.getAttribute("data-par-id");
-                if (parId && depthMap[parId] !== undefined && depthMap[prjId] === undefined) {
-                    depthMap[prjId] = depthMap[parId] + 1;
-                    changed = true;
-                }
-            });
-        }
+  /* 커스텀 컨텍스트 드롭다운 */
+  #ctxMenu {
+    position: fixed;
+    z-index: 9999;
+    display: none;
+    min-width: 100px;
+  }
 
-        // depth에 따라 들여쓰기 적용
-        rows.forEach(row => {
-            const prjId = row.getAttribute("data-prj-id");
-            const depth = depthMap[prjId] || 0;
-            const indent = row.querySelector('.prj-indent');
-            if (indent && depth > 0) {
-                indent.textContent = '↳ ';
-                indent.style.marginLeft = (depth * 20) + 'px';
-            }
-        });
-    }
-    </script>
-    
-    <!-- 3. 필터링 및 검색 자바스크립트 -->
-    <script th:inline="javascript">
-      let selectedBizNo = '';
-      let selectedPrjName = '';
-      let appliedBizNo = '';
-      let appliedPrjName = '';
-      let appliedCompanyTerm = '';
-      let appliedProjectTerm = '';
-      let companyData = [];
-      let projectData = [];
-      let searchTimer = null;
-      const isAdmin = /*[[${#authentication.principal.adminNm}]]*/ '';
-	  const userBizNo = /*[[${#authentication.principal.bizNo}]]*/ '';
+  /* ── 상태 필터 커스텀 드롭다운 ── */
+  .status-filter-wrap {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+  }
+  .status-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: #fff;
+    border: 1px solid #c9e0ef;
+    border-radius: 5px;
+    font-size: 13px;
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    color: #1a2f3f;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .status-filter-trigger:hover {
+    border-color: #1b87c9;
+    color: #1b87c9;
+  }
+  .status-filter-trigger.open {
+    border-color: #1b87c9;
+    box-shadow: 0 0 0 3px rgba(27,135,201,0.13);
+    color: #1b87c9;
+  }
+  .status-filter-trigger svg {
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .status-filter-trigger.open svg {
+    transform: rotate(180deg);
+  }
+  .status-filter-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 100%;
+    background: #fff;
+    border: 1px solid #1b87c9;
+    border-radius: 5px;
+    z-index: 9999;
+    box-shadow: 0 6px 16px rgba(27,135,201,0.13);
+    overflow: hidden;
+  }
+  .status-filter-dropdown.open { display: block; }
+  .status-filter-item {
+    padding: 9px 14px;
+    font-size: 13px;
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    color: #1a2f3f;
+    cursor: pointer;
+    border-bottom: 1px solid #e8f4fb;
+    white-space: nowrap;
+    transition: background 0.1s;
+  }
+  .status-filter-item:last-child { border-bottom: none; }
+  .status-filter-item:hover {
+    background: #e8f4fb;
+    color: #1b87c9;
+  }
+  .status-filter-item.selected {
+    background: #e8f4fb;
+    color: #1b87c9;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div layout:fragment="content">
+  <h2>프로젝트</h2>
 
-	  
-	  function debounce(fn, delay) { // ← 추가
-		    return function(...args) {
-		        clearTimeout(searchTimer);
-		        searchTimer = setTimeout(() => fn.apply(this, args), delay);
-		    };
-		}
-	  
-      function loadSearchData() {
-        companyData = Array.from(document.querySelectorAll('.search-company-data')).map(el => ({
-          bizNo: el.getAttribute('data-biz-no') || '',
-          companyName: el.getAttribute('data-name') || ''
-        }));
-        projectData = Array.from(document.querySelectorAll('.search-project-data')).map(el => ({
-          prjName: el.getAttribute('data-prj-name') || '',
-          bizNo: el.getAttribute('data-biz-no') || ''
-        }));
-      }
-
-      function includesTerm(text, term) {
-        if (!text || !term) return false;
-        return text.toLowerCase().includes(term.toLowerCase());
-      }
-
-      function applyAllFilters() {
-    	    const selectValue = document.getElementById("projectStatusSelect").value;
-    	    const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-name]");
-
-    	    // 1단계: 기본 매칭
-    	    const matchedIds = new Set();
-    	    rows.forEach(row => {
-    	        const status = row.getAttribute("data-status");
-    	        const bizNo = row.getAttribute("data-biz-no") || '';
-    	        const prjName = row.getAttribute("data-prj-name") || '';
-
-    	        let matched = status === selectValue;
-
-    	        if (appliedBizNo) {
-    	            matched = matched && bizNo === appliedBizNo;
-    	        } else if (appliedCompanyTerm) {
-    	            const matchedBizNos = companyData
-    	                .filter(c => includesTerm(c.companyName, appliedCompanyTerm))
-    	                .map(c => c.bizNo);
-    	            matched = matched && matchedBizNos.includes(bizNo);
-    	        }
-
-    	        if (appliedPrjName) {
-    	            matched = matched && prjName === appliedPrjName;
-    	        } else if (appliedProjectTerm) {
-    	            matched = matched && includesTerm(prjName, appliedProjectTerm);
-    	        }
-
-    	        row._matched = matched;
-    	        if (matched) matchedIds.add(row.getAttribute("data-prj-id"));
-    	    });
-
-    	    // 2단계: 매칭된 행의 부모 ID 추가 (중첩루프 없이)
-    	    rows.forEach(row => {
-    	        if (!row._matched) return;
-    	        let parId = row.getAttribute("data-par-id");
-    	        while (parId) {
-    	            if (matchedIds.has(parId)) break;
-    	            matchedIds.add(parId);
-    	            // 부모 행 찾기
-    	            const parentRow = Array.from(rows).find(r => r.getAttribute("data-prj-id") === parId);
-    	            if (!parentRow) break;
-    	            parentRow._matched = true;
-    	            parId = parentRow.getAttribute("data-par-id");
-    	        }
-    	    });
-
-    	    // 3단계: 매칭된 부모의 자식도 표시
-    	    rows.forEach(row => {
-    	        const parId = row.getAttribute("data-par-id");
-    	        if (!row._matched && parId && matchedIds.has(parId)) {
-    	            row._matched = true;
-    	        }
-    	    });
-
-    	    // 4단계: 표시 여부 결정
-    	    rows.forEach(row => {
-    	        row.style.display = row._matched ? "" : "none";
-    	    });
-
-    	    calcDepthAndIndent();
-    	}
-
-      function filterProjects() {
-        applyAllFilters();
-      }
-
-      function executeListSearch() {
-        const companyInput = document.getElementById('companySearch');
-        const projectInput = document.getElementById('projectSearch');
-
-        appliedCompanyTerm = companyInput ? companyInput.value.trim() : '';
-        appliedProjectTerm = projectInput ? projectInput.value.trim() : '';
-        appliedBizNo = selectedBizNo;
-        appliedPrjName = selectedPrjName;
-
-        applyAllFilters();
-      }
-
-      function renderDropdown(dropdownEl, matches, inputEl, onSelect) {
-        dropdownEl.innerHTML = '';
-        if (!matches.length) {
-          const empty = document.createElement('div');
-          empty.className = 'search-dropdown-item text-muted';
-          empty.textContent = '검색 결과가 없습니다.';
-          dropdownEl.appendChild(empty);
-          dropdownEl.style.display = 'block';
-          return;
-        }
-        matches.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'search-dropdown-item';
-          div.textContent = item.label;
-          div.addEventListener('click', function() {
-            inputEl.value = item.label;
-            onSelect(item);
-            dropdownEl.style.display = 'none';
-          });
-          dropdownEl.appendChild(div);
-        });
-        dropdownEl.style.display = 'block';
-      }
-
-      function showAutocomplete(inputEl, dropdownEl, getItems, onSelect) {
-        if (!inputEl || !dropdownEl) return;
-
-        const term = inputEl.value.trim();
-        onSelect(null);
-
-        if (term.length < 1) {
-          dropdownEl.style.display = 'none';
-          return;
-        }
-        
-        
-        
-	    if (projectSearch && projectDropdown) {
-	    	  setupAutocomplete(
-	    	    projectSearch,
-	    	    projectDropdown,
-	    	    function(term) {
-	    	      const seen = new Set();
-	    	      
-	    	      return projectData
-	    	        .filter(p => includesTerm(p.prjName, term))
-	    	        .filter(p => {
-	    	          if (isAdmin !== '시스템관리자') {
-	    	            return p.bizNo === userBizNo;
-	    	          }
-	    	          return true;
-	    	        })
-	    	        .filter(p => {
-	    	          if (seen.has(p.prjName)) return false;
-	    	          seen.add(p.prjName);
-	    	          return true;
-	    	        })
-	    	        .map(p => ({ label: p.prjName, prjName: p.prjName }));
-	    	    },
-	    	    function(item) {
-	    	      selectedPrjName = item ? item.prjName : '';
-	    	    }
-	    	  );
-	    	}
-
-        renderDropdown(dropdownEl, getItems(term), inputEl, onSelect);
-      }
-
-      function setupAutocomplete(inputEl, dropdownEl, getItems, onSelect) {
-    	    if (!inputEl || !dropdownEl) return;
-
-    	    const debouncedSearch = debounce(function(value) {
-    	        onSelect(null);
-    	        if (value.trim().length < 1) {
-    	            dropdownEl.style.display = 'none';
-    	            return;
-    	        }
-    	        showAutocomplete(inputEl, dropdownEl, getItems, onSelect);
-    	    }, 300);
-
-    	    inputEl.addEventListener('input', function() {
-    	        debouncedSearch(this.value);
-    	    });
-    	}
-      
-      function openReprojectModal(el) {
-    	    const id = el.getAttribute('data-id');
-    	    console.log("복구 ID:", id);  // 이게 찍히는지 확인
-    	    document.getElementById('reprojectId').value = id;
-    	}
-
-      function openDeleteModal(button) {
-    	    // 1. 버튼에 저장된 프로젝트 ID(숫자)를 가져옵니다.
-    	    const projectId = button.getAttribute("data-id");
-    	    
-    	    // 2. 모달창 내부에 있는 하나뿐인 input 태그를 찾습니다.
-    	    const hiddenInput = document.getElementById("projectHide");
-    	    
-    	    if (hiddenInput) {
-    	        // 3. 비어있던 value에 실제 ID 숫자를 대입합니다.
-    	        hiddenInput.value = projectId;
-    	        console.log("선택된 프로젝트 ID 주입 완료 : ", projectId);
-    	    }
-    	}
-      document.addEventListener('DOMContentLoaded', function() {
-        loadSearchData();
-        calcDepthAndIndent();
-        
-        const companySearch = document.getElementById('companySearch');
-        const companyDropdown = document.getElementById('companyDropdown');
-        const selectedBizNoInput = document.getElementById('selectedBizNo');
-
-        if (companySearch && companyDropdown) {
-          setupAutocomplete(
-            companySearch,
-            companyDropdown,
-            function(term) {
-              const seen = new Set();
-              return companyData
-                .filter(c => includesTerm(c.companyName, term))
-                .filter(c => {
-                  if (seen.has(c.bizNo)) return false;
-                  seen.add(c.bizNo);
-                  return true;
-                })
-                .map(c => ({ label: c.companyName, bizNo: c.bizNo }));
-            },
-            function(item) {
-              if (item) {
-                selectedBizNo = item.bizNo;
-                if (selectedBizNoInput) selectedBizNoInput.value = item.bizNo;
-              } else {
-                selectedBizNo = '';
-                if (selectedBizNoInput) selectedBizNoInput.value = '';
-              }
-            }
-          );
-          
-        }
-
-        const projectSearch = document.getElementById('projectSearch');
-        const projectDropdown = document.getElementById('projectDropdown');
-
-        if (projectSearch && projectDropdown) {
-          setupAutocomplete(
-            projectSearch,
-            projectDropdown,
-            function(term) {
-              const seen = new Set();
-              return projectData
-                .filter(p => includesTerm(p.prjName, term))
-                .filter(p => {
-                  if (seen.has(p.prjName)) return false;
-                  seen.add(p.prjName);
-                  return true;
-                })
-                .map(p => ({ label: p.prjName, prjName: p.prjName }));
-            },
-            function(item) {
-              selectedPrjName = item ? item.prjName : '';
-            }
-          );
-        }
-
-        const listSearchBtn = document.getElementById('listSearchBtn');
-        if (listSearchBtn) {
-          listSearchBtn.addEventListener('click', executeListSearch);
-        }
-
-        const searchInputs = [companySearch, projectSearch].filter(Boolean);
-        searchInputs.forEach(input => {
-          input.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              executeListSearch();
-            }
-          });
-        });
-        document.addEventListener('click', function(e) {
-            const companySearch = document.getElementById('companySearch');
-            const companyDropdown = document.getElementById('companyDropdown');
-            const projectSearch = document.getElementById('projectSearch');
-            const projectDropdown = document.getElementById('projectDropdown');
-            
-            if (companySearch && companyDropdown) {
-                if (!companySearch.contains(e.target) && !companyDropdown.contains(e.target)) {
-                    companyDropdown.style.display = 'none';
-                }
-            }
-            if (projectSearch && projectDropdown) {
-                if (!projectSearch.contains(e.target) && !projectDropdown.contains(e.target)) {
-                    projectDropdown.style.display = 'none';
-                }
-            }
-        });
-        
-        applyAllFilters();
-      });
-	
-      const serverMessage = /*[[${msg}]]*/ null;
-      if (serverMessage) {
-        alert(serverMessage);
-      }
-      
-      document.addEventListener("DOMContentLoaded", function () {
-          // 에러 토스트가 존재하면 실행
-          const errorToastEl = document.getElementById('errorToast');
-          if (errorToastEl) {
-              const errorToast = new bootstrap.Toast(errorToastEl);
-              errorToast.show();
-          }
-
-          // 성공 토스트가 존재하면 실행
-          const successToastEl = document.getElementById('successToast');
-          if (successToastEl) {
-              const successToast = new bootstrap.Toast(successToastEl);
-              successToast.show();
-          }
-      });
-    </script>
+  <!-- 토스트 메시지 -->
+  <div th:if="${errorMsg}" id="errorToast"
+       class="toast align-items-center text-bg-danger border-0 position-fixed bottom-0 end-0 m-3"
+       role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" th:text="${errorMsg}">이미 사용중인 식별자입니다.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
-  </body>
+  </div>
+  <div th:if="${successMsg}" id="successToast"
+       class="toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3"
+       role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" th:text="${successMsg}">복구 성공했습니다.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+
+  <a th:if="${#authentication.principal.adminNm == '기업관리자' || #authentication.principal.statusCd == '01ACTIVE'}"
+     href="/management/projectcreate" class="btn btn-primary">프로젝트 생성</a>
+
+  <div class="status-filter-wrap">
+    <div class="status-filter-trigger" id="statusFilterTrigger">
+      <span id="statusFilterLabel">진행중인 프로젝트</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+    <div class="status-filter-dropdown" id="statusFilterDropdown">
+      <div class="status-filter-item selected" data-value="progress">진행중인 프로젝트</div>
+      <div class="status-filter-item" data-value="complete">종료된 프로젝트</div>
+    </div>
+    <select id="projectStatusSelect" style="display:none">
+      <option value="progress">진행중인 프로젝트</option>
+      <option value="complete">종료된 프로젝트</option>
+    </select>
+  </div>
+
+  <!-- 검색용 데이터 store -->
+  <div id="searchDataStore" class="d-none" aria-hidden="true">
+    <span th:each="c : ${companyList}" class="search-company-data"
+          th:attr="data-biz-no=${c.bizNo}, data-name=${c.companyName}"></span>
+    <span th:each="p : ${projectinfo.list}" class="search-project-data"
+          th:attr="data-prj-name=${p.prjName}, data-biz-no=${p.bizNo}"></span>
+  </div>
+
+  <!-- 검색바 -->
+  <div class="project-search-bar">
+    <div class="search-autocomplete"
+         th:if="${#authentication.principal.adminNm == '시스템관리자'}">
+      <label for="companySearch">회사명</label>
+      <input type="text" id="companySearch" class="form-control form-control-sm"
+             placeholder="회사명 입력..." autocomplete="off">
+      <input type="hidden" id="selectedBizNo">
+      <div id="companyDropdown" class="search-dropdown"></div>
+    </div>
+    <div class="search-autocomplete">
+      <label for="projectSearch">프로젝트명</label>
+      <div class="search-input-group">
+        <input type="text" id="projectSearch" class="form-control form-control-sm"
+               placeholder="프로젝트명 입력..." autocomplete="off">
+        <button type="button" id="listSearchBtn" class="btn btn-sm btn-primary">검색</button>
+      </div>
+      <div id="projectDropdown" class="search-dropdown"></div>
+    </div>
+  </div>
+
+  <!-- 테이블 -->
+  <div style="width: 100%;">
+    <div class="tui-grid-table-wrap">
+      <table class="tui-style-table numbered-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>프로젝트명</th>
+            <th>식별자</th>
+            <th th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">회사명</th>
+            <th>설명</th>
+            <th>생성일</th>
+            <th>종료일</th>
+            <th class="text-center"
+                th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">설정</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="pro : ${projectinfo.list}"
+              th:if="${#authentication.principal.adminNm == '시스템관리자'
+                  or (#authentication.principal.adminNm == '사원' and pro.prjHide == 'N')
+                  or (pro.bizNo == #authentication.principal.bizNo and pro.prjHide == 'N')}"
+              th:data-status="${pro.prjStatusCd == '04PROSTAT' || pro.prjStatusCd == '05PROSTAT' ? 'complete' : 'progress'}"
+              th:attr="data-prj-name=${pro.prjName}, data-biz-no=${pro.bizNo}, data-par-id=${pro.prjParId}, data-prj-id=${pro.id}">
+            <td class="row-index"></td>
+            <td>
+              <span th:if="${pro.prjParId != null}" class="prj-indent"></span>
+              <a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a>
+            </td>
+            <td th:text="${pro.prjIdentifier}"></td>
+            <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
+              <th:block th:each="c : ${companyList}">
+                <span th:if="${pro.bizNo == c.bizNo}" th:text="${c.companyName}"></span>
+              </th:block>
+            </td>
+            <td th:text="${pro.prjDesc}"></td>
+            <td th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"></td>
+            <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
+            <td class="text-center"
+                th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자'}">
+              <!-- 커스텀 컨텍스트 버튼 -->
+              <button type="button" class="btn btn-sm btn-outline-secondary ctx-btn"
+                      th:data-id="${pro.id}"
+                      th:data-hide="${pro.prjHide}"
+                      th:data-is-admin="${#authentication.principal.adminNm == '시스템관리자' ? 'Y' : 'N'}">
+                ...
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div th:replace="~{management/modal/reprojectmodal :: reproject}"></div>
+    <div th:replace="~{management/modal/deleteprojectmodal :: deleteproject}"></div>
+  </div>
+
+  <!-- 커스텀 드롭다운 메뉴 (body 기준 fixed 렌더링) -->
+  <ul id="ctxMenu" class="dropdown-menu shadow-sm"></ul>
+
+  <script>
+    /* ── 커스텀 컨텍스트 드롭다운 ── */
+    (function () {
+      const menu = document.getElementById('ctxMenu');
+
+      document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.ctx-btn');
+        if (btn) {
+          e.stopPropagation();
+          const id      = btn.getAttribute('data-id');
+          const isAdmin = btn.getAttribute('data-is-admin') === 'Y';
+          const isHide  = btn.getAttribute('data-hide') === 'Y';
+
+          menu.innerHTML = '';
+          if (isAdmin && isHide) {
+            menu.innerHTML += `<li><a class="dropdown-item" href="#"
+              onclick="doReproject('${id}'); return false;">복구</a></li>`;
+          }
+          menu.innerHTML += `<li><a class="dropdown-item" href="#"
+            onclick="editProject('${id}'); return false;">수정</a></li>`;
+          menu.innerHTML += `<li><a class="dropdown-item" href="#"
+            onclick="copyProject('${id}'); return false;">복사</a></li>`;
+          menu.innerHTML += `<li><hr class="dropdown-divider"></li>`;
+          menu.innerHTML += `<li><button class="dropdown-item text-danger"
+            onclick="doDelete('${id}')">삭제</button></li>`;
+
+          // 위치 계산 (뷰포트 fixed 기준)
+          menu.style.display = 'block';
+          const rect   = btn.getBoundingClientRect();
+          const menuW  = menu.offsetWidth;
+          const menuH  = menu.offsetHeight;
+          let top  = rect.bottom + 2;
+          let left = rect.right - menuW;
+          if (top + menuH > window.innerHeight) top = rect.top - menuH - 2;
+          if (left < 0) left = rect.left;
+          menu.style.top  = top  + 'px';
+          menu.style.left = left + 'px';
+        } else {
+          menu.style.display = 'none';
+        }
+      });
+
+      // 스크롤·리사이즈 시 닫기
+      window.addEventListener('scroll', () => { menu.style.display = 'none'; }, true);
+      window.addEventListener('resize', () => { menu.style.display = 'none'; });
+    })();
+
+    function editProject(id)   { location.href = '/management/projectupdate?id=' + id; }
+    function copyProject(id)   { location.href = '/management/projectcreate?copyFrom=' + id; }
+    function doReproject(id) {
+      document.getElementById('reprojectId').value = id;
+      new bootstrap.Modal(document.getElementById('reproject')).show();
+    }
+    function doDelete(id) {
+      const el = document.getElementById('projectHide');
+      if (el) el.value = id;
+      new bootstrap.Modal(document.getElementById('deleteproject')).show();
+    }
+
+    /* ── 깊이/들여쓰기 계산 ── */
+    function calcDepthAndIndent() {
+      const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-id]");
+      const depthMap = {};
+      rows.forEach(row => {
+        const prjId = row.getAttribute("data-prj-id");
+        const parId = row.getAttribute("data-par-id");
+        if (!parId) depthMap[prjId] = 0;
+      });
+      let changed = true;
+      while (changed) {
+        changed = false;
+        rows.forEach(row => {
+          const prjId = row.getAttribute("data-prj-id");
+          const parId = row.getAttribute("data-par-id");
+          if (parId && depthMap[parId] !== undefined && depthMap[prjId] === undefined) {
+            depthMap[prjId] = depthMap[parId] + 1;
+            changed = true;
+          }
+        });
+      }
+      rows.forEach(row => {
+        const depth  = depthMap[row.getAttribute("data-prj-id")] || 0;
+        const indent = row.querySelector('.prj-indent');
+        if (indent && depth > 0) {
+          indent.textContent = '↳ ';
+          indent.style.marginLeft = (depth * 20) + 'px';
+        }
+      });
+    }
+  </script>
+
+  <script th:inline="javascript">
+    let selectedBizNo = '';
+    let selectedPrjName = '';
+    let appliedBizNo = '';
+    let appliedPrjName = '';
+    let appliedCompanyTerm = '';
+    let appliedProjectTerm = '';
+    let companyData = [];
+    let projectData = [];
+    let searchTimer = null;
+    const isAdmin   = /*[[${#authentication.principal.adminNm}]]*/ '';
+    const userBizNo = /*[[${#authentication.principal.bizNo}]]*/ '';
+
+    function debounce(fn, delay) {
+      return function (...args) {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    function loadSearchData() {
+      companyData = Array.from(document.querySelectorAll('.search-company-data')).map(el => ({
+        bizNo: el.getAttribute('data-biz-no') || '',
+        companyName: el.getAttribute('data-name') || ''
+      }));
+      projectData = Array.from(document.querySelectorAll('.search-project-data')).map(el => ({
+        prjName: el.getAttribute('data-prj-name') || '',
+        bizNo: el.getAttribute('data-biz-no') || ''
+      }));
+    }
+
+    function includesTerm(text, term) {
+      if (!text || !term) return false;
+      return text.toLowerCase().includes(term.toLowerCase());
+    }
+
+    function applyAllFilters() {
+      const selectValue = document.getElementById("projectStatusSelect").value;
+      const rows = document.querySelectorAll(".numbered-table tbody tr[data-prj-name]");
+      const matchedIds = new Set();
+
+      rows.forEach(row => {
+        const status  = row.getAttribute("data-status");
+        const bizNo   = row.getAttribute("data-biz-no") || '';
+        const prjName = row.getAttribute("data-prj-name") || '';
+        let matched = status === selectValue;
+        if (appliedBizNo) {
+          matched = matched && bizNo === appliedBizNo;
+        } else if (appliedCompanyTerm) {
+          const matchedBizNos = companyData
+            .filter(c => includesTerm(c.companyName, appliedCompanyTerm))
+            .map(c => c.bizNo);
+          matched = matched && matchedBizNos.includes(bizNo);
+        }
+        if (appliedPrjName) {
+          matched = matched && prjName === appliedPrjName;
+        } else if (appliedProjectTerm) {
+          matched = matched && includesTerm(prjName, appliedProjectTerm);
+        }
+        row._matched = matched;
+        if (matched) matchedIds.add(row.getAttribute("data-prj-id"));
+      });
+
+      rows.forEach(row => {
+        if (!row._matched) return;
+        let parId = row.getAttribute("data-par-id");
+        while (parId) {
+          if (matchedIds.has(parId)) break;
+          matchedIds.add(parId);
+          const parentRow = Array.from(rows).find(r => r.getAttribute("data-prj-id") === parId);
+          if (!parentRow) break;
+          parentRow._matched = true;
+          parId = parentRow.getAttribute("data-par-id");
+        }
+      });
+
+      rows.forEach(row => {
+        const parId = row.getAttribute("data-par-id");
+        if (!row._matched && parId && matchedIds.has(parId)) row._matched = true;
+      });
+
+      rows.forEach(row => {
+        row.style.display = row._matched ? "" : "none";
+      });
+      calcDepthAndIndent();
+    }
+
+    function filterProjects() { applyAllFilters(); }
+
+    function executeListSearch() {
+      const companyInput = document.getElementById('companySearch');
+      const projectInput = document.getElementById('projectSearch');
+      appliedCompanyTerm = companyInput ? companyInput.value.trim() : '';
+      appliedProjectTerm = projectInput ? projectInput.value.trim() : '';
+      appliedBizNo   = selectedBizNo;
+      appliedPrjName = selectedPrjName;
+      applyAllFilters();
+    }
+
+    function renderDropdown(dropdownEl, matches, inputEl, onSelect) {
+      dropdownEl.innerHTML = '';
+      if (!matches.length) {
+        const empty = document.createElement('div');
+        empty.className = 'search-dropdown-item text-muted';
+        empty.textContent = '검색 결과가 없습니다.';
+        dropdownEl.appendChild(empty);
+        dropdownEl.style.display = 'block';
+        return;
+      }
+      matches.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'search-dropdown-item';
+        div.textContent = item.label;
+        div.addEventListener('click', function () {
+          inputEl.value = item.label;
+          onSelect(item);
+          dropdownEl.style.display = 'none';
+        });
+        dropdownEl.appendChild(div);
+      });
+      dropdownEl.style.display = 'block';
+    }
+
+    function showAutocomplete(inputEl, dropdownEl, getItems, onSelect) {
+      if (!inputEl || !dropdownEl) return;
+      const term = inputEl.value.trim();
+      onSelect(null);
+      if (term.length < 1) { dropdownEl.style.display = 'none'; return; }
+      renderDropdown(dropdownEl, getItems(term), inputEl, onSelect);
+    }
+
+    function setupAutocomplete(inputEl, dropdownEl, getItems, onSelect) {
+      if (!inputEl || !dropdownEl) return;
+      const debouncedSearch = debounce(function (value) {
+        onSelect(null);
+        if (value.trim().length < 1) { dropdownEl.style.display = 'none'; return; }
+        showAutocomplete(inputEl, dropdownEl, getItems, onSelect);
+      }, 300);
+      inputEl.addEventListener('input', function () { debouncedSearch(this.value); });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      loadSearchData();
+      calcDepthAndIndent();
+
+      const companySearch     = document.getElementById('companySearch');
+      const companyDropdown   = document.getElementById('companyDropdown');
+      const selectedBizNoInput = document.getElementById('selectedBizNo');
+
+      if (companySearch && companyDropdown) {
+        setupAutocomplete(
+          companySearch, companyDropdown,
+          function (term) {
+            const seen = new Set();
+            return companyData
+              .filter(c => includesTerm(c.companyName, term))
+              .filter(c => { if (seen.has(c.bizNo)) return false; seen.add(c.bizNo); return true; })
+              .map(c => ({ label: c.companyName, bizNo: c.bizNo }));
+          },
+          function (item) {
+            if (item) { selectedBizNo = item.bizNo; if (selectedBizNoInput) selectedBizNoInput.value = item.bizNo; }
+            else       { selectedBizNo = '';         if (selectedBizNoInput) selectedBizNoInput.value = ''; }
+          }
+        );
+      }
+
+      const projectSearch   = document.getElementById('projectSearch');
+      const projectDropdown = document.getElementById('projectDropdown');
+
+      if (projectSearch && projectDropdown) {
+        setupAutocomplete(
+          projectSearch, projectDropdown,
+          function (term) {
+            const seen = new Set();
+            return projectData
+              .filter(p => includesTerm(p.prjName, term))
+              .filter(p => { if (seen.has(p.prjName)) return false; seen.add(p.prjName); return true; })
+              .map(p => ({ label: p.prjName, prjName: p.prjName }));
+          },
+          function (item) { selectedPrjName = item ? item.prjName : ''; }
+        );
+      }
+
+      const listSearchBtn = document.getElementById('listSearchBtn');
+      if (listSearchBtn) listSearchBtn.addEventListener('click', executeListSearch);
+
+      [companySearch, projectSearch].filter(Boolean).forEach(input => {
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); executeListSearch(); }
+        });
+      });
+
+      document.addEventListener('click', function (e) {
+        const cSearch = document.getElementById('companySearch');
+        const cDrop   = document.getElementById('companyDropdown');
+        const pSearch = document.getElementById('projectSearch');
+        const pDrop   = document.getElementById('projectDropdown');
+        if (cSearch && cDrop && !cSearch.contains(e.target) && !cDrop.contains(e.target)) {
+          cDrop.style.display = 'none';
+        }
+        if (pSearch && pDrop && !pSearch.contains(e.target) && !pDrop.contains(e.target)) {
+          pDrop.style.display = 'none';
+        }
+      });
+
+      applyAllFilters();
+
+      // 토스트
+      const errorToastEl   = document.getElementById('errorToast');
+      if (errorToastEl)   new bootstrap.Toast(errorToastEl).show();
+      const successToastEl = document.getElementById('successToast');
+      if (successToastEl) new bootstrap.Toast(successToastEl).show();
+    });
+
+    const serverMessage = /*[[${msg}]]*/ null;
+    if (serverMessage) alert(serverMessage);
+
+    /* ── 상태 필터 커스텀 드롭다운 초기화 ── */
+    (function () {
+      const trigger  = document.getElementById('statusFilterTrigger');
+      const dropdown = document.getElementById('statusFilterDropdown');
+      const label    = document.getElementById('statusFilterLabel');
+      const select   = document.getElementById('projectStatusSelect');
+      if (!trigger) return;
+
+      trigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const isOpen = dropdown.classList.toggle('open');
+        trigger.classList.toggle('open', isOpen);
+      });
+
+      dropdown.addEventListener('click', function (e) {
+        const item = e.target.closest('.status-filter-item');
+        if (!item) return;
+        dropdown.querySelectorAll('.status-filter-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        label.textContent = item.textContent.trim();
+        select.value = item.getAttribute('data-value');
+        dropdown.classList.remove('open');
+        trigger.classList.remove('open');
+        filterProjects();
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.remove('open');
+          trigger.classList.remove('open');
+        }
+      });
+    })();
+  </script>
+</div>
+</body>
 </html>

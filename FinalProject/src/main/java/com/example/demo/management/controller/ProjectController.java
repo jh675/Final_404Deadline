@@ -174,7 +174,7 @@ public class ProjectController {
 	            .filter(u -> u.getId().equals(editProject.getUserId()))
 	            .findFirst()
 	            .ifPresent(u -> editProject.setManagerName(
-	                u.getName() + "," + u.getLogin() + "," + u.getEmail()));
+	                u.getName() + " / " + u.getLogin() ));
 	    }
 
 	    // 활성화된 모듈 조회 후 enaId에 세팅
