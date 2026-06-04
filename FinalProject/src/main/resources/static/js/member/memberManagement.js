@@ -119,17 +119,17 @@ document.addEventListener("DOMContentLoaded", function () {
             const mount = getToolbarMount();
             if (!mount) return;
             let html =
-              '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--register" id="memberBtnRegister">등록</button>';
+              '<button type="button" class="btn btn-primary btn-sm" id="memberBtnRegister">등록</button>';
             if (!deleteMode) {
               html +=
-                '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--delete" id="memberBtnDelete">삭제</button>';
+                '<button type="button" class="btn btn-danger btn-sm" id="memberBtnDelete">삭제</button>';
             } else {
               const rows = grid ? getCheckedRowsForRemove() : [];
               const n = rows.length;
               if (n === 0) {
-                html += '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--cancel-delete" id="memberBtnDeleteCancel">삭제 취소</button>';
+                html += '<button type="button" class="btn btn-secondary btn-sm" id="memberBtnDeleteCancel">삭제 취소</button>';
               } else {
-                html += '<button type="button" class="role-grid-toolbar__btn role-grid-toolbar__btn--remove" id="memberBtnRemove">제거</button>';
+                html += '<button type="button" class="btn btn-danger btn-sm" id="memberBtnRemove">제거</button>';
               }
             }
             mount.innerHTML = html;
