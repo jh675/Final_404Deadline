@@ -50,8 +50,13 @@
 }
 .mem-actions, .grp-actions, .role-actions,
 .mem-join-actions {
-	display: flex; justify-content: center; align-items: center; gap: 8px;
+	display: flex; justify-content: flex-end; align-items: center; gap: 10px;
 	margin-top: 8px; padding-top: 24px; border-top: 1px solid var(--issue-border);
+}
+
+/* 목록 화면 — 검색 조건·버튼 우측 정렬 */
+.issue-shell--list .issue-filter-form {
+	justify-content: flex-end;
 }
 
 .mem-section__title,
@@ -72,13 +77,19 @@
 	border-top: 1px solid var(--issue-border);
 }
 
-.mem-section__head-row,
-.role-section__head {
+.mem-section__head-row {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
+	margin-bottom: 10px;
+}
+.role-section__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 0.75rem;
 	margin-bottom: 10px;
 }
 .mem-section__head-row .mem-section__title,
@@ -270,7 +281,7 @@ color: var(--issue-label);
 }
 .mem-actions {
 display: flex;
-justify-content: center;
+justify-content: flex-end;
 gap: 0.5rem;
 padding: 1.5rem 0 0.5rem;
 }
@@ -822,7 +833,7 @@ color: var(--issue-label);
 }
 .grp-actions {
 display: flex;
-justify-content: center;
+justify-content: flex-end;
 gap: 0.5rem;
 padding: 1.5rem 0 0.5rem;
 }
@@ -1436,7 +1447,6 @@ min-width: 8.5rem;
 font-size: 0.8125rem;
 color: var(--issue-label);
 }
-.role-group-pick__search 
 .role-group-pick__grid-host {
 flex: 1 1 auto;
 min-height: 12rem;
@@ -1484,36 +1494,21 @@ background: #fff;
 }
 .role-actions {
 display: flex;
-justify-content: center;
+justify-content: flex-end;
 align-items: center;
-gap: 0.75rem;
+gap: 10px;
 margin: 2rem 0 1rem;
-padding-top: 0.5rem;
 }
-.role-actions__btn {
-min-width: 5.5rem;
-padding: 0.45rem 1.25rem;
-font-size: 0.875rem;
-border-radius: 6px;
-border: 1px solid var(--issue-text);
-background: var(--issue-text);
-color: #fff;
-cursor: pointer;
+.role-actions.issue-register-actions,
+.grp-actions.issue-register-actions,
+.mem-actions.issue-register-actions {
+	margin-top: 24px;
+	padding-top: 0;
+	border-top: none;
 }
-.role-actions__btn:hover {
-background: var(--issue-text);
-border-color: var(--issue-text);
-}
-.role-actions__btn--secondary {
-background: #fff;
-color: var(--issue-heading);
-border-color: #bbb;
-}
-.role-actions__btn--secondary:hover {
-background: var(--issue-bg-muted);
-border-color: var(--issue-label);
-}
-.role-actions .is-hidden {
+.role-actions .is-hidden,
+.grp-actions .is-hidden,
+.mem-actions .is-hidden {
 display: none !important;
 }
 
@@ -1589,23 +1584,16 @@ border-bottom: 1px solid var(--issue-border);
 }
 
 
-.mem-actions__btn, .grp-actions__btn, .role-actions__btn,
-.mem-join-actions__btn,
-.grp-member-toolbar__btn, .role-group-toolbar__btn,
-.mem-section__head-actions .mem-actions__btn {
+.grp-member-toolbar__btn, .role-group-toolbar__btn {
 	display: inline-flex; align-items: center; justify-content: center;
 	height: 34px; padding: 0 16px; border-radius: var(--issue-radius-sm);
 	font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none;
-	border: 1px solid var(--issue-primary-border, var(--issue-border));
-	background: var(--issue-primary-bg, var(--issue-bg));
-	color: var(--issue-primary-text, var(--issue-heading));
+	border: 1px solid var(--issue-btn-border);
+	background: var(--issue-btn-bg);
+	color: var(--issue-btn-text);
 }
-.mem-actions__btn:hover, .grp-actions__btn:hover, .role-actions__btn:hover {
-	filter: brightness(0.97);
-}
-.mem-actions__btn--secondary, .grp-actions__btn--secondary, .role-actions__btn--secondary,
-.mem-join-actions__btn--secondary {
-	background: var(--issue-bg); color: var(--issue-text); border-color: var(--issue-border);
+.grp-member-toolbar__btn:hover, .role-group-toolbar__btn:hover {
+	background: var(--issue-btn-bg-hover);
 }
 .perm-toggle-btn {
 	color: var(--issue-link); border: 1px solid var(--issue-border);

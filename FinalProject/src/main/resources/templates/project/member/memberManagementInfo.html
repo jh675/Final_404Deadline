@@ -119,16 +119,7 @@
 
 
         <section class="mem-section" aria-labelledby="mem-project-heading">
-          <div class="mem-section__head-row">
-            <h2 class="mem-section__title" id="mem-project-heading">소속 정보</h2>
-            <div class="mem-section__head-actions" th:if="${viewMode}">
-              <a class="mem-actions__btn" th:href="@{/project/member/info(userId=${userId}, grpId=${grpId}, edit=true)}">수정</a>
-            </div>
-            <div class="mem-section__head-actions" th:if="${editMode}">
-              <button type="button" class="mem-actions__btn" id="btnMemberSave">저장</button>
-              <a class="mem-actions__btn mem-actions__btn--secondary" th:href="@{/project/member/info(userId=${userId}, grpId=${grpId})}">취소</a>
-            </div>
-          </div>
+          <h2 class="mem-section__title" id="mem-project-heading">소속 정보</h2>
           <div class="mem-section__body">
             <div class="mem-basic-fields mem-detail-form">
               <div class="mem-field-row">
@@ -171,6 +162,14 @@
           style="display: none"
           th:attr="data-prj-id=${prjId},data-user-id=${userId},data-old-grp-id=${grpId},data-initial-grp-id=${detail != null ? detail.grpId : ''}"
         ></div>
+
+        <div class="issue-register-actions mem-actions" th:if="${viewMode}">
+          <a class="btn btn-primary" th:href="@{/project/member/info(userId=${userId}, grpId=${grpId}, edit=true)}">수정</a>
+        </div>
+        <div class="issue-register-actions mem-actions" th:if="${editMode}">
+          <button type="button" class="btn btn-primary" id="btnMemberSave">저장</button>
+          <a class="btn btn-secondary" th:href="@{/project/member/info(userId=${userId}, grpId=${grpId})}">취소</a>
+        </div>
 
         <script th:if="${editMode}" th:src="@{/js/member/memberManagementInfo.js}"></script>
         <script th:if="${viewMode}" th:src="@{/js/member/memberIssueGrid.js}"></script>
