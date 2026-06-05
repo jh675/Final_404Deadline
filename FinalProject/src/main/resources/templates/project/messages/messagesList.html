@@ -4,59 +4,37 @@
       layout:decorate="~{layout/projectLayout}">
 <head>
     <meta charset="UTF-8">
-    <title>메시지 목록 및 상세</title>
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    
-    <style>
-
-        #wrapper { width: 100%; margin: 0 auto; padding: 20px; }
-        .list-table { width: 100%; border-collapse: collapse; margin-top: 15px; border-top: 2px solid #dee2e6; }
-        .list-table th, .list-table td { border: 1px solid #eee; padding: 12px; text-align: center; }
-        .list-table th { background-color: #f9f9f9; color: #495057; font-weight: 600; }
-        .list-table td.title-cell { text-align: left; padding-left: 20px; }
-
-
-        .btn-primary { padding: 6px 12px; font-size: 14px; border-radius: 4px; border: 1px solid #2e7d32; background-color: #2e7d32; color: white; cursor: pointer; text-decoration: none; display: inline-block; }
-        .btn-primary:hover { background-color: #256629; color: white; }
-        .btn-secondary { padding: 6px 12px; font-size: 14px; border-radius: 4px; border: 1px solid #ccc; background-color: #f8f9fa; color: #333; text-decoration: none; display: inline-block; }
-        .btn-secondary:hover { background-color: #e9ecef; }
-
-
-        .title-link { display: inline-block; padding: 2px 6px; color: #20a0e0; text-decoration: none; font-weight: 500; transition: all 0.2s ease; }
-        .title-link:hover { text-decoration: underline; color: #20a0e0; background-color: #f5fbff; }
-
-
-        .btn-action-view { font-size: 0.8rem; padding: 2px 8px; border: 1px solid #0d6efd; color: #0d6efd; background-color: transparent; border-radius: 4px; cursor: pointer; }
-        .btn-action-view:hover { background-color: #0d6efd; color: white; }
-        .btn-action-modify { font-size: 0.8rem; padding: 2px 8px; border: 1px solid #198754; color: #198754; background-color: transparent; border-radius: 4px; cursor: pointer; }
-        .btn-action-modify:hover { background-color: #198754; color: white; }
-        .btn-action-delete { font-size: 0.8rem; padding: 2px 8px; border: 1px solid #dc3545; color: #dc3545; background-color: transparent; border-radius: 4px; cursor: pointer; }
-        .btn-action-delete:hover { background-color: #dc3545; color: white; }
-        
-
-        .detail-container { max-width: 800px; margin-top: 50px; background: #fff; padding: 30px; border: 1px solid #e1e1e1; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .detail-container h2 { margin-bottom: 25px; font-size: 22px; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: bold; color: #2e7d32; margin-bottom: 8px; font-size: 15px; }
-        .view-control, .view-textarea { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background-color: #fafafa; }
-        .view-textarea { min-height: 180px; white-space: pre-wrap; }
-        .info-header { display: flex; gap: 40px; font-size: 13px; color: #666; margin: -10px 0 20px 0; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
-        .reply-section { margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
-        .answer-section { margin-top: 30px; border-top: 1px dashed #7cb1cd; padding: 20px; background-color: #fcfdfd; border-radius: 12px; border: 1px solid #e2e8f0; display: none; }
-        .answer-title-input { width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f5f5f5; color: #555; cursor: not-allowed; margin-bottom: 12px; }
-        .answer-content-input { width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; resize: vertical; min-height: 100px; }
-        .answer-submit-btn { background-color: #2e7d32; color: white; border: none; border-radius: 6px; padding: 10px 20px; font-weight: bold; cursor: pointer; float: right; margin-top: 10px; }
-        .answer-cancel-btn { background-color: #94a3b8; color: white; border: none; border-radius: 6px; padding: 10px 15px; cursor: pointer; float: right; margin-top: 10px; margin-right: 8px; }
-    </style>
-    
+    <title>게시글 관리</title>
+    <th:block layout:fragment="head-content">
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+        <link rel="stylesheet" th:href="@{/css/project/issue.css}" />
+        <link rel="stylesheet" th:href="@{/css/project/projectAdmin.css}" />
+    </th:block>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script th:inline="javascript">
+        function updateEmptyReplyMessage() {
+            var emptyMsg = document.getElementById("emptyReplyMessage");
+            if (!emptyMsg) return;
+            var hasReplies = document.querySelectorAll(".messages-reply-item").length > 0;
+            var form = document.getElementById("answerFormSection");
+            var formOpen = form && form.classList.contains("is-open");
+            emptyMsg.classList.toggle("is-hidden", hasReplies || formOpen);
+        }
+
         function toggleAnswerForm() {
             var form = document.getElementById("answerFormSection");
-            form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-            if(form.style.display === "block") form.scrollIntoView({ behavior: 'smooth' });
+            if (!form) return;
+            form.classList.toggle("is-open");
+            updateEmptyReplyMessage();
+            if (form.classList.contains("is-open")) {
+                form.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                var textarea = form.querySelector(".messages-answer-content");
+                if (textarea) textarea.focus();
+            }
         }
+
         function submitAnswer() {
             var token = $("meta[name='_csrf']").attr("content");
             var header = $("meta[name='_csrf_header']").attr("content");
@@ -69,6 +47,7 @@
                 error: function() { alert("답글 등록에 실패했습니다."); }
             });
         }
+
         function deleteReply(replyId, boardId) {
             if (!confirm("정말 삭제하시겠습니까?")) return;
             var token = $("meta[name='_csrf']").attr("content");
@@ -82,87 +61,133 @@
                 error: function() { alert("삭제에 실패했습니다."); }
             });
         }
+
         $(document).ready(function() {
             $(".row-number").each(function(index) { $(this).text(index + 1); });
+            updateEmptyReplyMessage();
         });
     </script>
 </head>
 <body>
 <div layout:fragment="content">
-<div id="wrapper">
-    <h2 th:text="${board.name}">게시판 이름</h2>
-    <div style="margin-bottom: 15px;">
-        <a th:href="@{/project/boards/list}" class="btn-secondary">뒤로가기</a>
-        <button type="button" class="btn-primary" th:onclick="|location.href='/project/messages/register?boardId=' + ${board.id}|">게시글 등록</button>
-    </div>
-    
-    <table class="list-table">
-        <thead>
-            <tr>
-                <th style="width: 80px;">번호</th>
-                <th>제목</th>
-                <th style="width: 150px;">작성일</th>
-                <th style="width: 180px;">관리</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="msg : ${list}" th:if="${msg.fieldparentId == null}">
-                <td class="row-number"></td>
-                <td class="title-cell">
-                    <a class="title-link" th:href="@{/project/messages/list(boardId=${board.id}, id=${msg.id})}" th:text="${msg.title}">제목</a>
-                </td>
-                <td th:text="${#dates.format(msg.createdOn, 'yyyy-MM-dd')}"></td>
-                <td>
-                    <div class="d-flex gap-1 justify-content-center">
-                        <button type="button" class="btn-action-view" th:onclick="|location.href='/project/messages/list?boardId=${board.id}&id=${msg.id}'|">상세</button>
-                        <button type="button" class="btn-action-modify" th:onclick="|location.href='/project/messages/modify?id=${msg.id}'|">수정</button>
-                        <button type="button" class="btn-action-delete" th:onclick="|if(confirm('정말 삭제하시겠습니까?')) { location.href='/project/messages/delete?id=${msg.id}&boardId=${board.id}' }|">삭제</button>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="issue-shell issue-shell--list">
+        <div id="wrapper" class="issue-list">
+            <header class="issue-list__header">
+                <a th:href="@{/project/boards/list}" class="issue-page-back">← 게시판 목록</a>
+                <h1 class="issue-list__title" th:text="${board.name}">게시판 이름</h1>
+            </header>
 
-    <div th:if="${message != null}" class="detail-container">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 10px;">
-            <h2 style="margin: 0; border: none; padding: 0;">게시글 상세</h2>
-            <div>
-                <a th:href="@{/project/messages/list(boardId=${board.id})}" style="padding: 4px 12px; font-size: 14px; background-color: #6c757d; color: white; border: none; border-radius: 4px; text-decoration: none; margin-right: 5px;">취소</a>
-                <button type="button" class="btn-primary" onclick="toggleAnswerForm()" style="background-color: #7cb1cd; border: 1px solid #7cb1cd;">답글 쓰기</button>
+            <section class="issue-section issue-section--grid" aria-label="게시글 목록">
+                <div class="messages-table-wrap">
+                    <table class="data-table messages-table">
+                        <thead>
+                            <tr>
+                                <th class="messages-table__col-no">번호</th>
+                                <th class="messages-table__col-title">제목</th>
+                                <th class="messages-table__col-date">작성일</th>
+                                <th class="messages-table__col-actions">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="msg : ${list}" th:if="${msg.fieldparentId == null}">
+                                <td class="messages-table__cell-no row-number"></td>
+                                <td class="messages-table__cell-title">
+                                    <a class="messages-title-link"
+                                       th:href="@{/project/messages/list(boardId=${board.id}, id=${msg.id})}"
+                                       th:text="${msg.title}">제목</a>
+                                </td>
+                                <td class="messages-table__cell-date" th:text="${#dates.format(msg.createdOn, 'yyyy-MM-dd')}"></td>
+                                <td class="messages-table__cell-actions">
+                                    <div class="messages-row-actions">
+                                        <button type="button" class="btn btn-success"
+                                            th:onclick="|location.href='/project/messages/modify?id=${msg.id}'|">수정</button>
+                                        <button type="button" class="btn btn-danger"
+                                            th:onclick="|if(confirm('정말 삭제하시겠습니까?')) { location.href='/project/messages/delete?id=${msg.id}&boardId=${board.id}' }|">삭제</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section th:if="${message == null}" class="issue-section issue-section--footer" aria-label="게시글 목록 하단">
+                <div class="issue-list-footer">
+                    <div class="issue-list-footer__pagination"></div>
+                    <div class="issue-list-footer__actions">
+                        <button type="button" class="btn btn-primary"
+                            th:onclick="|location.href='/project/messages/register?boardId=' + ${board.id}|">작성</button>
+                    </div>
+                </div>
+            </section>
+
+            <div th:if="${message != null}" class="messages-detail">
+                <div class="issue-page-head">
+                    <a th:href="@{/project/messages/list(boardId=${board.id})}" class="issue-page-back">← 게시글 목록</a>
+                    <h1 class="issue-page-head__title">게시글 상세</h1>
+                </div>
+
+                <section class="issue-page-section">
+                    <div class="messages-detail__meta">
+                        <div>작성자: <span class="messages-detail__meta-value" th:text="${message.userId != null ? message.userId : '익명'}"></span></div>
+                        <div>작성일: <span class="messages-detail__meta-value" th:text="${#dates.format(message.createdOn, 'yyyy-MM-dd')}"></span></div>
+                    </div>
+
+                    <div class="messages-detail__field">
+                        <span class="messages-detail__field-label">제목</span>
+                        <div class="messages-detail__field-value" th:text="${message.title}"></div>
+                    </div>
+                    <div class="messages-detail__field">
+                        <span class="messages-detail__field-label">내용</span>
+                        <div class="messages-detail__field-value messages-detail__field-value--body" th:text="${message.content}"></div>
+                    </div>
+                </section>
+
+                <div id="answerFormSection" class="messages-answer-section">
+                    <form id="answerForm">
+                        <input type="hidden" name="boardId" th:value="${board.id}" />
+                        <input type="hidden" name="fieldparentId" th:value="${message.id}" />
+                        <input type="text" class="messages-answer-title" th:value="${message.title}" disabled />
+                        <input type="hidden" name="title" th:value="${message.title}" />
+                        <textarea name="content" class="messages-answer-content" placeholder="답글을 입력하세요." required></textarea>
+                        <div class="messages-answer-actions">
+                            <button type="button" class="btn btn-secondary" onclick="toggleAnswerForm()">취소</button>
+                            <button type="button" class="btn btn-primary" onclick="submitAnswer()">등록</button>
+                        </div>
+                    </form>
+                </div>
+
+                <section class="issue-page-section messages-reply-section">
+                    <h2 class="messages-reply-section__title">답글</h2>
+                    <th:block th:each="ans : ${replyList}">
+                        <div class="messages-reply-item">
+                            <button type="button" class="btn btn-danger messages-reply-item__delete"
+                                th:onclick="|deleteReply(${ans.id}, ${board.id})|">삭제</button>
+                            <div class="messages-reply-item__title">
+                                <span class="messages-reply-item__label">제목:</span>
+                                <span th:text="${ans.title}"></span>
+                            </div>
+                            <div class="messages-reply-item__content">
+                                <span class="messages-reply-item__label">답글:</span>
+                                <span th:text="${ans.content}"></span>
+                            </div>
+                        </div>
+                    </th:block>
+                    <div id="emptyReplyMessage" class="messages-reply-empty"
+                         th:classappend="${#lists.isEmpty(replyList)} ? '' : ' is-hidden'">작성된 답글이 없습니다.</div>
+                </section>
+
+                <div class="messages-detail__footer">
+                    <div class="issue-list-footer">
+                        <div class="issue-list-footer__pagination"></div>
+                        <div class="issue-list-footer__actions">
+                            <button type="button" class="btn btn-primary" onclick="toggleAnswerForm()">작성</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="info-header">
-            <div>작성자: <span th:text="${message.userId != null ? message.userId : '익명'}"></span></div>
-            <div>작성일: <span th:text="${#dates.format(message.createdOn, 'yyyy-MM-dd')}"></span></div>
-        </div>
-        
-        <div class="form-group"><label>제목</label><div class="view-control" th:text="${message.title}"></div></div>
-        <div class="form-group"><label>내용</label><div class="view-textarea" th:text="${message.content}"></div></div>
-
-        <div id="answerFormSection" class="answer-section">
-            <form id="answerForm">
-                <input type="hidden" name="boardId" th:value="${board.id}" />
-                <input type="hidden" name="fieldparentId" th:value="${message.id}" />
-                <input type="text" class="answer-title-input" th:value="${message.title}" disabled />
-                <input type="hidden" name="title" th:value="${message.title}" />
-                <textarea name="content" class="answer-content-input" placeholder="답글을 입력하세요." required></textarea>
-                <button type="button" class="answer-submit-btn" onclick="submitAnswer()">답글등록</button>
-                <button type="button" class="answer-cancel-btn" onclick="toggleAnswerForm()">취소</button>
-            </form>
-        </div>
-        <div class="reply-section">
-            <th:block th:each="ans : ${replyList}">	
-                <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 10px; position: relative;">
-                    <button type="button" th:onclick="|deleteReply(${ans.id}, ${board.id})|" style="position: absolute; right: 10px; top: 10px; font-size: 11px; color: #dc3545; border: 1px solid #dc3545; background: none; border-radius: 4px; cursor: pointer;">삭제</button>
-                    <div style="font-size: 13px; font-weight: bold; margin-bottom: 5px;"><span style="color: #666;">제목:</span> <span th:text="${ans.title}"></span></div>
-                    <div style="font-size: 14px;"><span style="color: #666;">답글:</span> <span th:text="${ans.content}"></span></div>
-                </div>
-            </th:block>
-            <div th:if="${#lists.isEmpty(replyList)}" style="text-align: center; color: #94a3b8; padding: 10px; font-size: 14px;">작성된 답글이 없습니다.</div>
-        </div>
     </div>
-</div>
 </div>
 </body>
 </html>

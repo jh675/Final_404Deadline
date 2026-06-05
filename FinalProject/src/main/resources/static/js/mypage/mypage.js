@@ -41,7 +41,7 @@ function startMypageTimer(durationInSeconds) {
             
             btnEmailAction.disabled = false;
             btnEmailAction.textContent = '재인증';
-            btnEmailAction.className = 'btn btn-outline-primary';
+            btnEmailAction.className = 'btn btn-primary';
         }
     }
 
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
             emailInput.classList.add('bg-light');
 			btnEmailAction.disabled = false;
             btnEmailAction.textContent = '수정';
-            btnEmailAction.className = 'btn btn-outline-secondary';
+            btnEmailAction.className = 'btn btn-secondary';
 			document.getElementById('btnConfirmVerify').disabled = false;
             isEmailVerified = true;
             
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if(btnCheckCurrentPwd) {
                 btnCheckCurrentPwd.disabled = false;
                 btnCheckCurrentPwd.textContent = '확인';
-                btnCheckCurrentPwd.className = 'btn btn-outline-secondary';
+                btnCheckCurrentPwd.className = 'btn btn-secondary';
             }
             if(newPasswordArea) {
                 newPasswordArea.classList.add('d-none');
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentPwd.classList.add('is-valid');
                     currentPwd.readOnly = true; // 확인 완료 후 수정 못하게 잠금
                     this.textContent = '확인완료';
-                    this.classList.replace('btn-outline-secondary', 'btn-success');
+                    this.classList.replace('btn-secondary', 'btn-success');
                     
                     document.getElementById('currentPwdSuccess').classList.remove('d-none');
                     
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             emailInput.focus();
             
             this.textContent = '인증발송';
-            this.className = 'btn btn-outline-primary';
+            this.className = 'btn btn-primary';
 			this.disabled = false;
 			
             document.getElementById('emailFeedback').className = 'small mt-1 text-primary';
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 emailInput.setAttribute('readonly', true);
                 emailInput.classList.add('bg-light');
                 this.textContent = '수정';
-                this.className = 'btn btn-outline-secondary';
+                this.className = 'btn btn-secondary';
                 document.getElementById('emailFeedback').textContent = '';
                 isEmailVerified = true;
                 return;
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
 	                this.disabled = false;
 	                this.textContent = '재인증';
-	                this.className = 'btn btn-outline-primary';
+	                this.className = 'btn btn-primary';
                     document.getElementById('emailFeedback').className = 'small mt-1 text-danger';
                     document.getElementById('emailFeedback').textContent = '인증번호 발송에 실패했습니다.';
                 }
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 emailInput.setAttribute('data-original', email);
 				btnEmailAction.disabled = false;
                 btnEmailAction.textContent = '수정';
-                btnEmailAction.className = 'btn btn-outline-secondary';
+                btnEmailAction.className = 'btn btn-secondary';
                 
             } else {
 	            verifyInputEl.classList.add('is-invalid');
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	            
 	            btnEmailAction.disabled = false;
 	            btnEmailAction.textContent = '재인증';
-	            btnEmailAction.className = 'btn btn-outline-primary';
+	            btnEmailAction.className = 'btn btn-primary';
 	            
 	            document.getElementById('emailFeedback').className = 'small mt-1 text-danger fw-bold';
 	            document.getElementById('emailFeedback').textContent = '인증에 실패했습니다. 재인증을 진행해주세요.';

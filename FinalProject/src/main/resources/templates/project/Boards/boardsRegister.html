@@ -57,7 +57,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                    <button type="button" class="btn btn-light border btn-sm" onclick="location.href='/project/boards/list'">취소</button>
+                    <button type="button" class="btn btn-light border" onclick="location.href='/project/boards/list'">취소</button>
                     <button type="submit" class="btn btn-green-sm shadow-sm" 
                             th:text="${boards.id != null and boards.id != 0} ? '수정하기' : '등록하기'">등록</button>
                 </div>

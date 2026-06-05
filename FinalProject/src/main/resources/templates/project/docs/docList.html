@@ -31,6 +31,13 @@
     border-color: rgba(71, 85, 105, 0.2) !important;
 }
 
+/* 그리드 셀 안 버튼 크기 고정 */
+.tui-grid-cell-content .btn {
+    padding: 2px 10px;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
 .tui-grid-header-area,
 .tui-grid-lside-area .tui-grid-header-area,
 .tui-grid-rside-area .tui-grid-header-area {
@@ -70,7 +77,7 @@
                 data-bs-toggle="modal"
                 data-bs-target="#registerModal"
                 th:if="${@prjAuth.hasRole('ROLE_DOCS_CREATE')}">
-            등록
+            작성
         </button>
 
     </div>
@@ -90,21 +97,17 @@
 			{ 
 			    header: '제목', 
 			    name: 'title', 
-			    minWidth: 400, align:'center', sortable: true,
+			    minWidth: 300,
+			    align: 'left',
+			    sortable: true,
 			    formatter: ({ row, value }) => {
-			        return `
-			            <a href="javascript:void(0)"
-			               class="doc-title"
-			               data-id="${row.id}">
-			                ${value}
-			            </a>
-			        `;
+			        return `<a href="javascript:void(0)" class="doc-title" data-id="${row.id}">${value}</a>`;
 			    }
 			},
 			{ 
 				header: '첨부파일', 
 				name: 'fileCount', 
-				width: 100, 
+				width: 90, 
 				align: 'center',
 				formatter: ({ row }) => {
 				    if (row.fileCount > 0) {
@@ -113,8 +116,8 @@
 				    return ''; 
 				}
 			},
-			{ header: '작성자', name: 'memName', width: 150, align:'center', sortable: true },
-			{ header: '작성일', name: 'createdOn', width: 200, align:'center', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') }
+			{ header: '작성자', name: 'memName', width: 160, align: 'center', sortable: true },
+			{ header: '작성일', name: 'createdOn', width: 160, align: 'center', sortable: true, formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm') }
 		];
 
 		// 수정 권한이 있을 경우에만 컬럼 배열에 추가
@@ -122,13 +125,13 @@
 			gridColumns.push({ 
 		    	header: '수정',
 		    	name: 'edit',
-		    	width: 100,
-		    	align:'center',
-		    	sortable: true,
+		    	width: 90,
+		    	align: 'center',
+		    	sortable: false,
 		    	formatter: ({ row }) => {
 		    		return `
 		    			<button
-		    				class="btn btn-secondary btn-sm "
+		    				class="btn btn-success"
 		    				data-bs-toggle="modal"
 		    				data-bs-target="#editModal"
 		    				data-id="${row.id}"
@@ -147,11 +150,11 @@
 			gridColumns.push({ 
 				header: '삭제',
 				name: 'deleteBtn',
-				width: 100,
-				align:'center',
-				sortable: true,
+				width: 90,
+				align: 'center',
+				sortable: false,
 				formatter: ({ row }) => {
-					return '<button class="btn btn-danger btn-sm" ' +
+					return '<button class="btn btn-danger" ' +
 					       'data-bs-toggle="modal" ' +
 					       'data-bs-target="#deleteModal" ' +
 					       'data-id="' + row.id + '">' +
@@ -164,13 +167,12 @@
 grid = new tui.Grid({
   el: document.getElementById('grid'),
 
-  autoWidth: true,      
   scrollX: false,
   scrollY: false,
 
   bodyHeight: 'auto',
-  rowHeight: 36,
-  minBodyHeight: 100,
+  rowHeight: 40,
+  minBodyHeight: 400,
 
   data: docsData,
   columns: gridColumns,
@@ -178,7 +180,7 @@ grid = new tui.Grid({
   rowHeaders: ['rowNum'],
   pageOptions: {
     useClient: true,
-    perPage: 10
+    perPage: 15
   }
 });
 		
@@ -340,7 +342,7 @@ grid = new tui.Grid({
 
 										<button
 											type="button"
-											class="btn btn-sm btn-outline-danger delete-file-btn"
+											class="btn btn-danger delete-file-btn"
 											data-file-id="${file.id}">
 											삭제
 										</button>

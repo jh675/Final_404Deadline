@@ -92,6 +92,7 @@
 
           function enterEditMode() {
             groupEditMode = true;
+            refreshMembersTable();
             setMemberToolbarVisible(true);
             setRoleToolbarVisible(true);
             setEditActionButtonsVisible(true);
@@ -127,7 +128,7 @@
             return ( dt.getFullYear() + "-" + pad(dt.getMonth() + 1) + "-" + pad(dt.getDate()) )
           }
 
-          function memberInfoHref(userId, memberGrpId) {
+          function memberListDetailHref(userId, memberGrpId) {
             const uid = userId != null ? Number(userId) : NaN;
             const gid =
               memberGrpId != null
@@ -137,11 +138,18 @@
                   : NaN;
             if (isNaN(uid) || isNaN(gid)) return "";
             return (
-              "/project/member/info?userId=" +
+              "/project/member/list?userId=" +
               encodeURIComponent(String(uid)) +
               "&grpId=" +
               encodeURIComponent(String(gid))
             );
+          }
+
+          function navigateToMemberDetail(userId, memberGrpId) {
+            const href = memberListDetailHref(userId, memberGrpId);
+            if (!href) return;
+            const topWin = window.top || window;
+            topWin.location.href = href;
           }
 
           function pendingToGridRows() {
@@ -230,7 +238,7 @@
               el: membersGridEl,
               data: pendingToGridRows(),
               rowHeaders: ["rowNum"],
-              scrollX: panelMode,
+              scrollX: false,
               scrollY: false,
               bodyHeight: "auto",
               rowHeight: 36,
@@ -240,7 +248,7 @@
                   header: "이름",
                   name: "userName",
                   align: "center",
-                  width: 300,
+                  width: 360,
                   sortable: true,
                   escapeHTML: false,
                   formatter: function (ctx) {
@@ -249,17 +257,17 @@
                       ctx.value == null || ctx.value === ""
                         ? "-"
                         : String(ctx.value);
-                    const href = memberInfoHref(
+                    const href = memberListDetailHref(
                       row && row.userId,
                       row && row.grpId,
                     );
-                    if (!href || text === "-") {
+                    if (!href || text === "-" || groupEditMode) {
                       return escapeHtmlText(text);
                     }
                     return (
                       '<a class="grp-grid-name-link" href="' +
                       href +
-                      '">' +
+                      '" target="_top">' +
                       escapeHtmlText(text) +
                       "</a>"
                     );
@@ -268,13 +276,14 @@
                 {
                   header: "연락처",
                   name: "tel",
-                  width: 120,
+                  width: 168,
                   align: "center",
                   sortable: false,
                 },
                 {
                   header: "이메일",
                   name: "email",
+                  width: 470,
                   align: "center",
                   sortable: true,
                 },
@@ -290,10 +299,10 @@
               }
               const row = membersGrid.getRow(ev.rowKey);
               if (!row) return;
-              const href = memberInfoHref(row.userId, row.grpId);
-              if (href) {
-                location.href = href;
+              if (ev.nativeEvent && typeof ev.nativeEvent.preventDefault === "function") {
+                ev.nativeEvent.preventDefault();
               }
+              navigateToMemberDetail(row.userId, row.grpId);
             });
           }
 

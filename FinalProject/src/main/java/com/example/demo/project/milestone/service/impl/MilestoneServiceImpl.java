@@ -128,7 +128,6 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 	@Override
 	public Long moveIssue(MilestoneIssueVO milestoneIssueVO) {
-		// TODO Auto-generated method stub
 		return mapper.moveIssue(milestoneIssueVO);
 	}
 

@@ -201,7 +201,7 @@
 				<div class="search-item attach-section">
 					<div class="attach-head">
 						<span>첨부파일 (최대 5개, 합계 50MB 이하)</span>
-						<button type="button" class="btn btn-secondary btn-sm" id="btnAddFile">파일추가</button>
+						<button type="button" class="btn btn-secondary" id="btnAddFile">파일추가</button>
 					</div>
 					<ul class="attachment-list" id="attachRows"></ul>
 					<input type="file" id="fileInput" name="attachments" class="attach-hidden-input" multiple accept="*/*" />
@@ -211,8 +211,8 @@
 		</div>
 
 		<div class="issue-register-actions">
-			<button type="submit" class="btn btn-primary" id="btnSubmit"
-				th:text="${issue != null and issue.id != null} ? '이슈 수정' : '이슈 등록'">이슈 등록</button>
+			<button type="submit" class="btn btn-success" id="btnSubmit"
+				th:text="${issue != null and issue.id != null} ? '수정' : '등록'">등록</button>
 			<a th:href="@{/project/issue/list}" class="btn btn-danger" id="btnCancel">취소</a>
 		</div>
 	</form>
@@ -462,7 +462,7 @@
 
 			var del = document.createElement('button');
 			del.type = 'button';
-			del.className = 'btn btn-secondary btn-sm';
+			del.className = 'btn btn-secondary';
 			del.textContent = '첨부삭제';
 			del.addEventListener('click', function () {
 				selectedFiles.splice(index, 1);
