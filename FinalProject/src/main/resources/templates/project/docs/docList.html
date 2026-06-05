@@ -70,7 +70,7 @@
 			{ 
 			    header: '제목', 
 			    name: 'title', 
-			    width: 400, align:'center', sortable: true,
+			    minWidth: 400, align:'center', sortable: true,
 			    formatter: ({ row, value }) => {
 			        return `
 			            <a href="javascript:void(0)"
@@ -144,7 +144,7 @@
 grid = new tui.Grid({
   el: document.getElementById('grid'),
 
-  autoWidth: true,      // 기업이랑 동일
+  autoWidth: true,      
   scrollX: false,
   scrollY: false,
 
