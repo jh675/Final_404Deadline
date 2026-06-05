@@ -27,7 +27,7 @@
 	<div class="issue-page-head">
 		<a th:href="@{/project/issue/list}" class="issue-page-back">← 이슈 목록</a>
 		<h1 class="issue-page-head__title"
-			th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '제목 없음'">제목명</h1>
+			th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '이슈명 없음'">이슈명</h1>
 		<div class="issue-page-head__actions" th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
 			<a class="btn btn-primary btn-sm"
 				th:href="@{/project/issue/register(id=${issue.id})}">이슈 수정</a>
@@ -48,7 +48,7 @@
 			<input type="text" class="form-control form-control-sm" readonly th:value="${issue.priorityCd ?: '—'}" />
 		</div>
 		<div class="meta-item">
-			<label>진척률</label>
+			<label>진척율(%)</label>
 			<input type="text" class="form-control form-control-sm" readonly
 				th:value="${issue.doneRatio != null ? issue.doneRatio + '%' : '—'}" />
 		</div>
@@ -58,7 +58,7 @@
 				th:value="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : '—'}" />
 		</div>
 		<div class="meta-item">
-			<label>마감예정일</label>
+			<label>완료예정일</label>
 			<input type="text" class="form-control form-control-sm" readonly
 				th:value="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : '—'}" />
 		</div>
@@ -76,7 +76,7 @@
 			<label>상위 이슈</label>
 			<th:block th:if="${ParentIssue != null and ParentIssue.id != null}">
 				<a class="parent-issue-link" th:href="@{/project/issue/detail(id=${ParentIssue.id})}"
-					th:text="${ParentIssue.subject != null and !#strings.isEmpty(ParentIssue.subject)} ? ${ParentIssue.subject} : '제목 없음'">상위 이슈</a>
+					th:text="${ParentIssue.subject != null and !#strings.isEmpty(ParentIssue.subject)} ? ${ParentIssue.subject} : '이슈명 없음'">상위 이슈</a>
 			</th:block>
 			<span class="meta-empty" th:unless="${ParentIssue != null and ParentIssue.id != null}">—</span>
 		</div>
@@ -158,7 +158,7 @@
 				<thead>
 					<tr>
 						<th>이슈명</th>
-						<th>이슈상태</th>
+						<th>상태</th>
 						<th>담당자</th>
 					</tr>
 				</thead>
@@ -296,7 +296,7 @@
 
 		tbody.innerHTML = issues.map(function (issue) {
 			var id = issue.id;
-			var subject = escapeHtml(issue.subject || '제목 없음');
+			var subject = escapeHtml(issue.subject || '이슈명 없음');
 			var status = escapeHtml(issue.statusCd || '—');
 			var memName = escapeHtml(issue.memName || '—');
 			var subjectCell = id != null
@@ -924,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				}
 			},
 			{
-				header: '이슈상태',
+				header: '상태',
 				name: 'statusCd',
 				width: 120,
 				align: 'center',

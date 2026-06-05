@@ -29,12 +29,12 @@
 		<div class="issue-page-section">
 			<div class="issue-form-row">
 				<div class="search-item search-item--grow">
-					<label for="subject">제목<span class="req">*</span></label>
+					<label for="subject">이슈명<span class="req">*</span></label>
 					<div class="field-wrap" id="wrap-subject">
 						<input type="text" id="subject" name="subject" maxlength="500" class="form-control"
-							placeholder="제목 입력"
+							placeholder="이슈명 입력"
 							th:value="${issue != null and issue.subject != null ? issue.subject : ''}" required />
-						<p class="err-msg" id="err-subject">제목을 입력해 주세요.</p>
+						<p class="err-msg" id="err-subject">이슈명을 입력해 주세요.</p>
 					</div>
 				</div>
 			</div>
@@ -98,7 +98,7 @@
 					</div>
 				</div>
 				<div class="search-item search-item--date">
-					<label for="dueDate">마감예정일</label>
+					<label for="dueDate">완료예정일</label>
 					<div class="field-wrap">
 						<input type="date" id="dueDate" name="dueDate" class="form-control"
 							th:value="${issue != null and issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : (project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : '')}"
@@ -168,7 +168,7 @@
 					</div>
 				</div>
 				<div class="search-item search-item--progress">
-					<label for="doneRatio">진척율</label>
+					<label for="doneRatio">진척율(%)</label>
 					<div class="field-wrap">
 						<div class="progress-wrap">
 							<input type="range" id="doneRatio" name="doneRatio" min="0" max="100" step="10"

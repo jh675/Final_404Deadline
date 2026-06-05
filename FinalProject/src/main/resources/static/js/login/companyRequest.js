@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
         feedback.textContent = '';
 
         try {
-            // 폼 데이터를 모아서 fetch로 백엔드에 전송 (Thymeleaf CSRF 토큰 자동 포함)
+            // 폼 데이터를 모아서 fetch로 백엔드에 전송 
             const formData = new FormData(companyRequestForm);
             const response = await fetch(companyRequestForm.action, {
                 method: 'POST',
