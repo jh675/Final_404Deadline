@@ -26,6 +26,26 @@
     margin-top: 10px;
 }
 
+
+.tui-grid-container {
+    border-color: rgba(71, 85, 105, 0.2) !important;
+}
+
+.tui-grid-header-area,
+.tui-grid-lside-area .tui-grid-header-area,
+.tui-grid-rside-area .tui-grid-header-area {
+    background: #f4f8fc !important;
+}
+
+.tui-grid-cell-header {
+    background-color: #f4f8fc !important;
+    color: #64748b !important;
+}
+
+.tui-grid-body-area .tui-grid-cell {
+    background-color: #ffffff !important;
+}
+
 </style>
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
@@ -70,7 +90,7 @@
 			{ 
 			    header: '제목', 
 			    name: 'title', 
-			    width: 400, align:'center', sortable: true,
+			    minWidth: 400, align:'center', sortable: true,
 			    formatter: ({ row, value }) => {
 			        return `
 			            <a href="javascript:void(0)"
@@ -144,7 +164,7 @@
 grid = new tui.Grid({
   el: document.getElementById('grid'),
 
-  autoWidth: true,      // 기업이랑 동일
+  autoWidth: true,      
   scrollX: false,
   scrollY: false,
 
