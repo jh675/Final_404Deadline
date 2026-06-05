@@ -4,11 +4,9 @@
  */
 #wrapper {
 	width: 100%;
-	max-width: 1306px;
+	max-width: 1550px;
 	margin: 0 auto;
 	overflow-x: auto;
-	border: 1px solid #dee2e6;
-	border-radius: 6px;
 	padding: 12px;
 	box-sizing: border-box;
 }
