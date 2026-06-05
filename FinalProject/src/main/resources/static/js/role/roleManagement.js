@@ -340,19 +340,19 @@ document.addEventListener("DOMContentLoaded", function () {
             const mount = getToolbarMount();
             if (!mount) return;
             let html =
-              '<button type="button" class="btn btn-primary btn-sm" id="roleBtnRegister">등록</button>';
+              '<button type="button" class="btn btn-primary" id="roleBtnRegister">등록</button>';
             if (!deleteMode) {
               html +=
-                '<button type="button" class="btn btn-danger btn-sm" id="roleBtnDelete">삭제</button>';
+                '<button type="button" class="btn btn-danger" id="roleBtnDelete">삭제</button>';
             } else {
               const rows = grid ? getCheckedRowsForRemove() : [];
               const n = rows.length;
               if (n === 0) {
                 html +=
-                  '<button type="button" class="btn btn-secondary btn-sm" id="roleBtnDeleteCancel">삭제 취소</button>';
+                  '<button type="button" class="btn btn-secondary" id="roleBtnDeleteCancel">삭제 취소</button>';
               } else {
                 html +=
-                  '<button type="button" class="btn btn-danger btn-sm" id="roleBtnRemove">제거</button>';
+                  '<button type="button" class="btn btn-danger" id="roleBtnRemove">제거</button>';
               }
             }
             mount.innerHTML = html;

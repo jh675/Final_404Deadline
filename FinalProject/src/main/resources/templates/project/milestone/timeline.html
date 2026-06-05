@@ -429,11 +429,11 @@
       <ul class="milestone-list" id="milestoneList"></ul>
       <div class="milestone-add-wrap"
            th:if="${@prjAuth.hasRole('ROLE_MILESTONE_CREATE') or @prjAuth.hasRole('ROLE_MILESTONE_UPDATE')}">
-        <button type="button" class="btn btn-primary btn-sm"
+        <button type="button" class="btn btn-primary"
                 th:if="${@prjAuth.hasRole('ROLE_MILESTONE_CREATE')}"
                 data-bs-toggle="modal" data-bs-target="#milestoneAddModal"
                 data-mode="add">마일스톤 추가</button>
-        <button type="button" class="btn btn-secondary btn-sm"
+        <button type="button" class="btn btn-secondary"
                 th:if="${@prjAuth.hasRole('ROLE_MILESTONE_UPDATE')}"
                 data-bs-toggle="modal" data-bs-target="#milestoneAddModal"
                 data-mode="edit">마일스톤 관리</button>
@@ -448,22 +448,22 @@
           </div>
           <div class="timeline-actions"
                th:if="${@prjAuth.hasRole('ROLE_TIMELINE_CREATE') or (@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE'))}">
-            <button type="button" class="btn btn-primary btn-sm"
+            <button type="button" class="btn btn-primary"
                     th:if="${@prjAuth.hasRole('ROLE_TIMELINE_CREATE')}"
                     data-bs-toggle="modal" data-bs-target="#timelineAddModal">
               타임라인 추가
             </button>
-            <button type="button" class="btn btn-primary btn-sm"
+            <button type="button" class="btn btn-primary"
                     th:if="${@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE')}"
                     data-bs-toggle="modal" data-bs-target="#issueRegistModal">
               이슈 등록
             </button>
-            <button type="button" class="btn btn-secondary btn-sm"
+            <button type="button" class="btn btn-secondary"
                     th:if="${@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE')}"
                     data-bs-toggle="modal" data-bs-target="#issueMoveModal">
               이슈 이동
             </button>
-            <button type="button" class="btn btn-danger btn-sm"
+            <button type="button" class="btn btn-danger"
                     th:if="${@prjAuth.hasRole('ROLE_MILESTONE_UPDATE') and @prjAuth.hasRole('ROLE_ISSUE_UPDATE')}"
                     data-bs-toggle="modal" data-bs-target="#issueDelistModal">
               이슈 해제

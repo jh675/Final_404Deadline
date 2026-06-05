@@ -120,12 +120,12 @@
         <div class="issue-register-actions mem-actions">
           <a
             th:if="${panelMode}"
-            class="btn btn-primary"
+              class="btn btn-success"
             th:href="@{/project/member/panel(userId=${userId}, grpId=${grpId}, edit=true)}"
           >수정</a>
           <a
             th:unless="${panelMode}"
-            class="btn btn-primary"
+              class="btn btn-success"
             th:href="@{/project/member/info(userId=${userId}, grpId=${grpId}, edit=true)}"
           >수정</a>
         </div>

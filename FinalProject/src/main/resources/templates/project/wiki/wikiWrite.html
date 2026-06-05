@@ -74,7 +74,7 @@
                 <div class="search-item attach-section" th:unless="${page != null and page.id != null}">
                     <div class="attach-head">
                         <span>첨부파일 (최대 5개, 합계 50MB 이하)</span>
-                        <button type="button" class="btn btn-secondary btn-sm" id="btnAddFile">파일추가</button>
+                        <button type="button" class="btn btn-secondary" id="btnAddFile">파일추가</button>
                     </div>
                     <ul class="attachment-list" id="newAttachmentList"></ul>
                     <input type="file" id="fileInput" name="files" class="attach-hidden-input" multiple accept="*/*" />
@@ -96,7 +96,7 @@
                                 th:attr="data-attach-id=${file.id}, data-file-size=${file.fileSize != null ? file.fileSize : 0}">
                                 <div class="attach-file-name"
                                      th:text="${file.fileName != null ? file.fileName : file.diskFileName}">파일명</div>
-                                <button type="button" class="btn btn-secondary btn-sm btn-remove-existing"
+                                <button type="button" class="btn btn-secondary btn-remove-existing"
                                         th:if="${@prjAuth.hasRole('ROLE_WIKI_UPDATE')}">첨부삭제</button>
                             </li>
                         </ul>
@@ -105,7 +105,7 @@
                     <div class="attach-subsection">
                         <div class="attach-head">
                             <span>추가할 파일</span>
-                            <button type="button" class="btn btn-secondary btn-sm" id="btnAddFileEdit">파일추가</button>
+                            <button type="button" class="btn btn-secondary" id="btnAddFileEdit">파일추가</button>
                         </div>
                         <ul class="attachment-list" id="newAttachmentListEdit"></ul>
                         <input type="file" id="fileInputEdit" name="files" class="attach-hidden-input" multiple accept="*/*" />
@@ -327,7 +327,7 @@
 
                     var del = document.createElement('button');
                     del.type = 'button';
-                    del.className = 'btn btn-secondary btn-sm';
+                    del.className = 'btn btn-secondary';
                     del.textContent = '첨부삭제';
                     del.addEventListener('click', function () {
                         selectedFiles.splice(index, 1);

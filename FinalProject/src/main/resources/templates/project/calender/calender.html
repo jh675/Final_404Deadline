@@ -168,19 +168,19 @@
 				class="d-flex align-items-center gap-2 p-3 border rounded-3 mb-3 bg-white">
 				<div class="btn-group" role="group">
 					<button type="button"
-						class="btn btn-outline-primary view-btn active"
+						class="btn btn-primary view-btn active"
 						onclick="changeView('month')">월간</button>
-					<button type="button" class="btn btn-outline-primary view-btn"
+					<button type="button" class="btn btn-primary view-btn"
 						onclick="changeView('week')">주간</button>
-					<button type="button" class="btn btn-outline-primary view-btn"
+					<button type="button" class="btn btn-primary view-btn"
 						onclick="changeView('day')">일일</button>
 				</div>
 				<div class="d-flex align-items-center gap-1">
-					<button type="button" class="btn btn-outline-secondary btn-sm"
+					<button type="button" class="btn btn-secondary"
 						onclick="calendar.prev(); updateDateLabel()">&lt;</button>
 					<span class="fw-bold text-center px-2" id="currentDate"
 						style="min-width: 90px; font-size: 14px;">년 월</span>
-					<button type="button" class="btn btn-outline-secondary btn-sm"
+					<button type="button" class="btn btn-secondary"
 						onclick="calendar.next(); updateDateLabel(); loadEvents()">&gt;</button>
 				</div>
 				<div class="d-flex align-items-center gap-2 ms-auto">
@@ -192,7 +192,7 @@
 						<option value="company">회사일정</option>
 					</select> <input type="text" class="form-control form-control-sm"
 						id="searchInput" placeholder="검색어를 입력해주세요." style="width: 180px;">
-					<button type="button" class="btn btn-primary btn-sm"
+					<button type="button" class="btn btn-primary"
 						onclick="searchEvents()">검색</button>
 				</div>
 			</div>

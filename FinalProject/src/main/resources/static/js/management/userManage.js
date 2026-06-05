@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 				formatter: ({ row }) => {
 				    return `<button type="button" 
-									class="btn btn-success btn-sm edit-btn shadow-sm" 
+									class="btn btn-success edit-btn shadow-sm" 
 									data-id="${row.id}">
 									수정</button>`;
 				}
