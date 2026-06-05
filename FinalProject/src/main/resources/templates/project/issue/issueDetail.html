@@ -28,10 +28,6 @@
 		<a th:href="@{/project/issue/list}" class="issue-page-back">← 이슈 목록</a>
 		<h1 class="issue-page-head__title"
 			th:text="${issue.subject != null and !#strings.isEmpty(issue.subject)} ? ${issue.subject} : '이슈명 없음'">이슈명</h1>
-		<div class="issue-page-head__actions" th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
-			<a class="btn btn-primary btn-sm"
-				th:href="@{/project/issue/register(id=${issue.id})}">이슈 수정</a>
-		</div>
 	</div>
 
 	<div class="issue-meta-grid">
@@ -138,13 +134,13 @@
 			<div class="comment-form-wrap">
 				<div class="reply-hint-row" id="replyHintRow" hidden aria-live="polite">
 					<span id="replyHintText" class="reply-hint-row__text"></span>
-					<button type="button" class="btn btn-sm btn-issue-soft btn-reply-cancel" id="cancelReplyBtn">답글 취소</button>
+					<button type="button" class="btn btn-issue-soft btn-reply-cancel" id="cancelReplyBtn">답글 취소</button>
 				</div>
 				<form class="comment-form" id="issueCommentForm" th:data-issue-id="${issue.id}">
 					<input type="hidden" name="issueId" th:value="${issue.id}" />
 					<input type="hidden" name="parentId" id="commentParentId" value="" />
 					<textarea name="content" placeholder="댓글 내용" required></textarea>
-					<button type="submit" class="btn btn-sm btn-issue-soft btn-issue-soft--accent">등록</button>
+					<button type="submit" class="btn btn-issue-soft btn-issue-soft--accent">등록</button>
 				</form>
 			</div>
 		</div>
@@ -190,6 +186,11 @@
 				</tbody>
 			</table>
 		</div>
+	</div>
+
+	<div class="issue-register-actions" th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
+		<a class="btn btn-success"
+			th:href="@{/project/issue/register(id=${issue.id})}">수정</a>
 	</div>
 	</th:block>
 </div>
@@ -655,7 +656,7 @@
 			var content = escapeHtml(comment.content || '').replace(/\r?\n/g, '<br>');
 			var replyButton = comment.id != null
 				? '<div class="comment-actions">'
-					+ '<button type="button" class="btn btn-sm btn-issue-soft btn-reply" data-comment-id="' + escapeHtml(comment.id)
+					+ '<button type="button" class="btn btn-issue-soft btn-reply" data-comment-id="' + escapeHtml(comment.id)
 					+ '" data-comment-num="' + (index + 1) + '">댓글달기</button>'
 				+ '</div>'
 				: '';

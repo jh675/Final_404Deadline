@@ -93,7 +93,7 @@
 								style="background-color: #5b6cff;">✨ AI</span> <input
 								type="text" id="aiSearchInput" class="form-control"
 								placeholder="지금 내가 해야할 일은?">
-							<button class="btn btn-outline-primary" type="button"
+							<button class="btn btn-primary" type="button"
 								id="aiSearchBtn">묻기</button>
 						</div>
 					</div>
@@ -103,7 +103,7 @@
 
 					<!-- 🔔 알림 버튼 드롭다운 -->
 					<div class="dropdown me-2">
-						<button class="btn btn-outline-secondary btn-sm position-relative"
+						<button class="btn btn-secondary position-relative"
 							type="button" id="notificationBtn" data-bs-toggle="dropdown"
 							data-bs-auto-close="outside" aria-expanded="false">
 							🔔 <span id="notificationBadge"
@@ -120,7 +120,7 @@
 								class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom"
 								style="background: #f8f9fa; color: #212529;"><strong>🔔
 									알림</strong>
-								<button class="btn btn-sm btn-link text-muted p-0"
+								<button class="btn btn-link text-muted p-0"
 									id="clearAllBtn">전체 삭제</button></li>
 
 							<!-- 알림 목록 -->
@@ -166,7 +166,7 @@
 					</span>
 
 					<form th:action="@{/logout}" method="post">
-						<button type="submit" class="btn btn-danger btn-sm">로그아웃
+						<button type="submit" class="btn btn-danger">로그아웃
 						</button>
 					</form>
 				</div>
@@ -217,7 +217,7 @@
 			                    <span>${icon}</span>
 			                    <small class="ms-1" style="color:#212529;">${message}</small>
 			                </div>
-			                <button class="btn btn-sm btn-link p-0 ms-2 delete-btn" 
+			                <button class="btn btn-link p-0 ms-2 delete-btn" 
 			                        style="font-size:12px; flex-shrink:0; color:#aaa;">✕</button>
 			            </div>
 			            <div style="font-size:11px; color:#888; margin-top:4px;">${time}</div>

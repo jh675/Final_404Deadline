@@ -36,19 +36,19 @@
             <div class="wiki-page-head">
                 <h1 class="wiki-page-head__title" th:text="${page != null ? page.title : '지금위키명'}">지금위키명</h1>
                 <div class="wiki-page-head__actions">
-                    <a class="btn btn-primary btn-sm" th:href="@{/project/wiki/register}"
+                    <a class="btn btn-primary" th:href="@{/project/wiki/register}"
                        th:if="${@prjAuth.hasRole('ROLE_WIKI_CREATE')}">작성</a>
-                    <a class="btn btn-success btn-sm"
+                    <a class="btn btn-success"
                        th:if="${@prjAuth.hasRole('ROLE_WIKI_UPDATE')}"
                        th:href="@{/project/wiki/register(id=${page.id != null ? page.id : 0})}">편집</a>
-                    <a class="btn btn-secondary btn-sm"
+                    <a class="btn btn-secondary"
                        th:if="${@prjAuth.hasRole('ROLE_WIKI_VIEW')}"
                        th:href="@{/project/wiki/history/{name}(name=${page.title})}">역사</a>
-                    <button type="button" class="btn btn-secondary btn-sm"
+                    <button type="button" class="btn btn-secondary"
                             th:if="${@prjAuth.hasRole('ROLE_WIKI_UPDATE') and !isStartPage}"
                             th:attr="data-wiki-title=${page != null ? page.title : ''}"
                             onclick="confirmSetStartPage(this)">첫페이지 설정</button>
-                    <button type="button" class="btn btn-danger btn-sm"
+                    <button type="button" class="btn btn-danger"
                             th:if="${@prjAuth.hasRole('ROLE_WIKI_DELETE')}"
                             th:attr="data-wiki-id=${page != null ? page.id : 0},data-wiki-title=${page != null ? page.title : ''}"
                             th:disabled="${isStartPage}"
