@@ -2,6 +2,7 @@
           const cfg = window.groupManagementInfoPageConfig || {};
           const prjId = cfg.prjId;
           const registerMode = cfg.registerMode;
+          const panelMode = !!cfg.panelMode;
           const grpId = cfg.grpId;
           const serverMembers = cfg.serverMembers || [];
           const serverRoles = cfg.serverRoles || [];
@@ -229,7 +230,7 @@
               el: membersGridEl,
               data: pendingToGridRows(),
               rowHeaders: ["rowNum"],
-              scrollX: false,
+              scrollX: panelMode,
               scrollY: false,
               bodyHeight: "auto",
               rowHeight: 36,
@@ -416,7 +417,7 @@
               el: rolesGridEl,
               data: pendingRolesToGridRows(),
               rowHeaders: ["rowNum"],
-              scrollX: false,
+              scrollX: panelMode,
               scrollY: false,
               bodyHeight: "auto",
               rowHeight: 36,
@@ -1208,9 +1209,13 @@
                   const okMsg =
                     memberDirty && roleDirty ? "그룹 구성원과 권한이 수정되었습니다." : memberDirty ? "그룹 구성원이 수정되었습니다." : "그룹 권한이 수정되었습니다.";
                   await alertMsg(okMsg, "알림");
-                  window.location.href =
-                    "/project/group/info?grpId=" +
-                    encodeURIComponent(String(gid));
+                  if (panelMode) {
+                    window.location.reload();
+                  } else {
+                    window.location.href =
+                      "/project/group/info?grpId=" +
+                      encodeURIComponent(String(gid));
+                  }
                 } catch (e) {
                   await alertMsg("그룹 수정 중 오류가 발생했습니다.", "오류");
                 } finally {
