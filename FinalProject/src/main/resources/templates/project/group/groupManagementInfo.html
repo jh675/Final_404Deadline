@@ -81,12 +81,12 @@
 
         <div class="issue-register-actions grp-actions" th:if="${registerMode}">
           <button type="button" class="btn btn-primary" id="btnGroupSave">등록</button>
-          <a class="btn btn-secondary" th:href="@{/project/group/list}">취소</a>
+          <a class="btn btn-secondary" th:href="@{/project/group/list}">초기화</a>
         </div>
         <div class="issue-register-actions grp-actions" th:unless="${registerMode}">
           <button type="button" class="btn btn-primary" id="btnGroupEdit">수정</button>
           <button type="button" id="btnGroupSave" class="btn btn-primary is-hidden">저장</button>
-          <button type="button" id="btnGroupCancel" class="btn btn-secondary is-hidden">취소</button>
+          <button type="button" id="btnGroupCancel" class="btn btn-secondary is-hidden">초기화</button>
         </div>
       </th:block>
 

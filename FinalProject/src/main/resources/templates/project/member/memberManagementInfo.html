@@ -168,7 +168,7 @@
         </div>
         <div class="issue-register-actions mem-actions" th:if="${editMode}">
           <button type="button" class="btn btn-primary" id="btnMemberSave">저장</button>
-          <a class="btn btn-secondary" th:href="@{/project/member/info(userId=${userId}, grpId=${grpId})}">취소</a>
+          <a class="btn btn-secondary" th:href="@{/project/member/info(userId=${userId}, grpId=${grpId})}">초기화</a>
         </div>
 
         <script th:if="${editMode}" th:src="@{/js/member/memberManagementInfo.js}"></script>
