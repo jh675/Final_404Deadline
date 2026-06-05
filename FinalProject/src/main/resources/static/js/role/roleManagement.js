@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
               toolbarMountElement.id = "roleGridToolbarMount";
               toolbarMountElement.className = "role-grid-toolbar";
               toolbarMountElement.setAttribute("role", "toolbar");
-              toolbarMountElement.setAttribute("aria-label", "역할 목록 도구");
+              toolbarMountElement.setAttribute("aria-label", "권한 목록 도구");
             }
             return toolbarMountElement;
           }
@@ -300,13 +300,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const names = rows.map(function (r) {
               return r.roleName != null && r.roleName !== ""
                 ? String(r.roleName)
-                : "(역할명 없음)";
+                : "(권한명 없음)";
             });
             const msg =
-              "선택한 역할을 삭제하시겠습니까?\n\n" + names.join("\n");
+              "선택한 권한을 삭제하시겠습니까?\n\n" + names.join("\n");
             var confirmed = await window.RoleQuestionModal.confirm(
               msg,
-              "역할 삭제"
+              "권한 삭제"
             );
             if (!confirmed) {
               return;
@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function () {
               });
             if (!roleCds.length) {
               await window.RoleQuestionModal.alert(
-                "역할 코드를 확인할 수 없습니다.",
+                "권한 코드를 확인할 수 없습니다.",
                 "알림"
               );
               return;
@@ -370,7 +370,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const okMsg =
               names.length === 1
                 ? labelPart + "이(가) 정상적으로 제거되었습니다."
-                : labelPart + " 역할이 정상적으로 제거되었습니다.";
+                : labelPart + " 권한이 정상적으로 제거되었습니다.";
             await window.RoleQuestionModal.alert(okMsg, "알림");
 
             const removeSet = {};
@@ -412,7 +412,7 @@ document.addEventListener("DOMContentLoaded", function () {
               minBodyHeight: 100,
               columns: [
                 {
-                  header: "역할코드",
+                  header: "권한코드",
                   name: "roleCd",
                   width: 110,
                   align: "center",
@@ -421,7 +421,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     value == null || value === "" ? "" : String(value),
                 },
                 {
-                  header: "역할명",
+                  header: "권한명",
                   name: "roleName",
                   width: 220,
                   align: "center",

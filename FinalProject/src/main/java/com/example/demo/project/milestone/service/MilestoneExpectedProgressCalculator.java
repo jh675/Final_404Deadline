@@ -10,7 +10,7 @@ import java.util.Set;
 import com.example.demo.project.calender.service.HolidayVO;
 
 /**
- * 예상진척도 = 휴일을 제외한 진행기간 / (전체기간 - 휴일기간)
+ * 예상 진척율(%) = 휴일을 제외한 진행기간 / (전체기간 - 휴일기간)
  */
 public final class MilestoneExpectedProgressCalculator {
 

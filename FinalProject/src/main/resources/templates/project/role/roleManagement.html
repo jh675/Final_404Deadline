@@ -4,7 +4,7 @@
       layout:decorate="~{layout/projectLayout}">
   <head>
     <meta charset="UTF-8" />
-    <title>프로젝트 역할 관리</title>
+    <title>프로젝트 권한 관리</title>
     <th:block layout:fragment="head-content">
       <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
       <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
@@ -29,24 +29,24 @@
       <div class="issue-shell issue-shell--list">
         <div id="wrapper" class="issue-list">
           <header class="issue-list__header">
-            <h1 class="issue-list__title">프로젝트 역할 관리</h1>
+            <h1 class="issue-list__title">프로젝트 권한 관리</h1>
           </header>
 
-          <section class="issue-section issue-section--filter" aria-label="역할 검색">
+          <section class="issue-section issue-section--filter" aria-label="권한 검색">
             <form id="roleSearchForm" th:action="@{/project/role/list}" method="get" class="issue-filter-form">
               <div class="issue-field">
-                <label for="permissionKey">역할 코드</label>
-                <input type="text" id="permissionKey" name="permissionKey" th:value="${permissionKey}" placeholder="역할 코드" autocomplete="off" />
+                <label for="permissionKey">권한 코드</label>
+                <input type="text" id="permissionKey" name="permissionKey" th:value="${permissionKey}" placeholder="권한 코드" autocomplete="off" />
               </div>
               <div class="issue-field">
-                <label for="permissionName">역할명</label>
-                <input type="text" id="permissionName" name="permissionName" th:value="${permissionName}" placeholder="역할명" autocomplete="off" />
+                <label for="permissionName">권한명</label>
+                <input type="text" id="permissionName" name="permissionName" th:value="${permissionName}" placeholder="권한명" autocomplete="off" />
               </div>
               <div class="issue-field issue-field--range">
-                <label for="createdFrom">역할 생성일</label>
+                <label for="createdFrom">권한 생성일</label>
                 <input type="date" id="createdFrom" name="createdFrom" th:value="${createdFrom}" />
                 <span class="issue-field-sep">~</span>
-                <input type="date" id="createdTo" name="createdTo" th:value="${createdTo}" aria-label="역할 생성일 종료" />
+                <input type="date" id="createdTo" name="createdTo" th:value="${createdTo}" aria-label="권한 생성일 종료" />
               </div>
               <div class="issue-filter-buttons">
                 <button type="submit" class="btn btn-primary">검색</button>
@@ -55,8 +55,8 @@
             </form>
           </section>
 
-          <section class="issue-section issue-section--grid" aria-label="프로젝트 역할 목록">
-            <div id="menuRoleGrid" role="region" aria-label="프로젝트 역할 그리드"></div>
+          <section class="issue-section issue-section--grid" aria-label="프로젝트 권한 목록">
+            <div id="menuRoleGrid" role="region" aria-label="프로젝트 권한 그리드"></div>
           </section>
         </div>
       </div>

@@ -117,7 +117,7 @@ public class RoleController {
         } catch (Exception e) {
             Map<String, Object> err = new LinkedHashMap<>();
             err.put("ok", false);
-            err.put("message", "역할 제거 중 오류가 발생했습니다.");
+            err.put("message", "권한 제거 중 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
         }
     }
@@ -158,7 +158,7 @@ public class RoleController {
             }
             String roleName = body.roleName() == null ? "" : body.roleName().trim();
             if (roleName.isEmpty()) {
-                return badRequest("역할명을 입력하세요.");
+                return badRequest("권한명을 입력하세요.");
             }
             RoleRevokeResultVO result =
                     roleService.createRole(

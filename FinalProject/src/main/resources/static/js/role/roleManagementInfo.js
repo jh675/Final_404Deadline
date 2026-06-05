@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function () {
               var nameEl = document.getElementById("detailRoleName");
               var name = nameEl ? nameEl.value.trim() : "";
               if (!name) {
-                await alertModal("역할명을 입력하세요.", "알림");
+                await alertModal("권한명을 입력하세요.", "알림");
                 return;
               }
 
@@ -438,7 +438,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var pidNum = Number(prjId);
             var roleCdNum = rc ? Number(rc) : NaN;
             if (isNaN(pidNum) || isNaN(roleCdNum)) {
-              await alertModal("프로젝트 또는 역할 코드가 올바르지 않습니다.", "알림");
+              await alertModal("프로젝트 또는 권한 코드가 올바르지 않습니다.", "알림");
               return;
             }
 
@@ -1059,7 +1059,7 @@ document.addEventListener("DOMContentLoaded", function () {
               var deleteRoleIfUnused = false;
               if (grpRoleCount <= 1) {
                 deleteRoleIfUnused = await confirmModal(
-                  "이 권한을 사용하는 그룹이 더 이상 없습니다.\n권한(역할) 자체를 삭제하시겠습니까?",
+                  "이 권한을 사용하는 그룹이 더 이상 없습니다.\n권한 자체를 삭제하시겠습니까?",
                   "권한 삭제 확인",
                 );
               }
@@ -1111,7 +1111,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
           if (!pid || (!isRegisterMode && !rc)) {
             host.innerHTML =
-              '<p class="perm-empty" style="padding:1rem">프로젝트 또는 역할 코드가 없어 그룹을 조회할 수 없습니다.</p>';
+              '<p class="perm-empty" style="padding:1rem">프로젝트 또는 권한 코드가 없어 그룹을 조회할 수 없습니다.</p>';
             return;
           }
 
