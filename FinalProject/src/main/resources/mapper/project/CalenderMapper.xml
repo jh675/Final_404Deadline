@@ -104,44 +104,42 @@
 	</delete>
 
 	<select id="getList" resultType="calenderVO">
-		SELECT
-		C.ID AS id,
-		C.MEM_ID AS memId,
-		C.CAL_TEXT AS calText,
-		C.PLACE AS
-		place,
-		C.TYPE_CD AS typeCd,
-		C.SHARING_CD AS sharingCd,
-		C.STATE_CD AS
-		stateCd,
-		C.COLOR_TAG_CD AS colorTagCd,
-		C.CAL_TYPE AS calType,
-		U.NAME AS
-		memName,
-		TO_CHAR(C.CAL_START, 'YYYY-MM-DD HH24:MI:SS') AS calStart,
-		TO_CHAR(C.CAL_END, 'YYYY-MM-DD HH24:MI:SS') AS calEnd,
-		TO_CHAR(C.CREATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS createdOn,
-		TO_CHAR(C.UPDATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS updatedOn
-		FROM
-		CALENDER C
-		LEFT JOIN USERS U ON C.MEM_ID = U.ID
-		<where>
-			AND (
-			C.MEM_ID = #{memId}
-			OR C.SHARING_CD = '01CALSHARE'
-			)
-			<if test="typeCd != null and typeCd != ''">
-				AND C.TYPE_CD = #{typeCd}
-			</if>
-			<if test="keyword != null and keyword != ''">
-				AND (
-				C.PLACE LIKE '%' || #{keyword} || '%'
-				OR C.CAL_TEXT
-				LIKE '%' || #{keyword} || '%'
-				)
-			</if>
-		</where>
-	</select>
+    SELECT
+        C.ID AS id,
+        C.MEM_ID AS memId,
+        C.CAL_TEXT AS calText,
+        C.PLACE AS place,
+        C.TYPE_CD AS typeCd,
+        C.SHARING_CD AS sharingCd,
+        C.STATE_CD AS stateCd,
+        C.COLOR_TAG_CD AS colorTagCd,
+        C.CAL_TYPE AS calType,
+        U.NAME AS memName,
+        TO_CHAR(C.CAL_START, 'YYYY-MM-DD HH24:MI:SS') AS calStart,
+        TO_CHAR(C.CAL_END, 'YYYY-MM-DD HH24:MI:SS') AS calEnd,
+        TO_CHAR(C.CREATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS createdOn,
+        TO_CHAR(C.UPDATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS updatedOn
+    FROM
+        CALENDER C
+        INNER JOIN USERS U ON C.MEM_ID = U.ID
+    <where>
+        AND U.BIZ_NO = #{bizNo}
+        
+        AND (
+            C.MEM_ID = #{memId}
+            OR C.SHARING_CD = '01CALSHARE'
+        )
+        <if test="typeCd != null and typeCd != ''">
+            AND C.TYPE_CD = #{typeCd}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (
+                C.PLACE LIKE '%' || #{keyword} || '%'
+                OR C.CAL_TEXT LIKE '%' || #{keyword} || '%'
+            )
+        </if>
+    </where>
+</select>
 
 	<!-- 1시간 전 알림용 -->
 	<select id="findByCalStartBetween" resultType="calenderVO">
