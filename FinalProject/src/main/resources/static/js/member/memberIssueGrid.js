@@ -76,9 +76,9 @@
       { header: "이슈 신청자", name: "requesterName", align: "center", width: 120, sortable: true },
       { header: "이슈 담당자", name: "assigneeName", align: "center", width: 120, sortable: true },
       { header: "시작예정일", name: "estStartDate", align: "center", width: 120 },
-      { header: "마감희망일", name: "dueDate", align: "center", width: 120, sortable: true },
+      { header: "마감예정일", name: "dueDate", align: "center", width: 120, sortable: true },
       { header: "시작일", name: "startDate", align: "center", width: 120, sortable: true },
-      { header: "마감일", name: "closedDate", align: "center", width: 120, sortable: true },
+      { header: "완료일", name: "closedDate", align: "center", width: 120, sortable: true },
       { header: "진척율(%)", name: "doneRatio", align: "center", width: 100, sortable: true },
     ],
   });

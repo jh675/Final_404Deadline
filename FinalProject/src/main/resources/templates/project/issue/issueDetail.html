@@ -53,12 +53,12 @@
 				th:value="${issue.doneRatio != null ? issue.doneRatio + '%' : '—'}" />
 		</div>
 		<div class="meta-item">
-			<label>시작 예정일</label>
+			<label>시작예정일</label>
 			<input type="text" class="form-control form-control-sm" readonly
 				th:value="${issue.estStartDate != null ? #dates.format(issue.estStartDate, 'yyyy-MM-dd') : '—'}" />
 		</div>
 		<div class="meta-item">
-			<label>종료 예정일</label>
+			<label>마감예정일</label>
 			<input type="text" class="form-control form-control-sm" readonly
 				th:value="${issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : '—'}" />
 		</div>
@@ -68,7 +68,7 @@
 				th:attr="data-server-date=${issue.startDate != null ? #dates.format(issue.startDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
 		</div>
 		<div class="meta-item">
-			<label>종료일</label>
+			<label>완료일</label>
 			<input type="text" class="form-control form-control-sm" readonly
 				th:attr="data-server-date=${issue.closedDate != null ? #dates.format(issue.closedDate, 'yyyy-MM-dd''T''HH:mm:ss''Z''') : ''}" />
 		</div>
