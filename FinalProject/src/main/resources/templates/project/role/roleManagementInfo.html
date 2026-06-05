@@ -167,12 +167,12 @@
         </section>
         <div class="issue-register-actions role-actions" th:if="${registerMode}">
           <button type="button" class="btn btn-primary" id="btnRoleSave">저장</button>
-          <button type="button" class="btn btn-secondary" id="btnRoleCancel">취소</button>
+          <button type="button" class="btn btn-secondary" id="btnRoleCancel">초기화</button>
         </div>
 
         <div class="issue-register-actions role-actions" th:if="${!registerMode and currentRole != null}">
           <button type="button" class="btn btn-primary" id="btnRoleEdit" data-label-edit="수정" data-label-save="저장">수정</button>
-          <button type="button" class="btn btn-secondary is-hidden" id="btnRoleCancelEdit">취소</button>
+          <button type="button" class="btn btn-secondary is-hidden" id="btnRoleCancelEdit">초기화</button>
         </div>
 
       </th:block>
