@@ -94,9 +94,13 @@
 					return name != null && String(name).trim() !== '' && String(name).trim() !== '—';
 				}
 
-				function getStatusSkipReason(row) {
+				function statusRequiresAssignee(code) {
+					return code === '02ISSUESTAT' || code === '03ISSUESTAT';
+				}
+
+				function getStatusSkipReason(row, targetStatusCd) {
 					if (!row) return '이슈를 찾을 수 없음';
-					if (!hasAssignee(row)) return '담당자 없음';
+					if (statusRequiresAssignee(targetStatusCd) && !hasAssignee(row)) return '담당자 없음';
 					return null;
 				}
 
@@ -128,8 +132,10 @@
 					});
 				}
 
-				function classifyStatusAction(ids) {
-					return classifyBySkipReason(ids, getStatusSkipReason);
+				function classifyStatusAction(ids, targetStatusCd) {
+					return classifyBySkipReason(ids, function (row) {
+						return getStatusSkipReason(row, targetStatusCd);
+					});
 				}
 
 				function hideActionPanel() {
@@ -190,7 +196,13 @@
 				let statusActionResult = null;
 
 				function renderStatusActionPanel() {
-					statusActionResult = classifyStatusAction(modalTargetIds);
+					const targetStatusCd = modalValue.value;
+					if (!targetStatusCd) {
+						hideActionPanel();
+						statusActionResult = null;
+						return null;
+					}
+					statusActionResult = classifyStatusAction(modalTargetIds, targetStatusCd);
 					return renderActionPanel('상태 변경', '변경 대상', statusActionResult);
 				}
 
@@ -252,7 +264,8 @@
 					});
 
 					if (action === 'status') {
-						renderStatusActionPanel();
+						hideActionPanel();
+						statusActionResult = null;
 					}
 				}
 
@@ -260,6 +273,12 @@
 					const action = modalAction.value;
 					if (action === 'start' || action === 'closed') return;
 					if (action === 'status') {
+						if (modalValue.value) {
+							renderStatusActionPanel();
+						} else {
+							hideActionPanel();
+							statusActionResult = null;
+						}
 						const eligible = statusActionResult && statusActionResult.eligible
 							? statusActionResult.eligible.length
 							: 0;
@@ -316,10 +335,12 @@
 
 					let targetIds = modalTargetIds;
 					if (action === 'status') {
-						const result = classifyStatusAction(modalTargetIds);
+						const result = classifyStatusAction(modalTargetIds, code);
 						targetIds = result.eligible.map(function (item) { return item.id; });
 						if (!targetIds.length) {
-							alert('담당자가 없는 이슈는 상태를 변경할 수 없습니다.');
+							alert(statusRequiresAssignee(code)
+								? '담당자가 없는 이슈는 진행중·검토 상태로 변경할 수 없습니다.'
+								: '변경 가능한 이슈가 없습니다.');
 							return;
 						}
 					}
@@ -345,7 +366,9 @@
 								? '상태 변경 ' + updated + '건 완료'
 								: '변경이 완료되었습니다.';
 							if (action === 'status' && skipped > 0) {
-								msg += ' · 제외 ' + skipped + '건(담당자 없음)';
+								msg += statusRequiresAssignee(code)
+									? ' · 제외 ' + skipped + '건(담당자 없음)'
+									: ' · 제외 ' + skipped + '건';
 							}
 							alert(msg);
 							location.reload();

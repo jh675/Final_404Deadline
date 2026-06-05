@@ -1107,6 +1107,13 @@ table.data-table tbody tr:last-child td {
 	min-width: 90px;
 }
 
+.issue-field select:disabled {
+	background-color: var(--issue-bg-muted);
+	color: var(--issue-label);
+	cursor: not-allowed;
+	opacity: 1;
+}
+
 .issue-field input[type="text"] {
 	min-width: 160px;
 }
@@ -1115,25 +1122,61 @@ table.data-table tbody tr:last-child td {
 	flex-shrink: 1;
 }
 
+.issue-field--my-issue {
+	flex-shrink: 0;
+}
+
 .issue-filter-check {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
+	gap: 8px;
 	margin: 0;
+	min-height: 34px;
+	padding: 0 2px;
 	font-size: 13px;
 	color: var(--issue-text);
 	cursor: pointer;
 	white-space: nowrap;
 	flex-shrink: 0;
 	user-select: none;
+	border-radius: var(--issue-radius-sm);
+	transition: background-color var(--issue-transition), color var(--issue-transition);
+}
+
+.issue-filter-check__text {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+	line-height: 1;
 }
 
 .issue-filter-check input[type="checkbox"] {
-	width: auto;
-	height: auto;
+	width: 16px;
+	height: 16px;
+	min-width: 16px;
+	min-height: 16px;
 	margin: 0;
+	flex-shrink: 0;
 	accent-color: var(--issue-primary);
 	cursor: pointer;
+}
+
+.issue-filter-check:has(input:checked) {
+	background-color: var(--issue-bg-muted);
+}
+
+.issue-filter-check:has(input:checked) .issue-filter-check__text {
+	color: var(--issue-heading);
+}
+
+.issue-filter-check:has(input:focus-visible) {
+	outline: 2px solid var(--issue-primary);
+	outline-offset: 2px;
+}
+
+.issue-filter-form.is-my-issue-active .issue-field:has(#memId) label {
+	color: var(--issue-label);
+	opacity: 0.85;
 }
 
 .issue-filter-buttons {
