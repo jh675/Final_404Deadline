@@ -222,22 +222,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 	    }
 
         // 아이디 검사
-        if (!loginInput.value.trim()) {
-			loginInput.classList.add('is-invalid');
-			isValid = false;
-        }
+        if (!loginInput.value.trim()) setInvalid(loginInput);
 
         // 이름 검사
-        if (!nameInput.value.trim()) {
-			nameInput.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (!nameInput.value.trim()) setInvalid(nameInput);
 
         // 고용일자 검사
-        if (!hireDateInput.value) {
-			hireDateInput.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (!hireDateInput.value) setInvalid(hireDateInput);
 		
 		// 하나라도 비어있다면 폼 제출 중단
 		if (!isValid) {
@@ -603,14 +594,6 @@ searchForm.addEventListener('submit', function(e) {
         warning.classList.remove('d-none');
         return;
     }
-/* 검색어가 없을 경우 전체 목록 조회 (팀원들의 검색 로직에 맞춰 통일화)
-    if (searchType !== '' && keyword === '') {
-        e.preventDefault();
-        document.getElementById('searchType').classList.remove('is-invalid');
-        warning.innerText = '검색어를 입력해주세요.';
-        warning.classList.remove('d-none');
-        return;
-    }*/
 
     document.getElementById('searchType').classList.remove('is-invalid');
     warning.classList.add('d-none');

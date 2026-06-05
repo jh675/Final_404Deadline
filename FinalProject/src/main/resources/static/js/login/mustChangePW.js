@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 사용자가 다시 타이핑을 시작하면 에러(빨간 테두리) 표시를 지워주는 편의성 로직 추가
+    // 사용자가 다시 타이핑을 시작하면 에러 표시 지우기
     ['newPassword', 'confirmPassword'].forEach(id => {
         document.getElementById(id).addEventListener('input', function() {
             this.classList.remove('is-invalid');
@@ -22,13 +22,13 @@ function changePassword() {
 
 	let isValid = true;
 
-	// 1. 새 비밀번호 빈칸 검사
+	// 새 비밀번호 빈칸 검사
 	if (!newPassword || newPassword.trim() === '') {
 		newPasswordInput.classList.add('is-invalid');
 		isValid = false;
 	}
 
-	// 2. 비밀번호 일치 검사
+	// 비밀번호 일치 검사
 	if (newPassword && newPassword !== confirmPassword) {
 		confirmPasswordInput.classList.add('is-invalid');
 		isValid = false;
@@ -72,7 +72,7 @@ function changePassword() {
 		})
 	.catch(error => {
 		console.error('Error:', error);
-		// 서버 연결 실패 알림 (요청하신 대로 유지)
+		// 서버 연결 실패 알림
 		alert('서버와 통신 중 오류가 발생했습니다.');
 	});
 }
