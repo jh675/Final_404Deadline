@@ -9,6 +9,7 @@
             const pageOldGrpId = cfg.dataset.oldGrpId
               ? Number(cfg.dataset.oldGrpId)
               : null;
+            const panelMode = cfg.dataset.panelMode === "true";
 
             function mountPickerOverlay(el) {
               if (el && el.parentElement !== document.body) {
@@ -316,11 +317,19 @@
                     return;
                   }
                   await alertMsg("구성원 정보가 수정되었습니다.", "알림");
-                  window.location.href =
-                    "/project/member/info?userId=" +
-                    encodeURIComponent(String(uid)) +
-                    "&grpId=" +
-                    encodeURIComponent(String(gid));
+                  if (panelMode) {
+                    window.location.href =
+                      "/project/member/panel?userId=" +
+                      encodeURIComponent(String(uid)) +
+                      "&grpId=" +
+                      encodeURIComponent(String(gid));
+                  } else {
+                    window.location.href =
+                      "/project/member/info?userId=" +
+                      encodeURIComponent(String(uid)) +
+                      "&grpId=" +
+                      encodeURIComponent(String(gid));
+                  }
                 } catch (e) {
                   await alertMsg("구성원 수정 중 오류가 발생했습니다.", "오류");
                 } finally {

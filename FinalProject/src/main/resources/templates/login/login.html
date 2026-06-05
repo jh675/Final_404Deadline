@@ -13,7 +13,7 @@
 <body>
 
 <div layout:fragment="content">
-	<div class="d-flex justify-content-center align-items-center py-2 rounded-4 my-1">
+	<div class="d-flex justify-content-center align-items-center py-2 rounded-4 my-1" style="min-height: 75vh;">
 		
 		<div class="card border-0 shadow-lg" style="width: 100%; max-width: 450px; border-radius: 1.25rem;">
 			<div class="card-body p-2 p-md-3 bg-white" style="border-radius: 1.25rem;">
@@ -31,7 +31,7 @@
 
 					<input type="hidden" id="loginType" name="loginType" value="USER">
 
-					<ul class="nav nav-tabs nav-fill mb-4" id="loginTab" role="tablist">
+					<ul class="nav nav-tabs nav-justified mb-4" id="loginTab" role="tablist">
 					    <li class="nav-item" role="presentation">
 					        <button class="nav-link active fw-bold" id="user-tab" type="button" onclick="changeLoginType('USER')">회원</button>
 					    </li>
@@ -42,7 +42,7 @@
 
 					<div class="mb-3 position-relative" id="companyInputArea">
 				        <label for="companyNameInput" class="form-label fw-semibold text-muted small">소속 기업명</label>
-				        <input type="text" id="companyNameInput" class="form-control bg-light" placeholder="기업명을 입력하세요" autocomplete="off">
+				        <input type="text" id="companyNameInput" class="form-control" placeholder="기업명을 입력하세요" autocomplete="off">
 				        <input type="hidden" id="bizNo" name="bizNo">
 				        <ul id="companyDropdown" class="list-group position-absolute w-100 shadow-sm" 
 				            style="display: none; z-index: 1000; max-height: 200px; overflow-y: auto;">
@@ -87,14 +87,14 @@
 					</a>
 				</div>
 				
-				<div class="mt-4 p-3 bg-light rounded text-muted border" style="font-size: 12px; line-height: 1.6;">
+				<!--/* <div class="mt-4 p-3 bg-light rounded text-muted border" style="font-size: 12px; line-height: 1.6;">
 					<strong>📌 테스트 계정 안내</strong><br>
 					<span class="d-inline-block mt-1">기업명 : 미래소프트웨어</span><br>
 					시스템 관리자 : admin<br>
 					기업 관리자 : cadmin<br>
 					일반 유저 : user1, user2 ...<br>
 					<span class="text-danger mt-1 d-block">* 비밀번호는 아이디와 동일합니다.</span>
-				</div>
+				</div> */-->
 				
 			</div>
 		</div>

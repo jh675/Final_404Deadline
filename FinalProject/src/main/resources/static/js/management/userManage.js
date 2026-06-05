@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 					// '01ACTIVE'를 '활성'으로 변환
                     const statusName = activeCodeMap[value] || value;
 
-                    // 화면 표시용 단어로 변환.(활성 상태 서브코드를 사용해서 하드코딩 변환 필요)
+                    // 화면 표시용 단어로 변환.
                     const roleUiMap = {
                         '활성': '프로젝트 매니저',
                         '비활성': '사원'
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 				formatter: ({ row }) => {
 				    return `<button type="button" 
-									class="btn btn-sm btn-outline-success edit-btn" 
+									class="btn btn-success btn-sm edit-btn shadow-sm" 
 									data-id="${row.id}">
 									수정</button>`;
 				}
@@ -101,6 +101,30 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
+	const gridContainer = document.querySelector('#grid .tui-grid-container');
+    const tuiPaginationWrap = document.querySelector('#grid .tui-grid-pagination');
+    const customBottomBar = document.getElementById('customBottomBar');
+    const paginationPlaceholder = document.getElementById('paginationPlaceholder');
+
+    if (gridContainer && tuiPaginationWrap && customBottomBar && paginationPlaceholder) {
+        // TUI 기본 페이징 박스의 불필요한 고정 스타일(테두리, 배경) 제거
+        tuiPaginationWrap.style.border = 'none';
+        tuiPaginationWrap.style.background = 'transparent';
+        tuiPaginationWrap.style.margin = '0';
+        tuiPaginationWrap.style.padding = '0';
+        tuiPaginationWrap.style.height = 'auto'; // 높이 제한 해제
+        
+        // 기존 페이징 요소를 우리가 만든 하단 바의 중앙으로 위치
+        paginationPlaceholder.appendChild(tuiPaginationWrap);
+
+        // 완성된 한 줄짜리 하단 바를 그리드 영역 안쪽 맨 밑으로 이동
+        gridContainer.appendChild(customBottomBar);
+        
+        // 숨김 해제 및 가로 정렬(Flex) 활성화
+        customBottomBar.classList.remove('d-none');
+        customBottomBar.classList.add('d-flex');
+    }
+	
     // 수정 함수 호출을 위한 연결
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('edit-btn')) {
@@ -254,32 +278,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 	
         // 아이디 검사
-        if (!loginInput.value.trim()) {
-            loginInput.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (!loginInput.value.trim()) setInvalid(loginInput);
+		
         // 회원 권한 검사 (존재할 경우)
-        if (adminCdSelect && !adminCdSelect.value) {
-            adminCdSelect.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (adminCdSelect && !adminCdSelect.value) setInvalid(adminCdSelect);
+		
         // 소속기업 검사 (select 태그로 존재할 경우)
 		if (adminCdSelect.value !== '01ROLE') {
-            if (bizNoSelect && bizNoSelect.tagName === 'SELECT' && !bizNoSelect.value) {
-                bizNoSelect.classList.add('is-invalid');
-                isValid = false;
-            }
+            if (bizNoSelect && bizNoSelect.tagName === 'SELECT' && !bizNoSelect.value) setInvalid(bizNoSelect);
         }
         // 이름 검사
-        if (!nameInput.value.trim()) {
-            nameInput.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (!nameInput.value.trim()) setInvalid(nameInput);
+		
         // 고용일자 검사
-        if (!hireDateInput.value) {
-            hireDateInput.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (!hireDateInput.value) setInvalid(hireDateInput);
 
         // 하나라도 비어있다면 폼 제출 중단
 		if (!isValid) {
@@ -356,7 +368,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 		        finalUserId = result.id; 
 			}
 		} else { 
-	        // 존재하지 않는 기업번호 에러 (수정)
+	        // 존재하지 않는 기업번호 에러 (수정모드)
 	        if (result.result === 'INVALID_BIZNO') {
 	            if (bizNoSelect) {
 	                bizNoSelect.classList.add('is-invalid');
@@ -487,7 +499,7 @@ async function loadProfileImage(userId) {
     }
 }
 
-// 파일 선택 버튼 클릭 (유효성 검사 추가)
+// 파일 선택 버튼 클릭 (유효성 검사)
 document.getElementById('uploadBtn').addEventListener('click', function() {
     document.getElementById('profileImage').click();
 });

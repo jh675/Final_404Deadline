@@ -83,7 +83,7 @@ public class UserManageController {
 	    return result;
 	}
 
-	// 1. 프로필 이미지 조회 (최신 1건의 정보만 반환)
+	// 프로필 이미지 조회 
 	@GetMapping("/user/profile/{userId}")
 	@ResponseBody
 	public ResponseEntity<AttachVO> getProfileImage(@PathVariable("userId") Long userId) {
@@ -91,7 +91,7 @@ public class UserManageController {
 	    List<AttachVO> list = attachService.selectAttachList("09MODULE", userId);
 	    
 	    if (list != null && !list.isEmpty()) {
-	        // 가장 최근에 등록된 이미지를 가져옴 (또는 리스트의 마지막 값)
+	        // 가장 최근에 등록된 이미지를 가져옴
 	        return ResponseEntity.ok(list.get(list.size() - 1)); 
 	    }
 	    // 이미지가 없으면 빈 상태 반환
@@ -104,7 +104,7 @@ public class UserManageController {
 	public ResponseEntity<?> uploadProfileImage(@RequestParam("userId") Long userId, 
 	                                            @RequestParam("file") MultipartFile file) {
 	    
-	    // 1단계: 기존 프로필 이미지가 있다면 물리적 파일과 DB 데이터 삭제
+	    // 기존 프로필 이미지가 있다면 물리적 파일과 DB 데이터 삭제
 	    List<AttachVO> existList = attachService.selectAttachList("09MODULE", userId);
 	    if (existList != null) {
 	        for (AttachVO attach : existList) {
@@ -117,13 +117,13 @@ public class UserManageController {
 	        }
 	    }
 
-	    // 2단계: 새 프로필 이미지 저장 (DB 등록까지)
+	    // 새 프로필 이미지 저장 (DB 등록까지)
 	    attachService.saveAndInsertAttachments(userId, new MultipartFile[]{file}, "09MODULE", "users");
 	    
 	    return ResponseEntity.ok().body("SUCCESS");
 	}
 
-	// 3. 프로필 이미지 삭제
+	// 프로필 이미지 삭제
 	@DeleteMapping("/user/profile/{userId}")
 	@ResponseBody
 	public ResponseEntity<?> deleteProfileImage(@PathVariable("userId") Long userId) {

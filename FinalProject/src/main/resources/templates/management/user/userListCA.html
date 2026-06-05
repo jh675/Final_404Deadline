@@ -78,32 +78,33 @@
 			</div>
 		</div>
 		<div id="grid"></div>
-		<div class="d-flex justify-content-between align-items-center mb-2">
-		    <div class="d-flex align-items-center gap-2">
-		        <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleBulkModeBtn">일괄작업</button>
+		<div id="customBottomBar" class="d-none justify-content-between align-items-center bg-white border-top py-4">
+		    <div id="leftActionBtns" class="d-flex align-items-center gap-2" style="flex: 1;">
+		        <button type="button" class="btn btn-sm bg-white border text-secondary fw-semibold shadow-sm" id="toggleBulkModeBtn">일괄작업</button>
 		
 		        <div id="bulkControls" class="d-none d-flex align-items-center gap-2">
-				    <select id="bulkActionType" class="form-select form-select-sm" style="width: auto;">
-				        <option value="">일괄 작업 선택</option>
-				        <option value="status_01ACTIVE">계정 활성화</option>
-				        <option value="status_02ACTIVE">계정 비활성화</option>
-				        <option value="prjManager_01ACTIVE">PM 역할 부여</option>
-				        <option value="prjManager_02ACTIVE">PM 역할 해제</option>
-				    </select>
-				    <button type="button" class="btn btn-sm btn-success" id="bulkApplyBtn">적용</button>
-				    <button type="button" class="btn btn-sm btn-secondary" id="cancelBulkModeBtn">취소</button>
-				    
-				    <span id="bulkFeedback" class="small fw-bold text-danger ms-2"></span>
-				</div>
+		            <select id="bulkActionType" class="form-select form-select-sm" style="width: auto;">
+		                <option value="">일괄 작업 선택</option>
+		                <option value="status_01ACTIVE">계정 활성화</option>
+		                <option value="status_02ACTIVE">계정 비활성화</option>
+		                <option value="prjManager_01ACTIVE">PM 역할 부여</option>
+		                <option value="prjManager_02ACTIVE">PM 역할 해제</option>
+		            </select>
+		            <button type="button" class="btn btn-success btn-sm" id="bulkApplyBtn">적용</button>
+		            <button type="button" class="btn btn-sm bg-white border text-secondary fw-semibold shadow-sm" id="cancelBulkModeBtn">취소</button>
+		            <span id="bulkFeedback" class="small fw-bold text-danger ms-2"></span>
+		        </div>
 		    </div>
+		
+		    <div id="paginationPlaceholder" class="d-flex justify-content-center" style="flex: 2;"></div>
 		    
-		    <div>
-		    	<button type="button" class="btn btn-sm btn-success" onclick="openInsertModal()">회원 등록</button>
+		    <div id="rightActionBtns" class="d-flex justify-content-end" style="flex: 1;">
+		        <button type="button" class="btn btn-sm btn-primary" onclick="openInsertModal()">회원 등록</button>
 		    </div>
 		</div>
 
-		</div>
 		<div th:replace="~{management/modal/userInsertCA :: userInsert}"></div>
+		</div>
 
 		<script th:inline="javascript">
 			const userData = /*[[${userList}]]*/[];

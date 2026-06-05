@@ -136,10 +136,10 @@ public class AiSearchServiceImpl {
 				if (myIssues != null && !myIssues.isEmpty()) {
 					for (IssueOutputVO issue : myIssues) {
 						if (!"04ISSUESTAT".equals(issue.getStatusCd())) { // 완료되지 않은 것만 쏙쏙!
-							String closedDate = issue.getClosedDate() != null ? sdf.format(issue.getClosedDate())
+							String dueDate = issue.getDueDate() != null ? sdf.format(issue.getDueDate())
 									: "기한 없음";
-							contextData.append(String.format("- %s (프로젝트ID:%s, 상태:%s, 마감:%s)\n", issue.getSubject(),
-									issue.getPrjId(), issue.getStatusCd(), closedDate));
+							contextData.append(String.format("- %s (프로젝트ID:%s, 상태:%s, 완료예정일:%s)\n", issue.getSubject(),
+									issue.getPrjId(), issue.getStatusCd(), dueDate));
 							hasData = true;
 							// 데이터 개수 제한
 							if (++count >= maxLimit) {

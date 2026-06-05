@@ -2,26 +2,28 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
     <th:block th:fragment="groupQuestionModal">
-      <div class="modal fade" id="groupQuestionModal" tabindex="-1" aria-labelledby="groupQuestionModalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="groupQuestionModalTitle">알림</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-            </div>
-            <div class="modal-body">
-              <p class="mb-0 text-break" id="groupQuestionModalMessage" style="white-space: pre-wrap"></p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" id="groupQuestionModalCancelBtn">취소</button>
-              <button type="button" class="btn btn-primary" id="groupQuestionModalConfirmBtn">확인</button>
-            </div>
+      <div id="groupQuestionModal" class="issue-quick-modal-backdrop" role="dialog"
+        aria-modal="true" aria-labelledby="groupQuestionModalTitle" hidden>
+        <div class="issue-quick-modal">
+          <div class="issue-quick-modal-head">
+            <h2 id="groupQuestionModalTitle">알림</h2>
+            <button type="button" class="issue-quick-modal-close" id="groupQuestionModalCloseBtn"
+              aria-label="닫기">&times;</button>
+          </div>
+          <div class="issue-quick-modal-body">
+            <p class="issue-quick-confirm-message" id="groupQuestionModalMessage"></p>
+          </div>
+          <div class="issue-quick-modal-foot">
+            <button type="button" class="issue-btn issue-btn--secondary issue-bulk-btn issue-bulk-btn-ghost"
+              id="groupQuestionModalCancelBtn">취소</button>
+            <button type="button" class="issue-btn issue-btn--primary issue-bulk-btn issue-bulk-btn-primary"
+              id="groupQuestionModalConfirmBtn">확인</button>
           </div>
         </div>
       </div>
     </th:block>
     <th:block th:fragment="groupQuestionModalScript">
-      <script th:src="@{/js/group/modal/questionModal.js}"></script>
+      <script th:src="@{/js/group/modal/questionModal.js(v=2)}"></script>
     </th:block>
   </body>
 </html>

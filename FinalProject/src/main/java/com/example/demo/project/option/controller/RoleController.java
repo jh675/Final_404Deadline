@@ -60,26 +60,48 @@ public class RoleController {
             return "redirect:/management/project";
         }
         Long roleCd = criteria.getRoleCd();
-        List<RoleVO> allMenus = roleService.selectAllMenus();
-
         if (roleCd == null) {
-            model.addAttribute("registerMode", true);
-            model.addAttribute("roleNotFound", false);
-            model.addAttribute("roleCd", null);
-            model.addAttribute("menuSections", roleService.buildMenuSections(allMenus, Set.of()));
+            populateRoleRegisterModel(model);
             return "project/role/roleManagementInfo";
         }
+        populateRoleDetailModel(prjId, roleCd, model);
+        return "project/role/roleManagementInfo";
+    }
 
+    /** 목록 화면 우측 패널 — 레이아웃 없이 권한 상세만 렌더 */
+    @GetMapping("/panel")
+    public String rolePanel(RoleInfoCriteria criteria, HttpSession session, Model model) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return "redirect:/management/project";
+        }
+        Long roleCd = criteria.getRoleCd();
+        if (roleCd == null) {
+            return "redirect:/project/role/list";
+        }
+        populateRoleDetailModel(prjId, roleCd, model);
+        return "project/role/roleManagementPanel";
+    }
+
+    private void populateRoleRegisterModel(Model model) {
+        model.addAttribute("registerMode", true);
+        model.addAttribute("roleNotFound", false);
+        model.addAttribute("roleCd", null);
+        model.addAttribute(
+                "menuSections",
+                roleService.buildMenuSections(roleService.selectAllMenus(), Set.of()));
+    }
+
+    private void populateRoleDetailModel(Long prjId, Long roleCd, Model model) {
+        List<RoleVO> allMenus = roleService.selectAllMenus();
         model.addAttribute("registerMode", false);
         model.addAttribute("roleCd", roleCd);
 
         RoleVO currentRole = roleService.selectRoleByPrjAndCd(prjId, roleCd);
         if (currentRole == null) {
-            model.addAttribute("registerMode", false);
             model.addAttribute("roleNotFound", true);
-            model.addAttribute("roleCd", roleCd);
             model.addAttribute("menuSections", List.of());
-            return "project/role/roleManagementInfo";
+            return;
         }
 
         model.addAttribute("roleNotFound", false);
@@ -88,7 +110,6 @@ public class RoleController {
 
         Set<String> linked = new HashSet<>(roleService.selectMenuRoleIdsByRoleCd(roleCd));
         model.addAttribute("menuSections", roleService.buildMenuSections(allMenus, linked));
-        return "project/role/roleManagementInfo";
     }
 
 
@@ -117,7 +138,7 @@ public class RoleController {
         } catch (Exception e) {
             Map<String, Object> err = new LinkedHashMap<>();
             err.put("ok", false);
-            err.put("message", "역할 제거 중 오류가 발생했습니다.");
+            err.put("message", "권한 제거 중 오류가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
         }
     }
@@ -158,7 +179,7 @@ public class RoleController {
             }
             String roleName = body.roleName() == null ? "" : body.roleName().trim();
             if (roleName.isEmpty()) {
-                return badRequest("역할명을 입력하세요.");
+                return badRequest("권한명을 입력하세요.");
             }
             RoleRevokeResultVO result =
                     roleService.createRole(
