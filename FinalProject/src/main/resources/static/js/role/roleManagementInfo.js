@@ -397,6 +397,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if (editBtn) {
               editBtn.textContent = saveLabel;
+              editBtn.classList.remove("btn-success");
+              editBtn.classList.add("btn-primary");
             }
             if (cancelEditBtn) {
               cancelEditBtn.classList.remove("is-hidden");
@@ -415,6 +417,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if (editBtn) {
               editBtn.textContent = editLabel;
+              editBtn.classList.remove("btn-primary");
+              editBtn.classList.add("btn-success");
             }
             if (cancelEditBtn) {
               cancelEditBtn.classList.add("is-hidden");
@@ -1094,8 +1098,9 @@ document.addEventListener("DOMContentLoaded", function () {
                   ? navRow.id
                   : null;
               if (navGid != null) {
-                location.href =
-                  "/project/group/info?grpId=" +
+                var topWin = window.top || window;
+                topWin.location.href =
+                  "/project/group/list?grpId=" +
                   encodeURIComponent(String(navGid));
               }
               return;

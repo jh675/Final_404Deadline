@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ──────────────────────────────────────────
      그룹 Grid
-     - 그룹명 클릭 → /project/group/info?grpId=xxx
+     - 그룹명 클릭 → /project/group/list?grpId=xxx (그룹 탭 우측패널 자동 오픈)
      - 페이지네이션: 5건 초과 시 유용
   ────────────────────────────────────────── */
   const groupGrid = new tui.Grid({
@@ -325,11 +325,11 @@ document.addEventListener('DOMContentLoaded', function () {
         header:    '그룹명',
         name:      'grpName',
         sortable:  true,
-        // 그룹 상세 페이지 링크
+        // 그룹 탭 이동 링크
         formatter: ({ row, value }) => {
           const grpId = row.grpId;
           const text  = value == null ? '' : value;
-          return '<a href="/project/group/info?grpId=' + grpId + '">' + text + '</a>';
+          return '<a href="/project/group/list?grpId=' + grpId + '" target="_top">' + text + '</a>';
         }
       },
       {
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (ev.columnName === 'grpName' || ev.rowKey == null) return;
     const row = groupGrid.getRow(ev.rowKey);
     if (row && row.grpId) {
-      location.href = '/project/group/info?grpId=' + row.grpId;
+      (window.top || window).location.href = '/project/group/list?grpId=' + row.grpId;
     }
   });
 

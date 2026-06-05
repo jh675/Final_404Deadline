@@ -1051,6 +1051,11 @@ table.data-table tbody tr:last-child td {
 	margin-bottom: 24px;
 }
 
+.issue-list__header .issue-page-back {
+	display: inline-block;
+	margin-bottom: 8px;
+}
+
 .issue-list__title {
 	margin: 0;
 	font-size: 1.125rem;

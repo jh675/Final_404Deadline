@@ -4,59 +4,69 @@
 	layout:decorate="~{layout/projectLayout}">
 <head>
 <meta charset="UTF-8">
-<title>프로젝트 게시판 관리</title>
-<style>
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-weight: bold; color: #106699; margin-bottom: 8px; font-size: 15px; }
-    .form-group label .required { color: #d32f2f; margin-left: 4px; }
-    
-    .form-control { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; }
-    .form-control:focus { border-color: #20a0e0; box-shadow: 0 0 0 0.2rem rgba(32, 160, 224, 0.25); outline: none; }
-    
-    .readonly-control { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; background-color: #f5f5f5; color: #555; cursor: not-allowed; }
-    
-    .btn-group { text-align: right; margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; }
-    
-    .btn-submit { background-color: #20a0e0; color: white; border: none; font-weight: bold; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-    .btn-submit:hover { background-color: #1a8cc8; color: white; }
-</style>
+<title>게시글 등록</title>
+<th:block layout:fragment="head-content">
+	<link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+	<link rel="stylesheet" th:href="@{/css/project/issue.css}" />
+	<link rel="stylesheet" th:href="@{/css/project/projectAdmin.css}" />
+</th:block>
 </head>
 <body>
 	<div layout:fragment="content">
-		<div id="wrapper">
-			<h2 th:text="${parentId != null} ? '프로젝트 게시글 답글 등록' : (${message?.id != null} ? '프로젝트 게시글 수정' : '프로젝트 게시글 등록')">게시판 관리</h2>
-
-			<form th:action="${message?.id != null} ? @{/project/messages/update} : @{/project/messages/insert}"
-				method="post" enctype="multipart/form-data">
-
-				<input type="hidden" name="id" th:value="${message?.id}" />
-				<input type="hidden" name="boardId" th:value="${boardId}" />
-				
-				<input type="hidden" name="fieldparentId" th:value="${parentId != null ? parentId : (message?.fieldparentId != null ? message.fieldparentId : '')}" />
-
-				<div class="form-group">
-					<label for="title">게시글 제목 <span class="required">*</span></label>
-					<th:block th:if="${parentId != null}">
-						<input type="text" class="readonly-control" th:value="'[RE] ' + ${parentTitle}" disabled />
-						<input type="hidden" name="title" th:value="'[RE] ' + ${parentTitle}" />
-					</th:block>
-					<th:block th:if="${parentId == null}">
-						<input type="text" id="title" name="title" class="form-control"
-							th:value="${message?.title}" placeholder="게시글 제목을 입력하세요." required />
-					</th:block>
+		<div class="issue-shell">
+			<div id="wrapper">
+				<div class="issue-page-head">
+					<a class="issue-page-back" th:href="@{/project/messages/list(boardId=${boardId})}">← 게시글 목록</a>
+					<h1 class="issue-page-head__title"
+						th:text="${parentId != null} ? '게시글 답글 등록' : (${message?.id != null} ? '게시글 수정' : '게시글 등록')">
+						게시글 등록
+					</h1>
 				</div>
 
-				<div class="form-group">
-					<label for="content">설명</label>
-					<textarea id="content" name="content" class="form-control" rows="8" 
-							  placeholder="내용을 입력하세요." required th:text="${message?.content}"></textarea>
-				</div>
+				<form
+					th:action="${message?.id != null} ? @{/project/messages/update} : @{/project/messages/insert}"
+					method="post"
+					enctype="multipart/form-data"
+				>
+					<input type="hidden" name="id" th:value="${message?.id}" />
+					<input type="hidden" name="boardId" th:value="${boardId}" />
+					<input type="hidden" name="fieldparentId" th:value="${parentId != null ? parentId : (message?.fieldparentId != null ? message.fieldparentId : '')}" />
 
-				<div class="btn-group">
-					<button type="button" class="btn" th:onclick="|location.href='/project/messages/list?boardId=' + ${boardId}|">취소</button>
-					<button type="submit" class="btn btn-submit" th:text="${message?.id != null} ? '수정' : '등록'">확인</button>
-				</div>
-			</form>
+					<div class="issue-page-section">
+						<div class="issue-form-row">
+							<div class="search-item search-item--grow">
+								<label for="title">게시글 제목 <span class="req">*</span></label>
+								<div class="field-wrap">
+									<th:block th:if="${parentId != null}">
+										<input type="text" class="form-control" th:value="'[RE] ' + ${parentTitle}" disabled />
+										<input type="hidden" name="title" th:value="'[RE] ' + ${parentTitle}" />
+									</th:block>
+									<th:block th:if="${parentId == null}">
+										<input type="text" id="title" name="title" class="form-control"
+											th:value="${message?.title}" placeholder="게시글 제목을 입력하세요." required />
+									</th:block>
+								</div>
+							</div>
+						</div>
+
+						<div class="issue-form-row">
+							<div class="search-item search-item--grow">
+								<label for="content">내용</label>
+								<div class="field-wrap">
+									<textarea id="content" name="content" class="form-control" rows="8"
+										placeholder="내용을 입력하세요." required th:text="${message?.content}"></textarea>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="issue-register-actions">
+						<button type="button" class="btn btn-secondary"
+							th:onclick="|location.href='/project/messages/list?boardId=' + ${boardId}|">취소</button>
+						<button type="submit" class="btn btn-primary" th:text="${message?.id != null} ? '수정' : '등록'">등록</button>
+					</div>
+				</form>
+			</div>
 		</div>
 	</div>
 </body>
