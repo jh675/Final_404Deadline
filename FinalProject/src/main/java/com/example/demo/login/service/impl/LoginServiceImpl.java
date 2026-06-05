@@ -46,8 +46,7 @@ public class LoginServiceImpl implements LoginService, UserDetailsService {
 			bizNo = parts[0];   // 앞부분은 기업번호
 			loginId = parts[1]; // 뒷부분은 순수 아이디
 		} 
-		//  사용자가 직접 로그인 폼에서 [로그인] 버튼을 누른 경우
-		//  username은 순수 아이디이므로, 기업번호는 기존처럼 Request 파라미터에서 직접 꺼냅니다.
+
 		else {
 			loginId = username;
 			

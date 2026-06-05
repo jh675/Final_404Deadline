@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 					// '01ACTIVE'를 '활성'으로 변환
                     const statusName = activeCodeMap[value] || value;
 
-                    // 화면 표시용 단어로 변환.(활성 상태 서브코드를 사용해서 하드코딩 변환 필요)
+                    // 화면 표시용 단어로 변환.
                     const roleUiMap = {
                         '활성': '프로젝트 매니저',
                         '비활성': '사원'
@@ -278,32 +278,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 	
         // 아이디 검사
-        if (!loginInput.value.trim()) {
-            loginInput.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (!loginInput.value.trim()) setInvalid(loginInput);
+		
         // 회원 권한 검사 (존재할 경우)
-        if (adminCdSelect && !adminCdSelect.value) {
-            adminCdSelect.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (adminCdSelect && !adminCdSelect.value) setInvalid(adminCdSelect);
+		
         // 소속기업 검사 (select 태그로 존재할 경우)
 		if (adminCdSelect.value !== '01ROLE') {
-            if (bizNoSelect && bizNoSelect.tagName === 'SELECT' && !bizNoSelect.value) {
-                bizNoSelect.classList.add('is-invalid');
-                isValid = false;
-            }
+            if (bizNoSelect && bizNoSelect.tagName === 'SELECT' && !bizNoSelect.value) setInvalid(bizNoSelect);
         }
         // 이름 검사
-        if (!nameInput.value.trim()) {
-            nameInput.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (!nameInput.value.trim()) setInvalid(nameInput);
+		
         // 고용일자 검사
-        if (!hireDateInput.value) {
-            hireDateInput.classList.add('is-invalid');
-            isValid = false;
-        }
+        if (!hireDateInput.value) setInvalid(hireDateInput);
 
         // 하나라도 비어있다면 폼 제출 중단
 		if (!isValid) {
@@ -380,7 +368,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 		        finalUserId = result.id; 
 			}
 		} else { 
-	        // 존재하지 않는 기업번호 에러 (수정)
+	        // 존재하지 않는 기업번호 에러 (수정모드)
 	        if (result.result === 'INVALID_BIZNO') {
 	            if (bizNoSelect) {
 	                bizNoSelect.classList.add('is-invalid');
@@ -511,7 +499,7 @@ async function loadProfileImage(userId) {
     }
 }
 
-// 파일 선택 버튼 클릭 (유효성 검사 추가)
+// 파일 선택 버튼 클릭 (유효성 검사)
 document.getElementById('uploadBtn').addEventListener('click', function() {
     document.getElementById('profileImage').click();
 });
