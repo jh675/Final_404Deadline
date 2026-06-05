@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <base th:href="@{/}" />
+    <title>권한 상세</title>
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/cerulean/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/common/theme-colors.css}" />
+    <link rel="stylesheet" th:href="@{/css/common/tabler-bridge.css}" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+    <link rel="stylesheet" th:href="@{/css/project/issue.css}" />
+    <link rel="stylesheet" th:href="@{/css/project/projectAdmin.css}" />
+    <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <script th:src="@{/js/common/gridTheme.js}"></script>
+  </head>
+  <body class="layout-tabler role-panel-embed">
+    <div class="issue-shell role-panel-embed__shell">
+      <div id="rolePanelRoot" class="role-panel-embed__inner">
+        <th:block th:replace="~{project/role/fragments/roleDetailContent :: roleDetailContent}" />
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <th:block th:if="${registerMode or currentRole != null}">
+      <th:block th:replace="~{project/role/modal/questionModal :: roleQuestionModal}" />
+      <th:block th:replace="~{project/role/modal/questionModal :: roleQuestionModalScript}" />
+      <div th:replace="~{project/role/modal/roleGroupModal :: roleGroupPickOverlay}"></div>
+    </th:block>
+
+    <script
+      th:if="${registerMode or currentRole != null}"
+      th:inline="javascript"
+    >
+      /*<![CDATA[*/
+      window.roleManagementInfoPageConfig = {
+        registerMode: /*[[${registerMode}]]*/ false,
+        prjId: /*[[${session.currentProjectId}]]*/ 0,
+        roleCd: /*[[${roleCd}]]*/ null,
+        panelMode: true
+      };
+      /*]]>*/
+    </script>
+    <script
+      th:if="${registerMode or currentRole != null}"
+      th:src="@{/js/role/roleManagementInfo.js(v=6)}"
+    ></script>
+  </body>
+</html>

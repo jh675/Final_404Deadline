@@ -60,7 +60,26 @@ public class GroupController {
             model.addAttribute("roles", List.<GroupRoleDetailRowVO>of());
             return "project/group/groupManagementInfo";
         }
+        populateGroupDetailModel(prjId, grpId, model);
+        return "project/group/groupManagementInfo";
+    }
 
+    /** 목록 화면 우측 패널 — 레이아웃 없이 그룹 상세만 렌더 */
+    @GetMapping("/panel")
+    public String groupPanel(GroupInfoCriteria criteria, HttpSession session, Model model) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return "redirect:/management/project";
+        }
+        Long grpId = criteria.getGrpId();
+        if (grpId == null) {
+            return "redirect:/project/group/list";
+        }
+        populateGroupDetailModel(prjId, grpId, model);
+        return "project/group/groupManagementPanel";
+    }
+
+    private void populateGroupDetailModel(Long prjId, Long grpId, Model model) {
         model.addAttribute("registerMode", false);
         model.addAttribute("grpId", grpId);
 
@@ -69,14 +88,13 @@ public class GroupController {
             model.addAttribute("groupNotFound", true);
             model.addAttribute("members", List.<GroupMemberDetailRowVO>of());
             model.addAttribute("roles", List.<GroupRoleDetailRowVO>of());
-            return "project/group/groupManagementInfo";
+            return;
         }
 
         model.addAttribute("groupNotFound", false);
         model.addAttribute("detail", detail);
         model.addAttribute("members", groupService.selectGroupMembers(prjId, grpId));
         model.addAttribute("roles", groupService.selectGroupRoles(prjId, grpId));
-        return "project/group/groupManagementInfo";
     }
 
     @GetMapping("/checkGrpNameDuplicate")

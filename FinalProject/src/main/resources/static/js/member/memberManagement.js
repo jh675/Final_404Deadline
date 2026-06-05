@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+          var pageData = window.memberListPageData || {};
+          var prjId = pageData.prjId;
+          var projectMemberRows = Array.isArray(pageData.rows) ? pageData.rows : [];
+
           function formatDate(value) {
             if (value == null || value === "") return "";
             if ( typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ) return value;
@@ -18,6 +22,96 @@ document.addEventListener("DOMContentLoaded", function () {
               headers[headerMeta.content] = tokenMeta.content;
             }
             return headers;
+          }
+
+          let selectedMemberKey = null;
+          const memberListSplit = document.querySelector(".role-list-split");
+          const detailAside = document.getElementById("memberDetailAside");
+          const detailFrame = document.getElementById("memberDetailPanelFrame");
+          const detailCloseBtn = document.getElementById("memberDetailCloseBtn");
+
+          function refreshListGridLayout() {
+            if (grid && typeof grid.refreshLayout === "function") {
+              grid.refreshLayout();
+            }
+          }
+
+          function buildPanelUrl(userId, grpId) {
+            const panelBase =
+              (window.memberListPageData && window.memberListPageData.panelUrl) ||
+              "/project/member/panel";
+            const join = panelBase.indexOf("?") >= 0 ? "&" : "?";
+            return (
+              panelBase +
+              join +
+              "userId=" +
+              encodeURIComponent(String(userId)) +
+              "&grpId=" +
+              encodeURIComponent(String(grpId))
+            );
+          }
+
+          function showMemberDetailPanel(userId, grpId) {
+            if (userId == null || grpId == null) return;
+            selectedMemberKey = String(userId) + "_" + String(grpId);
+            if (memberListSplit) {
+              memberListSplit.classList.add("is-detail-open");
+            }
+            if (detailAside) {
+              detailAside.classList.remove("is-hidden");
+            }
+            if (detailFrame) {
+              detailFrame.classList.remove("is-hidden");
+              detailFrame.removeAttribute("srcdoc");
+              detailFrame.src = buildPanelUrl(userId, grpId);
+            }
+            refreshListGridLayout();
+          }
+
+          function clearSelectedRows() {
+            if (!grid) return;
+            grid.getData().forEach(function (row) {
+              if (row.rowKey != null) {
+                grid.removeRowClassName(row.rowKey, "role-grid-row--selected");
+              }
+            });
+          }
+
+          function clearMemberDetailPanel() {
+            selectedMemberKey = null;
+            if (memberListSplit) {
+              memberListSplit.classList.remove("is-detail-open");
+            }
+            if (detailAside) {
+              detailAside.classList.add("is-hidden");
+            }
+            if (detailFrame) {
+              detailFrame.removeAttribute("srcdoc");
+              detailFrame.src = "about:blank";
+              detailFrame.classList.add("is-hidden");
+            }
+            clearSelectedRows();
+            refreshListGridLayout();
+          }
+
+          if (detailCloseBtn) {
+            detailCloseBtn.addEventListener("click", function () {
+              clearMemberDetailPanel();
+            });
+          }
+
+          function markSelectedRow(userId, grpId) {
+            if (!grid || userId == null || grpId == null) return;
+            const target = String(userId) + "_" + String(grpId);
+            grid.getData().forEach(function (row) {
+              if (row.rowKey == null) return;
+              const key = rowMemberKey(row);
+              if (key === target) {
+                grid.addRowClassName(row.rowKey, "role-grid-row--selected");
+              } else {
+                grid.removeRowClassName(row.rowKey, "role-grid-row--selected");
+              }
+            });
           }
 
           function rowMemberKey(r) {
@@ -234,6 +328,9 @@ document.addEventListener("DOMContentLoaded", function () {
               const k = rowMemberKey(r);
               return !k || !removeSet[k];
             });
+            if (selectedMemberKey && removeSet[selectedMemberKey]) {
+              clearMemberDetailPanel();
+            }
             deleteMode = false;
             recreateGrid();
           }
@@ -257,7 +354,7 @@ document.addEventListener("DOMContentLoaded", function () {
               el: el,
               data: gridData,
               rowHeaders: rowHeaders,
-              scrollX: false,
+              scrollX: true,
               scrollY: false,
               bodyHeight: "auto",
               rowHeight: 36,
@@ -278,14 +375,19 @@ document.addEventListener("DOMContentLoaded", function () {
                       row.grpId != null && row.grpId !== ""
                         ? row.grpId
                         : null;
-                    const text = value == null ? "" : value;
-                    if (uid == null || gid == null) return text;
-                    const q =
-                      "userId=" +
+                    const text = value == null ? "" : String(value);
+                    if (uid == null || gid == null || !text) {
+                      return text || "-";
+                    }
+                    return (
+                      '<button type="button" class="role-name-link" data-user-id="' +
                       encodeURIComponent(String(uid)) +
-                      "&grpId=" +
-                      encodeURIComponent(String(gid));
-                    return '<a href="/project/member/info?' + q + '">' + text + "</a>";
+                      '" data-grp-id="' +
+                      encodeURIComponent(String(gid)) +
+                      '">' +
+                      text +
+                      "</button>"
+                    );
                   },
                 },
                 {
@@ -330,8 +432,8 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             grid.on("click", function (ev) {
-              if (deleteMode) return;
-              if (ev.columnName !== "userName" || ev.rowKey == null) return;
+              if (deleteMode || ev.rowKey == null) return;
+              if (ev.columnName !== "userName") return;
               const row = grid.getRow(ev.rowKey);
               const uid =
                 row && row.userId != null && row.userId !== ""
@@ -342,11 +444,8 @@ document.addEventListener("DOMContentLoaded", function () {
                   ? row.grpId
                   : null;
               if (uid != null && gid != null) {
-                location.href =
-                  "/project/member/info?userId=" +
-                  encodeURIComponent(String(uid)) +
-                  "&grpId=" +
-                  encodeURIComponent(String(gid));
+                showMemberDetailPanel(uid, gid);
+                markSelectedRow(uid, gid);
               }
             });
 

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <th:block th:fragment="roleDetailContent">
+      <th:block th:if="${roleNotFound}">
+        <p class="perm-empty">
+          요청한 권한(<span th:text="${roleCd}">-</span>)을 이 프로젝트에서 찾을 수 없습니다.
+        </p>
+      </th:block>
+
+      <th:block th:if="${registerMode or currentRole != null}">
+        <section class="role-section">
+          <h2 class="role-section__title">권한 정보</h2>
+          <div class="role-section__body">
+            <div class="role-info-fields role-detail-form">
+              <div class="role-info-fields__row" th:if="${registerMode}">
+                <label for="detailPrjName">프로젝트명</label>
+                <input type="text" id="detailPrjName" readonly th:value="${session.project != null ? session.project.prjName : ''}" />
+              </div>
+              <div class="role-info-fields__row" th:if="${!registerMode}">
+                <label for="detailRoleCd">권한 코드</label>
+                <input type="text" id="detailRoleCd" readonly th:value="${currentRole.roleCd}" />
+              </div>
+              <div class="role-info-fields__row">
+                <label for="detailRoleName">권한명</label>
+                <input th:if="${registerMode}" type="text" id="detailRoleName" class="role-input--editable" placeholder="권한명을 입력해 주세요." autocomplete="off" />
+                <input th:unless="${registerMode}" type="text" id="detailRoleName" readonly th:value="${currentRole.roleName}" />
+              </div>
+              <div class="role-info-fields__row" th:if="${!registerMode}">
+                <label for="detailCreatedOn">권한 생성일</label>
+                <input type="text" id="detailCreatedOn" readonly th:value="${roleCreatedOnYmd}" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="role-section">
+          <div class="role-section__head">
+            <h2 class="role-section__title">메뉴 권한 연결</h2>
+            <button
+              th:if="${menuSections != null and !menuSections.isEmpty()}"
+              type="button"
+              class="perm-toggle-btn perm-toggle-btn--global"
+              id="permToggleGlobal"
+              aria-pressed="false"
+              th:classappend="${!registerMode} ? ' is-hidden' : ''"
+              th:disabled="${!registerMode}"
+            >
+              전체 구역 선택
+            </button>
+          </div>
+          <div class="role-section__body">
+            <div class="perm-list" th:if="${menuSections != null and !menuSections.isEmpty()}">
+              <div
+                class="perm-sub"
+                th:each="sec, secStat : ${menuSections}"
+                th:classappend="${#strings.equalsIgnoreCase(sec.sectionTitle, 'HISTORY') or #strings.equalsIgnoreCase(sec.sectionTitle, 'GANTT') or sec.sectionTitle == '간트차트'} ? ' perm-sub--view-only' : ''"
+                th:attr="data-section-key=${sec.sectionTitle}"
+              >
+                <div class="perm-sub__head">
+                  <h3 class="perm-sub__title" th:text="${sec.sectionTitle}">구분</h3>
+                  <button
+                    type="button"
+                    class="perm-toggle-btn perm-toggle-btn--section"
+                    aria-pressed="false"
+                    th:classappend="${!registerMode} ? ' is-hidden' : ''"
+                    th:disabled="${!registerMode}"
+                  >
+                    전체 선택
+                  </button>
+                </div>
+                <hr class="role-section__divider" />
+                <div class="perm-full-block" th:if="${sec.crudSlots != null and !sec.crudSlots.isEmpty()}">
+                  <div class="perm-crud-row">
+                    <label
+                      class="perm-grid__cell"
+                      th:each="c, cStat : ${sec.crudSlots}"
+                      th:for="|cb-crud-${secStat.index}-${cStat.index}|"
+                    >
+                      <input
+                        type="checkbox"
+                        class="perm-menu-cb perm-menu-cb--crud"
+                        th:disabled="${!registerMode}"
+                        th:id="|cb-crud-${secStat.index}-${cStat.index}|"
+                        th:checked="${c.checked}"
+                        th:attr="data-role-id=${c.roleId}"
+                      />
+                      <span th:text="${c.label}">조회</span>
+                    </label>
+                  </div>
+                </div>
+                <th:block th:if="${sec.extraSlots != null and !sec.extraSlots.isEmpty()}">
+                  <div class="perm-full-block">
+                    <h4 class="perm-subblock-title">기타 권한</h4>
+                    <div class="perm-grid">
+                      <label
+                        class="perm-grid__cell"
+                        th:each="ex, exStat : ${sec.extraSlots}"
+                        th:for="|cb-extra-${secStat.index}-${exStat.index}|"
+                      >
+                        <input
+                          type="checkbox"
+                          class="perm-menu-cb perm-menu-cb--extra"
+                          th:disabled="${!registerMode}"
+                          th:id="|cb-extra-${secStat.index}-${exStat.index}|"
+                          th:checked="${ex.checked}"
+                          th:attr="data-role-id=${ex.roleId}"
+                        />
+                        <span th:text="${ex.label}">권한</span>
+                      </label>
+                    </div>
+                  </div>
+                </th:block>
+              </div>
+            </div>
+            <p class="perm-empty" th:if="${menuSections == null or menuSections.isEmpty()}">
+              메뉴 권한 데이터가 없습니다.
+            </p>
+          </div>
+        </section>
+
+        <section th:if="${registerMode or currentRole != null}" class="role-section" aria-labelledby="role-groups-heading">
+          <h2 class="role-section__title" id="role-groups-heading">이 권한을 보유한 그룹</h2>
+          <div class="role-section__body">
+            <div class="role-groups-panel">
+              <div
+                id="roleGroupsGrid"
+                class="role-groups-panel__grid-host"
+                th:attr="data-prj-id=${session.currentProjectId},data-page-mode=${registerMode ? 'register' : 'detail'},data-role-cd=${registerMode ? '' : roleCd}"
+                role="region"
+                aria-label="권한 보유 그룹 목록"
+              ></div>
+              <div id="roleGroupToolbar" class="role-group-toolbar" th:classappend="${registerMode} ? '' : ' is-hidden'">
+                <button type="button" class="btn btn-secondary btn-sm" id="btnManageRoleGroups">그룹 관리</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="issue-register-actions role-actions" th:if="${registerMode}">
+          <button type="button" class="btn btn-primary" id="btnRoleSave">저장</button>
+          <button type="button" class="btn btn-secondary" id="btnRoleCancel">초기화</button>
+        </div>
+
+        <div class="issue-register-actions role-actions" th:if="${!registerMode and currentRole != null}">
+          <button type="button" class="btn btn-primary" id="btnRoleEdit" data-label-edit="수정" data-label-save="저장">수정</button>
+          <button type="button" class="btn btn-secondary is-hidden" id="btnRoleCancelEdit">초기화</button>
+        </div>
+      </th:block>
+    </th:block>
+  </body>
+</html>
