@@ -452,7 +452,7 @@
 	white-space: nowrap;
 }
 
-/* 진척도 바 */
+/* 진척율(%) 바 */
 .mp-progress {
 	background: #e8ecf2;
 	border-radius: 99px;
@@ -689,7 +689,7 @@
 				<tbody>
 					<tr th:if="${#lists.isEmpty(projectList)}">
 						<td colspan="7" class="text-center" style="color:var(--mp-text-hint); padding:32px;">
-							참가 중인 프로젝트가 없습니다.
+							참여 중인 프로젝트가 없습니다.
 						</td>
 					</tr>
 					<tr th:each="p : ${projectList}">
@@ -725,11 +725,11 @@
 				<ul class="nav mp-tabs" id="issueTabs">
 					<li class="nav-item">
 						<button class="nav-link active" data-bs-toggle="tab"
-								data-bs-target="#myIssueTab">내 담당</button>
+								data-bs-target="#myIssueTab">내 담당 이슈</button>
 					</li>
 					<li class="nav-item">
 						<button class="nav-link" data-bs-toggle="tab"
-								data-bs-target="#weekIssueTab">이번주 전체마감</button>
+								data-bs-target="#weekIssueTab">이번주 마감</button>
 					</li>
 				</ul>
 
@@ -745,7 +745,7 @@
 										<th>상태</th>
 										<th>우선순위</th>
 										<th>시작예정일</th>
-										<th>마감예정일</th>
+										<th>완료예정일</th>
 										<th>진척율(%)</th>
 									</tr>
 								</thead>
@@ -770,7 +770,7 @@
 										<th>담당자</th>
 										<th>상태</th>
 										<th>우선순위</th>
-										<th>예정일</th>
+										<th>완료예정일</th>
 										<th>진척율(%)</th>
 									</tr>
 								</thead>
@@ -1098,7 +1098,7 @@ function renderMyIssues() {
 	const pagination = document.getElementById('myIssuePagination');
 
 	if (myIssueData.length === 0) {
-		tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--mp-text-hint);padding:28px;">담당 이슈가 없습니다.</td></tr>';
+		tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--mp-text-hint);padding:28px;">내 담당 이슈가 없습니다.</td></tr>';
 		pagination.innerHTML = '';
 		return;
 	}
