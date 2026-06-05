@@ -179,7 +179,7 @@ body, html {
 					    text:           issue.subject, // 이슈명 
 					    status_cd:      issue.statusCd, // 이슈상태 
 					    priority_cd:    issue.priorityCd, // 우선순위 
-					    assignee:       issue.memName, // 담당자 
+					    assignee:       formatAssignee(issue.memName), // 담당자 
 					    est_start_date: formatDate(issue.estStartDate), // 시작예정일(template용)
 					    due_date:       formatDate(issue.dueDate), // 마감예정일
 					    start_date:     formatDate(issue.startDate || issue.estStartDate), // 시작일(막대용)
@@ -207,8 +207,8 @@ body, html {
 		        { name: "assignee", label: "담당자",   width: 100 },
 		        { name: "est_start_date", label: "시작예정일", width: 140 },
 		        { name: "due_date", label: "마감예정일", width: 140 },
-		        { name: "start_date", label: "시작일", width: 140, template: task => task.start_date_str},
-		        { name: "end_date", label: "완료일", width: 140, template: task => task.end_date_str},
+		        { name: "start_date", label: "시작일", width: 140, template: task => task.start_date_str || "-"},
+		        { name: "end_date", label: "완료일", width: 140, template: task => task.end_date_str || "-"},
 		        { name: "progress", label: "진척도", width: 60, template: task => task.progress_text },
 		    ];
 		
@@ -282,12 +282,21 @@ body, html {
 			 // ===================================
 				
 				 function formatDate(dateStr) {
+					if (dateStr == null || dateStr === "") return "";
 					const day = new Date(dateStr);
-					  const dd = String(day.getDate()).padStart(2, '0'); 
-					const month = String (day.getMonth() +1) .padStart(2, '0');
+					if (isNaN(day.getTime()) || day.getFullYear() === 1970) return "";
+					const dd = String(day.getDate()).padStart(2, '0');
+					const month = String(day.getMonth() + 1).padStart(2, '0');
 					const years = day.getFullYear();
-					return `${years}-${month}-${dd}`;			
-				  } 
+					return `${years}-${month}-${dd}`;
+				  }
+
+				 function formatAssignee(name) {
+					if (name == null || String(name).trim() === "" || String(name).trim() === "미정") {
+						return "-";
+					}
+					return name;
+				  }
 			 
 			 // ===================================
 			 //  4. 검색창 부분 
