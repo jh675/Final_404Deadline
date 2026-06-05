@@ -295,6 +295,7 @@
             <th>설명</th>
             <th>생성일</th>
             <th>종료일</th>
+            <th>상태</th>
             <th class="text-center"
                 th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자' || #authentication.principal.prjManagerCd == '01ACTIVE'}">설정</th>
           </tr>
@@ -320,6 +321,16 @@
             <td th:text="${pro.prjDesc}"></td>
             <td th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"></td>
             <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
+            <td style="text-align:center;">
+              <span th:switch="${pro.prjStatusCd}">
+                <span th:case="'01PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#e8f4fb;color:#1b87c9;font-weight:600;">기획</span>
+                <span th:case="'02PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#dbeafe;color:#1d4ed8;font-weight:600;">진행중</span>
+                <span th:case="'03PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#fef9c3;color:#a16207;font-weight:600;">검수</span>
+                <span th:case="'04PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#dcfce7;color:#15803d;font-weight:600;">완료</span>
+                <span th:case="'05PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#fee2e2;color:#b91c1c;font-weight:600;">중단</span>
+                <span th:case="*" th:text="${pro.prjStatusCd}"></span>
+              </span>
+            </td>
             <td class="text-center"
                 th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자' || #authentication.principal.prjManagerCd == '01ACTIVE'}">
               <button type="button" class="btn btn-sm btn-outline-secondary ctx-btn"
