@@ -67,17 +67,41 @@ document.addEventListener('DOMContentLoaded', async function() {
                 width: 100,
                 align: 'center',
 				formatter: ({ row }) => {
-				    return `<button type="button" 
-									class="btn btn-sm btn-outline-success edit-btn" 
-									data-id="${row.id}">
-									수정</button>`;
-				}
+								    return `<button type="button" 
+													class="btn btn-success btn-sm edit-btn shadow-sm" 
+													data-id="${row.id}">
+													수정</button>`;
+								}
             }
         ],
 		rowHeaders: ['checkbox', 'rowNum'],
         pageOptions: { useClient: true, perPage: 10 }
     });
 
+	const gridContainer = document.querySelector('#grid .tui-grid-container');
+    const tuiPaginationWrap = document.querySelector('#grid .tui-grid-pagination');
+    const customBottomBar = document.getElementById('customBottomBar');
+    const paginationPlaceholder = document.getElementById('paginationPlaceholder');
+
+    if (gridContainer && tuiPaginationWrap && customBottomBar && paginationPlaceholder) {
+        // TUI 기본 페이징 박스의 불필요한 고정 스타일(테두리, 배경) 제거
+        tuiPaginationWrap.style.border = 'none';
+        tuiPaginationWrap.style.background = 'transparent';
+        tuiPaginationWrap.style.margin = '0';
+        tuiPaginationWrap.style.padding = '0';
+        tuiPaginationWrap.style.height = 'auto'; // 높이 제한 해제
+        
+        // 기존 페이징 요소를 우리가 만든 하단 바의 중앙으로 위치
+        paginationPlaceholder.appendChild(tuiPaginationWrap);
+
+        // 완성된 한 줄짜리 하단 바를 그리드 영역 안쪽 맨 밑으로 이동
+        gridContainer.appendChild(customBottomBar);
+        
+        // 숨김 해제 및 가로 정렬(Flex) 활성화
+        customBottomBar.classList.remove('d-none');
+        customBottomBar.classList.add('d-flex');
+    }
+	
     // 수정 버튼 이벤트
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('edit-btn')) {
