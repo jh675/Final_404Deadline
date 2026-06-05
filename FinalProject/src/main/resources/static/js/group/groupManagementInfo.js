@@ -1040,6 +1040,10 @@
           if (pickCancel) {
             pickCancel.addEventListener("click", closeMemberPicker);
           }
+          var btnMemberPickClose = document.getElementById("btnMemberPickClose");
+          if (btnMemberPickClose) {
+            btnMemberPickClose.addEventListener("click", closeMemberPicker);
+          }
           if (pickOverlay) {
             pickOverlay.addEventListener("click", function (e) {
               if (e.target === pickOverlay) {
@@ -1066,6 +1070,10 @@
               closeGroupRoleMenusModal,
             );
           }
+          var btnGrpRoleMenusCloseTop = document.getElementById("btnGrpRoleMenusCloseTop");
+          if (btnGrpRoleMenusCloseTop) {
+            btnGrpRoleMenusCloseTop.addEventListener("click", closeGroupRoleMenusModal);
+          }
           if (roleMenusOverlay) {
             roleMenusOverlay.addEventListener("click", function (e) {
               if (e.target === roleMenusOverlay) {
@@ -1089,6 +1097,10 @@
           }
           if (rolePickCancel) {
             rolePickCancel.addEventListener("click", closeRolePicker);
+          }
+          var btnRolePickClose = document.getElementById("btnRolePickClose");
+          if (btnRolePickClose) {
+            btnRolePickClose.addEventListener("click", closeRolePicker);
           }
           if (rolePickOk) {
             rolePickOk.addEventListener("click", function () {

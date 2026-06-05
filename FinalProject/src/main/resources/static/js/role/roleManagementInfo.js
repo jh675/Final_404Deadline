@@ -1032,6 +1032,10 @@ document.addEventListener("DOMContentLoaded", function () {
           if (pickCancel) {
             pickCancel.addEventListener("click", closeGroupPicker);
           }
+          var btnRoleGroupPickClose = document.getElementById("btnRoleGroupPickClose");
+          if (btnRoleGroupPickClose) {
+            btnRoleGroupPickClose.addEventListener("click", closeGroupPicker);
+          }
           if (pickOverlay) {
             pickOverlay.addEventListener("click", function (e) {
               if (e.target === pickOverlay) {
