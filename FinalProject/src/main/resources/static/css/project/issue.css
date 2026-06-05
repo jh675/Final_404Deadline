@@ -992,8 +992,7 @@ table.data-table tbody tr:last-child td {
 .issue-btn--secondary,
 .search-cancel-btn,
 .issue-pivot-btn,
-.issue-bulk-btn-ghost,
-#issueQuickCancelBtn {
+.issue-bulk-btn-ghost {
 	background-color: var(--issue-btn-bg);
 	color: var(--issue-btn-text);
 	border-color: var(--issue-btn-border);
@@ -1002,8 +1001,7 @@ table.data-table tbody tr:last-child td {
 .issue-btn--secondary:hover:not(:disabled),
 .search-cancel-btn:hover,
 .issue-pivot-btn:hover,
-.issue-bulk-btn-ghost:hover,
-#issueQuickCancelBtn:hover {
+.issue-bulk-btn-ghost:hover {
 	background-color: var(--issue-btn-bg-hover);
 	border-color: #dee2e6;
 	color: var(--issue-heading);
@@ -1395,6 +1393,10 @@ table.data-table tbody tr:last-child td {
 	align-items: center;
 	justify-content: center;
 	padding: 20px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "맑은 고딕", sans-serif;
+	color: var(--issue-text);
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
 }
 
 .issue-quick-modal-backdrop.is-open {
@@ -1403,7 +1405,7 @@ table.data-table tbody tr:last-child td {
 
 .issue-quick-modal {
 	width: 100%;
-	max-width: 420px;
+	max-width: min(28rem, 94vw);
 	background: var(--issue-bg);
 	border-radius: var(--issue-radius);
 	border: 1px solid var(--issue-border);
@@ -1429,17 +1431,31 @@ table.data-table tbody tr:last-child td {
 }
 
 .issue-quick-modal-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
 	border: none;
 	background: transparent;
 	font-size: 22px;
 	line-height: 1;
-	color: #6c757d;
+	color: var(--app-muted-fg, #6c757d);
 	cursor: pointer;
-	padding: 0 4px;
+	padding: 0;
+	border-radius: var(--issue-radius-xs);
+	flex-shrink: 0;
+	transition: color var(--issue-transition), background-color var(--issue-transition);
 }
 
 .issue-quick-modal-close:hover {
 	color: var(--issue-heading);
+	background-color: var(--issue-bg-muted);
+}
+
+.issue-quick-modal-close:focus-visible {
+	outline: 2px solid var(--issue-primary);
+	outline-offset: 2px;
 }
 
 .issue-quick-modal-body {
@@ -1454,8 +1470,20 @@ table.data-table tbody tr:last-child td {
 	display: block;
 	font-size: 12px;
 	font-weight: 600;
-	color: var(--issue-text);
+	color: var(--issue-label);
 	margin-bottom: 6px;
+}
+
+.issue-quick-modal select {
+	box-sizing: border-box;
+	font-family: inherit;
+	transition: border-color var(--issue-transition), box-shadow var(--issue-transition);
+}
+
+.issue-quick-modal select:focus {
+	outline: none;
+	border-color: var(--issue-border-focus);
+	box-shadow: 0 0 0 3px var(--app-focus-ring, rgba(var(--issue-primary-rgb, 47, 164, 231), 0.12));
 }
 
 .issue-quick-field select {
@@ -1463,10 +1491,10 @@ table.data-table tbody tr:last-child td {
 	height: 36px;
 	padding: 0 10px;
 	border: 1px solid var(--issue-border);
-	border-radius: 4px;
+	border-radius: var(--issue-radius-sm);
 	font-size: 13px;
-	background: #fff;
-	color: var(--issue-text);
+	background-color: var(--issue-bg);
+	color: var(--issue-heading);
 }
 
 .issue-quick-hint {
@@ -1481,9 +1509,9 @@ table.data-table tbody tr:last-child td {
 }
 
 .issue-quick-hint.is-warn {
-	background: #fff8e6;
-	border-color: #f0e0b0;
-	color: #7a5c00;
+	background: var(--app-warn-bg, #fff8e6);
+	border-color: var(--app-warn-border, #f0e0b0);
+	color: var(--app-warn-text, #7a5c00);
 }
 
 .issue-quick-target-block {
@@ -1501,12 +1529,18 @@ table.data-table tbody tr:last-child td {
 	margin-bottom: 8px;
 	font-size: 12px;
 	font-weight: 600;
-	color: var(--issue-text);
+	color: var(--issue-label);
 }
 
 .issue-quick-target-count {
 	color: var(--issue-heading);
 	font-weight: 700;
+}
+
+.issue-quick-target-list,
+.issue-quick-date-detail-list {
+	scrollbar-width: thin;
+	scrollbar-color: var(--issue-border) transparent;
 }
 
 .issue-quick-target-list {
@@ -1531,17 +1565,18 @@ table.data-table tbody tr:last-child td {
 .issue-quick-date-panel {
 	margin-bottom: 14px;
 	padding: 12px 14px;
-	background: #fff8e6;
-	border: 1px solid #f0e0b0;
-	border-radius: 6px;
+	background: var(--app-warn-bg, #fff8e6);
+	border: 1px solid var(--app-warn-border, #f0e0b0);
+	border-radius: var(--issue-radius-sm);
 	font-size: 12px;
 	color: var(--issue-text);
 }
 
 .issue-quick-date-summary {
 	font-weight: 700;
-	color: #7a5c00;
+	color: var(--app-warn-text, #7a5c00);
 	margin-bottom: 10px;
+	line-height: 1.45;
 }
 
 .issue-quick-date-section {
@@ -1556,11 +1591,11 @@ table.data-table tbody tr:last-child td {
 }
 
 .issue-quick-date-section-title.is-ok {
-	color: #2e7d32;
+	color: var(--app-success, #2e7d32);
 }
 
 .issue-quick-date-section-title.is-skip {
-	color: #c62828;
+	color: var(--app-error, #c62828);
 }
 
 .issue-quick-date-detail-list {
@@ -1591,14 +1626,14 @@ table.data-table tbody tr:last-child td {
 .issue-quick-date-reason {
 	display: block;
 	font-size: 11px;
-	color: #c62828;
+	color: var(--app-error, #c62828);
 	margin-top: 2px;
 }
 
 .issue-quick-date-empty {
 	list-style: none;
 	margin-left: -16px;
-	color: #6c757d;
+	color: var(--app-muted-fg, #6c757d);
 	font-size: 12px;
 }
 
@@ -1608,10 +1643,139 @@ table.data-table tbody tr:last-child td {
 	gap: 8px;
 	padding: 12px 20px 18px;
 	border-top: 1px solid var(--issue-border);
+	background: var(--issue-bg-subtle);
 }
 
 .issue-quick-modal-foot .issue-bulk-btn {
 	min-width: 72px;
+}
+
+.issue-quick-modal-foot .issue-btn--primary,
+.issue-quick-modal-foot .issue-bulk-btn-primary {
+	background-color: var(--issue-primary);
+	border-color: var(--issue-primary);
+	color: #fff;
+}
+
+.issue-quick-modal-foot .issue-btn--primary:hover:not(:disabled),
+.issue-quick-modal-foot .issue-bulk-btn-primary:hover:not(:disabled) {
+	background-color: var(--issue-primary-hover);
+	border-color: var(--issue-primary-hover);
+	color: #fff;
+}
+
+.issue-quick-modal-foot .issue-btn--secondary,
+.issue-quick-modal-foot .issue-bulk-btn-ghost,
+.issue-quick-modal-foot #issueQuickCancelBtn {
+	background-color: var(--app-danger);
+	border-color: var(--app-danger);
+	color: #fff;
+}
+
+.issue-quick-modal-foot .issue-btn--secondary:hover:not(:disabled),
+.issue-quick-modal-foot .issue-bulk-btn-ghost:hover,
+.issue-quick-modal-foot #issueQuickCancelBtn:hover {
+	background-color: var(--app-danger-hover);
+	border-color: var(--app-danger-border-hover);
+	color: #fff;
+}
+
+.issue-quick-modal-foot .issue-btn--primary:disabled,
+.issue-quick-modal-foot .issue-bulk-btn-primary:disabled {
+	background-color: var(--issue-btn-disabled-bg);
+	border-color: var(--issue-btn-border);
+	color: var(--issue-btn-disabled-text);
+	cursor: not-allowed;
+}
+
+.issue-quick-modal--wide {
+	max-width: min(42rem, 94vw);
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.issue-quick-modal--wide-lg {
+	max-width: min(44rem, 94vw);
+	max-height: 82vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.issue-quick-modal--menus {
+	max-width: min(34rem, 94vw);
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.issue-quick-modal--menus .issue-quick-modal-body {
+	overflow: auto;
+	flex: 1 1 auto;
+	min-height: 0;
+	max-height: 56vh;
+}
+
+.issue-quick-modal-body--pick {
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.issue-quick-confirm-message {
+	margin: 0;
+	font-size: 13px;
+	color: var(--issue-text);
+	line-height: 1.55;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.issue-quick-modal-search {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 14px 18px;
+	border-bottom: 1px solid var(--issue-border);
+	background: var(--issue-bg-muted);
+	flex-shrink: 0;
+}
+
+.issue-quick-modal-search select,
+.issue-quick-modal-search input[type="text"],
+.issue-quick-modal-search input[type="date"] {
+	height: 36px;
+	padding: 0 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	font-family: inherit;
+	background-color: var(--issue-bg);
+	color: var(--issue-heading);
+	box-sizing: border-box;
+	transition: border-color var(--issue-transition), box-shadow var(--issue-transition);
+}
+
+.issue-quick-modal-search select:focus,
+.issue-quick-modal-search input:focus {
+	outline: none;
+	border-color: var(--issue-border-focus);
+	box-shadow: 0 0 0 3px var(--app-focus-ring, rgba(var(--issue-primary-rgb, 47, 164, 231), 0.12));
+}
+
+.issue-quick-modal-grid-host {
+	flex: 1 1 auto;
+	min-height: 12rem;
+	max-height: 50vh;
+	overflow: auto;
+	margin: 8px 18px 12px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	background: var(--issue-bg);
 }
 
 /* ── 통계(피벗) ─────────────────────────────────────────── */
