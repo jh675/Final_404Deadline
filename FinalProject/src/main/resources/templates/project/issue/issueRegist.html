@@ -98,7 +98,7 @@
 					</div>
 				</div>
 				<div class="search-item search-item--date">
-					<label for="dueDate">종료예정일</label>
+					<label for="dueDate">마감예정일</label>
 					<div class="field-wrap">
 						<input type="date" id="dueDate" name="dueDate" class="form-control"
 							th:value="${issue != null and issue.dueDate != null ? #dates.format(issue.dueDate, 'yyyy-MM-dd') : (project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : '')}"

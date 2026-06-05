@@ -141,7 +141,7 @@ public class IssueRestController {
 		if(count == null) {
 			return ResponseEntity.badRequest().body(Map.of("ok", false, "message", "이슈를 찾을 수 없습니다."));
 		}
-		return ResponseEntity.ok(Map.of("ok", true, "message", count+"개의 이슈의 종료일이 등록되었습니다."));
+		return ResponseEntity.ok(Map.of("ok", true, "message", count+"개의 이슈의 완료일이 등록되었습니다."));
 	}
 	@PutMapping("/bulk")
 	public ResponseEntity<Map<String, Object>> bulk(@RequestBody IssueVulkVO vulkVO){

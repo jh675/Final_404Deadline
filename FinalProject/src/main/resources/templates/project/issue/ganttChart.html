@@ -119,7 +119,7 @@ body, html {
 										<th style="min-width: 80px;">우선순위</th>
 										<th style="min-width: 80px;">담당자</th>
 										<th style="min-width: 110px;">시작예정일</th>
-										<th style="min-width: 110px;">이슈마감일</th>
+										<th style="min-width: 110px;">마감예정일</th>
 										<th style="min-width: 110px;">시작일</th>
 										<th style="min-width: 110px;">완료일</th>
 										<th style="min-width: 70px;">진척도</th>
@@ -181,11 +181,11 @@ body, html {
 					    priority_cd:    issue.priorityCd, // 우선순위 
 					    assignee:       issue.memName, // 담당자 
 					    est_start_date: formatDate(issue.estStartDate), // 시작예정일(template용)
-					    due_date:       formatDate(issue.dueDate), // 이슈 마감일 
-					    start_date:     formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
-					    start_date_str: formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
-					    end_date:       formatDate(issue.dueDate), //실제 완료일 
-					    end_date_str:   formatDate(issue.dueDate), //실제 완료일 
+					    due_date:       formatDate(issue.dueDate), // 마감예정일
+					    start_date:     formatDate(issue.startDate || issue.estStartDate), // 시작일(막대용)
+					    start_date_str: formatDate(issue.startDate), // 시작일
+					    end_date:       formatDate(issue.closedDate || issue.dueDate), // 막대 종료(완료일 또는 마감예정일)
+					    end_date_str:   formatDate(issue.closedDate), // 완료일
 					    progress:       (issue.doneRatio ?? 0) / 100, // 진척도 (막대 그래프용)
 					    progress_text:  (issue.doneRatio ?? 0) + "%" // 진척도 (막대 그래프용)
 					}));	
@@ -206,7 +206,7 @@ body, html {
 		        { name: "priority_cd", label: "우선순위", width: 100 },
 		        { name: "assignee", label: "담당자",   width: 100 },
 		        { name: "est_start_date", label: "시작예정일", width: 140 },
-		        { name: "due_date", label: "이슈마감일", width: 140 },
+		        { name: "due_date", label: "마감예정일", width: 140 },
 		        { name: "start_date", label: "시작일", width: 140, template: task => task.start_date_str},
 		        { name: "end_date", label: "완료일", width: 140, template: task => task.end_date_str},
 		        { name: "progress", label: "진척도", width: 60, template: task => task.progress_text },

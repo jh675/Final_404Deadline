@@ -218,7 +218,7 @@
 								<th>상태</th>
 								<th>우선순위</th>
 								<th>시작예정일</th>
-								<th>마감일</th>
+								<th>마감예정일</th>
 								<th>진척도</th>
 							</tr>
 						</thead>
@@ -243,7 +243,7 @@
 							<th>담당자</th>
 							<th>상태</th>
 							<th>우선순위</th>
-							<th>마감일</th>
+							<th>마감예정일</th>
 							<th>진척도</th>
 						</tr>
 					</thead>
@@ -441,7 +441,7 @@
 				    { name: "text",        label: "이슈명",   width: 200, tree: true },
 			        { name: "status_cd",   label: "이슈상태", width: 80 },
 			        { name: "assignee",    label: "담당자",   width: 80 },
-			        { name: "due_date",    label: "마감일",   width: 100 },
+			        { name: "due_date",    label: "마감예정일",   width: 100 },
 			        { name: "progress",    label: "진척도",   width: 60, template: task => task.progress_text }
 			];
 			
@@ -497,11 +497,11 @@
 				    priority_cd:    issue.priorityCd, // 우선순위 
 				    assignee:       issue.memName, // 담당자 
 				    est_start_date: formatDate(issue.estStartDate), // 시작예정일(template용)
-				    due_date:       formatDate(issue.dueDate), // 이슈 마감일 
-				    start_date:     formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
-				    start_date_str: formatDate(issue.startDate || issue.estStartDate), // 실제 시작일
-				    end_date:       formatDate(issue.dueDate), //실제 완료일 
-				    end_date_str:   formatDate(issue.dueDate), //실제 완료일 
+				    due_date:       formatDate(issue.dueDate), // 마감예정일
+				    start_date:     formatDate(issue.startDate || issue.estStartDate), // 시작일(막대용)
+				    start_date_str: formatDate(issue.startDate), // 시작일
+				    end_date:       formatDate(issue.closedDate || issue.dueDate), // 막대 종료(완료일 또는 마감예정일)
+				    end_date_str:   formatDate(issue.closedDate), // 완료일
 				    progress:       (issue.doneRatio ?? 0) / 100, // 진척도 (막대 그래프용)
 				    progress_text:  (issue.doneRatio ?? 0) + "%" // 진척도 (막대 그래프용)
 				}));	
