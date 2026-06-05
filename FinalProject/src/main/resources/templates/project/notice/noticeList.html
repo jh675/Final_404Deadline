@@ -129,7 +129,7 @@
 							<tr th:each="notice, noticeStat : ${list}"
 								th:classappend="${notice.isFixed == '01ACTIVE'} ? 'bg-mint-highlight' : ''"
 								th:data-id="${notice.id}" th:data-fixed="${notice.isFixed}"
-								th:data-title="${notice.title}" th:data-memid="${notice.memId}"
+								th:data-title="${notice.title}" th:data-memid="${notice.memName}"
 								th:data-date="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"
 								th:data-description="${notice.description ?: '내용이 없습니다.'}"
 								class="notice-row">
@@ -148,7 +148,7 @@
 										th:classappend="${notice.isFixed == '01ACTIVE'} ? 'fw-bold' : ''"
 										th:text="${notice.title}" onclick="openNoticeDetail(this)"></div>
 								</td>
-								<td class="text-muted text-center" th:text="${notice.memId}"></td>
+								<td class="text-muted text-center" th:text="${notice.memName != null && notice.memName.contains('(') ? notice.memName.substring(0, notice.memName.indexOf('(')) : notice.memName}"></td>
 								<td class="text-muted text-center"
 									th:text="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"></td>
 								<td class="text-center">
@@ -235,15 +235,17 @@
             const row = element.closest('.notice-row');
             
             const title = row.getAttribute('data-title');
-            const memId = row.getAttribute('data-memid');
+            const fullMemName = row.getAttribute('data-memid');
             const date = row.getAttribute('data-date');
             const description = row.getAttribute('data-description');
+            
+            const memName = fullMemName.includes('(') ? fullMemName.substring(0, fullMemName.indexOf('(')) : fullMemName;
             
             //id
             const id = row.getAttribute('data-id');
             
             document.getElementById('viewTitle').textContent = title;
-            document.getElementById('viewMemId').textContent = memId;
+            document.getElementById('viewMemId').textContent = memName;
             document.getElementById('viewDate').textContent = date;
             document.getElementById('viewDescription').textContent = description;
             
