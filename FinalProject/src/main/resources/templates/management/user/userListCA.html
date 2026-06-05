@@ -15,7 +15,7 @@
 	<div layout:fragment="content">
 	<div id="wrapper">
 		<div class="d-flex justify-content-between align-items-center mb-4">
-			<h3 class="mb-3 fw-bold">회원 목록</h3>
+			<h2 class="mb-2">회원 목록</h2>
 			<div class="position-relative">
 				<form id="searchForm"
 				      th:action="@{/cadmin/userList}"
@@ -61,11 +61,11 @@
 				    </div>
 				    <div class="d-flex gap-2">
 					    <button type="submit"
-					            class="btn btn-sm btn-dark px-3">
+					            class="btn btn-sm btn-primary">
 					        검색
 					    </button>
 					    <a th:href="@{/cadmin/userList}"
-					       class="btn btn-sm btn-outline-secondary px-3">
+					       class="btn btn-sm btn-light border text-secondary">
 					        초기화
 					    </a>
 					</div>

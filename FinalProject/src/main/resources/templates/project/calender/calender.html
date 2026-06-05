@@ -11,6 +11,9 @@
 
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+	
+	<!-- container 공통 크기 -->
+	<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">
 
 <style>
 .toolbar {
@@ -159,7 +162,7 @@
 </head>
 <body>
 	<div layout:fragment="content">
-
+	<div id="wrapper">
 		<div class="calendar-wrapper">
 			<div
 				class="d-flex align-items-center gap-2 p-3 border rounded-3 mb-3 bg-white">
@@ -339,6 +342,7 @@
 
 		<div
 			th:replace="~{project/calender/modal/calenderAdd :: calenderAddModal}"></div>
+			</div>
 		<script
 			src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
 		<script th:inline="javascript">

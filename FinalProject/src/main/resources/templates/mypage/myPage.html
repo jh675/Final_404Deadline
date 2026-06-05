@@ -19,6 +19,8 @@
 	href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
 <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
 
+<!-- container 공통 크기 -->
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">
 
 <style>
 .status-new.gantt_task_line {
@@ -47,10 +49,9 @@
 </head>
 <body>
 	<div layout:fragment="content">
-		<div class="container py-4">
-
+		<div id="wrapper">
 			<!-- ===== 개인 영역 ===== -->
-			<h4 class="fw-bold mb-4">마이페이지</h4>
+			<h2 class="mb-2">마이페이지</h2>
 			<div class="card mb-4 p-3">
 				<div class="d-flex justify-content-between align-items-center">
 					<div class="d-flex align-items-center gap-4">
@@ -254,10 +255,8 @@
 				</table>
 			</div>
 
-		</div>
-
 		<!-- ===== 내 정보 수정 모달 ===== -->
-		<div th:replace="~{mypage/modal/myPageUserEdit :: mypageEditModal}"></div>
+		<div th:replace="~{mypage/modal/myPageUserEdit :: mypageEditModal}"></div></div>
 		<script th:src="@{/js/mypage/mypage.js}"></script>
 		<script>
 	
@@ -639,5 +638,6 @@
 			
 	</script>
 	</div>
+	
 </body>
 </html>

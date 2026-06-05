@@ -12,7 +12,9 @@
 	href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
 <link rel="stylesheet"
 	href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-
+	
+<!-- container 공통 크기 -->
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">
 <style>
 .numbered-table tbody {
 	counter-reset: myIndex 0;
@@ -311,7 +313,8 @@
 </head>
 <body>
 	<div layout:fragment="content">
-		<h2>프로젝트</h2>
+	<div id="wrapper">
+		<h2 class="mb-2">프로젝트</h2>
 
 		<!-- 토스트 메시지 -->
 		<div th:if="${errorMsg}" id="errorToast"
@@ -460,7 +463,7 @@
 		</div>
 
 		<ul id="ctxMenu" class="dropdown-menu shadow-sm"></ul>
-
+		</div>
 		<script>
     (function () {
       const menu = document.getElementById('ctxMenu');
