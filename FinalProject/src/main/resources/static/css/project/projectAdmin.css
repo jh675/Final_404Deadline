@@ -59,6 +59,154 @@
 	justify-content: flex-end;
 }
 
+/* 권한 목록 — 그리드 + 우측 상세 패널 */
+.role-list-split-section {
+	padding-top: 12px;
+}
+.role-list-split {
+	display: flex;
+	align-items: stretch;
+	gap: 16px;
+	min-height: 420px;
+}
+.role-list-split__grid {
+	flex: 1 1 auto;
+	min-width: 0;
+	width: 100%;
+}
+.role-list-split.is-detail-open .role-list-split__grid {
+	flex: 1 1 0;
+	min-width: 280px;
+}
+.role-list-split__detail {
+	display: flex;
+	flex-direction: column;
+	flex: 0 0 min(58%, 780px);
+	max-width: 800px;
+	min-width: 600px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	background: var(--issue-bg);
+	overflow: hidden;
+}
+.role-list-split__detail.is-hidden {
+	display: none;
+}
+.role-list-split__detail--member {
+	flex: 0 0 min(75%, 1010px);
+	max-width: 1040px;
+	min-width: 780px;
+}
+.role-list-split__detail-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--issue-border);
+	background: #fff;
+	flex-shrink: 0;
+}
+.role-list-split__detail-title {
+	margin: 0;
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: var(--issue-text, #1a1a1a);
+}
+.role-list-split__detail-close {
+	appearance: none;
+	border: 0;
+	margin: 0;
+	padding: 2px 8px;
+	background: none;
+	color: var(--issue-label, #666);
+	font-size: 1.375rem;
+	line-height: 1;
+	cursor: pointer;
+	border-radius: var(--issue-radius-sm, 4px);
+}
+.role-list-split__detail-close:hover {
+	color: var(--issue-text, #1a1a1a);
+	background: var(--issue-bg-muted, #f4f6f8);
+}
+.role-list-split__detail-frame {
+	display: block;
+	width: 100%;
+	flex: 1 1 auto;
+	min-height: 0;
+	height: 600px;
+	border: 0;
+	background: #fff;
+}
+.role-list-split__detail-frame.is-hidden {
+	display: none;
+}
+.role-name-link {
+	appearance: none;
+	border: 0;
+	padding: 0;
+	margin: 0;
+	background: none;
+	color: var(--issue-link);
+	font: inherit;
+	font-weight: 500;
+	cursor: pointer;
+	text-decoration: none;
+}
+.role-name-link:hover {
+	text-decoration: underline;
+}
+.issue-shell .tui-grid-row.role-grid-row--selected td {
+	background-color: var(--issue-bg-muted, #f4f6f8);
+}
+body.role-panel-embed.layout-tabler {
+	margin: 0;
+	background: var(--issue-bg, #fff);
+}
+.role-panel-embed__shell.issue-shell {
+	width: 100%;
+	box-sizing: border-box;
+}
+.role-panel-embed__inner {
+	max-width: 100%;
+	min-width: 0;
+	padding: 12px 14px 16px;
+	box-sizing: border-box;
+}
+.role-panel-embed .role-section__body,
+.role-panel-embed .role-groups-panel,
+.role-panel-embed .role-groups-panel__grid-host {
+	min-width: 0;
+	max-width: 100%;
+}
+.role-panel-embed .perm-list {
+	overflow-x: auto;
+}
+.role-panel-embed .perm-crud-row,
+.role-panel-embed .perm-extra-row {
+	min-width: min-content;
+}
+@media (max-width: 1100px) {
+	.role-list-split {
+		flex-direction: column;
+	}
+	.role-list-split__grid {
+		flex: 1 1 auto;
+		width: 100%;
+		max-width: none;
+	}
+	.role-list-split__detail {
+		flex: 1 1 auto;
+		max-width: none;
+		min-width: 0;
+		width: 100%;
+		min-height: 360px;
+	}
+	.role-list-split__detail-frame {
+		min-height: 400px;
+	}
+}
+
 .mem-section__title,
 .grp-section__title,
 .role-section__title,
@@ -264,6 +412,10 @@ column-gap: 0.5rem;
 white-space: nowrap;
 text-align: right;
 }
+.mem-account-inline .mem-field-row--pw-expiry {
+flex: 0 0 100%;
+width: 100%;
+}
 .mem-section[aria-labelledby="mem-account-heading"] .mem-section__body,
 .mem-section[aria-labelledby="mem-project-heading"] .mem-section__body {
 padding-left: 1rem;
@@ -273,6 +425,29 @@ border: 1px solid var(--issue-border);
 border-radius: 4px;
 overflow: hidden;
 background: #fff;
+max-width: 100%;
+}
+.role-panel-embed .mem-detail-form {
+--mem-label-w: 5.75rem;
+--mem-input-w: 11.5rem;
+}
+.role-panel-embed .mem-profile-slot {
+flex: 0 0 7rem;
+width: 7rem;
+height: 8.5rem;
+margin-left: 0;
+}
+.role-panel-embed .mem-basic-layout {
+gap: 0.5rem;
+}
+.role-panel-embed .mem-account-inline .mem-field-row {
+grid-template-columns: 5.75rem 11.5rem;
+}
+.role-panel-embed .mem-issue-grid {
+font-size: 0.8125rem;
+}
+.role-panel-embed .mem-section {
+margin-bottom: 1.25rem;
 }
 .mem-empty-msg {
 margin: 0.5rem 0 0;
