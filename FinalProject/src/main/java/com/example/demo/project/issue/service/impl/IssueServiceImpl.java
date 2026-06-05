@@ -21,6 +21,7 @@ import com.example.demo.project.issue.service.CommentOutputVO;
 import com.example.demo.project.issue.service.IssueInputVO;
 import com.example.demo.project.issue.service.IssueOutputVO;
 import com.example.demo.project.issue.service.IssueService;
+import com.example.demo.project.issue.service.IssueStatusException;
 import com.example.demo.project.issue.service.IssueSummaryVO;
 import com.example.demo.project.issue.service.IssueVulkVO;
 import com.example.demo.project.milestone.mapper.MilestoneMapper;
@@ -37,6 +38,8 @@ public class IssueServiceImpl implements IssueService {
 	private static final String MILESTONE_UNLINK_BLOCKED_MSG =
 			"타임라인이 등록된 이슈는 마일스톤에서 해제할 수 없습니다. "
 			+ "마일스톤 화면에서 타임라인을 삭제하거나 다른 마일스톤으로 이동해 주세요.";
+	private static final String STATUS_REQUIRES_ASSIGNEE_MSG =
+			"진행중·검토 상태는 담당자가 있을 때만 설정할 수 있습니다.";
 
 	@Autowired
 	IssueMapper mapper;
@@ -72,6 +75,8 @@ public class IssueServiceImpl implements IssueService {
 	@Override
 	@Transactional
 	public Long insertIssue(IssueInputVO issueVO) {
+		issueVO.setStatusCd("01ISSUESTAT");
+		issueVO.setDoneRatio(0L);
 		mapper.insertIssue(issueVO);
 		syncMilestoneIssue(issueVO.getId(), issueVO.getMilestoneId());
 		ProjectVO project = projectMapper.getprojectid(issueVO.getPrjId());
@@ -85,6 +90,7 @@ public class IssueServiceImpl implements IssueService {
 	@Override
 	@Transactional
 	public Long updateIssue(IssueInputVO issueVO) {
+		validateStatusRequiresAssignee(issueVO.getStatusCd(), issueVO.getMemId());
 		syncMilestoneIssue(issueVO.getId(), issueVO.getMilestoneId());
 
 		if (issueVO.getStatusCd() != null) {
@@ -331,6 +337,18 @@ public class IssueServiceImpl implements IssueService {
 	@Override
 	public Long updateVulk(IssueVulkVO vulkVO) {
 		return mapper.updateVulk(vulkVO);
+	}
+
+	private void validateStatusRequiresAssignee(String statusCd, Long memId) {
+		if (statusCd == null || statusCd.isBlank()) {
+			return;
+		}
+		if (!"02ISSUESTAT".equals(statusCd) && !"03ISSUESTAT".equals(statusCd)) {
+			return;
+		}
+		if (memId == null) {
+			throw new IssueStatusException(STATUS_REQUIRES_ASSIGNEE_MSG);
+		}
 	}
 
 	@Override

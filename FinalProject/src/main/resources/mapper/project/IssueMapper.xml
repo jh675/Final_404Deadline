@@ -169,6 +169,7 @@
 			SUBJECT,
 			DESCRIPTION,
 			CATEGORY_CD,
+			STATUS_CD,
 			PRIORITY_CD,
 			CREATED_ON,
 			UPDATED_ON,
@@ -193,6 +194,7 @@
 			#{subject},
 			#{description},
 			#{categoryCd},
+			#{statusCd},
 			#{priorityCd},
 			SYSDATE,
 			#{updatedOn},
@@ -287,7 +289,9 @@
 		WHERE ID IN <foreach collection="ids" item="id" separator="," open="(" close=")">
 			#{id}
 		</foreach>
+		<if test="statusCd != null and ('02ISSUESTAT'.equals(statusCd) or '03ISSUESTAT'.equals(statusCd))">
 		AND MEM_ID IS NOT NULL
+		</if>
 	</update>
 
 	<!-- ===================================================== -->
