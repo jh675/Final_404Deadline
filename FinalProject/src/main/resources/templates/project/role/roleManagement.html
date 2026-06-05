@@ -18,8 +18,11 @@
       <script th:src="@{/js/common/gridTheme.js}"></script>
       <script th:inline="javascript">
         /*<![CDATA[*/
-        const prjId = /*[[${session.currentProjectId}]]*/ "";
-        const projectRoleRows = /*[[${rows}]]*/ [];
+        window.roleListPageData = {
+          prjId: /*[[${session.currentProjectId}]]*/ null,
+          rows: /*[[${rows}]]*/ [],
+          panelUrl: /*[[@{/project/role/panel}]]*/ "/project/role/panel"
+        };
         /*]]>*/
       </script>
     </th:block>
@@ -55,8 +58,31 @@
             </form>
           </section>
 
-          <section class="issue-section issue-section--grid" aria-label="프로젝트 권한 목록">
-            <div id="menuRoleGrid" role="region" aria-label="프로젝트 권한 그리드"></div>
+          <section class="issue-section issue-section--grid role-list-split-section" aria-label="프로젝트 권한 목록">
+            <div class="role-list-split">
+              <div class="role-list-split__grid">
+                <div id="menuRoleGrid" role="region" aria-label="프로젝트 권한 그리드"></div>
+              </div>
+              <aside
+                id="roleDetailAside"
+                class="role-list-split__detail is-hidden"
+                aria-label="권한 상세">
+                <div class="role-list-split__detail-head">
+                  <h2 class="role-list-split__detail-title">권한 상세</h2>
+                  <button
+                    type="button"
+                    id="roleDetailCloseBtn"
+                    class="role-list-split__detail-close"
+                    aria-label="상세 닫기">
+                    ×
+                  </button>
+                </div>
+                <iframe
+                  id="roleDetailPanelFrame"
+                  class="role-list-split__detail-frame is-hidden"
+                  title="권한 상세"></iframe>
+              </aside>
+            </div>
           </section>
         </div>
       </div>

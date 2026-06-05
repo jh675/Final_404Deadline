@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+          var pageData = window.groupListPageData || {};
+          var prjId = pageData.prjId;
+          var projectGroupRows = Array.isArray(pageData.rows) ? pageData.rows : [];
+
           (function groupSearchDates() {
             const form = document.getElementById("groupSearchForm");
             const start = document.getElementById("createdFrom");
@@ -120,6 +124,92 @@ document.addEventListener("DOMContentLoaded", function () {
               headers[headerMeta.content] = tokenMeta.content;
             }
             return headers;
+          }
+
+          let selectedGrpId = null;
+          const groupListSplit = document.querySelector(".role-list-split");
+          const detailAside = document.getElementById("groupDetailAside");
+          const detailFrame = document.getElementById("groupDetailPanelFrame");
+          const detailCloseBtn = document.getElementById("groupDetailCloseBtn");
+
+          function refreshListGridLayout() {
+            if (grid && typeof grid.refreshLayout === "function") {
+              grid.refreshLayout();
+            }
+          }
+
+          function buildPanelUrl(grpId) {
+            const panelBase =
+              (window.groupListPageData && window.groupListPageData.panelUrl) ||
+              "/project/group/panel";
+            const join = panelBase.indexOf("?") >= 0 ? "&" : "?";
+            return (
+              panelBase + join + "grpId=" + encodeURIComponent(String(grpId))
+            );
+          }
+
+          function showGroupDetailPanel(grpId) {
+            if (grpId == null || grpId === "") return;
+            selectedGrpId = String(grpId);
+            if (groupListSplit) {
+              groupListSplit.classList.add("is-detail-open");
+            }
+            if (detailAside) {
+              detailAside.classList.remove("is-hidden");
+            }
+            if (detailFrame) {
+              detailFrame.classList.remove("is-hidden");
+              detailFrame.removeAttribute("srcdoc");
+              detailFrame.src = buildPanelUrl(selectedGrpId);
+            }
+            refreshListGridLayout();
+          }
+
+          function clearSelectedRows() {
+            if (!grid) return;
+            grid.getData().forEach(function (row) {
+              if (row.rowKey != null) {
+                grid.removeRowClassName(row.rowKey, "role-grid-row--selected");
+              }
+            });
+          }
+
+          function clearGroupDetailPanel() {
+            selectedGrpId = null;
+            if (groupListSplit) {
+              groupListSplit.classList.remove("is-detail-open");
+            }
+            if (detailAside) {
+              detailAside.classList.add("is-hidden");
+            }
+            if (detailFrame) {
+              detailFrame.removeAttribute("srcdoc");
+              detailFrame.src = "about:blank";
+              detailFrame.classList.add("is-hidden");
+            }
+            clearSelectedRows();
+            refreshListGridLayout();
+          }
+
+          if (detailCloseBtn) {
+            detailCloseBtn.addEventListener("click", function () {
+              clearGroupDetailPanel();
+            });
+          }
+
+          function markSelectedRow(grpId) {
+            if (!grid || grpId == null) return;
+            const target = String(grpId);
+            grid.getData().forEach(function (row) {
+              if (row.rowKey == null) return;
+              const gid =
+                row.id != null && row.id !== "" ? String(row.id) : "";
+              if (gid === target) {
+                grid.addRowClassName(row.rowKey, "role-grid-row--selected");
+              } else {
+                grid.removeRowClassName(row.rowKey, "role-grid-row--selected");
+              }
+            });
           }
 
           function rowGrpId(r) {
@@ -328,6 +418,9 @@ document.addEventListener("DOMContentLoaded", function () {
               const k = rowGrpId(r);
               return !k || !removeSet[k];
             });
+            if (selectedGrpId && removeSet[selectedGrpId]) {
+              clearGroupDetailPanel();
+            }
             deleteMode = false;
             recreateGrid();
           }
@@ -351,7 +444,7 @@ document.addEventListener("DOMContentLoaded", function () {
               el: el,
               data: gridData,
               rowHeaders: rowHeaders,
-              scrollX: false,
+              scrollX: true,
               scrollY: false,
               bodyHeight: "auto",
               rowHeight: 36,
@@ -368,17 +461,16 @@ document.addEventListener("DOMContentLoaded", function () {
                       row.id != null && row.id !== ""
                         ? row.id
                         : null;
-                    const text = value == null ? "" : value;
-                    if (gid == null) return text;
-                    const q =
-                      "grpId=" +
-                      encodeURIComponent(String(gid));
+                    const text = value == null ? "" : String(value);
+                    if (gid == null || !text) {
+                      return text || "-";
+                    }
                     return (
-                      '<a href="/project/group/info?' +
-                      q +
+                      '<button type="button" class="role-name-link" data-grp-id="' +
+                      encodeURIComponent(String(gid)) +
                       '">' +
                       text +
-                      "</a>"
+                      "</button>"
                     );
                   },
                 },
@@ -420,15 +512,14 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             grid.on("click", function (ev) {
-              if (deleteMode) return;
-              if (ev.columnName !== "grpName" || ev.rowKey == null) return;
+              if (deleteMode || ev.rowKey == null) return;
+              if (ev.columnName !== "grpName") return;
               const row = grid.getRow(ev.rowKey);
               const gid =
                 row && row.id != null && row.id !== "" ? row.id : null;
               if (gid != null) {
-                location.href =
-                  "/project/group/info?grpId=" +
-                  encodeURIComponent(String(gid));
+                showGroupDetailPanel(gid);
+                markSelectedRow(gid);
               }
             });
 

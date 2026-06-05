@@ -1,14 +1,17 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
-    <!-- 그룹 상세 — 권한별 메뉴 매트릭스 오버레이 (스타일은 groupManagementInfo.html) -->
+    <!-- 그룹 상세 — 권한별 메뉴 매트릭스 오버레이 -->
     <th:block th:fragment="groupRoleMenusOverlay">
-      <div class="grp-role-menus-overlay" id="grpRoleMenusOverlay" aria-hidden="true">
-        <div class="grp-role-menus-modal" role="dialog" aria-modal="true" aria-labelledby="grpRoleMenusTitle" tabindex="-1">
-          <div class="grp-role-menus-modal__head">
-            <span id="grpRoleMenusTitle">메뉴 권한</span>
+      <div class="issue-quick-modal-backdrop grp-role-menus-overlay" id="grpRoleMenusOverlay" aria-hidden="true">
+        <div class="issue-quick-modal issue-quick-modal--menus" role="dialog" aria-modal="true"
+          aria-labelledby="grpRoleMenusTitle" tabindex="-1">
+          <div class="issue-quick-modal-head">
+            <h2 id="grpRoleMenusTitle">메뉴 권한</h2>
+            <button type="button" class="issue-quick-modal-close" id="btnGrpRoleMenusCloseTop"
+              aria-label="닫기">&times;</button>
           </div>
-          <div class="grp-role-menus-modal__sub" id="grpRoleMenusRoleCaption" aria-live="polite"></div>
-          <div class="grp-role-menus-modal__body">
+          <div class="issue-quick-modal-body">
+            <p class="grp-role-menus-modal__sub" id="grpRoleMenusRoleCaption" aria-live="polite"></p>
             <table class="grp-role-menus-table" id="grpRoleMenusTable" hidden>
               <thead>
                 <tr>
@@ -28,8 +31,9 @@
               불러오는 중…
             </p>
           </div>
-          <div class="grp-role-menus-modal__actions">
-            <button type="button" id="btnGrpRoleMenusClose">닫기</button>
+          <div class="issue-quick-modal-foot">
+            <button type="button" class="issue-btn issue-btn--primary issue-bulk-btn issue-bulk-btn-primary"
+              id="btnGrpRoleMenusClose">닫기</button>
           </div>
         </div>
       </div>
@@ -37,22 +41,32 @@
 
     <!-- 그룹 상세 — 프로젝트 권한(ROLE) 선택 오버레이 -->
     <th:block th:fragment="groupRolePickOverlay">
-      <div class="grp-role-pick-overlay" id="grpRolePickOverlay" aria-hidden="true">
-        <div class="grp-role-pick" role="dialog" aria-modal="true" aria-labelledby="grpRolePickTitle">
-          <div class="grp-role-pick__head" id="grpRolePickTitle">권한 선택</div>
-          <div class="grp-role-pick__search">
-            <label class="visually-hidden" for="grpRoleSearchType">검색 항목</label>
-            <select id="grpRoleSearchType" aria-label="검색 항목">
-              <option value="roleCd">권한코드</option>
-              <option value="roleName" selected>권한명</option>
-            </select>
-            <label class="visually-hidden" for="grpRoleSearchKeyword">검색어</label>
-            <input type="text" autocomplete="off" id="grpRoleSearchKeyword" placeholder="검색어를 입력하세요" />
+      <div class="issue-quick-modal-backdrop grp-role-pick-overlay" id="grpRolePickOverlay" aria-hidden="true">
+        <div class="issue-quick-modal issue-quick-modal--wide" role="dialog" aria-modal="true"
+          aria-labelledby="grpRolePickTitle" tabindex="-1">
+          <div class="issue-quick-modal-head">
+            <h2 id="grpRolePickTitle">권한 선택</h2>
+            <button type="button" class="issue-quick-modal-close" id="btnRolePickClose"
+              aria-label="닫기">&times;</button>
           </div>
-          <div id="grpRolePickGrid" class="grp-role-pick__grid-host" role="region" aria-label="권한 선택 목록"></div>
-          <div class="grp-role-pick__actions">
-            <button type="button" id="btnRolePickCancel">초기화</button>
-            <button type="button" class="primary" id="btnRolePickOk">저장</button>
+          <div class="issue-quick-modal-body issue-quick-modal-body--pick">
+            <div class="issue-quick-modal-search grp-role-pick__search">
+              <label class="visually-hidden" for="grpRoleSearchType">검색 항목</label>
+              <select id="grpRoleSearchType" aria-label="검색 항목">
+                <option value="roleCd">권한코드</option>
+                <option value="roleName" selected>권한명</option>
+              </select>
+              <label class="visually-hidden" for="grpRoleSearchKeyword">검색어</label>
+              <input type="text" autocomplete="off" id="grpRoleSearchKeyword" placeholder="검색어를 입력하세요" />
+            </div>
+            <div id="grpRolePickGrid" class="issue-quick-modal-grid-host grp-role-pick__grid-host"
+              role="region" aria-label="권한 선택 목록"></div>
+          </div>
+          <div class="issue-quick-modal-foot">
+            <button type="button" class="issue-btn issue-btn--secondary issue-bulk-btn issue-bulk-btn-ghost"
+              id="btnRolePickCancel">초기화</button>
+            <button type="button" class="issue-btn issue-btn--primary issue-bulk-btn issue-bulk-btn-primary"
+              id="btnRolePickOk">저장</button>
           </div>
         </div>
       </div>

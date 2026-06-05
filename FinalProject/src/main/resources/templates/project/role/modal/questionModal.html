@@ -2,26 +2,28 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
     <th:block th:fragment="roleQuestionModal">
-      <div class="modal fade" id="roleQuestionModal" tabindex="-1" aria-labelledby="roleQuestionModalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="roleQuestionModalTitle">알림</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-            </div>
-            <div class="modal-body">
-              <p class="mb-0 text-break" id="roleQuestionModalMessage" style="white-space: pre-wrap"></p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" id="roleQuestionModalCancelBtn">취소</button>
-              <button type="button" class="btn btn-primary" id="roleQuestionModalConfirmBtn">확인</button>
-            </div>
+      <div id="roleQuestionModal" class="issue-quick-modal-backdrop" role="dialog"
+        aria-modal="true" aria-labelledby="roleQuestionModalTitle" hidden>
+        <div class="issue-quick-modal">
+          <div class="issue-quick-modal-head">
+            <h2 id="roleQuestionModalTitle">알림</h2>
+            <button type="button" class="issue-quick-modal-close" id="roleQuestionModalCloseBtn"
+              aria-label="닫기">&times;</button>
+          </div>
+          <div class="issue-quick-modal-body">
+            <p class="issue-quick-confirm-message" id="roleQuestionModalMessage"></p>
+          </div>
+          <div class="issue-quick-modal-foot">
+            <button type="button" class="issue-btn issue-btn--secondary issue-bulk-btn issue-bulk-btn-ghost"
+              id="roleQuestionModalCancelBtn">취소</button>
+            <button type="button" class="issue-btn issue-btn--primary issue-bulk-btn issue-bulk-btn-primary"
+              id="roleQuestionModalConfirmBtn">확인</button>
           </div>
         </div>
       </div>
     </th:block>
     <th:block th:fragment="roleQuestionModalScript">
-      <script th:src="@{/js/role/modal/questionModal.js(v=2)}"></script>
+      <script th:src="@{/js/role/modal/questionModal.js(v=3)}"></script>
     </th:block>
   </body>
 </html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <base th:href="@{/}" />
+    <title>그룹 상세</title>
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/cerulean/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/common/theme-colors.css}" />
+    <link rel="stylesheet" th:href="@{/css/common/tabler-bridge.css}" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+    <link rel="stylesheet" th:href="@{/css/project/issue.css}" />
+    <link rel="stylesheet" th:href="@{/css/project/projectAdmin.css}" />
+    <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <script th:src="@{/js/common/gridTheme.js}"></script>
+  </head>
+  <body class="layout-tabler role-panel-embed">
+    <div class="issue-shell role-panel-embed__shell">
+      <div id="groupPanelRoot" class="role-panel-embed__inner">
+        <th:block th:replace="~{project/group/fragments/groupDetailContent :: groupDetailContent}" />
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <th:block th:if="${registerMode or !groupNotFound}">
+      <th:block th:replace="~{project/group/modal/questionModal :: groupQuestionModal}" />
+      <th:block th:replace="~{project/group/modal/questionModal :: groupQuestionModalScript}" />
+      <div th:replace="~{project/group/modal/groupMemberModal :: groupMemberPickOverlay}"></div>
+      <div th:replace="~{project/group/modal/groupRoleModal :: groupRoleMenusOverlay}"></div>
+      <div th:replace="~{project/group/modal/groupRoleModal :: groupRolePickOverlay}"></div>
+    </th:block>
+
+    <script
+      th:if="${registerMode or !groupNotFound}"
+      th:inline="javascript"
+    >
+      /*<![CDATA[*/
+      window.groupManagementInfoPageConfig = {
+        prjId: /*[[${session.currentProjectId}]]*/ 0,
+        registerMode: /*[[${registerMode}]]*/ false,
+        grpId: /*[[${grpId}]]*/ null,
+        serverMembers: /*[[${members}]]*/ [],
+        serverRoles: /*[[${roles}]]*/ [],
+        panelMode: true
+      };
+      /*]]>*/
+    </script>
+    <script
+      th:if="${registerMode or !groupNotFound}"
+      th:src="@{/js/group/groupManagementInfo.js(v=2)}"
+    ></script>
+  </body>
+</html>

@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+          var pageData = window.roleListPageData || {};
+          var prjId = pageData.prjId;
+          var projectRoleRows = Array.isArray(pageData.rows) ? pageData.rows : [];
+
           (function roleSearchDates() {
             const form = document.getElementById("roleSearchForm");
             const start = document.getElementById("createdFrom");
@@ -153,6 +157,96 @@ document.addEventListener("DOMContentLoaded", function () {
               headers[headerMeta.content] = tokenMeta.content;
             }
             return headers;
+          }
+
+          let selectedRoleCd = null;
+          const roleListSplit = document.querySelector(".role-list-split");
+          const detailAside = document.getElementById("roleDetailAside");
+          const detailFrame = document.getElementById("roleDetailPanelFrame");
+          const detailCloseBtn = document.getElementById("roleDetailCloseBtn");
+
+          function refreshListGridLayout() {
+            if (grid && typeof grid.refreshLayout === "function") {
+              grid.refreshLayout();
+            }
+          }
+
+          function buildPanelFetchUrl(roleCd) {
+            const panelBase =
+              (window.roleListPageData && window.roleListPageData.panelUrl) ||
+              "/project/role/panel";
+            const join = panelBase.indexOf("?") >= 0 ? "&" : "?";
+            return (
+              panelBase + join + "roleCd=" + encodeURIComponent(String(roleCd))
+            );
+          }
+
+          function showRoleDetailPanel(roleCd) {
+            if (roleCd == null || roleCd === "") return;
+            selectedRoleCd = String(roleCd);
+            if (roleListSplit) {
+              roleListSplit.classList.add("is-detail-open");
+            }
+            if (detailAside) {
+              detailAside.classList.remove("is-hidden");
+            }
+            if (detailFrame) {
+              detailFrame.classList.remove("is-hidden");
+              detailFrame.removeAttribute("srcdoc");
+              detailFrame.src = buildPanelFetchUrl(selectedRoleCd);
+            }
+            refreshListGridLayout();
+          }
+
+          function clearSelectedRows() {
+            if (!grid) return;
+            grid.getData().forEach(function (row) {
+              if (row.rowKey != null) {
+                grid.removeRowClassName(row.rowKey, "role-grid-row--selected");
+              }
+            });
+          }
+
+          function clearRoleDetailPanel() {
+            selectedRoleCd = null;
+            if (roleListSplit) {
+              roleListSplit.classList.remove("is-detail-open");
+            }
+            if (detailAside) {
+              detailAside.classList.add("is-hidden");
+            }
+            if (detailFrame) {
+              detailFrame.removeAttribute("srcdoc");
+              detailFrame.src = "about:blank";
+              detailFrame.classList.add("is-hidden");
+            }
+            clearSelectedRows();
+            refreshListGridLayout();
+          }
+
+          if (detailCloseBtn) {
+            detailCloseBtn.addEventListener("click", function () {
+              clearRoleDetailPanel();
+            });
+          }
+
+          function markSelectedRow(roleCd) {
+            if (!grid || roleCd == null) return;
+            const target = String(roleCd);
+            grid.getData().forEach(function (row) {
+              if (row.rowKey == null) return;
+              const rc =
+                row.roleCd != null && row.roleCd !== ""
+                  ? String(row.roleCd)
+                  : row.id != null
+                    ? String(row.id)
+                    : "";
+              if (rc === target) {
+                grid.addRowClassName(row.rowKey, "role-grid-row--selected");
+              } else {
+                grid.removeRowClassName(row.rowKey, "role-grid-row--selected");
+              }
+            });
           }
 
           let gridData = Array.isArray(projectRoleRows)
@@ -382,6 +476,12 @@ document.addEventListener("DOMContentLoaded", function () {
               const id = rowBizId(r);
               return !id || !removeSet[id];
             });
+            if (
+              selectedRoleCd &&
+              removeSet[selectedRoleCd]
+            ) {
+              clearRoleDetailPanel();
+            }
             deleteMode = false;
             recreateGrid();
           }
@@ -405,7 +505,7 @@ document.addEventListener("DOMContentLoaded", function () {
               el: el,
               data: gridData,
               rowHeaders: rowHeaders,
-              scrollX: false,
+              scrollX: true,
               scrollY: false,
               bodyHeight: "auto",
               rowHeight: 36,
@@ -431,16 +531,16 @@ document.addEventListener("DOMContentLoaded", function () {
                       row.roleCd != null && row.roleCd !== ""
                         ? row.roleCd
                         : row.id;
-                    const text = value == null ? "" : value;
-                    const q =
-                      "roleCd=" +
-                      encodeURIComponent(rc == null ? "" : String(rc));
+                    const text = value == null ? "" : String(value);
+                    if (rc == null || rc === "" || !text) {
+                      return text || "-";
+                    }
                     return (
-                      '<a href="/project/role/info?' +
-                      q +
+                      '<button type="button" class="role-name-link" data-role-cd="' +
+                      encodeURIComponent(String(rc)) +
                       '">' +
                       text +
-                      "</a>"
+                      "</button>"
                     );
                   },
                 },
@@ -480,19 +580,20 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             grid.on("click", function (ev) {
-              if (deleteMode) {
+              if (deleteMode || ev.rowKey == null) {
                 return;
               }
-              if (ev.columnName === "roleName" || ev.rowKey == null) return;
+              if (ev.columnName !== "roleName") {
+                return;
+              }
               const row = grid.getRow(ev.rowKey);
               const rc =
                 row && row.roleCd != null && row.roleCd !== ""
                   ? row.roleCd
                   : row && row.id;
               if (rc != null && rc !== "") {
-                location.href =
-                  "/project/role/info?roleCd=" +
-                  encodeURIComponent(String(rc));
+                showRoleDetailPanel(rc);
+                markSelectedRow(rc);
               }
             });
 

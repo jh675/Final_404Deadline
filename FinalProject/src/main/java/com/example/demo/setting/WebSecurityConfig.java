@@ -66,6 +66,9 @@ class WebSecurityConfig {
 				.permitAll()
 			)
 			.logout(LogoutConfigurer::permitAll)
+			.headers((headers) -> headers
+				.frameOptions((frame) -> frame.sameOrigin())
+			)
 //			 .csrf(a -> a.disable())
 			
 			// 자동 로그인 설정 추가

@@ -552,6 +552,48 @@ body.layout-tabler {
 	color: var(--issue-heading);
 }
 
+#issueBulkQuickBtn {
+	background-color: var(--app-success);
+	border-color: var(--app-success);
+	color: #fff;
+}
+
+#issueBulkQuickBtn:hover:not(:disabled) {
+	background-color: var(--app-success);
+	border-color: var(--app-success);
+	filter: brightness(0.93);
+	color: #fff;
+}
+
+#issueBulkQuickBtn:disabled {
+	background-color: var(--issue-btn-disabled-bg);
+	border-color: var(--issue-btn-border);
+	color: var(--issue-btn-disabled-text);
+	opacity: 1;
+	cursor: not-allowed;
+}
+
+/* ── 빠른수정 모달 (issue-shell 밖 렌더) ─────────────── */
+.layout-tabler .issue-quick-modal-backdrop .issue-quick-field label {
+	color: var(--app-text-muted);
+}
+
+.layout-tabler .issue-quick-modal-backdrop .issue-quick-field select {
+	border-color: var(--app-border);
+	background-color: var(--app-surface);
+	color: var(--app-heading);
+}
+
+.layout-tabler .issue-quick-modal-backdrop .issue-quick-target-block {
+	background: var(--app-surface-muted);
+	border-color: var(--app-border);
+}
+
+.layout-tabler .issue-quick-modal-backdrop .issue-quick-modal-foot {
+	background: var(--app-surface-subtle);
+	border-color: var(--app-border);
+}
+
 .issue-shell .btn.btn-outline-primary,
 .issue-shell .btn.btn-outline-secondary,
 .issue-shell .btn.btn-outline-success,
