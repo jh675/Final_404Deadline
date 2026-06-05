@@ -63,6 +63,31 @@ public class MemberController {
             return "redirect:/project/member/list";
         }
 
+        model.addAttribute("panelMode", false);
+        populateMemberDetailModel(prjId, userId, grpId, criteria.isEdit(), model);
+        return "project/member/memberManagementInfo";
+    }
+
+    /** 목록 화면 우측 패널 — 레이아웃 없이 구성원 상세만 렌더 */
+    @GetMapping("/panel")
+    public String memberPanel(MemberInfoCriteria criteria, HttpSession session, Model model) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return "redirect:/management/project";
+        }
+        Long userId = criteria.getUserId();
+        Long grpId = criteria.getGrpId();
+        if (userId == null || grpId == null) {
+            return "redirect:/project/member/list";
+        }
+        model.addAttribute("prjId", prjId);
+        model.addAttribute("panelMode", true);
+        populateMemberDetailModel(prjId, userId, grpId, criteria.isEdit(), model);
+        return "project/member/memberManagementPanel";
+    }
+
+    private void populateMemberDetailModel(
+            Long prjId, Long userId, Long grpId, boolean editMode, Model model) {
         model.addAttribute("registerMode", false);
         model.addAttribute("userId", userId);
         model.addAttribute("grpId", grpId);
@@ -73,10 +98,9 @@ public class MemberController {
             model.addAttribute("editMode", false);
             model.addAttribute("viewMode", false);
             model.addAttribute("issues", List.<MemberIssueRowVO>of());
-            return "project/member/memberManagementInfo";
+            return;
         }
 
-        boolean editMode = criteria.isEdit();
         model.addAttribute("memberNotFound", false);
         model.addAttribute("editMode", editMode);
         model.addAttribute("viewMode", !editMode);
@@ -92,7 +116,6 @@ public class MemberController {
                 editMode
                         ? List.<MemberIssueRowVO>of()
                         : memberService.selectMemberIssues(prjId, userId, grpId));
-        return "project/member/memberManagementInfo";
     }
 
     /** 구성원 등록 화면 — TUI Grid 기반 (memberJoin.html) */

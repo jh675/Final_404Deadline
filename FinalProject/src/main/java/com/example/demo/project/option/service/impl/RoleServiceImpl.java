@@ -239,16 +239,16 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void deleteRolesForProject(Long prjId, List<Long> roleCds) {
         if (prjId == null || roleCds == null || roleCds.isEmpty()) {
-            throw new IllegalArgumentException("프로젝트 ID와 삭제할 역할이 필요합니다.");
+            throw new IllegalArgumentException("프로젝트 ID와 삭제할 권한이 필요합니다.");
         }
         List<Long> distinct =
                 roleCds.stream().filter(Objects::nonNull).distinct().toList();
         if (distinct.isEmpty()) {
-            throw new IllegalArgumentException("유효한 역할 코드가 없습니다.");
+            throw new IllegalArgumentException("유효한 권한 코드가 없습니다.");
         }
         for (Long roleCd : distinct) {
             if (roleMapper.selectRoleByPrjAndCd(prjId, roleCd) == null) {
-                throw new IllegalArgumentException("프로젝트에 존재하지 않는 역할입니다: " + roleCd);
+                throw new IllegalArgumentException("프로젝트에 존재하지 않는 권한입니다: " + roleCd);
             }
             roleMapper.callProcRoleDelete(roleCd, prjId);
         }
@@ -269,7 +269,7 @@ public class RoleServiceImpl implements RoleService {
             throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
         }
         if (roleName == null || roleName.isBlank()) {
-            throw new IllegalArgumentException("역할명이 필요합니다.");
+            throw new IllegalArgumentException("권한명이 필요합니다.");
         }
 
         String roleDetail = null;
@@ -320,10 +320,10 @@ public class RoleServiceImpl implements RoleService {
             throw new IllegalArgumentException("프로젝트 ID가 필요합니다.");
         }
         if (roleCd == null) {
-            throw new IllegalArgumentException("역할 코드가 필요합니다.");
+            throw new IllegalArgumentException("권한 코드가 필요합니다.");
         }
         if (roleMapper.selectRoleByPrjAndCd(prjId, roleCd) == null) {
-            throw new IllegalArgumentException("프로젝트에 존재하지 않는 역할입니다.");
+            throw new IllegalArgumentException("프로젝트에 존재하지 않는 권한입니다.");
         }
 
         String roleDetail = null;
@@ -357,7 +357,7 @@ public class RoleServiceImpl implements RoleService {
     public RoleRevokeResultVO revokeRoleFromGroup(
             Long roleCd, Long grpId, boolean deleteRoleIfUnused) {
         if (roleCd == null) {
-            throw new IllegalArgumentException("역할 코드가 필요합니다.");
+            throw new IllegalArgumentException("권한 코드가 필요합니다.");
         }
         if (grpId == null) {
             throw new IllegalArgumentException("그룹 ID가 필요합니다.");

@@ -61,7 +61,7 @@ public class UserManageServiceImpl implements UserManageService {
 		validateBizNoWithAdminCd(vo);
 
 		// 단일 수정 시, 상태가 '비활성(02ACTIVE)'으로 들어오면
-		// 화면에서 어떤 값을 넘겼든 무시하고 비밀번호 초기화를 '필요(01ACTIVE)'로 강제 세팅합니다.
+		// 비밀번호 초기화를 '필요(01ACTIVE)'로 강제 세팅
 		if ("02ACTIVE".equals(vo.getStatusCd())) {
 			vo.setMcpCd("01ACTIVE");
 		}
@@ -89,10 +89,10 @@ public class UserManageServiceImpl implements UserManageService {
 		String hqBizNo = "124-87-03358"; // 본사 사업자번호
 
 		if ("01ROLE".equals(vo.getAdminCd())) {
-			// 1. 시스템관리자라면: 프론트에서 어떤 조작된 번호를 보냈더라도 강제로 본사 번호로 덮어씌움
+			// 시스템관리자라면: 프론트에서 어떤 조작된 번호를 보냈더라도 강제로 본사 번호로 덮어씌움
 			vo.setBizNo(hqBizNo);
 		} else {
-			// 2. 그 외 권한인데: 본사 번호를 달고 왔다면 (악의적 DOM 조작) 차단!
+			// 그 외 권한: 본사 번호를 달고 왔다면 차단
 			if (hqBizNo.equals(vo.getBizNo())) {
 				throw new IllegalArgumentException("보안 경고: 일반/기업 계정은 본사 소속으로 등록할 수 없습니다.");
 			}

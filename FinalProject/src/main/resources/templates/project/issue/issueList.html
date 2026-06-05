@@ -74,7 +74,7 @@
 				</select>
 			</div>
 			<div class="issue-field issue-field--subject">
-				<label for="subject">제목</label>
+				<label for="subject">이슈명</label>
 				<input type="text" id="subject" th:field="*{subject}"
 					placeholder="텍스트를 입력해 주세요." />
 			</div>
@@ -82,7 +82,7 @@
 				<label class="issue-filter-check" for="myIssue">
 					<input type="checkbox" id="myIssue" name="myIssue" value="Y"
 						th:checked="*{myIssue == 'Y'}" />
-					<span class="issue-filter-check__text">내가 맡은 이슈</span>
+					<span class="issue-filter-check__text">내 담당 이슈</span>
 				</label>
 			</div>
 			<div class="issue-filter-buttons">
@@ -299,7 +299,7 @@
 				const row = getRowByIssueId(id);
 				const subject = row && row.subject != null && String(row.subject).trim() !== ''
 					? String(row.subject).trim()
-					: '제목 없음';
+					: '이슈명 없음';
 				return subject + ' #' + id;
 			}
 
@@ -324,7 +324,7 @@
 					}
 				} : null,
 				{
-					// 제목 컬럼: 클릭 시 상세 페이지로 이동하도록 <a> 태그를 직접 렌더링
+					// 이슈명 컬럼: 클릭 시 상세 페이지로 이동하도록 <a> 태그를 직접 렌더링
 					header: '이슈명',
 					name: 'subject',
 					sortable: true,
@@ -379,7 +379,7 @@
 					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
 				},
 				{
-					header: '마감예정일',
+					header: '완료예정일',
 					name: 'dueDate',
 					width: 120,
 					align: 'center',
@@ -412,8 +412,8 @@
 					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm')
 				},
 				{
-					// 진척도: 숫자 뒤에 % 자동 추가
-					header: '진척도',
+					// 진척율(%): 숫자 뒤에 % 자동 추가
+					header: '진척율(%)',
 					name: 'doneRatio',
 					width: 100,
 					align: 'center',

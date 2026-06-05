@@ -166,13 +166,14 @@ document.addEventListener("DOMContentLoaded", function () {
             if (window.RoleQuestionModal && window.RoleQuestionModal.confirm) {
               return window.RoleQuestionModal.confirm(message, title || "확인");
             }
-            return Promise.resolve(false);
+            return Promise.resolve(window.confirm(message));
           }
 
           function alertModal(message, title) {
             if (window.RoleQuestionModal && window.RoleQuestionModal.alert) {
               return window.RoleQuestionModal.alert(message, title || "알림");
             }
+            window.alert(message);
             return Promise.resolve();
           }
 
@@ -243,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function () {
               var nameEl = document.getElementById("detailRoleName");
               var name = nameEl ? nameEl.value.trim() : "";
               if (!name) {
-                await alertModal("역할명을 입력하세요.", "알림");
+                await alertModal("권한명을 입력하세요.", "알림");
                 return;
               }
 
@@ -302,9 +303,11 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
           var cfg = window.roleManagementInfoPageConfig || {};
           var isRegisterMode = !!cfg.registerMode;
+          var isPanelMode = !!cfg.panelMode;
           var prjId = cfg.prjId;
           var roleCd = cfg.roleCd;
           var roleEditMode = false;
+          var initialPermState = {};
           var editBtn = document.getElementById("btnRoleEdit");
           var cancelEditBtn = document.getElementById("btnRoleCancelEdit");
           var groupToolbar = document.getElementById("roleGroupToolbar");
@@ -341,6 +344,39 @@ document.addEventListener("DOMContentLoaded", function () {
             });
           }
 
+          function captureInitialPermState() {
+            initialPermState = {};
+            document
+              .querySelectorAll(".perm-menu-cb[data-role-id]")
+              .forEach(function (cb) {
+                var id = (cb.getAttribute("data-role-id") || "").trim();
+                if (id) {
+                  initialPermState[id] = cb.checked;
+                }
+              });
+          }
+
+          function restorePermCheckboxes() {
+            document
+              .querySelectorAll(".perm-menu-cb[data-role-id]")
+              .forEach(function (cb) {
+                var id = (cb.getAttribute("data-role-id") || "").trim();
+                if (
+                  id &&
+                  Object.prototype.hasOwnProperty.call(initialPermState, id)
+                ) {
+                  cb.checked = initialPermState[id];
+                }
+              });
+            if (window.RolePermToggle) {
+              window.RolePermToggle.refreshAllToggleBtns();
+            }
+          }
+
+          if (!isRegisterMode) {
+            captureInitialPermState();
+          }
+
           if (!isRegisterMode && window.RolePermToggle) {
             window.RolePermToggle.init({
               canInteract: function () {
@@ -351,6 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           function enterRoleEditMode() {
+            captureInitialPermState();
             roleEditMode = true;
             setPermCheckboxesEditable(true);
             if (window.RolePermToggle) {
@@ -368,6 +405,30 @@ document.addEventListener("DOMContentLoaded", function () {
             createRoleGroupsGrid();
           }
 
+          function exitRoleEditMode() {
+            roleEditMode = false;
+            restorePermCheckboxes();
+            setPermCheckboxesEditable(false);
+            if (window.RolePermToggle) {
+              window.RolePermToggle.setToggleButtonsVisible(false);
+              window.RolePermToggle.setToggleButtonsEnabled(false);
+            }
+            if (editBtn) {
+              editBtn.textContent = editLabel;
+            }
+            if (cancelEditBtn) {
+              cancelEditBtn.classList.add("is-hidden");
+            }
+            setRoleGroupToolbarVisible(false);
+            reloadRoleGroupsFromServer()
+              .then(function () {
+                createRoleGroupsGrid();
+              })
+              .catch(function () {
+                createRoleGroupsGrid();
+              });
+          }
+
           function setRoleGroupToolbarVisible(visible) {
             if (!groupToolbar) return;
             if (isRegisterMode) {
@@ -383,13 +444,14 @@ document.addEventListener("DOMContentLoaded", function () {
             if (window.RoleQuestionModal && window.RoleQuestionModal.confirm) {
               return window.RoleQuestionModal.confirm(message, title || "확인");
             }
-            return Promise.resolve(false);
+            return Promise.resolve(window.confirm(message));
           }
 
           function alertModal(message, title) {
             if (window.RoleQuestionModal && window.RoleQuestionModal.alert) {
               return window.RoleQuestionModal.alert(message, title || "알림");
             }
+            window.alert(message);
             return Promise.resolve();
           }
 
@@ -438,7 +500,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var pidNum = Number(prjId);
             var roleCdNum = rc ? Number(rc) : NaN;
             if (isNaN(pidNum) || isNaN(roleCdNum)) {
-              await alertModal("프로젝트 또는 역할 코드가 올바르지 않습니다.", "알림");
+              await alertModal("프로젝트 또는 권한 코드가 올바르지 않습니다.", "알림");
               return;
             }
 
@@ -500,12 +562,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
           if (cancelEditBtn) {
             cancelEditBtn.addEventListener("click", async function () {
+              if (!roleEditMode) {
+                return;
+              }
               var ok = await confirmModal(
                 "변경 내용을 저장하지 않고 되돌리시겠습니까?",
                 "취소 확인",
               );
               if (ok) {
-                window.location.reload();
+                exitRoleEditMode();
               }
             });
           }
@@ -669,7 +734,7 @@ document.addEventListener("DOMContentLoaded", function () {
               el: host,
               data: pendingToGridRows(),
               rowHeaders: ["rowNum"],
-              scrollX: false,
+              scrollX: isPanelMode,
               scrollY: false,
               bodyHeight: "auto",
               rowHeight: 36,
@@ -967,6 +1032,10 @@ document.addEventListener("DOMContentLoaded", function () {
           if (pickCancel) {
             pickCancel.addEventListener("click", closeGroupPicker);
           }
+          var btnRoleGroupPickClose = document.getElementById("btnRoleGroupPickClose");
+          if (btnRoleGroupPickClose) {
+            btnRoleGroupPickClose.addEventListener("click", closeGroupPicker);
+          }
           if (pickOverlay) {
             pickOverlay.addEventListener("click", function (e) {
               if (e.target === pickOverlay) {
@@ -1059,7 +1128,7 @@ document.addEventListener("DOMContentLoaded", function () {
               var deleteRoleIfUnused = false;
               if (grpRoleCount <= 1) {
                 deleteRoleIfUnused = await confirmModal(
-                  "이 권한을 사용하는 그룹이 더 이상 없습니다.\n권한(역할) 자체를 삭제하시겠습니까?",
+                  "이 권한을 사용하는 그룹이 더 이상 없습니다.\n권한 자체를 삭제하시겠습니까?",
                   "권한 삭제 확인",
                 );
               }
@@ -1094,7 +1163,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
               if (isOk) {
                 if (deleteRoleIfUnused && grpRoleCount <= 1) {
-                  window.location.href = "/project/role/list";
+                  if (
+                    cfg.panelMode &&
+                    window.parent &&
+                    window.parent !== window
+                  ) {
+                    window.parent.location.href = "/project/role/list";
+                  } else {
+                    window.location.href = "/project/role/list";
+                  }
                   return;
                 }
                 await reloadRoleGroupsFromServer();
@@ -1111,7 +1188,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
           if (!pid || (!isRegisterMode && !rc)) {
             host.innerHTML =
-              '<p class="perm-empty" style="padding:1rem">프로젝트 또는 역할 코드가 없어 그룹을 조회할 수 없습니다.</p>';
+              '<p class="perm-empty" style="padding:1rem">프로젝트 또는 권한 코드가 없어 그룹을 조회할 수 없습니다.</p>';
             return;
           }
 

@@ -67,9 +67,14 @@ public class IssueController {
 		return (Long) session.getAttribute("currentProjectId");
 	}
 
+	private void setIssueMenu(HttpSession session, Model model) {
+		session.setAttribute("currentMenu", "issue");
+		model.addAttribute("currentMenu", "issue");
+	}
+
 	@GetMapping("/project/issue/list")
 	public String issueList(Model model, @ModelAttribute("filter") IssueInputVO issueVO, HttpSession session) {
-		session.setAttribute("currentMenu", "issue"); // 대소문자 주의
+		setIssueMenu(session, model);
 		Long projectId = getCurrentProjectId(session);
 		if (projectId == null) {
 			return "redirect:/management/project";
@@ -79,7 +84,6 @@ public class IssueController {
 		filter.setPrjId(projectId);
 		List<IssueOutputVO> issueList = issueService.selectIssueList(issueVO);
 		model.addAttribute("members", memberService.selectProjectMemberList(filter));
-		model.addAttribute("currentMenu", "issue");
 		model.addAttribute("issueList", issueList);
 		return "project/issue/issueList";
 	}
@@ -94,7 +98,7 @@ public class IssueController {
 		if (issue == null || issue.getId() == null || !projectId.equals(issue.getPrjId())) {
 			return "redirect:/project/issue/list";
 		}
-		model.addAttribute("currentMenu", "issue");
+		setIssueMenu(session, model);
 		model.addAttribute("issue", issue);
 
 		List<AttachVO> attachments = Collections.emptyList();
@@ -165,7 +169,7 @@ public class IssueController {
 		filter.setPrjId(projectId);
 		model.addAttribute("milestones",milestoneService.selectMilestoneList(projectId));
 		model.addAttribute("members", memberService.selectProjectMemberList(filter));
-		model.addAttribute("currentMenu", "issue");
+		setIssueMenu(session, model);
 		model.addAttribute("issue", issue);
 		model.addAttribute("issueIds", issueService.getIssueIds(projectId, issue.getId()));
 		model.addAttribute("project", projectService.getprojectid(projectId));
@@ -264,7 +268,7 @@ public class IssueController {
 		model.addAttribute("priorityCols", List.of("최상", "상", "중", "하"));
 		model.addAttribute("categoryCols", List.of("버그", "기능", "작업", "개선"));
 		model.addAttribute("statusCols", List.of("신규", "진행중", "검토", "완료"));
-		model.addAttribute("currentMenu", "issue");
+		setIssueMenu(session, model);
 		return "project/issue/issuePivot";
 	}
 }

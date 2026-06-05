@@ -57,7 +57,7 @@ body, html {
 			<!-- 색깔 표시 테그부분 -->
 			<div
 				style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
-				<span style="font-weight: bold;">이슈상태 :</span> <span><span
+				<span style="font-weight: bold;">상태 :</span> <span><span
 					style="display: inline-block; width: 12px; height: 12px; background: #3498db; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>신규</span>
 				<span><span
 					style="display: inline-block; width: 12px; height: 12px; background: #e67e22; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>진행중</span>
@@ -72,7 +72,7 @@ body, html {
 					style="width: 100px;">
 					<option value="">전체</option>
 					<option value="text">이슈명</option>
-					<option value="status_cd">이슈상태</option>
+					<option value="status_cd">상태</option>
 					<option value="assignee">담당자</option>
 				</select> <input type="text" class="form-control form-control-sm"
 					id="searchInput" placeholder="검색어를 입력해주세요." style="width: 180px;"
@@ -107,14 +107,14 @@ body, html {
 								<thead class="table-dark">
 									<tr>
 										<th style="min-width: 150px;">이슈명</th>
-										<th style="min-width: 80px;">이슈상태</th>
+										<th style="min-width: 80px;">상태</th>
 										<th style="min-width: 80px;">우선순위</th>
 										<th style="min-width: 80px;">담당자</th>
 										<th style="min-width: 110px;">시작예정일</th>
-										<th style="min-width: 110px;">마감예정일</th>
+										<th style="min-width: 110px;">완료예정일</th>
 										<th style="min-width: 110px;">시작일</th>
 										<th style="min-width: 110px;">완료일</th>
-										<th style="min-width: 70px;">진척도</th>
+										<th style="min-width: 70px;">진척율(%)</th>
 									</tr>
 								</thead>
 								<tbody id="searchResultBody">
@@ -169,17 +169,17 @@ body, html {
 					})
 					.map(issue => ({
 					    text:           issue.subject, // 이슈명 
-					    status_cd:      issue.statusCd, // 이슈상태 
+					    status_cd:      issue.statusCd, // 상태 
 					    priority_cd:    issue.priorityCd, // 우선순위 
 					    assignee:       formatAssignee(issue.memName), // 담당자 
 					    est_start_date: formatDate(issue.estStartDate), // 시작예정일(template용)
-					    due_date:       formatDate(issue.dueDate), // 마감예정일
+					    due_date:       formatDate(issue.dueDate), // 완료예정일
 					    start_date:     formatDate(issue.startDate || issue.estStartDate), // 시작일(막대용)
 					    start_date_str: formatDate(issue.startDate), // 시작일
-					    end_date:       formatDate(issue.closedDate || issue.dueDate), // 막대 종료(완료일 또는 마감예정일)
+					    end_date:       formatDate(issue.closedDate || issue.dueDate), // 막대 종료(완료일 또는 완료예정일)
 					    end_date_str:   formatDate(issue.closedDate), // 완료일
-					    progress:       (issue.doneRatio ?? 0) / 100, // 진척도 (막대 그래프용)
-					    progress_text:  (issue.doneRatio ?? 0) + "%" // 진척도 (막대 그래프용)
+					    progress:       (issue.doneRatio ?? 0) / 100, // 진척율(%) (막대 그래프용)
+					    progress_text:  (issue.doneRatio ?? 0) + "%" // 진척율(%) (막대 그래프용)
 					}));	
 					gantt.clearAll();
 					gantt.parse({data: allTasks});
@@ -194,14 +194,14 @@ body, html {
 			
 			 gantt.config.columns = [
 		        { name: "text",     label: "이슈명",   width: 245, tree: true },    
-		        { name: "status_cd", label: "이슈상태", width: 100 },
+		        { name: "status_cd", label: "상태", width: 100 },
 		        { name: "priority_cd", label: "우선순위", width: 100 },
 		        { name: "assignee", label: "담당자",   width: 100 },
 		        { name: "est_start_date", label: "시작예정일", width: 140 },
-		        { name: "due_date", label: "마감예정일", width: 140 },
+		        { name: "due_date", label: "완료예정일", width: 140 },
 		        { name: "start_date", label: "시작일", width: 140, template: task => task.start_date_str || "-"},
 		        { name: "end_date", label: "완료일", width: 140, template: task => task.end_date_str || "-"},
-		        { name: "progress", label: "진척도", width: 60, template: task => task.progress_text },
+		        { name: "progress", label: "진척율(%)", width: 60, template: task => task.progress_text },
 		    ];
 		
 			// 1) 간트차트 막대 너비 조절 
@@ -217,7 +217,7 @@ body, html {
 			gantt.config.fit_tasks = false;
 		
 			
-			// 2) 진척도의 날짜헤더 (년+월/ 일)
+			// 2) 진척율(%)의 날짜헤더 (년+월/ 일)
 			
 			gantt.config.scales = [
 			    { unit: "month", step: 1, format: "%Y-%m" }, // 위: 2026-05
@@ -228,7 +228,7 @@ body, html {
 			
 			gantt.templates.task_class = function(start, end, task) {
 		
-				// 우선순위에 따라 구분
+				// 상태에 따라 구분
 		    switch(task.status_cd) {
 				    case "신규":   return "status-new";
 				    case "진행중": return "status-progress";

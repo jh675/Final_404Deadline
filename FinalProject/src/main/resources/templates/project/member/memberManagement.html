@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/projectLayout}">
   <head>
     <meta charset="UTF-8" />
-    <title>프로젝트 멤버 관리</title>
+    <title>프로젝트 구성원 관리</title>
     <th:block layout:fragment="head-content">
       <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
       <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
@@ -17,8 +17,11 @@
       <script th:src="@{/js/common/gridTheme.js}"></script>
       <script th:inline="javascript">
         /*<![CDATA[*/
-        const prjId = /*[[${session.currentProjectId}]]*/ "";
-        const projectMemberRows = /*[[${rows}]]*/ [];
+        window.memberListPageData = {
+          prjId: /*[[${session.currentProjectId}]]*/ null,
+          rows: /*[[${rows}]]*/ [],
+          panelUrl: /*[[@{/project/member/panel}]]*/ "/project/member/panel"
+        };
         /*]]>*/
       </script>
     </th:block>
@@ -28,10 +31,10 @@
       <div class="issue-shell issue-shell--list">
         <div id="wrapper" class="issue-list">
           <header class="issue-list__header">
-            <h1 class="issue-list__title">프로젝트 멤버 관리</h1>
+            <h1 class="issue-list__title">프로젝트 구성원 관리</h1>
           </header>
 
-          <section class="issue-section issue-section--filter" aria-label="멤버 검색">
+          <section class="issue-section issue-section--filter" aria-label="구성원 검색">
             <form id="memberSearchForm" method="get" th:action="@{/project/member/list}" class="issue-filter-form">
               <div class="issue-field">
                 <label for="memberName">이름</label>
@@ -48,8 +51,34 @@
             </form>
           </section>
 
-          <section class="issue-section issue-section--grid" aria-label="프로젝트 멤버 목록">
-            <div id="memberGrid" role="region" aria-label="프로젝트 멤버 그리드"></div>
+          <section class="issue-section issue-section--grid role-list-split-section" aria-label="프로젝트 구성원 목록">
+            <div class="role-list-split">
+              <div class="role-list-split__grid">
+                <div id="memberGrid" role="region" aria-label="프로젝트 구성원 그리드"></div>
+              </div>
+              <aside
+                id="memberDetailAside"
+                class="role-list-split__detail role-list-split__detail--member is-hidden"
+                aria-label="구성원 상세"
+              >
+                <div class="role-list-split__detail-head">
+                  <h2 class="role-list-split__detail-title">구성원 상세</h2>
+                  <button
+                    type="button"
+                    id="memberDetailCloseBtn"
+                    class="role-list-split__detail-close"
+                    aria-label="상세 닫기"
+                  >
+                    ×
+                  </button>
+                </div>
+                <iframe
+                  id="memberDetailPanelFrame"
+                  class="role-list-split__detail-frame is-hidden"
+                  title="구성원 상세"
+                ></iframe>
+              </aside>
+            </div>
           </section>
         </div>
       </div>

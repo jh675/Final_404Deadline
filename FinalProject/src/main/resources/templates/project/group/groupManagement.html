@@ -17,8 +17,11 @@
       <script th:src="@{/js/common/gridTheme.js}"></script>
       <script th:inline="javascript">
         /*<![CDATA[*/
-        const prjId = /*[[${session.currentProjectId}]]*/ "";
-        const projectGroupRows = /*[[${rows}]]*/ [];
+        window.groupListPageData = {
+          prjId: /*[[${session.currentProjectId}]]*/ null,
+          rows: /*[[${rows}]]*/ [],
+          panelUrl: /*[[@{/project/group/panel}]]*/ "/project/group/panel"
+        };
         /*]]>*/
       </script>
     </th:block>
@@ -50,8 +53,34 @@
             </form>
           </section>
 
-          <section class="issue-section issue-section--grid" aria-label="프로젝트 그룹 목록">
-            <div id="groupGrid" role="region" aria-label="프로젝트 그룹 그리드"></div>
+          <section class="issue-section issue-section--grid role-list-split-section" aria-label="프로젝트 그룹 목록">
+            <div class="role-list-split">
+              <div class="role-list-split__grid">
+                <div id="groupGrid" role="region" aria-label="프로젝트 그룹 그리드"></div>
+              </div>
+              <aside
+                id="groupDetailAside"
+                class="role-list-split__detail is-hidden"
+                aria-label="그룹 상세"
+              >
+                <div class="role-list-split__detail-head">
+                  <h2 class="role-list-split__detail-title">그룹 상세</h2>
+                  <button
+                    type="button"
+                    id="groupDetailCloseBtn"
+                    class="role-list-split__detail-close"
+                    aria-label="상세 닫기"
+                  >
+                    ×
+                  </button>
+                </div>
+                <iframe
+                  id="groupDetailPanelFrame"
+                  class="role-list-split__detail-frame is-hidden"
+                  title="그룹 상세"
+                ></iframe>
+              </aside>
+            </div>
           </section>
         </div>
       </div>

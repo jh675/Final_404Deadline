@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function validateSendForm() {
         clearMessage();
         
-        // ⭐ 유효성 검사 기준 변경 (hidden 값 체크)
+        // 유효성 검사
         if (!resetBizNo.value.trim()) {
             showMessage('기업을 검색하여 선택해주세요.', 'danger');
             resetCompanyNameInput.focus();
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ⭐ 경고문구 지우기 타겟 변경
+    // 경고문구 지우기 
     [resetCompanyNameInput, login, email, verifyNum].forEach(e => {
         e.addEventListener('input', () => {
             clearMessage();
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    bizNo: resetBizNo.value, // ⭐ 수정됨
+                    bizNo: resetBizNo.value,
                     login: login.value,
                     password: newPassword.value
                 })
