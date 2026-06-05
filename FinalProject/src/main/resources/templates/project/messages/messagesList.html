@@ -8,28 +8,24 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     
-   <style>
+    <style>
+
         #wrapper { width: 100%; margin: 0 auto; padding: 20px; }
         .list-table { width: 100%; border-collapse: collapse; margin-top: 15px; border-top: 2px solid #dee2e6; }
         .list-table th, .list-table td { border: 1px solid #eee; padding: 12px; text-align: center; }
         .list-table th { background-color: #f9f9f9; color: #495057; font-weight: 600; }
-        
         .list-table td.title-cell { text-align: left; padding-left: 20px; }
 
-    
-        .title-link { 
-            display: inline-block; 
-            padding: 2px 6px; 
-            color: #20a0e0;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        .title-link:hover { 
-            text-decoration: underline;
-            color: #20a0e0;
-            background-color: #f5fbff;
-        }
+
+        .btn-primary { padding: 6px 12px; font-size: 14px; border-radius: 4px; border: 1px solid #2e7d32; background-color: #2e7d32; color: white; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary:hover { background-color: #256629; color: white; }
+        .btn-secondary { padding: 6px 12px; font-size: 14px; border-radius: 4px; border: 1px solid #ccc; background-color: #f8f9fa; color: #333; text-decoration: none; display: inline-block; }
+        .btn-secondary:hover { background-color: #e9ecef; }
+
+
+        .title-link { display: inline-block; padding: 2px 6px; color: #20a0e0; text-decoration: none; font-weight: 500; transition: all 0.2s ease; }
+        .title-link:hover { text-decoration: underline; color: #20a0e0; background-color: #f5fbff; }
+
 
         .btn-action-view { font-size: 0.8rem; padding: 2px 8px; border: 1px solid #0d6efd; color: #0d6efd; background-color: transparent; border-radius: 4px; cursor: pointer; }
         .btn-action-view:hover { background-color: #0d6efd; color: white; }
@@ -38,6 +34,7 @@
         .btn-action-delete { font-size: 0.8rem; padding: 2px 8px; border: 1px solid #dc3545; color: #dc3545; background-color: transparent; border-radius: 4px; cursor: pointer; }
         .btn-action-delete:hover { background-color: #dc3545; color: white; }
         
+
         .detail-container { max-width: 800px; margin-top: 50px; background: #fff; padding: 30px; border: 1px solid #e1e1e1; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .detail-container h2 { margin-bottom: 25px; font-size: 22px; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; }
         .form-group { margin-bottom: 20px; }
@@ -95,8 +92,8 @@
 <div id="wrapper">
     <h2 th:text="${board.name}">게시판 이름</h2>
     <div style="margin-bottom: 15px;">
-        <a th:href="@{/project/boards/list}" class="btn" style="padding: 6px 12px; font-size: 14px; text-decoration: none; border: 1px solid #ccc; display: inline-block; color: #333; background-color: #f8f9fa; border-radius: 4px;">뒤로가기</a>
-        <button type="button" class="btn" th:onclick="|location.href='/project/messages/register?boardId=' + ${board.id}|">게시글 등록</button>
+        <a th:href="@{/project/boards/list}" class="btn-secondary">뒤로가기</a>
+        <button type="button" class="btn-primary" th:onclick="|location.href='/project/messages/register?boardId=' + ${board.id}|">게시글 등록</button>
     </div>
     
     <table class="list-table">
@@ -131,7 +128,7 @@
             <h2 style="margin: 0; border: none; padding: 0;">게시글 상세</h2>
             <div>
                 <a th:href="@{/project/messages/list(boardId=${board.id})}" style="padding: 4px 12px; font-size: 14px; background-color: #6c757d; color: white; border: none; border-radius: 4px; text-decoration: none; margin-right: 5px;">취소</a>
-                <button type="button" class="btn" onclick="toggleAnswerForm()" style="padding: 4px 12px; font-size: 14px; background-color: #7cb1cd; color: white; border: none;">답글 쓰기</button>
+                <button type="button" class="btn-primary" onclick="toggleAnswerForm()" style="background-color: #7cb1cd; border: 1px solid #7cb1cd;">답글 쓰기</button>
             </div>
         </div>
         
