@@ -139,10 +139,10 @@
 					if (hasManageCol) {
 						var actions = '<td class="text-center text-nowrap">';
 						if (canTimelineUpdate) {
-							actions += '<button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 me-1" data-tv-edit>수정</button>';
+							actions += '<button type="button" class="btn btn-success py-0 px-2 me-1" data-tv-edit>수정</button>';
 						}
 						if (canTimelineDelete) {
-							actions += '<button type="button" class="btn btn-outline-danger btn-sm py-0 px-2" data-tv-delete>삭제</button>';
+							actions += '<button type="button" class="btn btn-danger py-0 px-2" data-tv-delete>삭제</button>';
 						}
 						if (!canTimelineUpdate && !canTimelineDelete) {
 							actions += '<span class="text-muted small">-</span>';

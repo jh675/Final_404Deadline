@@ -122,6 +122,18 @@ document.addEventListener("DOMContentLoaded", function () {
             return u + "_" + g;
           }
 
+          function tryOpenMemberFromQuery() {
+            var params = new URLSearchParams(window.location.search);
+            var uid = params.get("userId");
+            var gid = params.get("grpId");
+            if (!uid || !gid) return;
+            var uidNum = Number(uid);
+            var gidNum = Number(gid);
+            if (isNaN(uidNum) || isNaN(gidNum)) return;
+            showMemberDetailPanel(uidNum, gidNum);
+            markSelectedRow(uidNum, gidNum);
+          }
+
           function memberKeyPayload(r) {
             if (!r) return null;
             var uid =
@@ -213,17 +225,17 @@ document.addEventListener("DOMContentLoaded", function () {
             const mount = getToolbarMount();
             if (!mount) return;
             let html =
-              '<button type="button" class="btn btn-primary btn-sm" id="memberBtnRegister">등록</button>';
+              '<button type="button" class="btn btn-primary" id="memberBtnRegister">등록</button>';
             if (!deleteMode) {
               html +=
-                '<button type="button" class="btn btn-danger btn-sm" id="memberBtnDelete">삭제</button>';
+                '<button type="button" class="btn btn-danger" id="memberBtnDelete">삭제</button>';
             } else {
               const rows = grid ? getCheckedRowsForRemove() : [];
               const n = rows.length;
               if (n === 0) {
-                html += '<button type="button" class="btn btn-secondary btn-sm" id="memberBtnDeleteCancel">삭제 취소</button>';
+                html += '<button type="button" class="btn btn-secondary" id="memberBtnDeleteCancel">삭제 취소</button>';
               } else {
-                html += '<button type="button" class="btn btn-danger btn-sm" id="memberBtnRemove">제거</button>';
+                html += '<button type="button" class="btn btn-danger" id="memberBtnRemove">제거</button>';
               }
             }
             mount.innerHTML = html;
@@ -454,4 +466,5 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           recreateGrid();
+          tryOpenMemberFromQuery();
         });

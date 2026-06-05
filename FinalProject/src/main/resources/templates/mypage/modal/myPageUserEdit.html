@@ -44,7 +44,7 @@
 										<div class="col-sm-9">
 											<div class="input-group">
 												<input type="email" id="myEmail" class="form-control bg-light" th:value="${#authentication.principal.email}" th:data-original="${#authentication.principal.email}" readonly>
-												<button class="btn btn-outline-secondary" type="button" id="btnEmailAction">수정</button>
+												<button class="btn btn-success" type="button" id="btnEmailAction">수정</button>
 											</div>
 											<div id="emailFeedback" class="small mt-1"></div>
 										</div>
@@ -75,7 +75,7 @@
 										<div class="col-sm-9">
 											<div class="input-group">
 												<input type="password" id="currentPassword" class="form-control bg-light" placeholder="비밀번호 변경 시 입력" autocomplete="off">
-												<button class="btn btn-outline-secondary" type="button" id="btnCheckCurrentPwd">확인</button>
+												<button class="btn btn-secondary" type="button" id="btnCheckCurrentPwd">확인</button>
 												<div class="invalid-feedback" id="currentPasswordError">현재 비밀번호를 입력해주세요.</div>
 												<div id="currentPwdSuccess" class="valid-feedback fw-bold d-none">비밀번호가 확인되었습니다.</div>
 											</div>
@@ -111,8 +111,8 @@
 										<div class="small text-muted mb-3">사진을 가로 3 : 세로 4 비율로<br>조정할 수 있습니다.</div>
 										<input type="file" id="myProfileImage" class="form-control d-none" accept="image/*">
 										<div class="d-flex justify-content-center gap-2">
-											<button type="button" class="btn btn-sm btn-outline-success px-3" id="btnUploadProfile">변경</button>
-											<button type="button" class="btn btn-sm btn-outline-danger px-3" id="btnDeleteProfile">삭제</button>
+											<button type="button" class="btn btn-success px-3" id="btnUploadProfile">변경</button>
+											<button type="button" class="btn btn-danger px-3" id="btnDeleteProfile">삭제</button>
 										</div>
 									</div>
 								</div>

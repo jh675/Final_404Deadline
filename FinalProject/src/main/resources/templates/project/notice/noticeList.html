@@ -1,396 +1,332 @@
-<!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout/projectLayout}">
-<head>
-<meta charset="UTF-8">
-<title>공지사항 관리</title>
-<style>
-    :root {
-        --primary-sky: #20a0e0;
-        --dark-sky: #1a8cc8;
-        --light-sky: #f5fbff;
-        --text-sky: #106699;
-        --muted-text: #6c757d;
-    }
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/projectLayout}">
+  <head>
+    <meta charset="UTF-8" />
+    <title>공지사항 관리</title>
+    <th:block layout:fragment="head-content">
+      <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+      <link rel="stylesheet" th:href="@{/css/project/issue.css}" />
+      <link rel="stylesheet" th:href="@{/css/project/projectAdmin.css}" />
+    </th:block>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div id="noticeListArea">
+        <div class="issue-shell issue-shell--list">
+          <div id="wrapper" class="issue-list issue-list--notice">
+            <header class="issue-list__header">
+              <h1 class="issue-list__title">공지사항 관리</h1>
+            </header>
 
-    .btn-sky { 
-        background-color: var(--primary-sky); 
-        border-color: var(--primary-sky); 
-        color: #fff; 
-        padding: 0.35rem 1.8rem; 
-        font-weight: 600; 
-    }
-    .btn-sky:hover { background-color: var(--dark-sky); color: #fff; }
-
-    .text-success-dark { color: var(--text-sky) !important; }
-    .bg-light-green { background-color: var(--light-sky) !important; }
-    .bg-mint-highlight {
-        background-color: #eef8ff !important;
-        border-left: 4px solid var(--primary-sky) !important;
-    }
-
-    .btn-outline-success { color: #6c757d; border-color: #ced4da; }
-    .btn-outline-success:hover { background-color: #6c757d; color: #fff; border-color: #6c757d; }
-
-    .btn-outline-danger { border-color: #dc3545; color: #dc3545; }
-    .btn-outline-danger:hover { background-color: #dc3545; color: #fff; }
-
-    .input-group .form-control:focus {
-        border-color: var(--primary-sky);
-        box-shadow: 0 0 0 0.2rem rgba(32, 160, 224, 0.25);
-    }
-    .btn-outline-secondary:hover {
-        background-color: var(--primary-sky);
-        border-color: var(--primary-sky);
-        color: #fff;
-    }
-
-    #noticeListArea, #noticeDetailArea { font-size: 0.875rem; }
-    #noticeListArea .table { font-size: 0.85rem; }
-    #noticeListArea .table th, #noticeListArea .table td { padding: 0.75rem !important; }
-    .notice-click-title { cursor: pointer; color: #212529; font-weight: 500; }
-    .notice-click-title:hover { color: var(--primary-sky); text-decoration: underline; }
-    .detail-view-box {
-        background-color: #fdfefe;
-        border: 1px solid #d1e7f0;
-        border-left: 4px solid var(--primary-sky);
-        padding: 1.5rem;
-        min-height: 250px;
-        line-height: 1.6;
-    }
-    .detail-label { font-weight: 600; color: var(--muted-text); font-size: 0.8rem; margin-bottom: 0.3rem; display: block; }
-    .table thead { border-top: 2px solid var(--primary-sky); background-color: var(--light-sky); }
-    .pagination .page-item.active .page-link {
-        background-color: var(--primary-sky) !important;
-        border-color: var(--primary-sky) !important;
-        color: white !important;
-    }
-</style>
-<style>
-    .btn-outline-success { 
-        color: var(--primary-sky) !important; 
-        border-color: var(--primary-sky) !important; 
-        background-color: transparent !important;
-    }
-    
-    .btn-outline-success:hover, 
-    .btn-outline-success:focus, 
-    .btn-outline-success:active, 
-    .btn-outline-success.active { 
-        background-color: var(--primary-sky) !important; 
-        border-color: var(--primary-sky) !important; 
-        color: #fff !important; 
-        box-shadow: none !important;
-    }
-
-    .btn:focus, .btn.focus {
-        box-shadow: 0 0 0 0.2rem rgba(32, 160, 224, 0.25) !important;
-    }
-</style>
-</head>
-<body>
-	<div layout:fragment="content">
-	<div id="wrapper">
-		<div id="noticeListArea">
-			<div id="noticeListArea">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold text-success-dark mb-0">공지사항 관리</h4>
-        
-        <div class="d-flex gap-2">
-            <form th:action="@{/project/notice/list}" method="get" class="d-flex">
-                <div class="input-group input-group-sm">
-                    <input type="text" name="keyword" class="form-control border-secondary-subtle"
-                           th:value="${param.keyword}" placeholder="검색어를 입력하세요" style="width: 200px;">
-                    <button class="btn btn-outline-secondary px-3" type="submit">검색</button>
+            <section class="issue-section issue-section--filter" aria-label="공지사항 검색">
+              <form id="noticeSearchForm" th:action="@{/project/notice/list}" method="get" class="issue-filter-form">
+                <div class="issue-field issue-field--subject">
+                  <label for="noticeKeyword">제목</label>
+                  <input
+                    type="text"
+                    id="noticeKeyword"
+                    name="keyword"
+                    th:value="${param.keyword}"
+                    placeholder="제목 검색"
+                    autocomplete="off"
+                  />
                 </div>
-            </form>
-            
-            <button type="button" class="btn btn-sky shadow-sm"
-                    th:onclick="|location.href='@{/project/notice/register}'|">등록</button>
+                <div class="issue-filter-buttons">
+                  <button type="submit" class="btn btn-primary">검색</button>
+                  <a th:href="@{/project/notice/list}" class="btn btn-secondary">초기화</a>
+                </div>
+              </form>
+            </section>
+
+            <section class="issue-section issue-section--grid" aria-label="공지사항 목록">
+              <div class="notice-table-wrap">
+                <table class="data-table notice-table" id="noticeTable">
+                  <thead>
+                    <tr>
+                      <th class="notice-table__col-no">번호</th>
+                      <th class="notice-table__col-title">제목</th>
+                      <th class="notice-table__col-author">작성자</th>
+                      <th class="notice-table__col-date">작성일</th>
+                      <th class="notice-table__col-actions">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody id="noticeTbody">
+                    <tr
+                      th:each="notice : ${list}"
+                      th:classappend="${notice.isFixed == '01ACTIVE'} ? 'notice-row--fixed' : ''"
+                      th:data-id="${notice.id}"
+                      th:data-fixed="${notice.isFixed}"
+                      th:data-title="${notice.title}"
+                      th:data-memid="${notice.memName}"
+                      th:data-date="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"
+                      th:data-description="${notice.description ?: '내용이 없습니다.'}"
+                      class="notice-row"
+                    >
+                      <td class="notice-table__cell-no">
+                        <span th:if="${notice.isFixed == '01ACTIVE'}" class="notice-pin" aria-hidden="true">📌</span>
+                        <span class="num-text"></span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          class="notice-click-title"
+                          th:classappend="${notice.isFixed == '01ACTIVE'} ? 'notice-click-title--fixed' : ''"
+                          th:text="${notice.title}"
+                          onclick="openNoticeDetail(this)"
+                        ></button>
+                      </td>
+                      <td class="notice-table__cell-muted" th:text="${notice.memName != null && notice.memName.contains('(') ? notice.memName.substring(0, notice.memName.indexOf('(')) : notice.memName}"></td>
+                      <td class="notice-table__cell-muted" th:text="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"></td>
+                      <td class="notice-table__cell-actions">
+                        <div class="notice-row-actions">
+                          <a
+                            class="btn btn-success"
+                            th:href="@{/project/notice/modify(id=${notice.id})}"
+                          >수정</a>
+                          <button
+                            type="button"
+                            class="btn btn-danger"
+                            th:onclick="|if(confirm('정말로 삭제하시겠습니까?')) location.href='@{/project/notice/delete(id=${notice.id})}'|"
+                          >삭제</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(list)}" id="emptyNoticeRow">
+                      <td colspan="5" class="notice-table__empty">등록된 공지사항이 없습니다.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="issue-section issue-section--footer" aria-label="공지사항 목록 하단">
+              <div class="issue-list-footer">
+                <div class="issue-list-footer__pagination">
+                  <nav aria-label="공지사항 페이지">
+                    <ul class="notice-pagination pagination mb-0" id="pagination"></ul>
+                  </nav>
+                </div>
+                <div class="issue-list-footer__actions">
+                  <a th:href="@{/project/notice/register}" class="btn btn-primary">작성</a>
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
-    </div>
-</div>
+      </div>
 
-			<div class="card border-0 shadow-sm overflow-hidden">
-				<div class="table-responsive">
-					<table class="table table-hover align-middle mb-0" id="noticeTable">
-						<thead class="bg-light-green text-success-dark">
-							<tr>
-								<th class="text-center" style="width: 60px;">번호</th>
-								<th>제목</th>
-								<th class="text-center" style="width: 120px;">작성자</th>
-								<th class="text-center" style="width: 120px;">작성일</th>
-								<th class="text-center" style="width: 140px;">관리</th>
-							</tr>
-						</thead>
-						<tbody id="noticeTbody">
+      <div id="noticeDetailArea" class="notice-detail is-hidden">
+        <div class="issue-shell">
+          <div id="wrapper">
+            <div class="issue-page-head">
+              <button type="button" class="issue-page-back notice-detail__back" onclick="closeNoticeDetail()">← 공지사항 목록</button>
+              <h1 class="issue-page-head__title">공지사항 상세</h1>
+            </div>
 
-							<tr th:each="notice, noticeStat : ${list}"
-								th:classappend="${notice.isFixed == '01ACTIVE'} ? 'bg-mint-highlight' : ''"
-								th:data-id="${notice.id}" th:data-fixed="${notice.isFixed}"
-								th:data-title="${notice.title}" th:data-memid="${notice.memName}"
-								th:data-date="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"
-								th:data-description="${notice.description ?: '내용이 없습니다.'}"
-								class="notice-row">
-								<td class="text-center">
-									<div
-										class="d-inline-flex align-items-center justify-content-center"
-										style="gap: 4px;">
-										<span th:if="${notice.isFixed == '01ACTIVE'}"
-											style="font-size: 0.85rem; line-height: 1; position: relative; top: -1px;">📌</span>
-										<span class="num-text"
-											th:classappend="${notice.isFixed == '01ACTIVE'} ? 'fw-bold text-success' : 'text-muted'"></span>
-									</div>
-								</td>
-								<td>
-									<div class="notice-click-title"
-										th:classappend="${notice.isFixed == '01ACTIVE'} ? 'fw-bold' : ''"
-										th:text="${notice.title}" onclick="openNoticeDetail(this)"></div>
-								</td>
-								<td class="text-muted text-center" th:text="${notice.memName != null && notice.memName.contains('(') ? notice.memName.substring(0, notice.memName.indexOf('(')) : notice.memName}"></td>
-								<td class="text-muted text-center"
-									th:text="${#dates.format(notice.createdOn, 'yyyy-MM-dd')}"></td>
-								<td class="text-center">
-									<div class="btn-group">
-										<button type="button" class="btn btn-outline-success"
-											th:onclick="|location.href='@{/project/notice/modify(id=${notice.id})}'|">수정</button>
-										<button type="button" class="btn btn-outline-danger"
-											th:onclick="|if(confirm('정말로 삭제하시겠습니까?')) location.href='@{/project/notice/delete(id=${notice.id})}'|">삭제</button>
-									</div>
-								</td>
-							</tr>
-							<tr th:if="${#lists.isEmpty(list)}" id="emptyNoticeRow">
-								<td colspan="5" class="text-center py-5 text-muted">등록된
-									공지사항이 없습니다.</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+            <section class="issue-page-section notice-detail__head-row">
+              <h2 id="viewTitle" class="notice-detail__head-title"></h2>
+              <div class="notice-detail__head-meta">
+                <span class="notice-detail__label">작성자</span>
+                <span id="viewMemId" class="notice-detail__value"></span>
+                <span class="notice-detail__meta-sep" aria-hidden="true">|</span>
+                <span class="notice-detail__label">등록일</span>
+                <span id="viewDate" class="notice-detail__value"></span>
+              </div>
+            </section>
 
-				<div class="card-footer bg-white border-0 py-3">
-					<nav>
-						<ul class="pagination justify-content-center mb-0" id="pagination"></ul>
-					</nav>
-				</div>
-			</div>
-		</div>
+            <section class="issue-page-section notice-detail__content-section">
+              <h2 class="notice-detail__section-title">내용</h2>
+              <div id="viewDescription" class="notice-detail__body"></div>
+            </section>
 
+            <section class="issue-page-section notice-detail__attach-section">
+              <h2 class="notice-detail__section-title">첨부파일</h2>
+              <div class="notice-detail__attach">
+                <ul id="fileListContainer" class="notice-detail__file-list">
+                  <li class="notice-detail__file-empty">조회 중...</li>
+                </ul>
+              </div>
+            </section>
 
-		<div id="noticeDetailArea" style="display: none;">
-			<div class="mb-3">
-				<h4 class="fw-bold text-success-dark mb-1">공지사항 내용 보기</h4>
-				<p class="text-muted small mb-0">해당 공지사항의 상세 내용을 확인할 수 있습니다.</p>
-			</div>
+            <div class="issue-register-actions">
+              <button type="button" class="btn btn-secondary" onclick="closeNoticeDetail()">닫기</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-			<div class="card border-0 shadow-sm overflow-hidden"
-				style="border-radius: 15px;">
-
-				<div class="card-body p-4">
-
-					<div class="row border-bottom pb-3 mb-3">
-						<div class="col-md-4">
-							<span class="detail-label">작성자</span>
-							<div id="viewMemId" class="fw-bold text-dark"></div>
-						</div>
-						<div class="col-md-4">
-							<span class="detail-label">등록일</span>
-							<div id="viewDate" class="text-dark"></div>
-						</div>
-					</div>
-
-					<div class="mb-4">
-						<span class="detail-label text-success-dark">제목</span>
-						<h4 id="viewTitle"
-							class="fw-bold text-dark border-start border-success border-4 ps-3 mb-0"></h4>
-					</div>
-
-					<div class="mb-4">
-						<span class="detail-label text-success-dark">공지 내용</span>
-						<div id="viewDescription" class="detail-view-box shadow-sm"></div>
-					</div>
-
-					<div class="mb-4">
-						<span class="detail-label text-success-dark">첨부파일</span>
-						<div class="p-3 bg-light rounded border">
-							<ul id="fileListContainer" class="list-unstyled mb-0">
-								<li class="text-muted small">조회 중...</li>
-							</ul>
-						</div>
-					</div>
-
-					<div class="d-flex justify-content-center border-top pt-3">
-						<button type="button"
-							class="btn btn-light border px-4 py-1.5 shadow-sm"
-							style="border-radius: 50px; font-weight: 600; min-width: 140px; font-size: 0.85rem;"
-							onclick="closeNoticeDetail()">닫기</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-
-		<script th:inline="javascript">
+      <script th:inline="javascript">
         function openNoticeDetail(element) {
-            const row = element.closest('.notice-row');
-            
-            const title = row.getAttribute('data-title');
-            const fullMemName = row.getAttribute('data-memid');
-            const date = row.getAttribute('data-date');
-            const description = row.getAttribute('data-description');
-            
-            const memName = fullMemName.includes('(') ? fullMemName.substring(0, fullMemName.indexOf('(')) : fullMemName;
-            
-            //id
-            const id = row.getAttribute('data-id');
-            
-            document.getElementById('viewTitle').textContent = title;
-            document.getElementById('viewMemId').textContent = memName;
-            document.getElementById('viewDate').textContent = date;
-            document.getElementById('viewDescription').textContent = description;
-            
-            document.getElementById('noticeListArea').style.display = 'none';
-            document.getElementById('noticeDetailArea').style.display = 'block';
-            window.scrollTo(0, 0);
-            
-            //첨부파일
-            const container = document.getElementById("fileListContainer");
-            container.innerHTML = '<li class="text-muted small">첨부파일을 불러오는 중입니다</li>';
+          const row = element.closest(".notice-row");
+          const title = row.getAttribute("data-title");
+          const fullMemName = row.getAttribute("data-memid");
+          const date = row.getAttribute("data-date");
+          const description = row.getAttribute("data-description");
+          const memName = fullMemName.includes("(")
+            ? fullMemName.substring(0, fullMemName.indexOf("("))
+            : fullMemName;
+          const id = row.getAttribute("data-id");
 
-            fetch(`/project/notice/attach?id=${id}`)
-            .then(response => response.json())
-            .then(data => {
-                container.innerHTML = '';
+          document.getElementById("viewTitle").textContent = title;
+          document.getElementById("viewMemId").textContent = memName;
+          document.getElementById("viewDate").textContent = date;
+          document.getElementById("viewDescription").textContent = description;
 
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<li class="text-muted small">첨부된 파일이 없습니다.</li>';
-                    return;
-                }
+          document.getElementById("noticeListArea").style.display = "none";
+          document.getElementById("noticeDetailArea").classList.remove("is-hidden");
+          window.scrollTo(0, 0);
 
-                data.forEach(file => {
-                    const fileName = file.atchName || file.fileName || '이름 없음';
-                    const sizeKB = file.fileSize ? (file.fileSize / 1024).toFixed(1) : '0.0';
-                    
-                    const li = document.createElement('li');
-                    li.style.marginBottom = '4px';
-                    li.style.display = 'flex';
-                    li.style.alignItems = 'center';
-                    li.style.gap = '8px';
-                    
-                    li.innerHTML = `
-                        <span style="color: #43a047;">📄</span>
-                        <span style="color: #333; font-weight: 500;">${fileName}<a href="/download/${file.id}">다운로드</a></span>
-                        <span style="color: #888; font-size: 0.8rem;">(${sizeKB} KB)</span>
-                    `;
-                    container.appendChild(li);
-                });
+          const container = document.getElementById("fileListContainer");
+          container.innerHTML = '<li class="notice-detail__file-empty">첨부파일을 불러오는 중입니다</li>';
+
+          fetch("/project/notice/attach?id=" + id)
+            .then(function (response) {
+              return response.json();
             })
-            .catch(err => {
-                console.error(err);
-                container.innerHTML = '<li class="text-danger small">오류가 발생했습니다.</li>';
+            .then(function (data) {
+              container.innerHTML = "";
+              if (!data || data.length === 0) {
+                container.innerHTML = '<li class="notice-detail__file-empty">첨부된 파일이 없습니다.</li>';
+                return;
+              }
+              data.forEach(function (file) {
+                const fileName = file.atchName || file.fileName || "이름 없음";
+                const sizeKB = file.fileSize ? (file.fileSize / 1024).toFixed(1) : "0.0";
+                const li = document.createElement("li");
+                li.className = "notice-detail__file-item";
+                li.innerHTML =
+                  '<span class="notice-detail__file-name">' +
+                  fileName +
+                  '</span><a class="notice-detail__file-link" href="/download/' +
+                  file.id +
+                  '">다운로드</a><span class="notice-detail__file-size">(' +
+                  sizeKB +
+                  " KB)</span>";
+                container.appendChild(li);
+              });
+            })
+            .catch(function () {
+              container.innerHTML = '<li class="notice-detail__file-empty notice-detail__file-empty--error">오류가 발생했습니다.</li>';
             });
         }
 
-        
-        
-        
         function closeNoticeDetail() {
-            document.getElementById('noticeDetailArea').style.display = 'none';
-            document.getElementById('noticeListArea').style.display = 'block';
-            window.scrollTo(0, 0);
+          document.getElementById("noticeDetailArea").classList.add("is-hidden");
+          document.getElementById("noticeListArea").style.display = "block";
+          window.scrollTo(0, 0);
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const tbody = document.getElementById("noticeTbody");
-            let rows = Array.from(document.querySelectorAll(".notice-row"));
-            
-            rows.sort((a, b) => {
-                const aFixed = a.getAttribute("data-fixed") === "01ACTIVE" ? 1 : 0;
-                const bFixed = b.getAttribute("data-fixed") === "01ACTIVE" ? 1 : 0;
-                return bFixed - aFixed; 
+        document.addEventListener("DOMContentLoaded", function () {
+          const tbody = document.getElementById("noticeTbody");
+          let rows = Array.from(document.querySelectorAll(".notice-row"));
+
+          rows.sort(function (a, b) {
+            const aFixed = a.getAttribute("data-fixed") === "01ACTIVE" ? 1 : 0;
+            const bFixed = b.getAttribute("data-fixed") === "01ACTIVE" ? 1 : 0;
+            return bFixed - aFixed;
+          });
+          rows.forEach(function (row) {
+            tbody.appendChild(row);
+          });
+
+          const rowsPerPage = 10;
+          const paginationUl = document.getElementById("pagination");
+          let filteredRows = rows.slice();
+
+          function displayPage(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.forEach(function (row) {
+              row.style.display = "none";
             });
-            rows.forEach(row => tbody.appendChild(row));
 
-            const rowsPerPage = 10;
-            const paginationUl = document.getElementById("pagination");
-            
-            let filteredRows = [...rows];
-            
-            function displayPage(page) {
-                const start = (page - 1) * rowsPerPage;
-                const end = start + rowsPerPage;
-                
-                rows.forEach(row => row.style.display = "none");
-
-                filteredRows.forEach((row, index) => {
-                    if (index >= start && index < end) {
-                        row.style.display = "";
-                        const numSpan = row.querySelector(".num-text");
-                        if (numSpan) { numSpan.textContent = (index - start) + 1; }
-                    }
-                });
-                
-                const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
-                renderPagination(page, pageCount);
-            }
-
-            function renderPagination(currentPage, pageCount) {
-                paginationUl.innerHTML = "";
-                if (pageCount <= 0) return;
-
-                const prevLi = document.createElement("li");
-                prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-                prevLi.innerHTML = `<a class="page-link shadow-sm" href="javascript:void(0);"><</a>`;
-                prevLi.onclick = () => { if(currentPage > 1) displayPage(currentPage - 1); };
-                paginationUl.appendChild(prevLi);
-
-                for (let i = 1; i <= pageCount; i++) {
-                    const li = document.createElement("li");
-                    li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-                    li.innerHTML = `<a class="page-link shadow-sm" href="javascript:void(0);">${i}</a>`;
-                    li.onclick = () => displayPage(i);
-                    paginationUl.appendChild(li);
+            filteredRows.forEach(function (row, index) {
+              if (index >= start && index < end) {
+                row.style.display = "";
+                const numSpan = row.querySelector(".num-text");
+                if (numSpan) {
+                  numSpan.textContent = index - start + 1;
                 }
+              }
+            });
 
-                const nextLi = document.createElement("li");
-                nextLi.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
-                nextLi.innerHTML = `<a class="page-link shadow-sm" href="javascript:void(0);">></a>`;
-                nextLi.onclick = () => { if(currentPage < pageCount) displayPage(currentPage + 1); };
-                paginationUl.appendChild(nextLi);
+            const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+            renderPagination(page, pageCount);
+          }
+
+          function renderPagination(currentPage, pageCount) {
+            paginationUl.innerHTML = "";
+            if (pageCount <= 0) {
+              return;
             }
 
-            const searchForm = document.querySelector("#noticeListArea form");
-            const searchInput = document.querySelector("input[name='keyword']");
+            const prevLi = document.createElement("li");
+            prevLi.className = "page-item" + (currentPage === 1 ? " disabled" : "");
+            prevLi.innerHTML = '<a class="page-link" href="javascript:void(0);">&lt;</a>';
+            prevLi.onclick = function () {
+              if (currentPage > 1) {
+                displayPage(currentPage - 1);
+              }
+            };
+            paginationUl.appendChild(prevLi);
 
-            if (searchForm && searchInput) {
-                searchForm.addEventListener("submit", function(e) {
-                    e.preventDefault();
-                    
-                    const keyword = searchInput.value.trim().toLowerCase();
-                    
-                    filteredRows = rows.filter(row => {
-                        const title = (row.getAttribute("data-title") || "").toLowerCase();
-                        return title.includes(keyword);
-                    });
-
-                    const emptyRow = document.getElementById("emptyNoticeRow") || document.querySelector("#noticeTbody tr[th\\:if]");
-                    if (filteredRows.length === 0) {
-                        if (emptyRow) {
-                            emptyRow.style.display = "";
-                            emptyRow.cells[0].textContent = "검색된 결과가 없습니다.";
-                        }
-                    } else {
-                        if (emptyRow) emptyRow.style.display = "none";
-                    }
-
-                    displayPage(1);
-                });
+            for (let i = 1; i <= pageCount; i++) {
+              const li = document.createElement("li");
+              li.className = "page-item" + (i === currentPage ? " active" : "");
+              li.innerHTML = '<a class="page-link" href="javascript:void(0);">' + i + "</a>";
+              li.onclick = (function (page) {
+                return function () {
+                  displayPage(page);
+                };
+              })(i);
+              paginationUl.appendChild(li);
             }
 
-            if (rows.length > 0) displayPage(1);
+            const nextLi = document.createElement("li");
+            nextLi.className = "page-item" + (currentPage === pageCount ? " disabled" : "");
+            nextLi.innerHTML = '<a class="page-link" href="javascript:void(0);">&gt;</a>';
+            nextLi.onclick = function () {
+              if (currentPage < pageCount) {
+                displayPage(currentPage + 1);
+              }
+            };
+            paginationUl.appendChild(nextLi);
+          }
+
+          const searchForm = document.getElementById("noticeSearchForm");
+          const searchInput = document.getElementById("noticeKeyword");
+
+          if (searchForm && searchInput) {
+            searchForm.addEventListener("submit", function (e) {
+              e.preventDefault();
+              const keyword = searchInput.value.trim().toLowerCase();
+              filteredRows = rows.filter(function (row) {
+                const title = (row.getAttribute("data-title") || "").toLowerCase();
+                return title.includes(keyword);
+              });
+
+              const emptyRow = document.getElementById("emptyNoticeRow");
+              if (filteredRows.length === 0) {
+                if (emptyRow) {
+                  emptyRow.style.display = "";
+                  emptyRow.cells[0].textContent = "검색된 결과가 없습니다.";
+                }
+              } else if (emptyRow) {
+                emptyRow.style.display = "none";
+              }
+
+              displayPage(1);
+            });
+          }
+
+          if (rows.length > 0) {
+            displayPage(1);
+          }
         });
-    </script>
-	</div>
-	</div>
-</body>
+      </script>
+    </div>
+  </body>
 </html>

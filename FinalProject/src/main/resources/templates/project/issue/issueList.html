@@ -97,10 +97,10 @@
 		<div id="issueBulkBar" class="issue-bulk-bar" aria-live="polite"
 			th:if="${@prjAuth.hasRole('ROLE_ISSUE_UPDATE')}">
 			<span class="bulk-count" id="issueBulkCount">0건 선택</span>
-			<button type="button" class="btn btn-success btn-sm" id="issueBulkQuickBtn" disabled>
+			<button type="button" class="btn btn-success" id="issueBulkQuickBtn" disabled>
 				빠른수정
 			</button>
-			<button type="button" class="btn btn-outline-secondary btn-sm" id="issueBulkClearBtn">
+			<button type="button" class="btn btn-secondary" id="issueBulkClearBtn">
 				선택 해제
 			</button>
 		</div>
@@ -116,10 +116,10 @@
 		<div class="issue-list-footer">
 			<div id="issuePaginationSlot" class="issue-list-footer__pagination"></div>
 			<div class="issue-list-footer__actions">
-				<a th:href="@{/project/issue/pivot}" class="btn btn-outline-primary btn-sm"
-					th:if="${@prjAuth.hasRole('ROLE_ISSUE_VIEW')}">통계</a>
-				<a th:href="@{/project/issue/register}" class="btn btn-primary btn-sm"
-					th:if="${@prjAuth.hasRole('ROLE_ISSUE_CREATE')}">이슈 등록</a>
+			<a th:href="@{/project/issue/pivot}" class="btn btn-secondary"
+				th:if="${@prjAuth.hasRole('ROLE_ISSUE_VIEW')}">통계</a>
+				<a th:href="@{/project/issue/register}" class="btn btn-primary"
+					th:if="${@prjAuth.hasRole('ROLE_ISSUE_CREATE')}">등록</a>
 			</div>
 		</div>
 		</section>
@@ -429,7 +429,7 @@
 					formatter: function (props) {
 						const id = props.row == null ? '' : props.row.id;
 						if (id == null || id === '') return '';
-						return '<button type="button" class="btn btn-success btn-sm issue-quick-btn" data-id="' + id + '">빠른수정</button>';
+						return '<button type="button" class="btn btn-success issue-quick-btn" data-id="' + id + '">빠른수정</button>';
 					}
 				} : null
 			].filter(Boolean);

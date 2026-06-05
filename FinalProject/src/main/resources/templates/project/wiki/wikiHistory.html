@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/projectLayout}">
@@ -28,8 +28,8 @@
                     </p>
                 </div>
                 <div class="wiki-page-head__actions">
-                    <a class="btn btn-secondary btn-sm" th:href="@{/project/wiki/view/{name}(name=${page.title})}">문서 보기</a>
-                    <a class="btn btn-success btn-sm"
+                    <a class="btn btn-secondary" th:href="@{/project/wiki/view/{name}(name=${page.title})}">문서 보기</a>
+                    <a class="btn btn-success"
                        th:if="${@prjAuth.hasRole('ROLE_WIKI_UPDATE')}"
                        th:href="@{/project/wiki/register(id=${page.pageId != null ? page.pageId : page.id})}">편집</a>
                 </div>
@@ -53,8 +53,8 @@
             <section class="wiki-panel">
                 <div class="wiki-history-toolbar">
                     <div class="wiki-history-pager">
-                        <button type="button" class="btn btn-secondary btn-sm" disabled>이전</button>
-                        <button type="button" class="btn btn-secondary btn-sm" disabled>다음</button>
+                        <button type="button" class="btn btn-secondary" disabled>이전</button>
+                        <button type="button" class="btn btn-secondary" disabled>다음</button>
                     </div>
                 </div>
 
