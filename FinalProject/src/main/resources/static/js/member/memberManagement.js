@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
               toolbarMountElement.id = "memberGridToolbarMount";
               toolbarMountElement.className = "role-grid-toolbar";
               toolbarMountElement.setAttribute("role", "toolbar");
-              toolbarMountElement.setAttribute("aria-label", "멤버 목록 도구");
+              toolbarMountElement.setAttribute("aria-label", "구성원 목록 도구");
             }
             return toolbarMountElement;
           }
@@ -171,9 +171,9 @@ document.addEventListener("DOMContentLoaded", function () {
               return r.userName != null && r.userName !== ""
                 ? String(r.userName) : "(이름 없음)";
             });
-            const msg = "선택한 멤버를 프로젝트에서 제거하시겠습니까?\n\n" + names.join("\n");
+            const msg = "선택한 구성원을 프로젝트에서 제거하시겠습니까?\n\n" + names.join("\n");
             var confirmed = await window.MemberQuestionModal.confirm(
-              msg, "멤버 제거" );
+              msg, "구성원 제거" );
             if (!confirmed) {
               return;
             }
@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const okMsg =
               names.length === 1
                 ? labelPart + "이(가) 정상적으로 제거되었습니다."
-                : labelPart + " 멤버가 정상적으로 제거되었습니다.";
+                : labelPart + " 구성원이 정상적으로 제거되었습니다.";
             await window.MemberQuestionModal.alert(okMsg, "알림");
 
             const removeSet = {};

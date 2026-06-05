@@ -93,7 +93,7 @@
 		i.DONE_RATIO as doneRatio
 		FROM ISSUE i
 		<include refid="issueSearchWhere" />
-		ORDER BY PRIORITY_CD DESC
+		ORDER BY id desc
 	</select>
 
 	<!-- ===================================================== -->

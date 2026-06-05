@@ -219,7 +219,7 @@ public class GroupServiceImpl implements GroupService {
                 continue;
             }
             if (roleService.selectRoleByPrjAndCd(prjId, roleCd) == null) {
-                throw new IllegalArgumentException("프로젝트에 존재하지 않는 역할입니다: " + roleCd);
+                throw new IllegalArgumentException("프로젝트에 존재하지 않는 권한입니다: " + roleCd);
             }
             List<Long> grpIds = new ArrayList<>();
             for (RoleGroupRowVO g : roleService.selectRoleGroupsList(prjId, roleCd)) {
