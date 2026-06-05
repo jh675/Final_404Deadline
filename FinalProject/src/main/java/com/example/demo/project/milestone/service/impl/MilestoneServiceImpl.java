@@ -1,16 +1,21 @@
 package com.example.demo.project.milestone.service.impl;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.example.demo.project.calender.mapper.HolidayMapper;
+import com.example.demo.project.calender.service.HolidayVO;
 import com.example.demo.project.issue.service.IssueSummaryVO;
 import com.example.demo.project.milestone.mapper.MilestoneMapper;
+import com.example.demo.project.milestone.service.MilestoneExpectedProgressCalculator;
 import com.example.demo.project.milestone.service.MilestoneIssueVO;
 import com.example.demo.project.milestone.service.MilestoneService;
+import com.example.demo.project.milestone.service.MilestoneSyncException;
 import com.example.demo.project.milestone.service.MilestoneTimelineVO;
 import com.example.demo.project.milestone.service.MilestoneVO;
 
@@ -19,22 +24,27 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 	@Autowired
 	private MilestoneMapper mapper;
+
+	@Autowired
+	private HolidayMapper holidayMapper;
 	
 	@Override
 	public List<MilestoneVO> selectMilestoneList(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.selectMilestoneList(id);
 	}
 
 	@Override
+	public MilestoneVO selectMilestoneById(Long id) {
+		return mapper.selectMilestoneById(id);
+	}
+
+	@Override
 	public List<MilestoneIssueVO> selectMilestoneIssueList(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.selectMilestoneIssueList(id);
 	}
 
 	@Override
 	public List<MilestoneTimelineVO> selectTimelineList(Long id) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -42,39 +52,42 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 	@Override
 	public Long insertMilestone(MilestoneVO milestoneVO) {
-		// TODO Auto-generated method stub
 		return mapper.insertMilestone(milestoneVO);
 	}
 
 	@Override
 	public Long insertMilestoneIssue(MilestoneIssueVO milestoneIssueVO) {
-		// TODO Auto-generated method stub
 		return mapper.insertMilestoneIssue(milestoneIssueVO);
 	}
 
 	@Override
 	public Long insertTimeline(MilestoneTimelineVO timelineVO) {
-		// TODO Auto-generated method stub
 		return mapper.insertTimeline(timelineVO);
 	}
 
 	@Override
 	public Long updateTimeline(MilestoneTimelineVO timelineVO) {
-		// TODO Auto-generated method stub
-		return null;
+		return mapper.updateTimeline(timelineVO);
 	}
 
 
 	@Override
 	public Long deleteMilestoneIssue(Long id) {
-		// TODO Auto-generated method stub
+		if (id == null) {
+			return null;
+		}
+		Long count = mapper.countTimelineByMilestoneIssueId(id);
+		if (count != null && count > 0) {
+			throw new MilestoneSyncException(
+					"타임라인이 등록된 이슈는 마일스톤에서 해제할 수 없습니다. "
+					+ "마일스톤 화면에서 타임라인을 삭제하거나 다른 마일스톤으로 이동해 주세요.");
+		}
 		return mapper.deleteMilestoneIssue(id);
 	}
 
 	@Override
 	public Long deleteTimeline(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		return mapper.deleteTimeline(id);
 	}
 
 	@Override
@@ -84,20 +97,40 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 	@Override
 	public Long updateMilestone(MilestoneVO milestoneVO) {
-		// TODO Auto-generated method stub
 		return mapper.updateMilestone(milestoneVO);
 	}
 
 	@Override
 	public Long deleteMilestone(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.deleteMilestone(id);
 	}
 
 	@Override
 	public Long getAvg(Long id) {
-		// TODO Auto-generated method stub
 		return mapper.getAvg(id);
 	}
+
+	@Override
+	public Long getExpectedProgress(Long id) {
+		MilestoneVO milestone = mapper.selectMilestoneById(id);
+		if (milestone == null || milestone.getStartDate() == null || milestone.getEndDate() == null) {
+			return null;
+		}
+
+		LocalDate start = milestone.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate end = milestone.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		List<HolidayVO> holidays = holidayMapper.getHolidaysByYearRange(start.getYear(), end.getYear());
+		return MilestoneExpectedProgressCalculator.calculate(
+				milestone.getStartDate(),
+				milestone.getEndDate(),
+				holidays);
+	}
+
+	@Override
+	public Long moveIssue(MilestoneIssueVO milestoneIssueVO) {
+		return mapper.moveIssue(milestoneIssueVO);
+	}
+
+
 
 }

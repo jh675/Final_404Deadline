@@ -11,16 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.demo.project.group.service.*;
-import com.example.demo.project.option.service.RoleService;
-import com.example.demo.project.option.service.RoleVO;
+import com.example.demo.project.option.service.*;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
-/**
- * 프로젝트 그룹 관리 — {@code project/group/groupManagement.html}
- */
+/** 프로젝트 그룹 — 세션 {@code currentProjectId} 기준 */
 @Controller
 @RequestMapping("/project/group")
 @RequiredArgsConstructor
@@ -29,46 +26,60 @@ public class GroupController {
     private final GroupService groupService;
     private final RoleService roleService;
 
-    /** 그룹 목록 화면 — 검색 조건 반영 후 Thymeleaf에 rows 전달 */
-    @GetMapping("/groupManagement")
-    public String groupManagementPage(
-            GroupListCriteria criteria,
-            Model model) {
-
-     
-
-        List<ProjectGroupRowVO> rows = groupService.selectProjectGroupList(criteria);
-
-        model.addAttribute("rows", rows);
-        model.addAttribute("prjId", criteria.getPrjId());
+    @GetMapping("/list")
+    public String groupList(GroupListCriteria criteria, HttpSession session, Model model) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return "redirect:/management/project";
+        }
+        criteria.setPrjId(prjId);
+        criteria.normalized();
+        model.addAttribute("rows", groupService.selectProjectGroupList(criteria));
         model.addAttribute("grpName", criteria.getGrpName());
         model.addAttribute("createdFrom", criteria.getCreatedFrom());
         model.addAttribute("createdTo", criteria.getCreatedTo());
+        session.setAttribute("currentMenu", "group");
         return "project/group/groupManagement";
     }
 
-    /** 그룹 상세·등록 — {@code project/group/groupManagementInfo.html} (grpId 없으면 등록) */
-    @GetMapping("/groupManagementInfo")
-    public String groupManagementInfoPage(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam(value = "grpId", required = false) Long grpId,
-            Model model) {
-
-        model.addAttribute("prjId", prjId);
-
+    @GetMapping("/info")
+    public String groupInfo(GroupInfoCriteria criteria, HttpSession session, Model model) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return "redirect:/management/project";
+        }
+        Long grpId = criteria.getGrpId();
         if (grpId == null) {
             model.addAttribute("registerMode", true);
             model.addAttribute("groupNotFound", false);
             model.addAttribute("detail", GroupDetailVO.builder()
                     .prjId(prjId)
-                    .prjName(groupService.selectProjectName(prjId))
                     .grpName("")
                     .build());
             model.addAttribute("members", List.<GroupMemberDetailRowVO>of());
             model.addAttribute("roles", List.<GroupRoleDetailRowVO>of());
             return "project/group/groupManagementInfo";
         }
+        populateGroupDetailModel(prjId, grpId, model);
+        return "project/group/groupManagementInfo";
+    }
 
+    /** 목록 화면 우측 패널 — 레이아웃 없이 그룹 상세만 렌더 */
+    @GetMapping("/panel")
+    public String groupPanel(GroupInfoCriteria criteria, HttpSession session, Model model) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return "redirect:/management/project";
+        }
+        Long grpId = criteria.getGrpId();
+        if (grpId == null) {
+            return "redirect:/project/group/list";
+        }
+        populateGroupDetailModel(prjId, grpId, model);
+        return "project/group/groupManagementPanel";
+    }
+
+    private void populateGroupDetailModel(Long prjId, Long grpId, Model model) {
         model.addAttribute("registerMode", false);
         model.addAttribute("grpId", grpId);
 
@@ -77,70 +88,44 @@ public class GroupController {
             model.addAttribute("groupNotFound", true);
             model.addAttribute("members", List.<GroupMemberDetailRowVO>of());
             model.addAttribute("roles", List.<GroupRoleDetailRowVO>of());
-            return "project/group/groupManagementInfo";
+            return;
         }
 
         model.addAttribute("groupNotFound", false);
         model.addAttribute("detail", detail);
         model.addAttribute("members", groupService.selectGroupMembers(prjId, grpId));
         model.addAttribute("roles", groupService.selectGroupRoles(prjId, grpId));
-        return "project/group/groupManagementInfo";
     }
 
-    /** 그룹명 중복 확인 — GRP.PRJ_ID + GRP.NAME */
     @GetMapping("/checkGrpNameDuplicate")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> checkGrpNameDuplicate(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam("grpName") String grpName) {
+            GroupNameDuplicateCriteria criteria, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
         if (prjId == null) {
-            return badRequest("프로젝트 ID가 필요합니다.");
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
         }
-        String name = grpName == null ? "" : grpName.trim();
+        String name = criteria.getGrpName() == null ? "" : criteria.getGrpName().trim();
         if (name.isEmpty()) {
             return badRequest("그룹명을 입력하세요.");
         }
-        boolean duplicate = groupService.existsGroupName(prjId, name);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("ok", true);
-        body.put("duplicate", duplicate);
+        body.put("duplicate", groupService.existsGroupName(prjId, name));
         return ResponseEntity.ok(body);
     }
 
-    /** 그룹 목록 JSON (AJAX 검색용, 현재 HTML에서는 미사용) */
-    @GetMapping("/groupManagementList")
-    @ResponseBody
-    public Map<String, Object> groupManagementList(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam(required = false) String grpName,
-            @RequestParam(required = false) String createdFrom,
-            @RequestParam(required = false) String createdTo) {
-
-        GroupListCriteria criteria = GroupListCriteria.builder()
-                .prjId(prjId)
-                .grpName(nullToEmpty(grpName))
-                .createdFrom(nullToEmpty(createdFrom))
-                .createdTo(nullToEmpty(createdTo))
-                .build();
-
-        List<ProjectGroupRowVO> rows = groupService.selectProjectGroupList(criteria);
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("content", rows);
-        body.put("prjId", prjId);
-        return body;
-    }
-
-    /**
-     * 그룹 보유 권한 — 역할에 연결된 메뉴명 목록.
-     * 해당 그룹에 {@code GRP_ROLE}로 부여된 역할만 조회 가능합니다.
-     */
     @GetMapping("/groupRoleMenus")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> groupRoleMenus(
-            @RequestParam("prjId") Long prjId,
-            @RequestParam("grpId") Long grpId,
-            @RequestParam("roleCd") Long roleCd) {
-        if (prjId == null || grpId == null || roleCd == null) {
+            GroupRoleMenusCriteria criteria, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        Long grpId = criteria.getGrpId();
+        Long roleCd = criteria.getRoleCd();
+        if (prjId == null) {
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
+        }
+        if (grpId == null || roleCd == null) {
             return badRequest("요청이 올바르지 않습니다.");
         }
         if (groupService.selectGroupDetail(prjId, grpId) == null) {
@@ -158,104 +143,141 @@ public class GroupController {
         body.put("ok", true);
         body.put("roleName", role.getRoleName());
         body.put("menus", menus == null ? List.of() : menus);
+        body.put("menuSections", roleService.selectMenuSectionsByRoleCd(prjId, roleCd));
         return ResponseEntity.ok(body);
     }
 
-    /** 그룹 등록 모달 — 프로젝트 구성원 선택 목록 JSON */
     @GetMapping("/groupMemberPickList")
     @ResponseBody
-    public Map<String, Object> groupMemberPickList(@RequestParam("prjId") Long prjId) {
-        List<GroupMemberPickRowVO> rows = groupService.selectGroupMemberPickList(prjId);
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("content", rows);
-        body.put("prjId", prjId);
-        return body;
+    public Object groupMemberPickList(HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("ok", false, "message", "프로젝트를 선택한 뒤 이용해 주세요."));
+        }
+        return listBody(prjId, groupService.selectGroupMemberPickList(prjId));
     }
 
-    /** 그룹 등록 — DB {@code PROC_GRP_INSERT} (userIds 없으면 그룹만 생성) */
     @PostMapping("/registerGroup")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> registerGroup(
-            @RequestBody(required = false) GroupInsertRequest body) {
+            @RequestBody(required = false) GroupInsertRequest body, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
+        }
         try {
-            if (body == null || body.prjId() == null) {
+            if (body == null) {
                 return badRequest("요청이 올바르지 않습니다.");
             }
             String grpName = body.grpName() == null ? "" : body.grpName().trim();
             if (grpName.isEmpty()) {
                 return badRequest("그룹명을 입력하세요.");
             }
-            List<Long> userIds = body.userIds();
-            groupService.insertGroup(body.prjId(), grpName, userIds);
-            Map<String, Object> ok = new LinkedHashMap<>();
-            ok.put("ok", true);
-            return ResponseEntity.ok(ok);
+            groupService.insertGroup(prjId, grpName, body.userIds(), body.roleCds());
+            return ResponseEntity.ok(Map.of("ok", true));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("ok", false, "message", e.getMessage()));
+            return badRequest(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("ok", false, "message", "그룹 등록 중 오류가 발생했습니다."));
+            return serverError("그룹 등록 중 오류가 발생했습니다.");
         }
     }
 
-    /** 그룹 수정 — DB {@code PROC_GRP_UPDATE} (userIds 없으면 구성원 변경 없음) */
     @PostMapping("/updateGroup")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> updateGroup(
-            @RequestBody(required = false) GroupUpdateRequest body) {
+            @RequestBody(required = false) GroupUpdateRequest body, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
+        }
         try {
-            if (body == null || body.prjId() == null || body.grpId() == null) {
+            if (body == null || body.grpId() == null) {
                 return badRequest("요청이 올바르지 않습니다.");
             }
-            groupService.updateGroup(body.prjId(), body.grpId(), body.userIds());
+            groupService.updateGroup(prjId, body.grpId(), body.userIds());
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("ok", false, "message", e.getMessage()));
+            return badRequest(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("ok", false, "message", "그룹 수정 중 오류가 발생했습니다."));
+            return serverError("그룹 수정 중 오류가 발생했습니다.");
         }
     }
 
-    /** 선택 그룹 삭제 — DB {@code PROC_GRP_DELETE} 호출 */
+    @GetMapping("/groupRolePickList")
+    @ResponseBody
+    public Object groupRolePickList(HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("ok", false, "message", "프로젝트를 선택한 뒤 이용해 주세요."));
+        }
+        RoleVO search = new RoleVO();
+        search.setPrjId(prjId);
+        return listBody(prjId, roleService.selectRoleList(search));
+    }
+
+    @PostMapping("/updateGroupRoles")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateGroupRoles(
+            @RequestBody(required = false) GroupRolesUpdateRequest body, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
+        }
+        try {
+            if (body == null || body.grpId() == null) {
+                return badRequest("요청이 올바르지 않습니다.");
+            }
+            groupService.updateGroupRoles(prjId, body.grpId(), body.roleCds());
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
+        } catch (Exception e) {
+            return serverError("그룹 권한 수정 중 오류가 발생했습니다.");
+        }
+    }
+
     @PostMapping("/deleteGroups")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteGroups(
-            @RequestBody(required = false) GroupDeleteRequest body) {
-        Map<String, Object> ok = new LinkedHashMap<>();
-        ok.put("ok", true);
-        try {
-            if (body == null || body.prjId() == null) {
-                return badRequest("요청이 올바르지 않습니다.");
-            }
-            groupService.deleteGroups(body.prjId(), body.grpIds() == null ? List.of() : body.grpIds());
-            return ResponseEntity.ok(ok);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("ok", false, "message", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("ok", false, "message", "그룹 삭제 중 오류가 발생했습니다."));
+            @RequestBody(required = false) GroupDeleteRequest body, HttpSession session) {
+        Long prjId = (Long) session.getAttribute("currentProjectId");
+        if (prjId == null) {
+            return badRequest("프로젝트를 선택한 뒤 이용해 주세요.");
         }
+        try {
+            groupService.deleteGroups(
+                    prjId, body == null || body.grpIds() == null ? List.of() : body.grpIds());
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
+        } catch (Exception e) {
+            return serverError("그룹 삭제 중 오류가 발생했습니다.");
+        }
+    }
+
+    private static Map<String, Object> listBody(Long prjId, List<?> content) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", content);
+        body.put("prjId", prjId);
+        return body;
     }
 
     private static ResponseEntity<Map<String, Object>> badRequest(String message) {
         return ResponseEntity.badRequest().body(Map.of("ok", false, "message", message));
     }
 
-    /** deleteGroups 요청 JSON */
-    public record GroupDeleteRequest(Long prjId, List<Long> grpIds) {}
-
-    /** registerGroup 요청 JSON — userIds 키는 구성원이 있을 때만 전송 */
-    public record GroupInsertRequest(Long prjId, String grpName, List<Long> userIds) {}
-
-    /** updateGroup 요청 JSON */
-    public record GroupUpdateRequest(Long prjId, Long grpId, List<Long> userIds) {}
-
-    /** MyBatis 동적 SQL에서 null 대신 빈 문자열로 통일 */
-    private static String nullToEmpty(String s) {
-        return s == null ? "" : s;
+    private static ResponseEntity<Map<String, Object>> serverError(String message) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("ok", false, "message", message));
     }
+
+    public record GroupDeleteRequest(List<Long> grpIds) {}
+
+    public record GroupInsertRequest(String grpName, List<Long> userIds, List<Long> roleCds) {}
+
+    public record GroupUpdateRequest(Long grpId, List<Long> userIds) {}
+
+    public record GroupRolesUpdateRequest(Long grpId, List<Long> roleCds) {}
 }

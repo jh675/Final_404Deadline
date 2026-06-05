@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<div th:fragment="issueMoveModal">
+	<div class="modal fade" id="issueMoveModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">이슈 이동</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="issueMoveForm" autocomplete="off">
+						<div class="mb-3">
+							<label class="form-label">이동할 이슈</label>
+							<select class="form-select" name="milestoneIssueId" required>
+								<option value="">이슈를 선택하세요</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">이동할 마일스톤</label>
+							<select class="form-select" name="targetMilestoneId" required>
+								<option value="">마일스톤을 선택하세요</option>
+							</select>
+							<small class="form-text text-muted">
+								타임라인 이벤트가 있어도 이동할 수 있습니다. 기록은 이슈와 함께 새 마일스톤으로 옮겨집니다.
+							</small>
+						</div>
+						<small class="text-danger d-none" data-im-err></small>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-primary" data-im-save>이동</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			var modalEl = document.getElementById("issueMoveModal");
+			if (!modalEl) return;
+			var form = modalEl.querySelector("#issueMoveForm");
+			var errEl = modalEl.querySelector("[data-im-err]");
+			var saveBtn = modalEl.querySelector("[data-im-save]");
+			var issueSelectEl = form.querySelector('[name="milestoneIssueId"]');
+			var milestoneSelectEl = form.querySelector('[name="targetMilestoneId"]');
+
+			function getCsrfHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getCsrfHeaders) {
+					return window.MilestoneTimeline.getCsrfHeaders();
+				}
+				var headers = {};
+				var tokenMeta = document.querySelector('meta[name="_csrf"]');
+				var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+				if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
+					headers[headerMeta.content] = tokenMeta.content;
+				}
+				return headers;
+			}
+
+			function getApiJsonHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getApiJsonHeaders) {
+					return window.MilestoneTimeline.getApiJsonHeaders();
+				}
+				return Object.assign(
+					{ "Content-Type": "application/json", Accept: "application/json" },
+					getCsrfHeaders()
+				);
+			}
+
+			function setErr(msg) {
+				if (!errEl) return;
+				if (msg) { errEl.textContent = msg; errEl.classList.remove("d-none"); }
+				else     { errEl.textContent = ""; errEl.classList.add("d-none"); }
+			}
+
+			function populateIssues(issues) {
+				issueSelectEl.innerHTML = '<option value="">이슈를 선택하세요</option>';
+				if (!issues || !issues.length) {
+					issueSelectEl.innerHTML = '<option value="">등록된 이슈가 없습니다</option>';
+					return;
+				}
+				issues.forEach(function (it) {
+					var opt = document.createElement("option");
+					opt.value = it.id != null ? it.id : "";
+					var label = (it.name || ("이슈 #" + (it.issueId != null ? it.issueId : it.id)));
+					var eventCount = Array.isArray(it.events) ? it.events.filter(function (e) {
+						return e && (e.id != null || e.entryDate || e.contents);
+					}).length : 0;
+					if (eventCount > 0) {
+						label += " · 타임라인 " + eventCount + "건";
+					}
+					opt.textContent = label;
+					issueSelectEl.appendChild(opt);
+				});
+			}
+
+			function populateMilestones(msId) {
+				milestoneSelectEl.innerHTML = '<option value="">마일스톤을 선택하세요</option>';
+				var list = (window.MilestoneTimeline && window.MilestoneTimeline.getMilestones)
+					? window.MilestoneTimeline.getMilestones() : [];
+				if (!list.length) {
+					milestoneSelectEl.innerHTML = '<option value="">마일스톤 목록이 없습니다</option>';
+					return;
+				}
+				list.forEach(function (ms) {
+					if (ms.id == null) return;
+					if (String(ms.id) === String(msId)) return;
+					var opt = document.createElement("option");
+					opt.value = ms.id;
+					var period = "";
+					if (ms.startDate && ms.endDate) {
+						try {
+							var parse = window.MilestoneTimeline && window.MilestoneTimeline.parseWallClockDate;
+							var s = parse ? parse(ms.startDate) : new Date(ms.startDate);
+							var e = parse ? parse(ms.endDate) : new Date(ms.endDate);
+							if (s && e && !isNaN(s.getTime()) && !isNaN(e.getTime())) {
+								period = " (" + s.toLocaleDateString("ko-KR") + " ~ " + e.toLocaleDateString("ko-KR") + ")";
+							}
+						} catch (_) {}
+					}
+					opt.textContent = (ms.name || ("마일스톤 #" + ms.id)) + period;
+					milestoneSelectEl.appendChild(opt);
+				});
+				if (milestoneSelectEl.options.length <= 1) {
+					milestoneSelectEl.innerHTML = '<option value="">이동 가능한 다른 마일스톤이 없습니다</option>';
+				}
+			}
+
+			modalEl.addEventListener("show.bs.modal", function () {
+				setErr("");
+				form.reset();
+				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
+					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
+				if (!msId) {
+					issueSelectEl.innerHTML = '<option value="">마일스톤을 먼저 선택하세요</option>';
+					milestoneSelectEl.innerHTML = '<option value="">마일스톤을 먼저 선택하세요</option>';
+					return;
+				}
+				var issues = (window.MilestoneTimeline && window.MilestoneTimeline.getCurrentIssues)
+					? window.MilestoneTimeline.getCurrentIssues() : [];
+				populateIssues(issues);
+				populateMilestones(msId);
+			});
+
+			saveBtn.addEventListener("click", function () {
+				setErr("");
+				var msId = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestoneId)
+					? window.MilestoneTimeline.getSelectedMilestoneId() : null;
+				if (!msId) { setErr("마일스톤을 먼저 선택하세요."); return; }
+
+				var fd = new FormData(form);
+				var miId = fd.get("milestoneIssueId");
+				var targetMsId = fd.get("targetMilestoneId");
+				if (!miId) { setErr("이동할 이슈를 선택하세요."); return; }
+				if (!targetMsId) { setErr("이동할 마일스톤을 선택하세요."); return; }
+				if (String(targetMsId) === String(msId)) {
+					setErr("현재 마일스톤과 동일합니다. 다른 마일스톤을 선택하세요.");
+					return;
+				}
+
+				// miId = milestone_issue.id (연결 행 PK). issue.id(it.issueId) 아님.
+				var payload = {
+					id: Number(miId),
+					milestoneId: Number(targetMsId),
+				};
+
+				saveBtn.disabled = true;
+				fetch("/project/milestone/api/issue/move", {
+					method: "PUT",
+					headers: getApiJsonHeaders(),
+					body: JSON.stringify(payload),
+				})
+					.then(function (res) {
+						if (!res.ok) throw new Error("HTTP " + res.status);
+						return res.json().catch(function () { return null; });
+					})
+					.then(function () {
+						if (window.MilestoneTimeline) {
+							window.MilestoneTimeline.refreshSelected();
+							if (typeof window.MilestoneTimeline.refreshProgress === "function") {
+								window.MilestoneTimeline.refreshProgress();
+							}
+						}
+						alert("이슈가 다른 마일스톤으로 이동되었습니다.");
+						bootstrap.Modal.getInstance(modalEl).hide();
+					})
+					.catch(function (err) {
+						setErr("이동 실패: " + (err && err.message ? err.message : err));
+					})
+					.finally(function () { saveBtn.disabled = false; });
+			});
+		})();
+	</script>
+</div>
+</body>
+</html>

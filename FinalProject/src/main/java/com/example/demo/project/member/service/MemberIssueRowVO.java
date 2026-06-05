@@ -1,6 +1,7 @@
 package com.example.demo.project.member.service;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,15 +16,20 @@ import lombok.Setter;
 @Builder
 public class MemberIssueRowVO {
 
+    private Long issueId;
     private String priorityCd;
     private String subject;
     private String categoryCd;
     private String statusCd;
     private String requesterName;
     private String assigneeName;
-    private LocalDateTime estStartDate;
-    private LocalDateTime dueDate;
-    private LocalDateTime startDate;
-    private LocalDateTime closedDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date estStartDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date dueDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date startDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date closedDate;
     private Long doneRatio;
 }

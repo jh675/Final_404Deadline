@@ -55,6 +55,13 @@
 			<if test="categoryCd != null and categoryCd != ''">
 				AND CATEGORY_CD = #{categoryCd}
 			</if>
+			<if test="milestoneId != null">
+				AND i.ID IN (
+					SELECT mi.issue_id
+					FROM milestone_issue mi
+					WHERE mi.milestone_id = #{milestoneId}
+				)		
+			</if>
 		</where>
 	</sql>
 
@@ -64,28 +71,29 @@
 	<select id="selectIssueList" parameterType="IssueInputVO"
 		resultType="IssueOutputVO">
 		SELECT
-		ID,
-		PRJ_ID,
-		SUBJECT,
-		DESCRIPTION,
-		get_sub_code_name(CATEGORY_CD) as CATEGORY_CD,
-		get_sub_code_name(STATUS_CD) as STATUS_CD,
-		get_sub_code_name(PRIORITY_CD)as PRIORITY_CD,
-		CREATED_ON,
-		UPDATED_ON,
-		EST_START_DATE,
-		DUE_DATE,
-		START_DATE,
-		CLOSED_DATE,
-		PARENT_ISSUE,
-		ROOT_ISSUE,
-		GET_USERID_TO_NAME (MEM_ID) as memName,
-		LFT,
-		RGT,
-		DONE_RATIO
-		FROM ISSUE
+		i.ID as id,
+		i.PRJ_ID as prjId,
+		i.SUBJECT as subject,
+		i.DESCRIPTION as description,
+		get_sub_code_name(i.CATEGORY_CD) as CATEGORY_CD,
+		get_sub_code_name(i.STATUS_CD) as STATUS_CD,
+		get_sub_code_name(i.PRIORITY_CD)as PRIORITY_CD,
+		i.CREATED_ON as createdOn,
+		i.UPDATED_ON as updatedOn,
+		i.EST_START_DATE as estStartDate,
+		i.DUE_DATE as dueDate,
+		i.START_DATE as startDate,
+		i.CLOSED_DATE as closedDate,
+		i.PARENT_ISSUE as parentIssue,
+		i.ROOT_ISSUE as rootIssue,
+		i.MEM_ID as memId,
+		GET_USERID_TO_NAME (i.MEM_ID) as memName,
+		i.LFT as lft,
+		i.RGT as rgt,
+		i.DONE_RATIO as doneRatio
+		FROM ISSUE i
 		<include refid="issueSearchWhere" />
-		ORDER BY PRIORITY_CD DESC
+		ORDER BY id desc
 	</select>
 
 	<!-- ===================================================== -->
@@ -141,7 +149,8 @@
 			LFT AS lft,
 			RGT AS rgt,
 			DONE_RATIO AS doneRatio,
-			IS_ATTACH_CD AS isAttachCd
+			IS_ATTACH_CD AS isAttachCd,
+			(SELECT mi.MILESTONE_ID FROM MILESTONE_ISSUE mi WHERE mi.ISSUE_ID = ISSUE.ID AND ROWNUM = 1) AS milestoneId
 		FROM ISSUE
 		WHERE ID = #{id}
 	</select>
@@ -160,6 +169,7 @@
 			SUBJECT,
 			DESCRIPTION,
 			CATEGORY_CD,
+			STATUS_CD,
 			PRIORITY_CD,
 			CREATED_ON,
 			UPDATED_ON,
@@ -180,10 +190,11 @@
 			</if>
 		) VALUES (
 			#{id},
-			3,
+			#{prjId},
 			#{subject},
 			#{description},
 			#{categoryCd},
+			#{statusCd},
 			#{priorityCd},
 			SYSDATE,
 			#{updatedOn},
@@ -237,16 +248,50 @@
 	<!-- ===================================================== -->
 	<!-- 목록에서 시작일·완료일 등록 (당일 SYSDATE)                  -->
 	<!-- ===================================================== -->
-	<update id="updateIssueStartDate" parameterType="long">
+	<update id="registerStartDate" parameterType="IssueVulkVO">
 		UPDATE ISSUE
-		SET (START_DATE, UPDATED_ON) = (SELECT SYSDATE, SYSDATE FROM DUAL)
-		WHERE ID = #{id}
+		SET (START_DATE, UPDATED_ON,last_updater) = (SELECT SYSDATE, SYSDATE,#{updater} FROM DUAL)
+		WHERE ID IN 
+		<foreach collection="ids" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
+		and start_date is null
+		AND MEM_ID IS NOT NULL
 	</update>
 
-	<update id="updateIssueClosedDate" parameterType="long">
+	<update id="registerClosedDate" parameterType="IssueVulkVO">
 		UPDATE ISSUE
-		SET (CLOSED_DATE, UPDATED_ON) = (SELECT SYSDATE, SYSDATE FROM DUAL)
-		WHERE ID = #{id}
+		SET (CLOSED_DATE, UPDATED_ON,STATUS_CD ,DONE_RATIO,last_updater) = (SELECT SYSDATE, SYSDATE,'04ISSUESTAT',100,#{updater} FROM DUAL)
+		WHERE ID IN <foreach collection="ids" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
+		and closed_date is null
+	</update>
+
+	<update id="updateVulk" parameterType="IssueVulkVO">
+		UPDATE ISSUE
+		<set>
+			<if test="statusCd != null">
+			STATUS_CD = #{statusCd},
+			DONE_RATIO = 
+			 	CASE
+					WHEN #{statusCd} = '01ISSUESTAT' THEN 0
+					WHEN #{statusCd} IN ('03ISSUESTAT','04ISSUESTAT') THEN 100
+					WHEN #{statusCd} = '02ISSUESTAT' THEN
+					LEAST(90, GREATEST(10, ROUND(NVL(DONE_RATIO,0)/10)*10))
+				END,
+			</if>
+			<if test="priorityCd != null">PRIORITY_CD = #{priorityCd},</if>
+			<if test="categoryCd != null">CATEGORY_CD = #{categoryCd},</if>
+			UPDATED_ON = SYSDATE,
+			last_updater = #{updater}
+		</set>
+		WHERE ID IN <foreach collection="ids" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
+		<if test="statusCd != null and ('02ISSUESTAT'.equals(statusCd) or '03ISSUESTAT'.equals(statusCd))">
+		AND MEM_ID IS NOT NULL
+		</if>
 	</update>
 
 	<!-- ===================================================== -->
@@ -316,7 +361,7 @@
 			c.WRITE_DATE,
 			GET_USERID_TO_NAME(c.MEM_ID) AS memId,
 			LEVEL AS depth
-		FROM issue_comment c
+		FROM issue_comment c	
 		WHERE c.issue_id = #{id}
 		START WITH c.parent_id IS NULL
 		CONNECT BY PRIOR c.id = c.parent_id
@@ -346,5 +391,146 @@
 	<select id="getIssueIds" resultType="IssueSummaryVO">
 		SELECT id AS id, subject AS subject
 		FROM ISSUE
+		WHERE PRJ_ID = #{prjId}
+		<if test="issueId != null">
+			AND ID NOT IN (
+				SELECT ID
+				FROM ISSUE
+				START WITH ID = #{issueId}
+				CONNECT BY PRIOR ID = PARENT_ISSUE
+			)
+		</if>
+		ORDER BY ID
 	</select>
+	
+	<select id="getRelationIssue" resultType="IssueOutputVO">
+		SELECT
+			i.ID,
+			i.PRJ_ID,
+			i.SUBJECT,
+			get_sub_code_name(i.STATUS_CD) AS STATUS_CD,
+			GET_USERID_TO_NAME(i.MEM_ID) AS memName
+		FROM ISSUE i
+		WHERE i.ID IN (
+			SELECT mi2.issue_id
+			FROM milestone_issue mi1
+			JOIN milestone_issue mi2 ON mi1.milestone_id = mi2.milestone_id
+			WHERE mi1.issue_id = #{id}
+				AND mi2.issue_id != #{id}
+		)
+		ORDER BY i.ID DESC
+	</select>
+	<select id="getHistory" resultType="com.example.demo.project.history.service.HistoryVO">
+		SELECT
+			H.ID AS id,
+			H.ID AS historyId,
+			H.TABLE_NAME AS tableName,
+			H.TABLE_ID AS tableId,
+			H.MEM_ID AS userId,
+			H.UPDATED_ON AS updatedOn,
+			H.DETAIL AS detail,
+			U.NAME AS modifierName
+		FROM HISTORY H
+		LEFT JOIN USERS U ON U.ID = H.MEM_ID
+		WHERE H.TABLE_NAME = 'ISSUE'
+			AND H.TABLE_ID = #{id}
+		ORDER BY H.UPDATED_ON DESC, H.ID DESC
+	</select>
+	<select id="getPivotStatus" resultType="map">
+		SELECT
+			mem_id,
+			name,
+			NVL("신규", 0)   AS "신규",
+			NVL("진행중", 0) AS "진행중",
+			NVL("검토", 0)   AS "검토",
+			NVL("완료", 0)   AS "완료"
+		FROM (
+			SELECT
+				NVL(i.mem_id, 0) AS mem_id,
+				NVL(get_userid_to_name(i.mem_id), '미배정') AS name,
+				get_sub_code_name(i.status_cd) AS status
+			FROM issue i
+			WHERE i.prj_id = #{prjId}
+		)
+		PIVOT (
+			COUNT(*)
+			FOR status IN (
+				'신규'   AS "신규",
+				'진행중' AS "진행중",
+				'검토'   AS "검토",
+				'완료'   AS "완료"
+			)
+		)
+		ORDER BY mem_id
+	</select>
+	<select id="getPivotPriority" resultType="map">
+		SELECT
+			mem_id,
+			name,
+			NVL("최상", 0) AS "최상",
+			NVL("상", 0)   AS "상",
+			NVL("중", 0)   AS "중",
+			NVL("하", 0)   AS "하"
+		FROM (
+			SELECT
+				NVL(i.mem_id, 0) AS mem_id,
+				NVL(get_userid_to_name(i.mem_id), '미배정') AS name,
+				get_sub_code_name(i.priority_cd) AS status
+			FROM issue i
+			WHERE i.prj_id = #{prjId}
+		)
+		PIVOT (
+			COUNT(*)
+			FOR status IN (
+				'최상' AS "최상",
+				'상'   AS "상",
+				'중'   AS "중",
+				'하'   AS "하"
+			)
+		)
+		ORDER BY mem_id
+	</select>
+	<select id="getPivotCategory" resultType="map">
+		SELECT
+			mem_id,
+			name,
+			NVL("버그", 0) AS "버그",
+			NVL("기능", 0) AS "기능",
+			NVL("작업", 0) AS "작업",
+			NVL("개선", 0) AS "개선"
+		FROM (
+			SELECT
+				NVL(i.mem_id, 0) AS mem_id,
+				NVL(get_userid_to_name(i.mem_id), '미배정') AS name,
+				get_sub_code_name(i.category_cd) AS status
+			FROM issue i
+			WHERE i.prj_id = #{prjId}
+		)
+		PIVOT (
+			COUNT(*)
+			FOR status IN (
+				'버그' AS "버그",
+				'기능' AS "기능",
+				'작업' AS "작업",
+				'개선' AS "개선"
+			)
+		)
+		ORDER BY mem_id
+	</select>
+
+	<select id="searchIssuesForLink" resultType="IssueOutputVO">
+		SELECT id, subject FROM (
+			SELECT i.ID AS id, i.SUBJECT AS subject
+			FROM ISSUE i
+			WHERE i.PRJ_ID = #{prjId}
+			<if test="q != null and q != ''">
+				AND (
+					TO_CHAR(i.ID) LIKE '%' || #{q} || '%'
+					OR UPPER(i.SUBJECT) LIKE '%' || UPPER(#{q}) || '%'
+				)
+			</if>
+			ORDER BY i.ID DESC
+		) WHERE ROWNUM &lt;= 20
+	</select>
+
 </mapper>

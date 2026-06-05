@@ -9,6 +9,6 @@ public interface CalenderService {
 	 CalenderVO selectOne(int id);
 	 int insert(CalenderVO vo);
 	 int update(CalenderVO vo);
-	 int delete(int id);
+	 int delete(CalenderVO vo);
 }
 

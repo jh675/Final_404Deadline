@@ -38,6 +38,7 @@
     resultType="com.example.demo.project.history.service.HistoryVO">
     SELECT
       H.ID AS id,
+      H.ID AS historyId,
       H.TABLE_NAME AS tableName,
       H.TABLE_ID AS tableId,
       H.MEM_ID AS userId,
@@ -51,10 +52,12 @@
   </select>
   <select id="selectHistoryDetailList" resultType="com.example.demo.project.history.service.HistoryDetailVO">
     SELECT
+      HD.ID AS id,
       HD.FIELD_NAME AS fieldName,
       HD.OLD_VALUES AS oldValues,
       HD.NEW_VALUES AS newValues
     FROM HISTORY_DETAIL HD
-    WHERE H.ID = #{historyId}
+    WHERE HD.HISTORY_ID = #{historyId}
+    ORDER BY HD.ID
   </select>
 </mapper>

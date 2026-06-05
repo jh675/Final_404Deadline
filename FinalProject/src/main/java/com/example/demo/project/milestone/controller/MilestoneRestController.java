@@ -1,9 +1,13 @@
 package com.example.demo.project.milestone.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,15 +19,22 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.project.issue.service.IssueSummaryVO;
 import com.example.demo.project.milestone.service.MilestoneIssueVO;
 import com.example.demo.project.milestone.service.MilestoneService;
+import com.example.demo.project.milestone.service.MilestoneSyncException;
 import com.example.demo.project.milestone.service.MilestoneTimelineVO;
 import com.example.demo.project.milestone.service.MilestoneVO;
 
+import jakarta.servlet.http.HttpSession;
+
 @RestController
-@RequestMapping("/api/milestone")
+@RequestMapping("/project/milestone/api")
 public class MilestoneRestController {
 
 	@Autowired
 	private MilestoneService service;
+
+	private Long getCurrentProjectId(HttpSession session) {
+		return (Long) session.getAttribute("currentProjectId");
+	}
 
 	@GetMapping("/list/{id}") 
 	public List<MilestoneIssueVO> getMilestoneIssueList(@PathVariable("id") Long id) {
@@ -32,17 +43,23 @@ public class MilestoneRestController {
 	}
 	
 	@GetMapping("/{id}")
-	public List<MilestoneVO> selectMilestoneList(@PathVariable("id") Long id) {
-		return service.selectMilestoneList(id);
+	public List<MilestoneVO> selectMilestoneList(@PathVariable("id") Long id, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return List.of();
+		}
+		return service.selectMilestoneList(projectId);
 	}
 	@PostMapping("/milestone")
-	public Long insertMilestone(@RequestBody MilestoneVO milestoneVO) {
+	public Long insertMilestone(@RequestBody MilestoneVO milestoneVO, HttpSession session) {
 		try {
-//			System.out.println(milestoneVO);
+			Long projectId = getCurrentProjectId(session);
+			if (projectId == null) {
+				return null;
+			}
+			milestoneVO.setPrjId(projectId);
 			return service.insertMilestone(milestoneVO);
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -51,8 +68,6 @@ public class MilestoneRestController {
 		try {
 			return service.insertMilestoneIssue(milestoneIssueVO);
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -61,35 +76,65 @@ public class MilestoneRestController {
 		try {
 			return service.insertTimeline(timelineVO);
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
 			return null;
 		}
 	}
 	@GetMapping("/notinissue/{id}")
-	public List<IssueSummaryVO> selectMilestoneNotInIssue(@PathVariable("id") Long id) {
-		return service.selectMilestoneNotInIssue(id);
+	public List<IssueSummaryVO> selectMilestoneNotInIssue(@PathVariable("id") Long id, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return List.of();
+		}
+		return service.selectMilestoneNotInIssue(projectId);
 	}
 	@DeleteMapping("/issue/{id}")
 	public Long deleteMilestoneIssue(@PathVariable("id")Long id) {
 		return service.deleteMilestoneIssue(id);
 	}
-	@PutMapping("/milestone")
-	public Long updateMilestone(@RequestBody MilestoneVO milestoneVO) {
-		try {
-			return service.updateMilestone(milestoneVO);
-		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
-			return null;
-		}
+
+	@ExceptionHandler(MilestoneSyncException.class)
+	public ResponseEntity<Map<String, Object>> handleMilestoneSync(MilestoneSyncException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(Map.of("ok", false, "message", ex.getMessage()));
 	}
+
+	@PutMapping("/milestone")
+	public MilestoneVO updateMilestone(@RequestBody MilestoneVO milestoneVO) {
+		if (milestoneVO == null || milestoneVO.getId() == null) {
+			throw new MilestoneSyncException("수정할 마일스톤 ID가 없습니다.");
+		}
+		Long updated = service.updateMilestone(milestoneVO);
+		if (updated == null || updated <= 0) {
+			throw new MilestoneSyncException("마일스톤 수정에 실패했습니다.");
+		}
+		return service.selectMilestoneById(milestoneVO.getId());
+	}
+	
 	@DeleteMapping("/milestone/{id}")
 	public Long deleteMilestone(@PathVariable("id")Long id) {
 		return service.deleteMilestone(id);
 	}
+	
 	@GetMapping("/avg/{id}")
 	public Long getAvg(@PathVariable("id") Long id) {
 		return service.getAvg(id);
+	}
+
+	@GetMapping("/expected/{id}")
+	public Long getExpectedProgress(@PathVariable("id") Long id) {
+		return service.getExpectedProgress(id);
+	}
+	
+	@PutMapping("/issue/move")
+	public Long moveIssue(@RequestBody MilestoneIssueVO milestoneIssueVO) {
+		return service.moveIssue(milestoneIssueVO);
+	}
+	@DeleteMapping("/timeline/{id}")
+	public Long deleteTimeline(@PathVariable("id") Long id) {
+		return service.deleteTimeline(id);
+	}
+	@PutMapping("/timeline")
+	public Long updateTimeline(@RequestBody MilestoneTimelineVO timelineVO) {
+		return service.updateTimeline(timelineVO);
 	}
 }

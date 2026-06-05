@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorate="~{layout/defaultLayout}">
+<head>
+<meta charset="UTF-8">
+<title>마이페이지</title>
+
+<!-- Toast UI -->
+<link rel="stylesheet"
+	href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+<script
+	src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+
+<!-- DHTMLX Gantt -->
+<link rel="stylesheet"
+	href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
+<script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
+
+<!-- container 공통 크기 -->
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}">
+
+<!-- Google Fonts: Noto Sans KR -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ── 디자인 토큰 ── */
+:root {
+	--mp-bg:          #ffffff;
+	--mp-surface:     #ffffff;
+	--mp-surface-sub: #f8fafc;
+	--mp-border:      rgba(99, 120, 155, 0.18);
+	--mp-border-md:   rgba(99, 120, 155, 0.28);
+	--mp-primary:     #3b7dd8;
+	--mp-primary-dk:  #2563b0;
+	--mp-primary-lt:  #e8f0fc;
+	--mp-text:        #1e2b3c;
+	--mp-text-sub:    #57697e;
+	--mp-text-hint:   #94a4b5;
+	--mp-shadow-sm:   0 1px 4px rgba(30,43,60,0.10), 0 1px 2px rgba(30,43,60,0.06);
+	--mp-shadow-md:   0 6px 16px rgba(30,43,60,0.12), 0 2px 6px rgba(30,43,60,0.07);
+	--mp-radius:      14px;
+	--mp-radius-sm:   8px;
+	--mp-font:        'Noto Sans KR', sans-serif;
+}
+
+/* ── 기반 ── */
+#wrapper {
+	font-family: var(--mp-font);
+	padding: 28px 24px 48px;
+	background: var(--mp-bg);
+	min-height: 100vh;
+	color: var(--mp-text);
+}
+
+/* ── 섹션 타이틀 ── */
+.mp-page-title {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--mp-text);
+	margin: 0 0 24px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.mp-page-title::before {
+	content: '';
+	display: block;
+	width: 4px;
+	height: 1.5rem;
+	background: var(--mp-primary);
+	border-radius: 4px;
+}
+
+.mp-section-title {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--mp-text-hint);
+	margin: 0 0 12px;
+}
+
+/* ── 카드 공통 ── */
+.mp-card {
+	background: var(--mp-surface);
+	border: 1px solid var(--mp-border);
+	border-radius: var(--mp-radius);
+	box-shadow: var(--mp-shadow-sm);
+	transition: box-shadow 0.18s ease;
+	overflow: hidden;
+	margin-bottom: 20px;
+}
+.mp-card:hover {
+	box-shadow: var(--mp-shadow-md);
+}
+.mp-card-body {
+	padding: 20px 22px;
+}
+
+/* ── 프로필 카드 ── */
+.mp-profile-card {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+.mp-profile-left {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.mp-avatar {
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	background: var(--mp-primary-lt);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--mp-primary);
+	flex-shrink: 0;
+	border: 2px solid rgba(59, 125, 216, 0.18);
+}
+.mp-profile-name {
+	font-size: 1.0625rem;
+	font-weight: 700;
+	color: var(--mp-text);
+	margin: 0 0 5px;
+	line-height: 1.2;
+}
+.mp-profile-meta {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+.mp-meta-item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.8125rem;
+	color: var(--mp-text-sub);
+}
+.mp-meta-item svg {
+	opacity: 0.55;
+}
+
+/* ── 뱃지 ── */
+.mp-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 9px;
+	border-radius: 99px;
+	font-size: 0.75rem;
+	font-weight: 500;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+.mp-badge-gray  { background: #eef0f4; color: #495568; }
+.mp-badge-amber { background: #fef3cd; color: #7d5a00; }
+.mp-badge-blue  { background: var(--mp-primary-lt); color: var(--mp-primary-dk); }
+.mp-badge-green { background: #e3f5e8; color: #1a6e34; }
+.mp-badge-red   { background: #fde8e8; color: #9b1c1c; }
+.mp-badge-slate { background: #edf1f5; color: #445568; }
+
+/* ── 프로젝트 뱃지 행 ── */
+.mp-project-badges {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+	margin-top: 6px;
+}
+
+/* ── 버튼 ── */
+.mp-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 16px;
+	border-radius: var(--mp-radius-sm);
+	font-family: var(--mp-font);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.mp-btn-primary {
+	border: 1px solid var(--mp-primary);
+	background: var(--mp-primary);
+	color: #fff;
+}
+.mp-btn-primary:hover {
+	background: var(--mp-primary-dk);
+	border-color: var(--mp-primary-dk);
+	color: #fff;
+}
+.mp-btn-ghost {
+	border: none;
+	background: transparent;
+	padding: 0;
+	font-size: 0.8125rem;
+	color: var(--mp-primary);
+	font-weight: 500;
+}
+
+/* ── 탭 ── */
+.mp-tabs {
+	display: flex;
+	gap: 2px;
+	border-bottom: 1px solid var(--mp-border);
+	margin-bottom: 18px;
+	padding: 0 4px;
+}
+.mp-tabs .nav-link {
+	border: none;
+	background: transparent;
+	color: var(--mp-text-sub);
+	font-family: var(--mp-font);
+	font-size: 0.875rem;
+	font-weight: 500;
+	padding: 10px 14px;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px;
+	border-radius: 0;
+	transition: color 0.15s, border-color 0.15s;
+	cursor: pointer;
+}
+.mp-tabs .nav-link:hover {
+	color: var(--mp-primary);
+}
+.mp-tabs .nav-link.active {
+	color: var(--mp-primary);
+	border-bottom-color: var(--mp-primary);
+}
+
+/* ── 일정 뷰 전환 ── */
+.mp-view-btns {
+	display: flex;
+	background: var(--mp-surface-sub);
+	border: 1px solid var(--mp-border);
+	border-radius: var(--mp-radius-sm);
+	padding: 3px;
+	gap: 2px;
+}
+.mp-view-btns .view-btn {
+	border: none;
+	background: transparent;
+	color: var(--mp-text-sub);
+	font-family: var(--mp-font);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	padding: 5px 14px;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.15s;
+}
+.mp-view-btns .view-btn.active {
+	background: var(--mp-surface);
+	color: var(--mp-primary);
+	box-shadow: var(--mp-shadow-sm);
+}
+
+/* ── 필터 셀렉트 ── */
+.mp-select {
+	border: 1px solid var(--mp-border-md);
+	border-radius: var(--mp-radius-sm);
+	padding: 5px 10px;
+	font-family: var(--mp-font);
+	font-size: 0.8125rem;
+	color: var(--mp-text);
+	background: var(--mp-surface);
+	cursor: pointer;
+	outline: none;
+	transition: border-color 0.15s;
+}
+.mp-select:focus { border-color: var(--mp-primary); }
+
+/* ── 일정 목록 ── */
+#scheduleList {
+	max-height: 380px;
+	overflow-y: auto;
+	padding-right: 4px;
+	scrollbar-width: thin;
+	scrollbar-color: var(--mp-border-md) transparent;
+}
+#scheduleList::-webkit-scrollbar { width: 4px; }
+#scheduleList::-webkit-scrollbar-thumb {
+	background: var(--mp-border-md);
+	border-radius: 4px;
+}
+
+.mp-date-group {
+	margin-bottom: 14px;
+}
+.mp-date-label {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--mp-text-sub);
+	margin-bottom: 6px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.mp-date-label.today { color: var(--mp-primary); }
+.mp-date-today-badge {
+	font-size: 0.7rem;
+	background: var(--mp-primary);
+	color: #fff;
+	padding: 1px 7px;
+	border-radius: 99px;
+	font-weight: 600;
+}
+
+.mp-schedule-item {
+	background: var(--mp-surface);
+	border: 1px solid var(--mp-border);
+	border-left: 3px solid var(--item-color, var(--mp-primary));
+	border-radius: var(--mp-radius-sm);
+	padding: 9px 12px;
+	margin-bottom: 6px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	transition: box-shadow 0.14s;
+}
+.mp-schedule-item:hover { box-shadow: var(--mp-shadow-sm); }
+.mp-schedule-time {
+	font-size: 0.75rem;
+	color: var(--mp-text-hint);
+	white-space: nowrap;
+	min-width: 80px;
+}
+.mp-schedule-name {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--mp-text);
+	flex: 1;
+}
+.mp-schedule-place {
+	font-size: 0.75rem;
+	color: var(--mp-text-hint);
+}
+
+.mp-empty-state {
+	text-align: center;
+	padding: 40px 0;
+	color: var(--mp-text-hint);
+}
+.mp-empty-icon {
+	font-size: 2rem;
+	margin-bottom: 8px;
+}
+.mp-empty-text {
+	font-size: 0.875rem;
+}
+
+/* ── 간트차트 ── */
+#mypageGantt {
+	border: 1px solid var(--mp-border) !important;
+	border-radius: var(--mp-radius-sm) !important;
+	overflow: hidden;
+}
+
+.status-new.gantt_task_line     { background-color: #3b7dd8; border-color: #2563b0; }
+.status-progress.gantt_task_line { background-color: #f59e0b; border-color: #d97706; }
+.status-review.gantt_task_line  { background-color: #8b5cf6; border-color: #7c3aed; }
+
+.mp-gantt-legend {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	font-size: 0.8rem;
+	color: var(--mp-text-sub);
+	margin-bottom: 12px;
+	flex-wrap: wrap;
+}
+.mp-gantt-dot {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 2px;
+	margin-right: 4px;
+	vertical-align: middle;
+}
+
+/* ── 테이블 ── */
+.mp-table-wrap {
+	border: 1px solid var(--mp-border);
+	border-radius: var(--mp-radius);
+	overflow: hidden;
+	box-shadow: var(--mp-shadow-sm);
+	background: var(--mp-surface);
+	margin-bottom: 20px;
+}
+.mp-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.875rem;
+	margin: 0;
+}
+.mp-table thead th {
+	background: var(--mp-surface-sub);
+	color: #1e2b3c;
+	font-weight: 700;
+	font-size: 0.775rem;
+	letter-spacing: 0.03em;
+	padding: 11px 14px;
+	border-bottom: 1px solid var(--mp-border);
+	white-space: nowrap;
+	text-align: center;
+}
+.mp-table thead th:first-child { text-align: left; }
+.mp-table tbody td {
+	padding: 11px 14px;
+	border-bottom: 1px solid var(--mp-border);
+	color: #1e2b3c;
+	vertical-align: middle;
+	text-align: center;
+}
+.mp-table tbody td:first-child { text-align: left; }
+.mp-table tbody tr:nth-child(even) td {
+	background: #f7f9fc;
+}
+.mp-table tbody tr:last-child td { border-bottom: none; }
+.mp-table tbody tr { transition: background 0.12s; }
+.mp-table tbody tr:hover td { background: #eef3fc !important; }
+
+.mp-table td.text-truncate {
+	max-width: 180px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* 진척율(%) 바 */
+.mp-progress {
+	background: #e8ecf2;
+	border-radius: 99px;
+	height: 6px;
+	overflow: hidden;
+	min-width: 70px;
+}
+.mp-progress-bar {
+	height: 100%;
+	background: var(--mp-primary);
+	border-radius: 99px;
+	transition: width 0.4s ease;
+}
+
+/* ── 섹션 간격 ── */
+.mp-section { margin-bottom: 28px; }
+.mp-section-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 12px;
+}
+.mp-section-label {
+	font-size: 0.9375rem;
+	font-weight: 700;
+	color: var(--mp-text);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.mp-section-label::before {
+	content: '';
+	width: 3px;
+	height: 1rem;
+	background: var(--mp-primary);
+	border-radius: 3px;
+	display: block;
+}
+
+/* ── 페이지네이션 ── */
+.mp-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	padding: 14px 0 4px;
+}
+.mp-page-btn {
+	min-width: 32px;
+	height: 32px;
+	padding: 0 8px;
+	border: 1px solid var(--mp-border-md);
+	border-radius: 7px;
+	background: transparent;
+	font-family: var(--mp-font);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--mp-text-sub);
+	cursor: pointer;
+	transition: all 0.14s;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.mp-page-btn:hover:not(:disabled) {
+	border-color: var(--mp-primary);
+	color: var(--mp-primary);
+	background: var(--mp-primary-lt);
+}
+.mp-page-btn.active {
+	background: var(--mp-primary);
+	border-color: var(--mp-primary);
+	color: #fff;
+}
+.mp-page-btn:disabled {
+	opacity: 0.35;
+	cursor: default;
+}
+
+/* ── 테이블 이동 버튼 ── */
+.mp-link-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--mp-primary);
+	border: 1px solid rgba(59, 125, 216, 0.35);
+	border-radius: 6px;
+	padding: 3px 10px;
+	text-decoration: none;
+	transition: all 0.14s;
+	background: var(--mp-primary-lt);
+}
+.mp-link-btn:hover {
+	background: var(--mp-primary);
+	border-color: var(--mp-primary);
+	color: #fff;
+}
+</style>
+</head>
+<body>
+<div layout:fragment="content">
+<div id="wrapper">
+
+	<!-- ===== 페이지 타이틀 ===== -->
+	<h2 class="mp-page-title">마이페이지</h2>
+
+	<!-- ===== 프로필 카드 ===== -->
+	<section class="mp-section">
+		<div class="mp-card">
+			<div class="mp-card-body mp-profile-card">
+				<div class="mp-profile-left">
+					<!-- 아바타 이니셜 -->
+					<div class="mp-avatar">
+						<!-- 이니셜: 이름 첫 글자, JS로 채움 -->
+						<span id="avatarInitial">?</span>
+					</div>
+					<div>
+						<p class="mp-profile-name">
+							<span sec:authentication="principal.name"></span>
+							<span class="mp-badge mp-badge-gray ms-2"
+								  sec:authentication="principal.adminNm"></span>
+							<span class="mp-badge mp-badge-amber ms-1"
+								  sec:authentication="principal.statusNm"></span>
+						</p>
+						<div class="mp-profile-meta">
+							<span class="mp-meta-item">
+								<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"></path></svg>
+								<span th:text="${#authentication.principal.tel}"></span>
+							</span>
+							<span class="mp-meta-item">
+								<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+								<span th:text="${#authentication.principal.email}"></span>
+							</span>
+						</div>
+						<!-- 소속 프로젝트 뱃지 -->
+						<div class="mp-project-badges">
+							<span th:if="${#lists.isEmpty(projectList)}"
+								  class="mp-badge mp-badge-slate">참여 중인 프로젝트 없음</span>
+							<span th:each="p, iterStat : ${projectList}"
+								  th:if="${iterStat.index < 3}"
+								  class="mp-badge mp-badge-blue"
+								  th:text="${p.prjName}"></span>
+							<span th:if="${#lists.size(projectList) > 3}"
+								  class="mp-badge mp-badge-slate"
+								  th:text="'+ ' + (${#lists.size(projectList)} - 3) + '개'"></span>
+						</div>
+					</div>
+				</div>
+				<button type="button" class="mp-btn mp-btn-primary"
+						data-bs-toggle="modal" data-bs-target="#mypageEditModal">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+					정보 수정
+				</button>
+			</div>
+		</div>
+	</section>
+
+	<!-- ===== 일정 카드 ===== -->
+	<section class="mp-section">
+		<div class="mp-section-header">
+			<span class="mp-section-label">일정</span>
+		</div>
+		<div class="mp-card">
+			<div class="mp-card-body">
+				<!-- 탭 -->
+				<ul class="nav mp-tabs" id="scheduleTabs">
+					<li class="nav-item">
+						<button class="nav-link active" data-bs-toggle="tab"
+								data-bs-target="#calendarTab">캘린더</button>
+					</li>
+					<li class="nav-item">
+						<button class="nav-link" data-bs-toggle="tab"
+								data-bs-target="#ganttTab">간트차트</button>
+					</li>
+				</ul>
+
+				<!-- 탭 내용 -->
+				<div class="tab-content">
+					<!-- 캘린더 탭 -->
+					<div class="tab-pane fade show active" id="calendarTab">
+						<div class="d-flex align-items-center gap-2 mb-3">
+							<div class="mp-view-btns">
+								<button type="button" class="view-btn active"
+										onclick="showSchedule('week')">이번주</button>
+								<button type="button" class="view-btn"
+										onclick="showSchedule('day')">오늘</button>
+							</div>
+							<select class="mp-select ms-auto" id="mypageTypeCd"
+									onchange="filterMypageEvents()" style="width:110px;">
+								<option value="">전체</option>
+								<option value="01CALTYPE">개인일정</option>
+								<option value="02CALTYPE">그룹일정</option>
+								<option value="03CALTYPE">회사일정</option>
+							</select>
+						</div>
+						<div id="scheduleList"></div>
+					</div>
+
+					<!-- 간트차트 탭 -->
+					<div class="tab-pane fade" id="ganttTab">
+						<div class="mp-gantt-legend">
+							<span class="fw-semibold text-muted" style="font-size:0.8rem;">상태</span>
+							<span><span class="mp-gantt-dot" style="background:#3b7dd8;"></span>신규</span>
+							<span><span class="mp-gantt-dot" style="background:#f59e0b;"></span>진행중</span>
+							<span><span class="mp-gantt-dot" style="background:#8b5cf6;"></span>검토</span>
+						</div>
+						<div id="mypageGantt" style="width:100%; height:400px;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ===== 참여 프로젝트 ===== -->
+	<section class="mp-section">
+		<div class="mp-section-header">
+			<span class="mp-section-label">참여 프로젝트</span>
+		</div>
+		<div class="mp-table-wrap">
+			<table class="mp-table">
+				<thead>
+					<tr>
+						<th>프로젝트명</th>
+						<th>설명</th>
+						<th>진행상태</th>
+						<th>시작일</th>
+						<th>종료일</th>
+						<th>생성일</th>
+						<th>상세</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:if="${#lists.isEmpty(projectList)}">
+						<td colspan="7" class="text-center" style="color:var(--mp-text-hint); padding:32px;">
+							참여 중인 프로젝트가 없습니다.
+						</td>
+					</tr>
+					<tr th:each="p : ${projectList}">
+						<td style="font-weight:600;" th:text="${p.prjName}"></td>
+						<td class="text-truncate" th:text="${p.prjDesc != null ? p.prjDesc : '-'}"></td>
+						<td>
+							<span class="mp-badge mp-badge-blue"
+								  th:text="${p.prjStatusCd != null ? p.prjStatusCd : '-'}"></span>
+						</td>
+						<td th:text="${p.startDate != null ? #dates.format(p.startDate, 'yyyy-MM-dd') : '-'}"></td>
+						<td th:text="${p.closedDate != null ? #dates.format(p.closedDate, 'yyyy-MM-dd') : '-'}"></td>
+						<td th:text="${p.createdOn != null ? #dates.format(p.createdOn, 'yyyy-MM-dd') : '-'}"></td>
+						<td>
+							<a th:href="@{/project/{id}(id=${p.id})}" class="mp-link-btn">
+								<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+								이동
+							</a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<!-- ===== 이슈 탭 카드 ===== -->
+	<section class="mp-section">
+		<div class="mp-section-header">
+			<span class="mp-section-label">이슈</span>
+		</div>
+		<div class="mp-card">
+			<div class="mp-card-body">
+				<!-- 탭 -->
+				<ul class="nav mp-tabs" id="issueTabs">
+					<li class="nav-item">
+						<button class="nav-link active" data-bs-toggle="tab"
+								data-bs-target="#myIssueTab">내 담당 이슈</button>
+					</li>
+					<li class="nav-item">
+						<button class="nav-link" data-bs-toggle="tab"
+								data-bs-target="#weekIssueTab">이번주 마감</button>
+					</li>
+				</ul>
+
+				<!-- 탭 내용 -->
+				<div class="tab-content">
+					<!-- 내 담당 이슈 -->
+					<div class="tab-pane fade show active" id="myIssueTab">
+						<div class="mp-table-wrap" style="margin-bottom:0; border-radius: var(--mp-radius-sm);">
+							<table class="mp-table">
+								<thead>
+									<tr>
+										<th>이슈명</th>
+										<th>상태</th>
+										<th>우선순위</th>
+										<th>시작예정일</th>
+										<th>완료예정일</th>
+										<th>진척율(%)</th>
+									</tr>
+								</thead>
+								<tbody id="myIssueList">
+									<tr>
+										<td colspan="6" class="text-center"
+											style="color:var(--mp-text-hint); padding:28px;">로딩 중...</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div id="myIssuePagination" class="mp-pagination"></div>
+					</div>
+
+					<!-- 이번주 마감 전체 이슈 -->
+					<div class="tab-pane fade" id="weekIssueTab">
+						<div class="mp-table-wrap" style="margin-bottom:0; border-radius: var(--mp-radius-sm);">
+							<table class="mp-table">
+								<thead>
+									<tr>
+										<th>이슈명</th>
+										<th>담당자</th>
+										<th>상태</th>
+										<th>우선순위</th>
+										<th>완료예정일</th>
+										<th>진척율(%)</th>
+									</tr>
+								</thead>
+								<tbody id="weekWeeklyIssueList">
+									<tr>
+										<td colspan="6" class="text-center"
+											style="color:var(--mp-text-hint); padding:28px;">로딩 중...</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- 모달 -->
+	<div th:replace="~{mypage/modal/myPageUserEdit :: mypageEditModal}"></div>
+
+</div><!-- #wrapper -->
+
+<script th:src="@{/js/mypage/mypage.js}"></script>
+<script>
+
+// ── 아바타 이니셜 ──
+(function() {
+	const nameEl = document.querySelector('[sec\\:authentication="principal.name"]');
+	const nameText = nameEl ? nameEl.textContent.trim() : '';
+	const initEl = document.getElementById('avatarInitial');
+	if (initEl && nameText.length > 0) {
+		initEl.textContent = nameText.charAt(0);
+	}
+})();
+
+// ── 뱃지 헬퍼 ──
+const statusBadge = {
+	'신규':  'mp-badge-blue',
+	'진행중': 'mp-badge-amber',
+	'검토':  'mp-badge-slate',
+	'완료':  'mp-badge-green'
+};
+const priorityBadge = {
+	'최상': 'mp-badge-red',
+	'상':   'mp-badge-amber',
+	'중':   'mp-badge-blue',
+	'하':   'mp-badge-slate'
+};
+function badge(cls, text) {
+	return `<span class="mp-badge ${cls || 'mp-badge-slate'}">${text}</span>`;
+}
+function progressBar(ratio) {
+	return `<div class="d-flex align-items-center gap-2">
+		<div class="mp-progress" style="flex:1">
+			<div class="mp-progress-bar" style="width:${ratio}%"></div>
+		</div>
+		<span style="font-size:0.775rem;color:var(--mp-text-hint);min-width:30px">${ratio}%</span>
+	</div>`;
+}
+
+// =============================================
+// 1. 캘린더 (일정 목록)
+// =============================================
+let allEvents = [];
+
+function loadcalendarEvents(typeCd = '') {
+	fetch(`/calendar/listJson?typeCd=${typeCd}`, {
+		headers: { 'X-Requested-With': 'XMLHttpRequest' }
+	})
+	.then(res => res.json())
+	.then(data => {
+		if (!Array.isArray(data)) return;
+		const year = new Date().getFullYear();
+		fetch(`/holiday/list?year=${year}`, {
+			headers: { 'X-Requested-With': 'XMLHttpRequest' }
+		})
+		.then(res => res.json())
+		.then(holidays => {
+			const holidayEvents = holidays.map(h => ({
+				calStart: `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}T00:00:00`,
+				calEnd:   `${h.year}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}T23:59:00`,
+				calText: h.holidayName, place: '', typeCd: 'holiday'
+			}));
+			allEvents = typeCd === '' ? [...data, ...holidayEvents] : [...data];
+			showSchedule('week');
+		});
+	});
+}
+
+function showSchedule(mode) {
+	document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+	document.querySelectorAll('.view-btn')[mode === 'week' ? 0 : 1].classList.add('active');
+
+	const today = new Date(); today.setHours(0, 0, 0, 0);
+	const dow = today.getDay();
+	const weekStart = new Date(today); weekStart.setDate(today.getDate() - dow);
+	const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23, 59, 59, 999);
+
+	let filtered = [];
+	if (mode === 'day') {
+		filtered = allEvents.filter(item => {
+			const s = new Date(item.calStart);
+			return s.getFullYear() === today.getFullYear() &&
+				   s.getMonth() === today.getMonth() &&
+				   s.getDate() === today.getDate();
+		});
+	} else {
+		filtered = allEvents.filter(item => {
+			const s = new Date(item.calStart);
+			return s >= weekStart && s <= weekEnd;
+		});
+	}
+	filtered.sort((a, b) => new Date(a.calStart) - new Date(b.calStart));
+	renderScheduleList(filtered, mode);
+}
+
+function renderScheduleList(events, mode) {
+	const container = document.getElementById('scheduleList');
+	if (events.length === 0) {
+		container.innerHTML = `
+			<div class="mp-empty-state">
+				<div class="mp-empty-icon">📅</div>
+				<p class="mp-empty-text">${mode === 'day' ? '오늘' : '이번주'} 일정이 없습니다.</p>
+			</div>`;
+		return;
+	}
+
+	const grouped = {};
+	events.forEach(item => {
+		const d = new Date(item.calStart);
+		const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+		if (!grouped[key]) grouped[key] = [];
+		grouped[key].push(item);
+	});
+
+	const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+	const now = new Date();
+	let html = '';
+
+	Object.keys(grouped).forEach((dateKey, gi) => {
+		const d = new Date(dateKey);
+		const isToday = d.getFullYear() === now.getFullYear() &&
+						d.getMonth() === now.getMonth() &&
+						d.getDate() === now.getDate();
+		const label = `${d.getMonth()+1}월 ${d.getDate()}일 (${dayNames[d.getDay()]})`;
+		const items = grouped[dateKey];
+		const showMore = items.length > 3;
+
+		html += `<div class="mp-date-group">
+			<div class="mp-date-label ${isToday ? 'today' : ''}">
+				${isToday ? '📌 ' : ''}${label}
+				${isToday ? '<span class="mp-date-today-badge">오늘</span>' : ''}
+			</div>`;
+
+		const colorMap = {
+			holiday: '#ef4444',
+			'01CALTYPE': '#ef4444',
+			'02CALTYPE': '#22c55e',
+			'03CALTYPE': '#3b7dd8'
+		};
+		const labelMap = {
+			holiday: '공휴일',
+			'01CALTYPE': '개인',
+			'02CALTYPE': '그룹',
+			'03CALTYPE': '회사'
+		};
+		const badgeClsMap = {
+			holiday: 'mp-badge-red',
+			'01CALTYPE': 'mp-badge-red',
+			'02CALTYPE': 'mp-badge-green',
+			'03CALTYPE': 'mp-badge-blue'
+		};
+
+		items.forEach((item, idx) => {
+			const s = new Date(item.calStart), e = new Date(item.calEnd);
+			const st = `${String(s.getHours()).padStart(2,'0')}:${String(s.getMinutes()).padStart(2,'0')}`;
+			const et = `${String(e.getHours()).padStart(2,'0')}:${String(e.getMinutes()).padStart(2,'0')}`;
+			const color = colorMap[item.typeCd] || '#3b7dd8';
+			const tlabel = labelMap[item.typeCd] || '개인';
+			const tbadge = badgeClsMap[item.typeCd] || 'mp-badge-blue';
+			const hidden = (showMore && idx >= 3) ? `class="extra-item-${gi}" style="display:none"` : '';
+
+			html += `<div ${hidden}>
+				<div class="mp-schedule-item" style="--item-color:${color}">
+					<span class="mp-schedule-time">${st} ~ ${et}</span>
+					<span class="mp-schedule-name">${item.calText || '제목없음'}</span>
+					<span class="mp-badge ${tbadge}">${tlabel}</span>
+					${item.place ? `<span class="mp-schedule-place">📍 ${item.place}</span>` : ''}
+				</div>
+			</div>`;
+		});
+
+		if (showMore) {
+			html += `<button class="mp-btn mp-btn-ghost mt-1"
+				onclick="toggleMore(${gi}, ${items.length - 3}, this)">
+				▼ 더보기 (${items.length - 3}개)
+			</button>`;
+		}
+		html += '</div>';
+	});
+	container.innerHTML = html;
+}
+
+function toggleMore(gi, cnt, btn) {
+	const els = document.querySelectorAll(`.extra-item-${gi}`);
+	const hidden = els[0].style.display === 'none';
+	els.forEach(el => el.style.display = hidden ? 'block' : 'none');
+	btn.textContent = hidden ? '▲ 접기' : `▼ 더보기 (${cnt}개)`;
+}
+
+// =============================================
+// 2. 간트차트
+// =============================================
+let mypageGantt = false;
+
+function loadMypageGantt() {
+	if (mypageGantt) return;
+
+	gantt.config.columns = [
+		{ name: "text",      label: "이슈명",    width: 200, tree: true },
+		{ name: "status_cd", label: "상태",  width: 80 },
+		{ name: "assignee",  label: "담당자",    width: 80 },
+		{ name: "due_date",  label: "완료예정일", width: 100 },
+		{ name: "progress",  label: "진척율(%)",    width: 60, template: t => t.progress_text }
+	];
+	gantt.config.row_height = 30;
+	gantt.config.bar_height = 18;
+	gantt.config.min_column_width = 30;
+	gantt.config.grid_width = 550;
+	gantt.config.readonly = true;
+	gantt.config.layout = {
+		css: "gantt_container",
+		rows: [
+			{
+				cols: [
+					{ view: "grid", id: "grid", scrollX: "scrollHor", scrollY: "scrollVer", width: 550 },
+					{ resizer: true, width: 1 },
+					{ view: "timeline", id: "timeline", scrollX: "scrollHor", scrollY: "scrollVer" },
+					{ view: "scrollbar", id: "scrollVer" }
+				]
+			},
+			{ view: "scrollbar", id: "scrollHor", group: "horizontal" }
+		]
+	};
+	gantt.config.scales = [
+		{ unit: "month", step: 1, format: "%Y-%m" },
+		{ unit: "day",   step: 1, format: "%d" }
+	];
+	gantt.templates.task_class = function(start, end, task) {
+		const map = { '신규': 'status-new', '진행중': 'status-progress', '검토': 'status-review' };
+		return map[task.status_cd] || '';
+	};
+	gantt.init("mypageGantt");
+	mypageGantt = true;
+
+	fetch('/mypage/gantt/list')
+	.then(res => res.json())
+	.then(data => {
+		const tasks = data
+		.filter(issue => {
+			const startVal = issue.startDate || issue.estStartDate;
+			if (!startVal || !issue.dueDate) return false;
+			const s = new Date(startVal), e = new Date(issue.dueDate);
+			if (isNaN(s.getTime()) || isNaN(e.getTime())) return false;
+			if (s.getFullYear() === 1970) return false;
+			if (e <= s) return false;
+			if (issue.statusCd === '완료') return false;
+			return true;
+		})
+		.map(issue => ({
+			text:          issue.subject,
+			status_cd:     issue.statusCd,
+			priority_cd:   issue.priorityCd,
+			assignee:      issue.memName,
+			due_date:      formatDate(issue.dueDate),
+			start_date:    formatDate(issue.startDate || issue.estStartDate),
+			end_date:      formatDate(issue.closedDate || issue.dueDate),
+			progress:      (issue.doneRatio ?? 0) / 100,
+			progress_text: (issue.doneRatio ?? 0) + '%'
+		}));
+		gantt.clearAll();
+		gantt.parse({ data: tasks });
+	});
+}
+
+function formatDate(dateStr) {
+	const d = new Date(dateStr);
+	return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+document.querySelector('[data-bs-target="#ganttTab"]')
+		.addEventListener('click', () => setTimeout(loadMypageGantt, 300));
+
+document.querySelector('[data-bs-target="#weekIssueTab"]')
+		.addEventListener('click', function() {
+			if (!this.dataset.loaded) {
+				loadAllIssues();
+				this.dataset.loaded = 'true';
+			}
+		});
+
+function filterMypageEvents() {
+	loadcalendarEvents(document.getElementById('mypageTypeCd').value);
+}
+
+// =============================================
+// 3. 내 담당 이슈 (페이지네이션, 5개씩)
+// =============================================
+let myIssueData = [];
+let myIssuePage = 1;
+const MY_ISSUE_PAGE_SIZE = 5;
+
+function loadMyIssues() {
+	fetch('/mypage/gantt/list')
+	.then(res => res.json())
+	.then(data => {
+		myIssueData = Array.isArray(data) ? data.filter(i => i.statusCd !== '완료') : [];
+		myIssuePage = 1;
+		renderMyIssues();
+	});
+}
+
+function renderMyIssues() {
+	const tbody = document.getElementById('myIssueList');
+	const pagination = document.getElementById('myIssuePagination');
+
+	if (myIssueData.length === 0) {
+		tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--mp-text-hint);padding:28px;">내 담당 이슈가 없습니다.</td></tr>';
+		pagination.innerHTML = '';
+		return;
+	}
+
+	const totalPages = Math.ceil(myIssueData.length / MY_ISSUE_PAGE_SIZE);
+	const start = (myIssuePage - 1) * MY_ISSUE_PAGE_SIZE;
+	const pageItems = myIssueData.slice(start, start + MY_ISSUE_PAGE_SIZE);
+
+	tbody.innerHTML = pageItems.map(issue => {
+		const estStart = issue.estStartDate ? new Date(issue.estStartDate).toLocaleDateString('ko-KR') : '-';
+		const dueDate  = issue.dueDate  ? new Date(issue.dueDate).toLocaleDateString('ko-KR')  : '-';
+		const ratio = issue.doneRatio ?? 0;
+		return `<tr>
+			<td style="font-weight:500">${issue.subject || '-'}</td>
+			<td>${badge(statusBadge[issue.statusCd], issue.statusCd || '-')}</td>
+			<td>${badge(priorityBadge[issue.priorityCd], issue.priorityCd || '-')}</td>
+			<td>${estStart}</td>
+			<td>${dueDate}</td>
+			<td>${progressBar(ratio)}</td>
+		</tr>`;
+	}).join('');
+
+	// 페이지 버튼 렌더링
+	let pHtml = `<button class="mp-page-btn" onclick="goMyIssuePage(${myIssuePage - 1})" ${myIssuePage === 1 ? 'disabled' : ''}>&#8249;</button>`;
+	for (let i = 1; i <= totalPages; i++) {
+		pHtml += `<button class="mp-page-btn ${i === myIssuePage ? 'active' : ''}" onclick="goMyIssuePage(${i})">${i}</button>`;
+	}
+	pHtml += `<button class="mp-page-btn" onclick="goMyIssuePage(${myIssuePage + 1})" ${myIssuePage === totalPages ? 'disabled' : ''}>&#8250;</button>`;
+	pagination.innerHTML = pHtml;
+}
+
+function goMyIssuePage(page) {
+	const totalPages = Math.ceil(myIssueData.length / MY_ISSUE_PAGE_SIZE);
+	if (page < 1 || page > totalPages) return;
+	myIssuePage = page;
+	renderMyIssues();
+}
+
+// =============================================
+// 4. 이번주 마감 전체 이슈
+// =============================================
+function loadAllIssues() {
+	const tbody = document.getElementById('weekWeeklyIssueList');
+	tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--mp-text-hint);padding:28px;">로딩 중...</td></tr>';
+
+	fetch('/mypage/issue/week', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+	.then(res => res.json())
+	.then(data => {
+		if (!Array.isArray(data) || data.length === 0) {
+			tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--mp-text-hint);padding:28px;">이번주 마감 이슈가 없습니다.</td></tr>';
+			return;
+		}
+		tbody.innerHTML = data.map(issue => {
+			const ratio = issue.doneRatio ?? 0;
+			return `<tr>
+				<td style="font-weight:500">${issue.subject || '-'}</td>
+				<td>${issue.memName || '-'}</td>
+				<td>${badge(statusBadge[issue.statusCd], issue.statusCd || '-')}</td>
+				<td>${badge(priorityBadge[issue.priorityCd], issue.priorityCd || '-')}</td>
+				<td>${issue.dueDate || '-'}</td>
+				<td>${progressBar(ratio)}</td>
+			</tr>`;
+		}).join('');
+	})
+	.catch(() => {
+		tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:#ef4444;padding:28px;">데이터 로딩 실패</td></tr>';
+	});
+}
+
+// ── DOMContentLoaded ──
+document.addEventListener('DOMContentLoaded', function() {
+	loadcalendarEvents();
+	loadMyIssues();
+});
+</script>
+</div>
+</body>
+</html>

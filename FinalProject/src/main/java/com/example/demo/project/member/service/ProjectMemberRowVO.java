@@ -20,6 +20,5 @@ public class ProjectMemberRowVO {
     private String tel;
     private String email;
     private String grpName;
-    /** {@code yyyy-MM-dd} (조회 전용 문자열) */
-    private String prjStartDate;
+    private String login;
 }

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<div th:fragment="timelineEditModal">
+	<div class="modal fade" id="timelineEditModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">타임라인 수정</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="timelineEditForm" autocomplete="off">
+						<input type="hidden" name="id" />
+						<div class="mb-3">
+							<label class="form-label d-block">유형</label>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="typeCd" id="tlEditType01" value="01TIMELINE">
+								<label class="form-check-label" for="tlEditType01">기능</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="typeCd" id="tlEditType02" value="02TIMELINE">
+								<label class="form-check-label" for="tlEditType02">개선</label>
+							</div>
+							<div class="form-check form-check-inline">
+								<input class="form-check-input" type="radio" name="typeCd" id="tlEditType03" value="03TIMELINE">
+								<label class="form-check-label" for="tlEditType03">관리</label>
+							</div>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">설명</label>
+							<input type="text" class="form-control" name="contents" maxlength="200" placeholder="설명입력" />
+						</div>
+						<div class="mb-3">
+							<label class="form-label">날짜</label>
+							<input type="datetime-local" class="form-control" name="entryDate" step="60" required />
+							<small class="form-text text-muted" data-tle-date-hint></small>
+						</div>
+						<small class="text-danger d-none" data-tle-err></small>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+					<button type="button" class="btn btn-primary" data-tle-save>저장</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			var modalEl = document.getElementById("timelineEditModal");
+			if (!modalEl) return;
+			var form = modalEl.querySelector("#timelineEditForm");
+			var errEl = modalEl.querySelector("[data-tle-err]");
+			var saveBtn = modalEl.querySelector("[data-tle-save]");
+			var idEl = form.querySelector('[name="id"]');
+			var entryDateEl = form.querySelector('[name="entryDate"]');
+			var dateHintEl = modalEl.querySelector("[data-tle-date-hint]");
+
+			function applyEntryDateBounds() {
+				var mt = window.MilestoneTimeline;
+				if (!mt || !entryDateEl) return;
+				mt.applyEntryDateBounds(entryDateEl);
+				if (dateHintEl) {
+					var hint = mt.formatEntryDateBoundsHint ? mt.formatEntryDateBoundsHint() : "";
+					dateHintEl.textContent = hint;
+				}
+			}
+
+			function toDatetimeLocalValue(d) {
+				if (!d) return "";
+				if (window.MilestoneTimeline && window.MilestoneTimeline.parseWallClockDate) {
+					d = window.MilestoneTimeline.parseWallClockDate(d);
+				} else {
+					d = d instanceof Date ? d : new Date(d);
+				}
+				if (!d || isNaN(d.getTime())) return "";
+				var pad = function (n) { return String(n).padStart(2, "0"); };
+				return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate())
+					+ "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+			}
+
+			function normalizeEntryDate(raw) {
+				var s = (raw || "").toString().trim();
+				if (!s) return "";
+				var m = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+				if (!m) return s;
+				return m[1] + "-" + m[2] + "-" + m[3] + "T" + m[4] + ":" + m[5] + ":00";
+			}
+
+			function getCsrfHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getCsrfHeaders) {
+					return window.MilestoneTimeline.getCsrfHeaders();
+				}
+				var headers = {};
+				var tokenMeta = document.querySelector('meta[name="_csrf"]');
+				var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+				if (tokenMeta && headerMeta && tokenMeta.content && headerMeta.content) {
+					headers[headerMeta.content] = tokenMeta.content;
+				}
+				return headers;
+			}
+
+			function getApiJsonHeaders() {
+				if (window.MilestoneTimeline && window.MilestoneTimeline.getApiJsonHeaders) {
+					return window.MilestoneTimeline.getApiJsonHeaders();
+				}
+				return Object.assign(
+					{ "Content-Type": "application/json", Accept: "application/json" },
+					getCsrfHeaders()
+				);
+			}
+
+			function setErr(msg) {
+				if (!errEl) return;
+				if (msg) { errEl.textContent = msg; errEl.classList.remove("d-none"); }
+				else     { errEl.textContent = ""; errEl.classList.add("d-none"); }
+			}
+
+			function setTypeCd(typeCd) {
+				var radios = form.querySelectorAll('input[name="typeCd"]');
+				var found = false;
+				radios.forEach(function (r) {
+					r.checked = (r.value === typeCd);
+					if (r.checked) found = true;
+				});
+				if (!found && radios.length) radios[0].checked = true;
+			}
+
+			window.MilestoneTimelineEdit = {
+				open: function (event) {
+					if (!event || event.id == null) return;
+					setErr("");
+					form.reset();
+					idEl.value = String(event.id);
+					setTypeCd(event.typeCd || "01TIMELINE");
+					form.querySelector('[name="contents"]').value = (event.contents || event.content || "").toString();
+					applyEntryDateBounds();
+					entryDateEl.value = toDatetimeLocalValue(event.entryDate || event.start);
+					if (window.MilestoneTimeline && window.MilestoneTimeline.clampEntryDateValue) {
+						window.MilestoneTimeline.clampEntryDateValue(entryDateEl);
+					}
+					bootstrap.Modal.getOrCreateInstance(modalEl).show();
+				},
+			};
+
+			saveBtn.addEventListener("click", function () {
+				setErr("");
+				var fd = new FormData(form);
+				var payload = {
+					id: fd.get("id") ? Number(fd.get("id")) : null,
+					typeCd: (fd.get("typeCd") || "").toString(),
+					contents: (fd.get("contents") || "").toString().trim(),
+					entryDate: normalizeEntryDate(fd.get("entryDate")),
+				};
+				if (!payload.id)       { setErr("수정할 이벤트 정보가 없습니다."); return; }
+				if (!payload.entryDate){ setErr("날짜를 입력하세요."); return; }
+				if (!payload.typeCd)   { setErr("유형을 선택하세요."); return; }
+				var rawDate = (fd.get("entryDate") || "").toString();
+				if (window.MilestoneTimeline && window.MilestoneTimeline.isEntryDateInBounds
+						&& !window.MilestoneTimeline.isEntryDateInBounds(rawDate)) {
+					setErr("날짜는 마일스톤 시작일~마감일 사이여야 합니다.");
+					return;
+				}
+
+				saveBtn.disabled = true;
+				fetch("/project/milestone/api/timeline", {
+					method: "PUT",
+					headers: getApiJsonHeaders(),
+					body: JSON.stringify(payload),
+				})
+					.then(function (res) {
+						if (!res.ok) throw new Error("HTTP " + res.status);
+						return res.json().catch(function () { return null; });
+					})
+					.then(function () {
+						var editedId = payload.id;
+						var refresh = (window.MilestoneTimeline && window.MilestoneTimeline.refreshSelected)
+							? window.MilestoneTimeline.refreshSelected()
+							: null;
+						var done = function () {
+							if (window.MilestoneTimelineView
+									&& typeof window.MilestoneTimelineView.replaceAfterEdit === "function") {
+								window.MilestoneTimelineView.replaceAfterEdit(editedId);
+							}
+							alert("타임라인 이벤트가 수정되었습니다.");
+							bootstrap.Modal.getInstance(modalEl).hide();
+						};
+						if (refresh && typeof refresh.then === "function") {
+							return refresh.then(done);
+						}
+						done();
+					})
+					.catch(function (err) {
+						setErr("저장 실패: " + (err && err.message ? err.message : err));
+					})
+					.finally(function () { saveBtn.disabled = false; });
+			});
+		})();
+	</script>
+</div>
+</body>
+</html>

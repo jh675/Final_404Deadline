@@ -5,13 +5,95 @@
 	layout:decorate="~{layout/defaultLayout}">
 <head>
 <meta charset="UTF-8">
-<title>소개페이지</title>
+<title>프로그램 소개</title>
+<style>
+	.info-section {
+		padding: 60px 0;
+	}
+	.carousel-item img {
+		width: 100%;
+		height: 400px;
+		object-fit: cover; /* 이미지 비율 유지하며 꽉 채우기 */
+	}
+	.section-img {
+		width: 100%;
+		height: 400px;
+		object-fit: cover;
+	}
+</style>
 </head>
 <body>
 <div layout:fragment="content">
-<h1>소개페이지입니다</h1>
+<div class="container mt-5">
 
-<div><a th:href="@{/login}">로그인하러가기</a></div>
+	<div class="text-center mb-5">
+		<h1 class="display-4 fw-bold">프로그램 소개</h1>
+		<p class="lead text-muted">우리 시스템의 핵심 기능과 가치를 소개합니다.</p>
+	</div>
+
+	<section class="info-section row align-items-center">
+		<div class="col-md-6 mb-4 mb-md-0">
+			<h2 class="fw-bold mb-3">혁신적인 업무 관리 시스템</h2>
+			<p class="text-secondary lh-lg">
+				이 프로그램은 기업의 비즈니스 효율성을 극대화하기 위해 설계된 올인원 솔루션입니다. 
+				복잡한 프로젝트 관리부터 팀원 간의 실시간 협업, 보안성이 강화된 계정 관리 기능까지 
+				단 하나의 플랫폼에서 완벽하게 지원합니다. 90일 주기 비밀번호 변경 프로세스 및 
+				관리자 원격 계정 제어 시스템을 통해 기업의 소중한 자산과 데이터를 안전하게 보호하세요.
+			</p>
+			<div class="mt-4">
+				<a th:href="@{/login}" class="btn btn-primary btn-lg">지금 시작하기</a>
+			</div>
+		</div>
+		
+		<div class="col-md-6">
+			<div id="bannerCarousel" class="carousel slide shadow rounded overflow-hidden" data-bs-ride="carousel">
+				<div class="carousel-indicators">
+					<button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>
+					<button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="1"></button>
+					<button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="2"></button>
+				</div>
+				<div class="carousel-inner">
+					<div class="carousel-item active" data-bs-interval="3000">
+						<img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1600&auto=format&fit=crop" class="d-block w-100" alt="배너 이미지 1">
+					</div>
+					<div class="carousel-item" data-bs-interval="3000">
+						<img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1600&auto=format&fit=crop" class="d-block w-100" alt="배너 이미지 2">
+					</div>
+					<div class="carousel-item" data-bs-interval="3000">
+						<img src="https://images.unsplash.com/photo-1494526585095-c41746248156?q=80&w=1600&auto=format&fit=crop" class="d-block w-100" alt="배너 이미지 3">
+					</div>
+				</div>
+				<button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+					<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+					<span class="visually-hidden">Previous</span>
+				</button>
+				<button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+					<span class="carousel-control-next-icon" aria-hidden="true"></span>
+					<span class="visually-hidden">Next</span>
+				</button>
+			</div>
+		</div>
+	</section>
+
+	<hr class="my-5">
+
+	<section class="info-section row align-items-center flex-column-reverse flex-md-row">
+		<div class="col-md-6">
+			<img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop" class="img-fluid rounded shadow section-img" alt="소개 이미지">
+		</div>
+		
+		<div class="col-md-6 mb-4 mb-md-0 ps-md-5">
+			<h2 class="fw-bold mb-3">체계적인 데이터 분석 및 모니터링</h2>
+			<p class="text-secondary lh-lg">
+				실시간으로 수집되는 프로젝트 데이터를 기반으로 직관적인 대시보드를 제공합니다. 
+				팀의 생산성 지표를 한눈에 파악하고, 발생 가능한 리스크를 사전에 감지하여 
+				유연하게 대처할 수 있습니다. 시스템 관리자는 언제 어디서나 기업 설정 및 
+				회원 상태를 모니터링하고 가이드를 편집할 수 있는 강력한 백오피스 기능을 경험하실 수 있습니다.
+			</p>
+		</div>
+	</section>
+
+</div>
 </div>
 </body>
 </html>

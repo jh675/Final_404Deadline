@@ -3,8 +3,234 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.project.wiki.mapper.WikiMapper">
 	
-	<select id="selectWikiContentLastVer">
-		select * from wikiContent 
+	<select id="selectWikiContentLastVerByTitle" resultType="wikiContentVO">
+		SELECT
+			p.id AS id,
+			c.page_id AS pageId,
+			p.parent_id AS parentId,
+			c.version AS version,
+			c.describe AS describe,
+			c.content AS content,
+			p.title AS title,
+			c.updated_on AS updatedOn,
+			c.mem_id AS memId
+		FROM wiki_page p
+		JOIN wiki_content c ON p.last_ver = c.version AND p.id = c.page_id
+		JOIN wiki w ON w.id = p.wiki_id
+		WHERE w.prj_id = #{id}
+		<choose>
+			<when test="title != null and title != ''">
+				AND p.title = #{title}
+			</when>
+			<otherwise>
+				AND p.title = w.start_page
+			</otherwise>
+		</choose>
 	</select>
+	
+	<select id="selectWikiContentLastVerById" resultType="wikiContentVO">
+		SELECT
+			p.id AS id,
+			c.page_id AS pageId,
+			p.parent_id AS parentId,
+			c.version AS version,
+			c.describe AS describe,
+			c.content AS content,
+			p.title AS title,
+			c.updated_on AS updatedOn,
+			c.mem_id AS memId
+		FROM wiki_page p
+		JOIN wiki_content c ON p.last_ver = c.version AND p.id = c.page_id
+		WHERE p.id = #{id}
+	</select>
+
+	<select id="selectWikiContentByPageIdAndVersion" resultType="wikiContentVO">
+		SELECT
+			p.id AS id,
+			c.page_id AS pageId,
+			p.parent_id AS parentId,
+			c.version AS version,
+			c.describe AS describe,
+			c.content AS content,
+			p.title AS title,
+			c.updated_on AS updatedOn,
+			c.mem_id AS memId,
+			GET_USERID_TO_NAME(c.mem_id) AS modifierName
+		FROM wiki_page p
+		JOIN wiki_content c ON p.id = c.page_id
+		WHERE p.id = #{pageId}
+		AND c.version = #{version}
+	</select>
+
+	<select id="selectWikiHistoryByPageId" resultType="wikiContentVO">
+		SELECT
+			p.id AS id,
+			c.page_id AS pageId,
+			p.parent_id AS parentId,
+			c.version AS version,
+			c.describe AS describe,
+			c.content AS content,
+			p.title AS title,
+			c.updated_on AS updatedOn,
+			c.mem_id AS memId,
+			GET_USERID_TO_NAME(c.mem_id) AS modifierName
+		FROM wiki_page p
+		JOIN wiki_content c ON p.id = c.page_id
+		WHERE p.id = #{pageId}
+		ORDER BY c.version DESC
+	</select>
+	
+	<select id="nameCheck" resultType="long">
+		select count(*)
+		from wiki_page p
+		join wiki w
+		on w.id = p.wiki_id
+		where w.prj_id = #{id}
+		and title = #{name}
+	</select>
+	
+	<select id="selectWikiIndexPages" resultType="wikiPageVO">
+		SELECT
+			p.id AS id,
+			p.wiki_id AS wikiId,
+			p.title AS title,
+			p.last_ver AS lastVer,
+			w.prj_id AS prjId,
+			p.parent_id AS parentId,
+			c.describe AS describe,
+			c.updated_on AS updatedOn
+		FROM wiki_page p
+		JOIN wiki w ON w.id = p.wiki_id
+		LEFT JOIN wiki_content c ON c.page_id = p.id AND c.version = p.last_ver
+		WHERE w.prj_id = #{projectId}
+		ORDER BY p.title
+	</select>
+	
+	<select id="selectWikiPageForTree" resultType="wikiPageVO">
+		select
+			p.id,
+			p.title,
+			p.parent_id AS parentId
+		from wiki_page p
+		join wiki i
+		on i.id = p.wiki_id
+		where i.prj_id = #{prjId}
+		<if test="id != null">
+			AND p.id NOT IN (
+				SELECT id
+				FROM wiki_page
+				START WITH id = #{id}
+				CONNECT BY PRIOR id = parent_id
+			)
+		</if>
+		order by p.title
+	</select>
+	
+	<select id="selectWikiBreadcrumb" resultType="wikiPageVO">
+		SELECT
+			p.id AS id,
+			p.title AS title,
+			p.parent_id AS parentId
+		FROM wiki_page p
+		START WITH p.id = #{pageId}
+		CONNECT BY PRIOR p.parent_id = id
+		ORDER BY LEVEL DESC
+	</select>
+
+	<select id="countWikiChildren" resultType="long">
+		SELECT COUNT(*)
+		FROM wiki_page
+		WHERE parent_id = #{pageId}
+	</select>
+
+	<insert id="insertWikiPage" parameterType="wikiPageVO">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			select w_page_seq.nextval from dual
+		</selectKey>
+		insert into wiki_page (id, title, wiki_id, parent_id)
+		values (#{id}, #{title}, (select id from wiki where prj_id = #{prjId}), #{parentId})
+	</insert>
+	
+	<update id="updateWikiPageParent" parameterType="wikiPageVO">
+		update wiki_page
+		set parent_id = #{parentId}
+		where id = #{id}
+	</update>
+
+	<insert id="insertWikiContent" parameterType="wikiContentVO">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			select w_content_seq.nextval from dual
+		</selectKey>
+		insert into wiki_content (id,version, page_id, content,describe,mem_Id)
+		values (#{id}, 1,#{pageId}, #{content}, #{describe}, #{memId})
+	</insert>
+	
+	<select id="searchWikiTitles" resultType="string">
+		SELECT title FROM (
+			SELECT p.title AS title
+			FROM wiki_page p
+			JOIN wiki w ON w.id = p.wiki_id
+			WHERE w.prj_id = #{projectId}
+			<if test="q != null and q != ''">
+				AND UPPER(p.title) LIKE '%' || UPPER(#{q}) || '%'
+			</if>
+			ORDER BY p.title
+		) WHERE ROWNUM &lt;= 20
+	</select>
+
+	<select id="countStartPageByTitle" resultType="long">
+		select count(*)
+		from wiki
+		where prj_id = #{projectId}
+		and start_page = #{name}
+	</select>
+
+	<insert id="updateWikiContent" parameterType="wikiContentVO">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			select w_content_seq.nextval from dual
+		</selectKey>
+		insert into wiki_content (id,version, page_id, content,describe,mem_Id)
+		values (#{id}, (select max(version)+1 from wiki_content where page_id =#{pageId}),#{pageId}, #{content}, #{describe}, #{memId})
+	</insert>
+
+	<delete id="deleteWikiPage" parameterType="long">
+		delete from wiki_page
+		where id = #{pageId}
+	</delete>
+
+	<delete id="deleteWikiContent" parameterType="long">
+		delete from wiki_content
+		where page_id = #{pageId}
+	</delete>
+
+	<select id="getIdByTitle" resultType="long">
+		select p.id
+		from wiki_page p
+		join wiki w
+		on w.id = p.wiki_id
+		where w.prj_id = #{projectId}
+		and p.title = #{name}
+	</select>
+
+	<select id="getParentIdByPageId" resultType="long">
+		select parent_id
+		from wiki_page
+		where id = #{pageId}
+	</select>
+
+	<update id="reparentWikiChildren">
+		update wiki_page
+		set parent_id = #{parentId}
+		where parent_id = #{pageId}
+	</update>
+
+	<update id="updateStartPage">
+		update wiki
+		set start_page = #{name}
+		where prj_id = #{projectId}
+	</update>
+
+
+
 	
 </mapper>

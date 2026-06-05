@@ -31,7 +31,7 @@ companyNameInput.addEventListener('input', function(e) {
                         li.textContent = company.companyName; // 기업명 표시
                         
                         // 클릭 시 선택 로직
-                        li.addEventListener('click', function() {
+                        li.addEventListener('mousedown', function() {
                             companyNameInput.value = company.companyName; // 화면엔 기업명
                             bizNoInput.value = company.bizNo;             // hidden엔 사업자번호
                             companyDropdown.style.display = 'none';       // 드롭다운 닫기
@@ -48,17 +48,20 @@ companyNameInput.addEventListener('input', function(e) {
     }, 300);
 });
 
-// 외부 클릭 시 드롭다운 닫기
-document.addEventListener('click', function(e) {
-    if (!companyNameInput.contains(e.target) && !companyDropdown.contains(e.target)) {
-        companyDropdown.style.display = 'none';
-    }
+companyNameInput.addEventListener('blur', function() {
+	// 포커스를 잃는 순간, 검색 0.3초 대기 타이머를 강제로 취소
+    clearTimeout(debounceTimer);
+    
+	// 드롭다운 닫기
+    companyDropdown.style.display = 'none';
 });
+
 // 폼 제출 시 검증 및 자동 매칭 로직
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     // 폼 기본 제출 동작 막기
     e.preventDefault();
 
+	const loginType = document.getElementById('loginType').value;
     const companyNameInput = document.getElementById('companyNameInput');
     const bizNoInput = document.getElementById('bizNo');
     const username = document.getElementById('username');
@@ -72,11 +75,14 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 
     // 기초 유효성 검사 (빈칸 체크)
     let isValid = true;
-    if (!companyNameInput.value.trim()) {
+	
+	// 일반 회원일 때만 기업명 체크
+	if (loginType === 'USER' && !companyNameInput.value.trim()) {
         companyNameInput.classList.add('is-invalid');
         feedbackDiv.textContent = "기업명을 입력해주세요.";
         isValid = false;
     }
+		
     if (!username.value.trim()) { 
 		username.classList.add('is-invalid'); 
 		isValid = false; 
@@ -88,6 +94,12 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 
     if (!isValid) return; // 빈칸이 있으면 여기서 중단
 
+	// 시스템 관리자 로그인인 경우 기업 검증 생략
+	if (loginType === 'ADMIN') {
+        this.submit();
+        return;
+    }
+		
     // bizNo가 채워져 있는 경우 
     if (bizNoInput.value.trim()) {
         this.submit(); // this.submit()은 이벤트를 다시 발생시키지 않고 순수하게 폼만 제출합니다.
@@ -125,7 +137,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
             else {
                 // 검색 결과가 없을 경우
                 companyNameInput.classList.add('is-invalid');
-                feedbackDiv.textContent = "존재하지 않거나 비활성화된 기업입니다.";
+                feedbackDiv.textContent = "존재하지 않거나 비활성화 상태의 기업입니다.";
             }
         })
         .catch(error => {
@@ -148,3 +160,36 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 });
+
+function changeLoginType(type) {
+    document.getElementById('loginType').value = type;
+    const companyArea = document.getElementById('companyInputArea');
+    
+    // 활성화된 탭 디자인 변경
+    document.getElementById('user-tab').classList.toggle('active', type === 'USER');
+    document.getElementById('admin-tab').classList.toggle('active', type === 'ADMIN');
+    
+    // 초기화
+    document.getElementById('companyNameInput').value = ''; 
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    
+    // 에러 표시 모두 제거
+    ['companyNameInput', 'username', 'password'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.remove('is-invalid');
+    });
+    
+    // 혹시 열려있는 기업 검색 드롭다운이 있다면 닫기
+    const companyDropdown = document.getElementById('companyDropdown');
+    if (companyDropdown) {
+        companyDropdown.style.display = 'none';
+        companyDropdown.innerHTML = '';
+    }
+
+    if (type === 'ADMIN') {
+        companyArea.style.display = 'none'; // 시스템 관리자는 기업 입력 숨김
+    } else {
+        companyArea.style.display = 'block'; // 일반 회원은 기업 입력 표시
+    }
+}

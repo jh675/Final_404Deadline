@@ -1,8 +1,11 @@
 package com.example.demo.project.group.mapper;
 
+import java.util.Date;
 import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
 import com.example.demo.project.group.service.*;
 
 /** 그룹 MyBatis — GRP 목록·연쇄 삭제 */
@@ -19,6 +22,11 @@ public interface GroupMapper {
 
     /** 동일 프로젝트·그룹명 존재 여부 (PRJ_ID + NAME) */
     int countGrpByPrjIdAndName(
+            @Param("prjId") Long prjId,
+            @Param("grpName") String grpName);
+
+    /** 그룹 등록 직후 — PRJ_ID + NAME으로 GRP.ID 조회 */
+    Long selectGrpIdByPrjIdAndName(
             @Param("prjId") Long prjId,
             @Param("grpName") String grpName);
 
@@ -43,4 +51,7 @@ public interface GroupMapper {
 
     /** DB {@code PROC_GRP_UPDATE} — memIds null이면 구성원 변경 없음 */
     void callProcGrpUpdate(GroupUpdateProcParam param);
+    
+ // 그룹 참여 감지용
+    List<GroupDetailVO> findByCreatedOnAfter(Date date);
 }

@@ -9,18 +9,12 @@
   <sql id="memberListWhere">
     <where>
       G.PRJ_ID = #{prjId}
-      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
+      AND G.STATUS_CD = '01ACTIVE'
       <if test="memberName != null and memberName != ''">
         AND U.NAME LIKE '%' || #{memberName} || '%'
       </if>
       <if test="grpName != null and grpName != ''">
         AND G.NAME LIKE '%' || #{grpName} || '%'
-      </if>
-      <if test="prjStartFrom != null and prjStartFrom != ''">
-        AND TRUNC(M.PRJ_START_DATE) &gt;= TO_DATE(#{prjStartFrom}, 'YYYY-MM-DD')
-      </if>
-      <if test="prjStartTo != null and prjStartTo != ''">
-        AND TRUNC(M.PRJ_START_DATE) &lt;= TO_DATE(#{prjStartTo}, 'YYYY-MM-DD')
       </if>
     </where>
   </sql>
@@ -34,7 +28,7 @@
       U.TEL AS tel,
       U.EMAIL AS email,
       G.NAME AS grpName,
-      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+      u.login as login
     FROM USERS U
     JOIN MEMBER M ON U.ID = M.USER_ID
     JOIN GRP G ON M.GRP_ID = G.ID
@@ -42,18 +36,12 @@
     ORDER BY M.USER_ID
   </select>
 
-  <!-- 등록 화면 — 프로젝트명 -->
-  <select id="selectProjectNameByPrjId" resultType="string">
-    SELECT P.PRJ_NAME
-    FROM project P
-    WHERE P.ID = #{prjId}
-  </select>
-
-  <!-- 구성원 등록 모달 — 동일 biz_no·활성 사용자, MEMBER 미등록(user_id 없음)만 -->
+  <!-- 구성원 등록 모달 — 동일 biz_no·활성 사용자 (excludeRegistered 시 현재 프로젝트 미등록만) -->
   <select id="selectCompanyMembersByPrjId"
     resultType="com.example.demo.project.member.service.CompanyMemberRowVO">
     SELECT
       U.ID AS userId,
+      U.LOGIN AS login,
       U.NAME AS userName,
       TO_CHAR(U.HIRE_DATE, 'YYYY-MM-DD') AS hireDate,
       U.GENDER_CD AS genderCd,
@@ -68,7 +56,10 @@
       AND NOT EXISTS (
         SELECT 1
         FROM MEMBER M
+        JOIN GRP G ON G.ID = M.GRP_ID
         WHERE M.USER_ID = U.ID
+          AND G.PRJ_ID = #{prjId}
+          AND G.STATUS_CD = '01ACTIVE'
       )
     </if>
     ORDER BY U.ID
@@ -98,51 +89,41 @@
       U.EMAIL AS email,
       U.TEL AS tel,
       U.LOGIN AS login,
-      NULL AS lastLoginOn,
+      U.LAST_LOG_ON AS lastLoginOn,
       U.PW_UPDATED_ON AS pwUpdatedOn,
-      P.PRJ_NAME AS prjName,
-      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate,
-      TO_CHAR(M.PRJ_END_DATE, 'YYYY-MM-DD') AS prjEndDate,
       G.NAME AS grpName
     FROM MEMBER M
     JOIN USERS U ON U.ID = M.USER_ID
     JOIN GRP G ON G.ID = M.GRP_ID
-    LEFT JOIN project P ON P.ID = G.PRJ_ID
     WHERE G.PRJ_ID = #{prjId}
       AND M.USER_ID = #{userId}
       AND M.GRP_ID = #{grpId}
-      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
       AND G.STATUS_CD = '01ACTIVE'
   </select>
 
   <select id="selectMemberIssues" resultType="com.example.demo.project.member.service.MemberIssueRowVO">
     SELECT
+      I.ID AS issueId,
       get_sub_code_name(I.PRIORITY_CD) AS priorityCd,
       I.SUBJECT AS subject,
       get_sub_code_name(I.CATEGORY_CD) AS categoryCd,
       get_sub_code_name(I.STATUS_CD) AS statusCd,
-      NULL AS requesterName,
-      GET_USERID_TO_NAME(I.MEM_ID) AS assigneeName,
+      RW.NAME AS requesterName,
+      AU.NAME AS assigneeName,
       I.EST_START_DATE AS estStartDate,
       I.DUE_DATE AS dueDate,
       I.START_DATE AS startDate,
       I.CLOSED_DATE AS closedDate,
       I.DONE_RATIO AS doneRatio
     FROM ISSUE I
+    LEFT JOIN USERS AU ON AU.ID = I.MEM_ID
+    LEFT JOIN USERS RW ON RW.ID = I.WRITER
     WHERE I.PRJ_ID = #{prjId}
-      AND I.MEM_ID = (
-        SELECT M.ID
-        FROM MEMBER M
-        JOIN GRP G ON G.ID = M.GRP_ID
-        WHERE G.PRJ_ID = #{prjId}
-          AND M.USER_ID = #{userId}
-          AND M.GRP_ID = #{grpId}
-          AND M.PRJ_END_DATE IS NULL
-          AND G.STATUS_CD = '01ACTIVE'
-      )
-    ORDER BY I.PRIORITY_CD DESC, I.ID
+      AND I.MEM_ID = #{userId}
+    ORDER BY I.PRIORITY_CD ASC, I.DONE_RATIO ASC
   </select>
 
+  <!-- 그룹 존재 여부 체크 -->
   <select id="countGrpInProject" resultType="int">
     SELECT COUNT(*)
     FROM GRP G
@@ -151,64 +132,37 @@
       AND G.STATUS_CD = '01ACTIVE'
   </select>
 
+  <!-- 활성 구성원 수 체크 -->
   <select id="countActiveMember" resultType="int">
     SELECT COUNT(*)
     FROM MEMBER M
     WHERE M.USER_ID = #{userId}
       AND M.GRP_ID = #{grpId}
-      AND M.PRJ_END_DATE IS NULL
   </select>
 
-  <select id="selectUserHireDateYmd" resultType="string">
-    SELECT TO_CHAR(U.HIRE_DATE, 'YYYY-MM-DD')
-    FROM USERS U
-    WHERE U.ID = #{userId}
-  </select>
-
-  <!-- 구성원 등록 — PK: mem_seq → MEMBER.ID -->
-  <insert id="insertMember" parameterType="com.example.demo.project.member.service.MemberRegisterParam">
-    <selectKey keyProperty="memberId" resultType="long" order="BEFORE">
-      SELECT mem_seq.NEXTVAL FROM dual
-    </selectKey>
-    INSERT INTO MEMBER (
-      ID,
-      USER_ID,
-      GRP_ID,
-      PRJ_START_DATE,
-      PRJ_END_DATE
-    ) VALUES (
-      #{memberId},
-      #{userId},
-      #{grpId},
-      TO_DATE(#{prjStartDate}, 'YYYY-MM-DD'),
-      <choose>
-        <when test="prjEndDate != null and prjEndDate != ''">
-          TO_DATE(#{prjEndDate}, 'YYYY-MM-DD')
-        </when>
-        <otherwise>
-          NULL
-        </otherwise>
-      </choose>
-    )
+  <!-- 구성원 일괄 등록 -->
+  <insert id="insertMembers">
+    BEGIN
+      <foreach collection="userIds" item="uid" separator=";">
+        INSERT INTO MEMBER (
+          ID,
+          USER_ID,
+          GRP_ID
+        ) VALUES (
+          mem_seq.NEXTVAL,
+          #{uid},
+          #{grpId}
+        )
+      </foreach>;
+    END;
   </insert>
 
-  <!-- 구성원 수정 — 종료일·소속 그룹 (투입 시작일 변경 없음) -->
+  <!-- 구성원 수정 — 소속 그룹 -->
   <update id="updateMember" parameterType="com.example.demo.project.member.service.MemberUpdateParam">
     UPDATE MEMBER M
-    SET
-      M.GRP_ID = #{grpId},
-      M.PRJ_END_DATE =
-      <choose>
-        <when test="prjEndDate != null and prjEndDate != ''">
-          TO_DATE(#{prjEndDate}, 'YYYY-MM-DD')
-        </when>
-        <otherwise>
-          NULL
-        </otherwise>
-      </choose>
+    SET M.GRP_ID = #{grpId}
     WHERE M.USER_ID = #{userId}
       AND M.GRP_ID = #{oldGrpId}
-      AND M.PRJ_END_DATE IS NULL
       AND EXISTS (
         SELECT 1
         FROM GRP G
@@ -230,4 +184,10 @@
       </foreach>
     )
   </delete>
+  
+  <select id="findLoginById" parameterType="Long" resultType="String">
+	    SELECT BIZ_NO || '_' || LOGIN
+	    FROM USERS
+	    WHERE ID = #{userId}
+	</select>
 </mapper>

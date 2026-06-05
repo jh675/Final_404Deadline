@@ -30,7 +30,7 @@
       COUNT(M.USER_ID) AS cntMem,
       G.CREATED_ON AS createdOn
     FROM GRP G
-    LEFT JOIN MEMBER M ON M.GRP_ID = G.ID AND M.PRJ_END_DATE IS NULL
+    LEFT JOIN MEMBER M ON M.GRP_ID = G.ID
     <include refid="groupListWhere"/>
     GROUP BY G.ID, G.NAME, G.CREATED_ON
     ORDER BY G.ID
@@ -41,6 +41,15 @@
     SELECT P.PRJ_NAME
     FROM project P
     WHERE P.ID = #{prjId}
+  </select>
+
+  <!-- 그룹 등록 직후 — PRJ_ID + NAME으로 ID 조회 -->
+  <select id="selectGrpIdByPrjIdAndName" resultType="long">
+    SELECT G.ID
+    FROM GRP G
+    WHERE G.PRJ_ID = #{prjId}
+      AND G.NAME = #{grpName}
+      AND G.STATUS_CD = '01ACTIVE'
   </select>
 
   <!-- 그룹명 중복 — PRJ_ID + NAME 일치 (활성 그룹) -->
@@ -74,16 +83,14 @@
       U.NAME AS userName,
       U.TEL AS tel,
       U.EMAIL AS email,
-      G.NAME AS grpName,
-      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+      G.NAME AS grpName
     FROM MEMBER M
     JOIN USERS U ON U.ID = M.USER_ID
     JOIN GRP G ON G.ID = M.GRP_ID
     WHERE G.PRJ_ID = #{prjId}
       AND G.ID = #{grpId}
       AND G.STATUS_CD = '01ACTIVE'
-      AND M.PRJ_END_DATE IS NULL
-    ORDER BY U.NAME
+    ORDER BY M.USER_ID, U.NAME
   </select>
 
   <!-- 그룹 상세 보유 권한 — 역할(권한) 단위 행만 (메뉴 폭증 없음) -->
@@ -134,15 +141,13 @@
       U.NAME AS userName,
       U.TEL AS tel,
       U.EMAIL AS email,
-      G.NAME AS grpName,
-      TO_CHAR(M.PRJ_START_DATE, 'YYYY-MM-DD') AS prjStartDate
+      G.NAME AS grpName
     FROM MEMBER M
     LEFT JOIN USERS U ON U.ID = M.USER_ID
     LEFT JOIN GRP G ON G.ID = M.GRP_ID
     WHERE G.PRJ_ID = #{prjId}
-      AND (M.PRJ_END_DATE IS NULL OR M.PRJ_END_DATE >= SYSDATE)
       AND G.STATUS_CD = '01ACTIVE'
-    ORDER BY U.NAME, M.ID
+    ORDER BY M.USER_ID, U.NAME
   </select>
 
   <!-- 그룹 등록 — DB PROC_GRP_INSERT (memIds null = p_mem_ids 미전달과 동일) -->
@@ -157,7 +162,7 @@
     }
   </update>
 
-  <!-- 그룹 수정 — DB PROC_GRP_UPDATE (memIds null = p_mem_ids 미전달과 동일) -->
+  <!-- 그룹 수정 — DB PROC_GRP_UPDATE (memIds null = 구성원 변경 없음, '' = 전원 제거) -->
   <update id="callProcGrpUpdate" statementType="CALLABLE">
     {
       CALL PROC_GRP_UPDATE(
@@ -168,4 +173,6 @@
       )
     }
   </update>
+  
+
 </mapper>

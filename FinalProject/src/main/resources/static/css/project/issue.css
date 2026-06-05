@@ -1,0 +1,1894 @@
+/**
+ * 이슈 모듈 — 배치·간격·형태 (색상: theme-colors.css)
+ */
+:root {
+	--issue-radius: 8px;
+	--issue-radius-sm: 6px;
+	--issue-radius-xs: 4px;
+	--issue-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
+	--issue-shadow: 0 4px 16px rgba(16, 24, 40, 0.06);
+	--issue-transition: 0.16s ease;
+}
+
+/* ── 레이아웃 셸 ───────────────────────────────────────── */
+.issue-shell {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "맑은 고딕", sans-serif;
+	color: var(--issue-text);
+	width: 100%;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+.issue-shell > #wrapper {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: none;
+	margin-left: 0;
+	margin-right: 0;
+	padding: var(--project-body-inset, 16px 20px 20px);
+	background: var(--issue-bg);
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius);
+	box-shadow: var(--issue-shadow-sm);
+}
+
+/* ── 섹션 간격 (목록·상세 공통) ─────────────────────────── */
+.issue-section + .issue-section {
+	padding-top: 32px;
+	border-top: 1px solid var(--issue-border);
+}
+
+.issue-section--bulk:not(:has(.issue-bulk-bar.is-visible)) {
+	display: none;
+}
+
+.issue-section--bulk:has(.issue-bulk-bar.is-visible) {
+	padding-top: 24px;
+	border-top: 1px solid var(--issue-border);
+}
+
+.issue-shell input:not([type="checkbox"]):not([type="range"]):focus,
+.issue-shell select:focus,
+.issue-shell textarea:focus {
+	outline: none;
+}
+
+/* ── 상단 바 · 섹션 ─────────────────────────────────────── */
+.issue-page-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	padding-bottom: 20px;
+	margin-bottom: 28px;
+	border-bottom: 1px solid var(--issue-border);
+}
+
+.issue-page-head__actions {
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+.issue-page-back {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--issue-label);
+	text-decoration: none;
+	white-space: nowrap;
+	flex-shrink: 0;
+	transition: color var(--issue-transition);
+}
+
+.issue-page-back:hover {
+	color: var(--issue-link);
+	text-decoration: none;
+}
+
+.issue-page-head__title {
+	flex: 1;
+	min-width: 0;
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	line-height: 1.35;
+	color: var(--issue-heading);
+}
+
+.issue-page-desc {
+	margin: -10px 0 22px;
+	font-size: 13px;
+	color: var(--issue-label);
+	line-height: 1.55;
+}
+
+.issue-page-section {
+	margin-bottom: 28px;
+	padding-bottom: 28px;
+	border-bottom: 1px solid var(--issue-border);
+}
+
+.issue-page-section:last-child {
+	margin-bottom: 0;
+	padding-bottom: 0;
+	border-bottom: none;
+}
+
+.issue-form-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 16px 20px;
+}
+
+.issue-form-row + .issue-form-row {
+	margin-top: 16px;
+}
+
+/* 등록/수정 폼 — 세로 라벨, 외곽 박스 없음 */
+.issue-form-row .search-item {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 6px;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+	min-height: auto;
+}
+
+.issue-form-row .search-item > label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+	white-space: nowrap;
+}
+
+.search-item--grow {
+	flex: 1 1 240px;
+	min-width: 200px;
+}
+
+.search-item--wide {
+	flex: 1 1 320px;
+	min-width: 280px;
+}
+
+/* 등록/수정 폼 — 행별 그리드 배치 */
+.issue-form-row--assign {
+	display: grid;
+	grid-template-columns: minmax(200px, 1.4fr) minmax(148px, 1fr) minmax(168px, 1.15fr);
+	gap: 16px 24px;
+	align-items: start;
+}
+
+.issue-form-row--schedule {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(220px, 1fr));
+	gap: 16px 24px;
+	align-items: start;
+}
+
+.issue-form-row--schedule .search-item {
+	width: 100%;
+	min-width: 0;
+}
+
+.issue-form-row--schedule .search-item--date input[type="date"],
+.issue-form-row--schedule .search-item--ref select {
+	width: 100%;
+	min-width: 0;
+}
+
+.search-item--ref {
+	min-width: 0;
+}
+
+.search-item--category,
+.search-item--priority {
+	min-width: 0;
+}
+
+.search-item--compact {
+	min-width: 0;
+	max-width: 360px;
+}
+
+.search-item--compact .field-wrap select {
+	font-size: 13px;
+}
+
+.issue-form-row .search-item select.form-select,
+.issue-form-row .search-item select {
+	padding-right: 2.25rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.search-item--category select {
+	min-width: 148px;
+}
+
+.search-item--priority select {
+	min-width: 168px;
+}
+
+@media (max-width: 1100px) {
+	.issue-form-row--schedule {
+		grid-template-columns: repeat(2, minmax(280px, 1fr));
+		gap: 20px 28px;
+	}
+}
+
+@media (max-width: 768px) {
+	.issue-form-row--assign {
+		grid-template-columns: 1fr;
+	}
+
+	.issue-form-row--schedule {
+		grid-template-columns: 1fr;
+	}
+
+	.search-item--compact {
+		max-width: none;
+	}
+}
+
+.search-item .field-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: 100%;
+	min-width: 0;
+}
+
+.search-item input[type="text"],
+.search-item input[type="date"],
+.search-item input[type="datetime-local"],
+.search-item select,
+.search-item textarea {
+	width: 100%;
+	min-width: 0;
+	height: 34px;
+	padding: 0 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	background-color: var(--issue-bg);
+	color: var(--issue-heading);
+	box-sizing: border-box;
+	transition: border-color var(--issue-transition), box-shadow var(--issue-transition);
+}
+
+.search-item textarea {
+	height: auto;
+	min-height: 120px;
+	padding: 8px;
+	resize: vertical;
+	font-family: inherit;
+	line-height: 1.45;
+}
+
+.search-item select:disabled {
+	background: var(--issue-bg-muted);
+	color: #6c757d;
+	cursor: not-allowed;
+}
+
+.search-item--range {
+	flex: 1 1 360px;
+	min-width: 280px;
+}
+
+/* 등록/수정 — 상태 + 진척율 세로 묶음 */
+.issue-form-row--status-progress {
+	flex-direction: column;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	gap: 18px;
+	width: 100%;
+	padding: 18px 22px;
+	border-radius: var(--issue-radius-sm);
+	box-sizing: border-box;
+}
+
+.issue-form-row--status-progress .search-item--status,
+.issue-form-row--status-progress .search-item--progress {
+	flex: none;
+	width: 100%;
+	min-width: 0;
+	max-width: none;
+}
+
+.issue-form-row--status-progress .progress-wrap {
+	width: 100%;
+	max-width: none;
+}
+
+.issue-form-row--status-progress .progress-wrap input[type="range"] {
+	min-width: 0;
+}
+
+.form-hint {
+	font-size: 12px;
+	color: #6c757d;
+	margin: 4px 0 0;
+}
+
+.req {
+	color: #c62828;
+	font-weight: 700;
+	margin-left: 2px;
+}
+
+.err-msg {
+	font-size: 12px;
+	color: #c62828;
+	margin-top: 4px;
+	display: none;
+}
+
+.err-msg.is-visible {
+	display: block;
+}
+
+.issue-shell .field-wrap.is-invalid input,
+.issue-shell .field-wrap.is-invalid select,
+.issue-shell .field-wrap.is-invalid textarea {
+	border-color: #c62828;
+}
+
+.attach-section {
+	flex: 1 1 100%;
+	width: 100%;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	padding: 16px 18px;
+	background: var(--issue-bg-subtle);
+	box-sizing: border-box;
+}
+
+.attach-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.attach-head span {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--issue-text);
+}
+
+.attachment-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.attach-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	flex-wrap: wrap;
+	padding: 10px 12px;
+	border: 1px solid var(--issue-border);
+	border-radius: 4px;
+	background: #fff;
+}
+
+.attach-file-name {
+	flex: 1;
+	min-width: 0;
+	font-size: 13px;
+	color: var(--issue-text);
+	overflow-wrap: anywhere;
+}
+
+.attach-file-meta {
+	font-size: 12px;
+	color: #6c757d;
+}
+
+.attach-hidden-input {
+	display: none;
+}
+
+.progress-wrap {
+	--thumb-size: 18px;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-rows: auto auto;
+	align-items: center;
+	column-gap: 14px;
+	row-gap: 6px;
+	width: 100%;
+}
+
+.progress-wrap input[type="range"] {
+	grid-column: 1;
+	grid-row: 1;
+	width: 100%;
+	min-width: 0;
+	height: 6px;
+	border-radius: 3px;
+	accent-color: var(--issue-accent);
+	-webkit-appearance: none;
+	appearance: none;
+	background: transparent;
+}
+
+.progress-wrap input[type="range"]::-webkit-slider-runnable-track {
+	height: 6px;
+	border-radius: 3px;
+	background: linear-gradient(to right, var(--issue-accent) 0%, var(--issue-accent) var(--pct, 0%), #e4e6ef var(--pct, 0%), #e4e6ef 100%);
+}
+
+.progress-wrap input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: var(--thumb-size);
+	height: var(--thumb-size);
+	margin-top: -6px;
+	border-radius: 50%;
+	background: #fff;
+	border: 2px solid var(--issue-accent);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+}
+
+.progress-wrap input[type="range"]::-moz-range-track {
+	height: 6px;
+	border-radius: 3px;
+	background: #e4e6ef;
+}
+
+.progress-wrap input[type="range"]::-moz-range-progress {
+	height: 6px;
+	border-radius: 3px;
+	background: var(--issue-accent);
+}
+
+.progress-wrap input[type="range"]::-moz-range-thumb {
+	width: var(--thumb-size);
+	height: var(--thumb-size);
+	border-radius: 50%;
+	background: #fff;
+	border: 2px solid var(--issue-accent);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+}
+
+.progress-wrap input[type="range"]:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.progress-wrap .progress-value-pill {
+	grid-column: 2;
+	grid-row: 1;
+	flex-shrink: 0;
+	min-width: 52px;
+	padding: 6px 12px;
+	text-align: center;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--issue-btn-primary-text);
+	background: var(--issue-btn-primary-bg);
+	border: 1px solid var(--issue-btn-primary-border);
+	border-radius: var(--issue-radius-sm);
+}
+
+.progress-ticks {
+	grid-column: 1;
+	grid-row: 2;
+	position: relative;
+	height: 1.15em;
+	font-size: 11px;
+	color: #6c757d;
+	user-select: none;
+}
+
+.progress-ticks span {
+	position: absolute;
+	top: 0;
+	transform: translateX(-50%);
+	white-space: nowrap;
+}
+
+.progress-ticks span:nth-child(1) { left: calc(var(--thumb-size) / 2); }
+.progress-ticks span:nth-child(2) { left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.2); }
+.progress-ticks span:nth-child(3) { left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.4); }
+.progress-ticks span:nth-child(4) { left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.6); }
+.progress-ticks span:nth-child(5) { left: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * 0.8); }
+.progress-ticks span:nth-child(6) { left: calc(100% - var(--thumb-size) / 2); }
+
+/* ── 상세: 메타 필드 (목록 검색줄처럼 가로 배치) ─────────── */
+.issue-meta-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 16px 20px;
+	margin-bottom: 28px;
+	padding: 20px 24px;
+	background: var(--issue-bg-subtle);
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+}
+
+.issue-meta-grid .meta-item--full {
+	grid-column: 1 / -1;
+}
+
+.meta-item label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0;
+	color: var(--issue-label);
+	margin-bottom: 6px;
+}
+
+.meta-item input,
+.meta-item textarea {
+	width: 100%;
+	padding: 9px 12px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	background: var(--issue-bg-subtle);
+	color: var(--issue-heading);
+	box-sizing: border-box;
+}
+
+.meta-item textarea {
+	min-height: 72px;
+	resize: vertical;
+	font-family: inherit;
+}
+
+.meta-item .parent-issue-link {
+	display: block;
+	width: 100%;
+	padding: 8px 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: 4px;
+	font-size: 13px;
+	background: var(--issue-bg-muted);
+	color: var(--issue-link);
+	text-decoration: none;
+	box-sizing: border-box;
+}
+
+.meta-item .parent-issue-link:hover {
+	text-decoration: underline;
+}
+
+.meta-item .meta-empty {
+	display: block;
+	padding: 8px 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: 4px;
+	font-size: 13px;
+	background: var(--issue-bg-muted);
+	color: var(--issue-text);
+}
+
+.section-block {
+	margin-bottom: 28px;
+	padding-bottom: 28px;
+	border-bottom: 1px solid var(--issue-border);
+}
+
+.section-block:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.section-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 10px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--issue-heading);
+}
+
+.badge-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 7px;
+	font-size: 11px;
+	font-weight: 600;
+	background: var(--issue-bg);
+	color: var(--issue-label);
+	border: 1px solid var(--issue-border);
+	border-radius: 999px;
+}
+
+.attach-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 20px;
+	align-items: center;
+}
+
+.attach-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: var(--issue-text);
+}
+
+.attach-item a {
+	color: var(--issue-link);
+	text-decoration: none;
+	font-size: 16px;
+	line-height: 1;
+}
+
+.attach-item a:hover {
+	text-decoration: underline;
+}
+
+.attach-item-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.attach-delete-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: #6c757d;
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.attach-delete-btn:hover {
+	background: #fee;
+	color: #c33;
+}
+
+.attach-list-scroll-wrap.is-collapsed {
+	max-height: 11rem;
+	overflow: hidden;
+}
+
+.attach-list-scroll-wrap.is-expanded {
+	max-height: none;
+	overflow: visible;
+}
+
+.comment-thread-scroll {
+	max-height: 280px;
+	overflow-y: auto;
+}
+
+.attach-list.attach-list--grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px 14px;
+	align-items: start;
+}
+
+.attach-list.attach-list--grid .attach-item {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.attach-list-toggle {
+	display: inline-flex;
+	align-items: center;
+	margin-top: 8px;
+	padding: 0;
+	border: none;
+	background: none;
+	color: var(--issue-link);
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.attach-list-toggle:hover {
+	text-decoration: underline;
+}
+
+table.data-table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	font-size: 13px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	overflow: hidden;
+}
+
+table.data-table thead th {
+	background: var(--issue-bg-muted);
+	border-bottom: 1px solid var(--issue-border);
+	padding: 11px 14px;
+	text-align: left;
+	font-weight: 600;
+	font-size: 12px;
+	color: var(--issue-label);
+}
+
+table.data-table tbody td {
+	border-bottom: 1px solid var(--issue-border);
+	padding: 11px 14px;
+	background: var(--issue-bg);
+	color: var(--issue-text);
+}
+
+table.data-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.tab-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 20px;
+	padding: 4px;
+	background: var(--issue-bg-muted);
+	border-radius: var(--issue-radius-sm);
+	width: fit-content;
+	max-width: 100%;
+}
+
+.tab-btn {
+	padding: 8px 16px;
+	border: 1px solid transparent;
+	border-radius: var(--issue-radius-xs);
+	background: transparent;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--issue-label);
+	cursor: pointer;
+	transition: background var(--issue-transition), color var(--issue-transition), border-color var(--issue-transition);
+}
+
+.tab-btn:hover {
+	background: var(--app-surface, #fff);
+	color: var(--issue-heading);
+	border-color: rgba(var(--issue-primary-rgb, 47, 164, 231), 0.18);
+}
+
+.tab-btn.is-active {
+	background: var(--issue-primary-muted);
+	color: var(--issue-primary);
+	font-weight: 600;
+	box-shadow: none;
+	border: 1px solid rgba(var(--issue-primary-rgb, 47, 164, 231), 0.35);
+}
+
+.tab-panel-wrap {
+	background: var(--issue-bg);
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	padding: 20px 24px;
+	min-height: 220px;
+	margin-top: 4px;
+}
+
+.tab-panel {
+	display: none;
+}
+
+.tab-panel.is-visible {
+	display: block;
+}
+
+.comment-thread .comment {
+	background: var(--issue-bg-subtle);
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	padding: 12px 14px;
+	margin-bottom: 10px;
+	font-size: 13px;
+}
+
+.comment-thread .comment .meta {
+	font-size: 12px;
+	color: #6c757d;
+	margin-bottom: 6px;
+}
+
+.comment-thread .comment .meta strong {
+	color: var(--issue-heading);
+	margin-right: 8px;
+}
+
+.comment-thread .comment .meta .comment-num {
+	font-weight: 700;
+	color: var(--issue-link);
+	margin-right: 10px;
+}
+
+.comment-thread .comment.is-reply {
+	border-left: 3px solid var(--issue-border);
+	padding-left: 12px;
+}
+
+.comment-form {
+	display: flex;
+	gap: 10px;
+	margin-top: 14px;
+	align-items: stretch;
+}
+
+.comment-form textarea {
+	flex: 1;
+	min-height: 80px;
+	padding: 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: 4px;
+	font-size: 13px;
+	font-family: inherit;
+	resize: vertical;
+}
+
+.comment-form .btn-issue-soft {
+	align-self: flex-end;
+}
+
+.comment-actions {
+	margin-top: 8px;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.comment-form-wrap {
+	margin-top: 14px;
+}
+
+.comment-form-wrap .comment-form {
+	margin-top: 0;
+}
+
+.reply-hint-row {
+	display: none;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 12px;
+	color: var(--issue-text);
+	margin-bottom: 8px;
+	padding: 8px 12px;
+	background: var(--issue-bg-muted);
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+}
+
+.reply-hint-row.is-active,
+.reply-hint-row:not([hidden]) {
+	display: flex;
+}
+
+.reply-hint-row[hidden] {
+	display: none !important;
+}
+
+.reply-hint-row__text {
+	flex: 1;
+	min-width: 0;
+	color: var(--issue-heading);
+	font-weight: 500;
+}
+
+.comment-thread .comment.is-reply-target {
+	border-color: rgba(var(--issue-primary-rgb, 47, 164, 231), 0.45);
+	background: var(--issue-primary-muted);
+	box-shadow: inset 0 0 0 1px rgba(var(--issue-primary-rgb, 47, 164, 231), 0.12);
+}
+
+.inner-table-title {
+	font-size: 13px;
+	font-weight: 600;
+	margin-bottom: 8px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--issue-heading);
+}
+
+.history-detail-link {
+	color: var(--issue-link);
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+@media (max-width: 1100px) {
+	.issue-meta-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 640px) {
+	.issue-meta-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.attach-list.attach-list--grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ── 공통 버튼 (목록 검색·하단 액션·등록·모달 동일) ─────── */
+.issue-btn,
+.search-btn,
+.search-cancel-btn,
+.issue-register-btn,
+.issue-pivot-btn,
+.issue-bulk-btn,
+.issue-quick-btn,
+.issue-shell .btn-ghost {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	height: 36px;
+	padding: 0 16px;
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	font-weight: 500;
+	font-family: inherit;
+	line-height: 1;
+	white-space: nowrap;
+	text-decoration: none;
+	cursor: pointer;
+	border: 1px solid var(--issue-btn-border);
+	background-color: var(--issue-btn-bg);
+	color: var(--issue-btn-text);
+	flex-shrink: 0;
+	transition: background-color var(--issue-transition), border-color var(--issue-transition),
+		color var(--issue-transition);
+}
+
+/* 주요 액션 — 연한 파란 배경 */
+.issue-btn--primary,
+.search-btn,
+.issue-register-btn,
+.issue-bulk-btn-primary {
+	background-color: var(--issue-btn-primary-bg);
+	color: var(--issue-btn-primary-text);
+	border-color: var(--issue-btn-primary-border);
+}
+
+.issue-btn--primary:hover:not(:disabled),
+.search-btn:hover,
+.issue-register-btn:hover,
+.issue-bulk-btn-primary:hover:not(:disabled) {
+	background-color: var(--issue-btn-primary-bg-hover);
+	border-color: #c5d9ff;
+	color: var(--issue-btn-primary-text);
+	text-decoration: none;
+}
+
+/* 보조 액션 — 흰/연회색 배경 */
+.issue-btn--secondary,
+.search-cancel-btn,
+.issue-pivot-btn,
+.issue-bulk-btn-ghost {
+	background-color: var(--issue-btn-bg);
+	color: var(--issue-btn-text);
+	border-color: var(--issue-btn-border);
+}
+
+.issue-btn--secondary:hover:not(:disabled),
+.search-cancel-btn:hover,
+.issue-pivot-btn:hover,
+.issue-bulk-btn-ghost:hover {
+	background-color: var(--issue-btn-bg-hover);
+	border-color: #dee2e6;
+	color: var(--issue-heading);
+	text-decoration: none;
+}
+
+.issue-btn--primary:disabled,
+.issue-bulk-btn-primary:disabled,
+.issue-btn--secondary:disabled {
+	background-color: var(--issue-btn-disabled-bg);
+	border-color: var(--issue-btn-border);
+	color: var(--issue-btn-disabled-text);
+	cursor: not-allowed;
+}
+
+.issue-btn--sm,
+.issue-quick-btn,
+.issue-shell .btn-ghost {
+	height: 32px;
+	padding: 0 14px;
+	font-size: 12px;
+	background-color: var(--issue-btn-bg);
+	color: var(--issue-btn-text);
+	border-color: var(--issue-btn-border);
+}
+
+.issue-btn--sm:hover:not(:disabled),
+.issue-quick-btn:hover,
+.issue-shell .btn-ghost:hover {
+	background-color: var(--issue-btn-bg-hover);
+	border-color: #dee2e6;
+	color: var(--issue-heading);
+}
+
+/* 버튼 역할 색상 → theme-colors.css */
+
+#grid .btn.issue-quick-btn.btn-success {
+	height: auto;
+	padding: 0.25rem 0.5rem;
+	font-size: 0.875rem;
+	line-height: 1.5;
+	border-radius: 0.375rem;
+}
+
+/* ── 목록 페이지 ─────────────────────────────────────────── */
+.issue-list__header {
+	margin-bottom: 24px;
+}
+
+.issue-list__header .issue-page-back {
+	display: inline-block;
+	margin-bottom: 8px;
+}
+
+.issue-list__title {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--issue-heading);
+	line-height: 1.4;
+}
+
+/* 검색 폼 — 한 줄 컴팩트, 전 항목 오른쪽 정렬 */
+.issue-filter-form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	width: 100%;
+	gap: 14px;
+}
+
+.issue-field {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+	min-width: 0;
+}
+
+.issue-field label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+	line-height: 1;
+	white-space: nowrap;
+}
+
+.issue-field select,
+.issue-field input[type="text"] {
+	width: auto;
+	height: 34px;
+	padding: 0 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	background-color: var(--issue-bg);
+	color: var(--issue-heading);
+	box-sizing: border-box;
+	transition: border-color var(--issue-transition), box-shadow var(--issue-transition);
+}
+
+.issue-field select {
+	min-width: 90px;
+}
+
+.issue-field select:disabled {
+	background-color: var(--issue-bg-muted);
+	color: var(--issue-label);
+	cursor: not-allowed;
+	opacity: 1;
+}
+
+.issue-field input[type="text"] {
+	min-width: 160px;
+}
+
+.issue-field--subject {
+	flex-shrink: 1;
+}
+
+.issue-field--my-issue {
+	flex-shrink: 0;
+}
+
+.issue-filter-check {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	min-height: 34px;
+	padding: 0 2px;
+	font-size: 13px;
+	color: var(--issue-text);
+	cursor: pointer;
+	white-space: nowrap;
+	flex-shrink: 0;
+	user-select: none;
+	border-radius: var(--issue-radius-sm);
+	transition: background-color var(--issue-transition), color var(--issue-transition);
+}
+
+.issue-filter-check__text {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+	line-height: 1;
+}
+
+.issue-filter-check input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	min-width: 16px;
+	min-height: 16px;
+	margin: 0;
+	flex-shrink: 0;
+	accent-color: var(--issue-primary);
+	cursor: pointer;
+}
+
+.issue-filter-check:has(input:checked) {
+	background-color: var(--issue-bg-muted);
+}
+
+.issue-filter-check:has(input:checked) .issue-filter-check__text {
+	color: var(--issue-heading);
+}
+
+.issue-filter-check:has(input:focus-visible) {
+	outline: 2px solid var(--issue-primary);
+	outline-offset: 2px;
+}
+
+.issue-filter-form.is-my-issue-active .issue-field:has(#memId) label {
+	color: var(--issue-label);
+	opacity: 0.85;
+}
+
+.issue-filter-buttons {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-shrink: 0;
+}
+
+@media (max-width: 992px) {
+	.issue-filter-form {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		padding-bottom: 2px;
+		justify-content: flex-end;
+	}
+}
+
+.issue-section.issue-section--grid {
+	padding-top: 20px;
+}
+
+.issue-section.issue-section--footer {
+	padding-top: 20px;
+}
+
+.issue-list-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.issue-list-footer__pagination {
+	flex: 1 1 200px;
+	min-width: 0;
+}
+
+.issue-list-footer__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.search-item {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 6px;
+	flex-shrink: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+	min-height: auto;
+}
+
+.search-item label {
+	font-weight: 600;
+	font-size: 12px;
+	color: var(--issue-label);
+	white-space: nowrap;
+}
+
+.search-item select,
+.search-item input[type="text"] {
+	height: 36px;
+	padding: 0 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	background-color: var(--issue-bg);
+	color: var(--issue-heading);
+	min-width: 0;
+	width: 100%;
+	transition: border-color var(--issue-transition), box-shadow var(--issue-transition);
+}
+
+.search-item input[type="text"] {
+	min-width: 0;
+}
+
+.checkbox-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: var(--issue-text);
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+/* ── TOAST UI Grid ─────────────────────────────────────── */
+#issue-grid,
+#grid,
+#childIssueList {
+	width: 100%;
+	min-height: 100px;
+}
+
+.issue-shell .tui-grid-container {
+	border-radius: var(--issue-radius-sm);
+	overflow: hidden;
+}
+
+/* 목록 그리드에서 불필요한 세로 스크롤바가 보이는 현상 방지 */
+#grid .tui-grid-body-area,
+#grid .tui-grid-rside-area .tui-grid-body-area {
+	overflow-y: hidden !important;
+}
+
+.issue-shell .tui-grid-cell-content a {
+	color: var(--issue-link);
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.issue-shell .tui-grid-cell-content a:hover {
+	text-decoration: underline;
+}
+
+.issue-register-actions {
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid var(--issue-border);
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+}
+
+.issue-date-actions {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 4px;
+}
+
+.issue-date-btn {
+	height: 32px;
+	padding: 0 12px;
+	border: 1px solid var(--issue-btn-border);
+	border-radius: var(--issue-radius-sm);
+	background-color: var(--issue-btn-bg);
+	color: var(--issue-btn-text);
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background-color var(--issue-transition), border-color var(--issue-transition);
+}
+
+.issue-date-btn:hover {
+	background-color: var(--issue-btn-bg-hover);
+	border-color: #dee2e6;
+	color: var(--issue-heading);
+}
+
+.issue-date-btn:disabled {
+	background-color: var(--issue-btn-disabled-bg);
+	border-color: var(--issue-btn-border);
+	color: var(--issue-btn-disabled-text);
+	cursor: not-allowed;
+	opacity: 1;
+}
+
+.issue-date-btn:disabled:hover {
+	background-color: var(--issue-btn-disabled-bg);
+	border-color: var(--issue-btn-border);
+	color: var(--issue-btn-disabled-text);
+}
+
+/* ── 일괄 선택 · 빠른수정 ────────────────────────────────── */
+.issue-bulk-bar {
+	display: none;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin: 0;
+	padding: 14px 18px;
+	background: var(--issue-bg-muted);
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	color: var(--issue-text);
+}
+
+.issue-bulk-bar.is-visible {
+	display: flex;
+}
+
+.issue-bulk-bar .bulk-count {
+	font-weight: 700;
+	color: var(--issue-heading);
+}
+
+.issue-row-check {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	accent-color: var(--issue-link);
+}
+
+/* ── 빠른수정 모달 ───────────────────────────────────────── */
+.issue-quick-modal-backdrop {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 1200;
+	background: rgba(15, 23, 42, 0.35);
+	backdrop-filter: blur(2px);
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "맑은 고딕", sans-serif;
+	color: var(--issue-text);
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+.issue-quick-modal-backdrop.is-open {
+	display: flex;
+}
+
+.issue-quick-modal {
+	width: 100%;
+	max-width: min(28rem, 94vw);
+	background: var(--issue-bg);
+	border-radius: var(--issue-radius);
+	border: 1px solid var(--issue-border);
+	box-shadow: var(--issue-shadow);
+	overflow: hidden;
+}
+
+.issue-quick-modal-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 18px 22px;
+	border-bottom: 1px solid var(--issue-border);
+	background: var(--issue-bg);
+}
+
+.issue-quick-modal-head h2 {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--issue-heading);
+}
+
+.issue-quick-modal-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: none;
+	background: transparent;
+	font-size: 22px;
+	line-height: 1;
+	color: var(--app-muted-fg, #6c757d);
+	cursor: pointer;
+	padding: 0;
+	border-radius: var(--issue-radius-xs);
+	flex-shrink: 0;
+	transition: color var(--issue-transition), background-color var(--issue-transition);
+}
+
+.issue-quick-modal-close:hover {
+	color: var(--issue-heading);
+	background-color: var(--issue-bg-muted);
+}
+
+.issue-quick-modal-close:focus-visible {
+	outline: 2px solid var(--issue-primary);
+	outline-offset: 2px;
+}
+
+.issue-quick-modal-body {
+	padding: 18px 20px 8px;
+}
+
+.issue-quick-field {
+	margin-bottom: 14px;
+}
+
+.issue-quick-field label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+	margin-bottom: 6px;
+}
+
+.issue-quick-modal select {
+	box-sizing: border-box;
+	font-family: inherit;
+	transition: border-color var(--issue-transition), box-shadow var(--issue-transition);
+}
+
+.issue-quick-modal select:focus {
+	outline: none;
+	border-color: var(--issue-border-focus);
+	box-shadow: 0 0 0 3px var(--app-focus-ring, rgba(var(--issue-primary-rgb, 47, 164, 231), 0.12));
+}
+
+.issue-quick-field select {
+	width: 100%;
+	height: 36px;
+	padding: 0 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	background-color: var(--issue-bg);
+	color: var(--issue-heading);
+}
+
+.issue-quick-hint {
+	font-size: 12px;
+	color: var(--issue-text);
+	line-height: 1.5;
+	margin: 0 0 12px;
+	padding: 10px 12px;
+	background: var(--issue-bg-muted);
+	border-radius: 4px;
+	border: 1px solid var(--issue-border);
+}
+
+.issue-quick-hint.is-warn {
+	background: var(--app-warn-bg, #fff8e6);
+	border-color: var(--app-warn-border, #f0e0b0);
+	color: var(--app-warn-text, #7a5c00);
+}
+
+.issue-quick-target-block {
+	margin-bottom: 16px;
+	padding: 12px 14px;
+	background: var(--issue-bg-muted);
+	border: 1px solid var(--issue-border);
+	border-radius: 6px;
+}
+
+.issue-quick-target-head {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--issue-label);
+}
+
+.issue-quick-target-count {
+	color: var(--issue-heading);
+	font-weight: 700;
+}
+
+.issue-quick-target-list,
+.issue-quick-date-detail-list {
+	scrollbar-width: thin;
+	scrollbar-color: var(--issue-border) transparent;
+}
+
+.issue-quick-target-list {
+	margin: 0;
+	padding: 0 0 0 18px;
+	max-height: 140px;
+	overflow-y: auto;
+	font-size: 13px;
+	color: var(--issue-text);
+	line-height: 1.55;
+}
+
+.issue-quick-target-list li {
+	margin-bottom: 4px;
+	word-break: break-all;
+}
+
+.issue-quick-target-list li:last-child {
+	margin-bottom: 0;
+}
+
+.issue-quick-date-panel {
+	margin-bottom: 14px;
+	padding: 12px 14px;
+	background: var(--app-warn-bg, #fff8e6);
+	border: 1px solid var(--app-warn-border, #f0e0b0);
+	border-radius: var(--issue-radius-sm);
+	font-size: 12px;
+	color: var(--issue-text);
+}
+
+.issue-quick-date-summary {
+	font-weight: 700;
+	color: var(--app-warn-text, #7a5c00);
+	margin-bottom: 10px;
+	line-height: 1.45;
+}
+
+.issue-quick-date-section {
+	margin-top: 8px;
+}
+
+.issue-quick-date-section-title {
+	font-weight: 600;
+	font-size: 12px;
+	color: var(--issue-text);
+	margin-bottom: 4px;
+}
+
+.issue-quick-date-section-title.is-ok {
+	color: var(--app-success, #2e7d32);
+}
+
+.issue-quick-date-section-title.is-skip {
+	color: var(--app-error, #c62828);
+}
+
+.issue-quick-date-detail-list {
+	margin: 0;
+	padding: 0 0 0 16px;
+	max-height: 100px;
+	overflow-y: auto;
+	line-height: 1.5;
+}
+
+.issue-quick-date-detail-list li {
+	margin-bottom: 6px;
+	word-break: break-all;
+}
+
+.issue-quick-date-detail-list li.issue-quick-date-excluded-item {
+	list-style: none;
+	margin-left: -16px;
+	padding-left: 0;
+}
+
+.issue-quick-date-issue {
+	display: block;
+	font-size: 13px;
+	color: var(--issue-text);
+}
+
+.issue-quick-date-reason {
+	display: block;
+	font-size: 11px;
+	color: var(--app-error, #c62828);
+	margin-top: 2px;
+}
+
+.issue-quick-date-empty {
+	list-style: none;
+	margin-left: -16px;
+	color: var(--app-muted-fg, #6c757d);
+	font-size: 12px;
+}
+
+.issue-quick-modal-foot {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	padding: 12px 20px 18px;
+	border-top: 1px solid var(--issue-border);
+	background: var(--issue-bg-subtle);
+}
+
+.issue-quick-modal-foot .issue-bulk-btn {
+	min-width: 72px;
+}
+
+.issue-quick-modal-foot .issue-btn--primary,
+.issue-quick-modal-foot .issue-bulk-btn-primary {
+	background-color: var(--issue-primary);
+	border-color: var(--issue-primary);
+	color: #fff;
+}
+
+.issue-quick-modal-foot .issue-btn--primary:hover:not(:disabled),
+.issue-quick-modal-foot .issue-bulk-btn-primary:hover:not(:disabled) {
+	background-color: var(--issue-primary-hover);
+	border-color: var(--issue-primary-hover);
+	color: #fff;
+}
+
+.issue-quick-modal-foot .issue-btn--secondary,
+.issue-quick-modal-foot .issue-bulk-btn-ghost,
+.issue-quick-modal-foot #issueQuickCancelBtn {
+	background-color: var(--app-danger);
+	border-color: var(--app-danger);
+	color: #fff;
+}
+
+.issue-quick-modal-foot .issue-btn--secondary:hover:not(:disabled),
+.issue-quick-modal-foot .issue-bulk-btn-ghost:hover,
+.issue-quick-modal-foot #issueQuickCancelBtn:hover {
+	background-color: var(--app-danger-hover);
+	border-color: var(--app-danger-border-hover);
+	color: #fff;
+}
+
+.issue-quick-modal-foot .issue-btn--primary:disabled,
+.issue-quick-modal-foot .issue-bulk-btn-primary:disabled {
+	background-color: var(--issue-btn-disabled-bg);
+	border-color: var(--issue-btn-border);
+	color: var(--issue-btn-disabled-text);
+	cursor: not-allowed;
+}
+
+.issue-quick-modal--wide {
+	max-width: min(42rem, 94vw);
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.issue-quick-modal--wide-lg {
+	max-width: min(44rem, 94vw);
+	max-height: 82vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.issue-quick-modal--menus {
+	max-width: min(34rem, 94vw);
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.issue-quick-modal--menus .issue-quick-modal-body {
+	overflow: auto;
+	flex: 1 1 auto;
+	min-height: 0;
+	max-height: 56vh;
+}
+
+.issue-quick-modal-body--pick {
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.issue-quick-confirm-message {
+	margin: 0;
+	font-size: 13px;
+	color: var(--issue-text);
+	line-height: 1.55;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.issue-quick-modal-search {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 14px 18px;
+	border-bottom: 1px solid var(--issue-border);
+	background: var(--issue-bg-muted);
+	flex-shrink: 0;
+}
+
+.issue-quick-modal-search select,
+.issue-quick-modal-search input[type="text"],
+.issue-quick-modal-search input[type="date"] {
+	height: 36px;
+	padding: 0 10px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	font-size: 13px;
+	font-family: inherit;
+	background-color: var(--issue-bg);
+	color: var(--issue-heading);
+	box-sizing: border-box;
+	transition: border-color var(--issue-transition), box-shadow var(--issue-transition);
+}
+
+.issue-quick-modal-search select:focus,
+.issue-quick-modal-search input:focus {
+	outline: none;
+	border-color: var(--issue-border-focus);
+	box-shadow: 0 0 0 3px var(--app-focus-ring, rgba(var(--issue-primary-rgb, 47, 164, 231), 0.12));
+}
+
+.issue-quick-modal-grid-host {
+	flex: 1 1 auto;
+	min-height: 12rem;
+	max-height: 50vh;
+	overflow: auto;
+	margin: 8px 18px 12px;
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	background: var(--issue-bg);
+}
+
+/* ── 통계(피벗) ─────────────────────────────────────────── */
+.issue-pivot-page {
+	width: 100%;
+}
+
+.issue-pivot-page__title {
+	margin: 0 0 1.25rem;
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: var(--issue-heading);
+}
+
+.issue-pivot-page__desc {
+	margin: -0.75rem 0 1.5rem;
+	font-size: 0.875rem;
+	color: var(--issue-text);
+}
+
+.issue-pivot-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.issue-pivot-grid--single {
+	grid-template-columns: 1fr;
+}
+
+.issue-pivot-panel {
+	border: 1px solid var(--issue-border);
+	border-radius: var(--issue-radius-sm);
+	background: var(--issue-bg);
+	overflow: hidden;
+	box-shadow: var(--issue-shadow-sm);
+}
+
+.issue-pivot-panel__title {
+	margin: 0;
+	padding: 12px 16px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--issue-heading);
+	background: var(--issue-bg-subtle);
+	border-bottom: 1px solid var(--issue-border);
+}
+
+.issue-pivot-table-wrap {
+	overflow-x: auto;
+}
+
+.issue-pivot-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.875rem;
+}
+
+.issue-pivot-table th,
+.issue-pivot-table td {
+	border: 1px solid var(--issue-border);
+	padding: 0.5rem 0.75rem;
+	text-align: center;
+	white-space: nowrap;
+	color: var(--issue-text);
+}
+
+.issue-pivot-table thead th {
+	background: var(--issue-bg-muted);
+	color: var(--issue-heading);
+	font-weight: 600;
+}
+
+.issue-pivot-table tbody th.pivot-row-label {
+	background: var(--issue-bg-muted);
+	text-align: left;
+	font-weight: 600;
+	color: var(--issue-heading);
+	min-width: 6rem;
+}
+
+.issue-pivot-table tbody td.pivot-val {
+	color: var(--issue-heading);
+}
+
+.issue-pivot-table tfoot th,
+.issue-pivot-table tfoot td {
+	background: var(--issue-hover);
+	font-weight: 700;
+	color: var(--issue-heading);
+}
+
+.issue-pivot-table .pivot-row-total,
+.issue-pivot-table .pivot-col-total,
+.issue-pivot-table .pivot-grand-total {
+	background: var(--issue-bg-muted);
+}
+
+.issue-pivot-empty {
+	padding: 1.5rem;
+	text-align: center;
+	color: #6c757d;
+	font-size: 0.875rem;
+}
+
+@media (max-width: 900px) {
+	.issue-pivot-grid {
+		grid-template-columns: 1fr;
+	}
+}

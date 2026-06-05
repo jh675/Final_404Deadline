@@ -19,8 +19,19 @@
 		<result column="type_cd" property="typeCd" />
 	</resultMap>
 	<select id="selectMilestoneList" resultType="MilestoneVO">
-		select * from milestone 
-		where prj_id=#{id}
+		select id,
+		       prj_id prjId,
+		       name,
+		       start_date startDate,
+		       end_date endDate
+		  from milestone
+		 where prj_id = #{id}
+	</select>
+
+	<select id="selectMilestoneById" resultType="MilestoneVO">
+		select id, prj_id prjId, name, start_date startDate, end_date endDate
+		  from milestone
+		 where id = #{id}
 	</select>
 
 	<select id="selectMilestoneIssueList" resultMap="MilestoneIssueResultMap">
@@ -39,6 +50,21 @@
 		on m.id=i.milestone_id
 		where i.milestone_id=#{id}
 	</select>
+	<select id="selectMilestoneIssueByIssueId" resultType="MilestoneIssueVO">
+		SELECT id,
+		       milestone_id milestoneId,
+		       issue_id issueId
+		  FROM milestone_issue
+		 WHERE issue_id = #{issueId}
+		   AND ROWNUM = 1
+	</select>
+
+	<select id="countTimelineByMilestoneIssueId" resultType="long">
+		SELECT COUNT(*)
+		  FROM milestone_timeline
+		 WHERE milestone_issue_id = #{milestoneIssueId}
+	</select>
+
 	<select id="selectMilestoneNotInIssue">
 		select id,subject from issue
 		where id not in(
@@ -52,7 +78,7 @@
 			SELECT ML_SEQ.NEXTVAL FROM DUAL
 		</selectKey>
 		insert into milestone (id, prj_id, name, start_date, end_date)
-		values (${id}, #{prjId}, #{name}, #{startDate}, #{endDate})
+		values (${id}, #{prjId}, #{name}, #{startDate, jdbcType=DATE}, #{endDate, jdbcType=DATE})
 	</insert>
 	
 	<insert id="insertMilestoneIssue">
@@ -71,7 +97,7 @@
 	</insert>
 	<update id="updateMilestone">
 		update milestone
-		set name=#{name}, start_date=#{startDate}, end_date=#{endDate}
+		set name=#{name}, start_date=#{startDate, jdbcType=DATE}, end_date=#{endDate, jdbcType=DATE}
 		where id=#{id}
 	</update>
 	<delete id="deleteMilestone">
@@ -88,7 +114,21 @@
 			where milestone_id=${id}
 		)
 	</select>
-
-
+	<update id="moveIssue">
+		update milestone_issue
+		set milestone_id = #{milestoneId}
+		where id = #{id}
+	</update>
+	<delete id="deleteTimeline">
+		delete from milestone_timeline
+		where id = #{id}
+	</delete>
+	<update id="updateTimeline">
+		update milestone_timeline
+		set contents = #{contents},
+		entry_date = #{entryDate},
+		type_cd = #{typeCd}
+		where id = #{id}
+	</update>
 
 </mapper>

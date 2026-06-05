@@ -22,25 +22,21 @@ public class DocsServiceImpl implements DocsService {
 
 	@Override
 	public DocsVO selectOne(Long id) {
-		// TODO Auto-generated method stub
 		return docsMapper.selectOne(id);
 	}
 
 	@Override
 	public int delete(Long id) {
-		// TODO Auto-generated method stub
 		return docsMapper.delete(id);
 	}
 
 	@Override
-	public int update(DocsVO vo) {
-		// TODO Auto-generated method stub
-		return docsMapper.update(vo);
+	public void update(DocsVO vo) {
+	    docsMapper.update(vo);
 	}
 
 	@Override
 	public int insert(DocsVO vo) {
-		// TODO Auto-generated method stub
 		return docsMapper.insert(vo);
 	}
 

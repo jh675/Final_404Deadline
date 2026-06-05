@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/projectLayout}">
+<head>
+<meta charset="UTF-8">
+<title>통계</title>
+<th:block layout:fragment="head-content">
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+<link rel="stylesheet" th:href="@{/css/project/issue.css}" />
+</th:block>
+</head>
+<body>
+<div layout:fragment="content">
+	<div class="issue-shell">
+	<div id="wrapper">
+		<div class="issue-page-head">
+			<a th:href="@{/project/issue/list}" class="issue-page-back">← 이슈 목록</a>
+			<h1 class="issue-page-head__title">통계</h1>
+		</div>
+		<p class="issue-page-desc">프로젝트 이슈를 우선순위·유형·담당자 기준으로 집계합니다.</p>
+
+		<div class="issue-pivot-grid">
+			<div th:replace="~{project/issue/issuePivot :: pivotPanel(title='우선순위', rows=${pivotPriority}, valueCols=${priorityCols})}"></div>
+			<div th:replace="~{project/issue/issuePivot :: pivotPanel(title='유형', rows=${pivotCategory}, valueCols=${categoryCols})}"></div>
+		</div>
+
+		<div class="issue-pivot-grid issue-pivot-grid--single">
+			<div th:replace="~{project/issue/issuePivot :: pivotPanel(title='담당자', rows=${pivotStatus}, valueCols=${statusCols})}"></div>
+		</div>
+
+		<div class="issue-register-actions">
+			<a th:href="@{/project/issue/list}" class="issue-btn issue-btn--secondary search-cancel-btn">이슈 목록</a>
+		</div>
+	</div>
+	</div>
+
+	<script>
+	(function () {
+		function toNumber(v) {
+			if (v == null || v === '') return 0;
+			var n = Number(v);
+			return isNaN(n) ? 0 : n;
+		}
+
+		function computePivotTotals(table) {
+			var bodyRows = table.querySelectorAll('tbody tr');
+			var footCells = table.querySelectorAll('tfoot .pivot-col-total');
+			var grandCell = table.querySelector('tfoot .pivot-grand-total');
+			var colCount = footCells.length;
+			var colSums = new Array(colCount);
+			var j, sum, grand = 0;
+
+			for (j = 0; j < colCount; j++) colSums[j] = 0;
+
+			bodyRows.forEach(function (tr) {
+				var vals = tr.querySelectorAll('td.pivot-val');
+				sum = 0;
+				for (j = 0; j < vals.length; j++) {
+					var n = toNumber(vals[j].getAttribute('data-value') || vals[j].textContent);
+					colSums[j] += n;
+					sum += n;
+				}
+				var rowTotalCell = tr.querySelector('.pivot-row-total');
+				if (rowTotalCell) rowTotalCell.textContent = sum;
+				grand += sum;
+			});
+
+			for (j = 0; j < footCells.length; j++) {
+				footCells[j].textContent = colSums[j];
+			}
+			if (grandCell) grandCell.textContent = grand;
+		}
+
+		document.querySelectorAll('.issue-pivot-table').forEach(computePivotTotals);
+	})();
+	</script>
+</div>
+
+<th:block th:fragment="pivotPanel(title, rows, valueCols)">
+	<section class="issue-pivot-panel">
+		<h3 class="issue-pivot-panel__title" th:text="${title}">표 제목</h3>
+		<div class="issue-pivot-table-wrap" th:if="${rows != null and !rows.isEmpty()}">
+			<table class="issue-pivot-table">
+				<thead>
+					<tr>
+						<th scope="col"></th>
+						<th scope="col" th:each="col : ${valueCols}" th:text="${col}">열</th>
+						<th scope="col">총합</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="row : ${rows}">
+						<th scope="row" class="pivot-row-label" th:text="${row['label']}">-</th>
+						<td th:each="col : ${valueCols}" class="pivot-val"
+							th:text="${row[__${col}__] != null ? row[__${col}__] : 0}"
+							th:attr="data-value=${row[__${col}__] != null ? row[__${col}__] : 0}">0</td>
+						<td class="pivot-row-total">0</td>
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<th scope="row">종합</th>
+						<td th:each="col : ${valueCols}" class="pivot-col-total">0</td>
+						<td class="pivot-grand-total">0</td>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+		<p class="issue-pivot-empty" th:if="${rows == null or rows.isEmpty()}">표시할 데이터가 없습니다.</p>
+	</section>
+</th:block>
+</body>
+</html>

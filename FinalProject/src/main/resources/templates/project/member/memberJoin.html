@@ -1,0 +1,108 @@
+<!doctype html>
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/projectLayout}"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>구성원 등록</title>
+    <th:block layout:fragment="head-content">
+      <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+      <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+      <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+      <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+      <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+      <link rel="stylesheet" th:href="@{/css/project/issue.css}" />
+      <link rel="stylesheet" th:href="@{/css/project/projectAdmin.css}" />
+      <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+      <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+      <script th:src="@{/js/common/gridTheme.js}"></script>
+    </th:block>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div class="issue-shell">
+        <div id="wrapper">
+                <div class="issue-page-head">
+            <a class="issue-page-back" th:href="@{/project/member/list}">← 구성원 목록</a>
+            <h1 class="issue-page-head__title">구성원 등록</h1>
+          </div>
+
+      <section class="mem-join-section" aria-labelledby="mem-join-basic-heading">
+        <h2 class="mem-join-section__title" id="mem-join-basic-heading">기본정보</h2>
+        <div class="mem-join-section__body">
+          <div class="mem-join-search" role="search">
+            <label class="visually-hidden" for="memJoinSearchType">검색 항목</label>
+            <select id="memJoinSearchType" aria-label="검색 항목">
+              <option value="login">아이디</option>
+              <option value="userName" selected>이름</option>
+              <option value="tel">연락처</option>
+              <option value="email">이메일</option>
+            </select>
+            <label class="visually-hidden" for="memJoinSearchKeyword">검색어</label>
+            <input type="text" autocomplete="off" id="memJoinSearchKeyword" placeholder="검색어를 입력하세요" />
+          </div>
+          <div id="memJoinMemberGrid" class="mem-join-grid-host" role="region" aria-label="등록 가능한 구성원 목록"></div>
+        </div>
+      </section>
+
+      <section class="mem-join-section" aria-labelledby="mem-join-project-heading">
+        <h2 class="mem-join-section__title" id="mem-join-project-heading">소속 정보</h2>
+        <div class="mem-join-section__body">
+          <div class="mem-join-form">
+            <div class="mem-field-row">
+              <label for="memJoinGrpName">소속 그룹 <span class="req">*</span></label>
+              <input
+                type="text"
+                id="memJoinGrpName"
+                class="mem-input--editable mem-input--picker"
+                placeholder="클릭하여 그룹을 선택하세요."
+                autocomplete="off"
+                readonly
+              />
+              <input type="hidden" id="memJoinSelectedGrpId" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="mem-join-actions">
+        <button type="button" class="mem-join-actions__btn" id="btnMemberJoinRegister">등록</button>
+        <a class="mem-join-actions__btn mem-join-actions__btn--secondary" th:href="@{/project/member/list}">초기화</a>
+      </div>
+
+      <div class="mem-join-picker-overlay" id="memJoinGroupOverlay" aria-hidden="true">
+        <div class="mem-join-picker" role="dialog" aria-modal="true" aria-labelledby="memJoinGroupPickTitle">
+          <div class="mem-join-picker__head" id="memJoinGroupPickTitle">소속 그룹 선택</div>
+          <div class="mem-join-picker__search">
+            <label class="visually-hidden" for="memJoinGroupSearchType">검색 항목</label>
+            <select id="memJoinGroupSearchType" aria-label="검색 항목">
+              <option value="id">그룹아이디</option>
+              <option value="grpName" selected>그룹명</option>
+            </select>
+            <label class="visually-hidden" for="memJoinGroupSearchKeyword">검색어</label>
+            <input type="text" autocomplete="off" id="memJoinGroupSearchKeyword" placeholder="검색어를 입력하세요" />
+          </div>
+          <div class="mem-join-picker__list" id="memJoinGroupPickList"></div>
+          <div class="mem-join-picker__actions">
+            <button type="button" id="btnMemJoinGroupPickCancel">닫기</button>
+          </div>
+        </div>
+      </div>
+
+      <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModal}"></th:block>
+      <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModalScript}"></th:block>
+
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        const memJoinPrjId = /*[[${session.currentProjectId}]]*/ 0;
+        /*]]>*/
+      </script>
+      <script th:src="@{/js/member/memberJoin.js}"></script>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

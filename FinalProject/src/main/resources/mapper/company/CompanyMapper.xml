@@ -4,113 +4,118 @@
 
 <mapper namespace="com.example.demo.company.mapper.CompanyMapper">
 
-    <!-- ===================== LIST ===================== -->
-    <select id="selectAll"
-            parameterType="com.example.demo.company.service.CompanyVO"
-            resultType="com.example.demo.company.service.CompanyVO">
+	<!-- ===================== LIST ===================== -->
+	<select id="selectAll"
+		parameterType="com.example.demo.company.service.CompanyVO"
+		resultType="com.example.demo.company.service.CompanyVO">
 
-     select 
-        c.biz_no,
-        c.company_name,
-        c.tel, 
-        c.address,
-        c.is_active_cd,
-        c.created_on,
-        u.login,
-        u.email
-    from company c
-    left join users u
-        on c.biz_no = u.biz_no
-        and u.admin_cd = '02ROLE'
+		select
+		c.biz_no,
+		c.company_name,
+		c.tel,
+		c.address,
+		c.is_active_cd,
+		c.created_on,
+		u.login,
+		u.email
+		from company c
+		left join users u
+		on c.biz_no = u.biz_no
+		and u.admin_cd = '02ROLE'
 
-        <where>
+		<where>
 
-            <if test="keyword != null and keyword != ''">
+			<if test="keyword != null and keyword != ''">
 
-                <choose>
+				<choose>
 
-                    <when test="searchType == 'bizNo'">
-                        biz_no like '%' || #{keyword} || '%'
-                    </when>
+					<when test="searchType == 'bizNo'">
+						c.biz_no like '%' || #{keyword} || '%'
+					</when>
 
-                    <when test="searchType == 'companyName'">
-                        company_name like '%' || #{keyword} || '%'
-                    </when>
+					<when test="searchType == 'companyName'">
+						c.company_name like '%' || #{keyword} || '%'
+					</when>
 
-                    <when test="searchType == 'tel'">
-                        tel like '%' || #{keyword} || '%'
-                    </when>
+					<when test="searchType == 'tel'">
+						c.tel like '%' || #{keyword} || '%'
+					</when>
 
-                    <when test="searchType == 'address'">
-                        address like '%' || #{keyword} || '%'
-                    </when>
+					<when test="searchType == 'address'">
+						c.address like '%' || #{keyword} || '%'
+					</when>
 
-                </choose>
+				</choose>
 
-            </if>
+			</if>
 
-        </where>
+			<!-- 활성여부 조건 -->
+			<if test="isActiveCd != null and isActiveCd != ''">
+				and c.is_active_cd = #{isActiveCd}
+			</if>
 
-    </select>
+		</where>
 
-    <!-- ===================== ONE ===================== -->
-    <select id="selectOne"
-            resultType="com.example.demo.company.service.CompanyVO">
+	</select>
 
-        select 
-        	c.biz_no,
-        	c.company_name,
-        	c.tel,
-        	c.address,
-        	c.is_active_cd,
-        	c.created_on,
-        	u.login,
-        	u.email
-        from company c
-        left join users u
-        	on c.biz_no = u.biz_no	
-        	and u.admin_cd = '02ROLE'
+	<!-- ===================== ONE ===================== -->
+	<select id="selectOne"
+		resultType="com.example.demo.company.service.CompanyVO">
+
+		select
+		c.biz_no,
+		c.company_name,
+		c.tel,
+		c.address,
+		c.is_active_cd,
+		c.created_on,
+		u.login,
+		u.email
+		from company c
+		left join users u
+		on c.biz_no = u.biz_no
+		and u.admin_cd = '02ROLE'
 		where c.biz_no = #{bizNo}
-    </select>
+	</select>
 
-    <!-- ===================== INSERT ===================== -->
-    <insert id="insert">
+	<!-- ===================== INSERT ===================== -->
+	<insert id="insert">
 
-        insert into company (
-            biz_no,
-            company_name,
-            tel,
-            address,
-            is_active_cd
-        )
-        values (
-            #{bizNo},
-            #{companyName},
-            #{tel},
-            #{address},
-            #{isActiveCd}
-        )
+		insert into company (
+		biz_no,
+		company_name,
+		tel,
+		address,
+		is_active_cd
+		)
+		values (
+		#{bizNo},
+		#{companyName},
+		#{tel},
+		#{address},
+		#{isActiveCd}
+		)
 
-    </insert>
+	</insert>
 
-    <!-- ===================== UPDATE ===================== -->
-    <update id="update">
+	<!-- ===================== UPDATE ===================== -->
+	<update id="update">
 
-        update company
-        set company_name = #{companyName},
-            tel = #{tel},
-            address = #{address},
-            is_active_cd = #{isActiveCd}
-        where biz_no = #{bizNo}
+		update company
+		set company_name = #{companyName},
+		tel = #{tel},
+		address = #{address},
+		is_active_cd = #{isActiveCd}
+		where biz_no = #{bizNo}
 
-    </update>
+	</update>
 
-    <!-- ===================== DELETE ===================== -->
-    <delete id="delete">
+	<!-- ===================== DELETE ===================== -->
+	<delete id="delete">
 
-        delete from company
-        where biz_no = #{bizNo}
+		delete from company
+		where biz_no = #{bizNo}
 
-    </delete>
+	</delete>
 
 </mapper>

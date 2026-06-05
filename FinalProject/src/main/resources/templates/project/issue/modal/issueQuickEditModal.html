@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="issueQuickEditModal">
+	<!-- 빠른수정 모달 (행 단건 · 다건 공용) -->
+	<div id="issueQuickModalBackdrop" class="issue-quick-modal-backdrop" role="dialog"
+		aria-modal="true" aria-labelledby="issueQuickModalTitle" hidden>
+		<div class="issue-quick-modal">
+			<div class="issue-quick-modal-head">
+				<h2 id="issueQuickModalTitle">빠른수정</h2>
+				<button type="button" class="issue-quick-modal-close" id="issueQuickModalClose"
+					aria-label="닫기">&times;</button>
+			</div>
+			<div class="issue-quick-modal-body">
+				<div class="issue-quick-target-block">
+					<div class="issue-quick-target-head">
+						<span class="issue-quick-target-label">선택된 이슈</span>
+						<span class="issue-quick-target-count" id="issueQuickTargetCount">0</span><span>건</span>
+					</div>
+					<ul class="issue-quick-target-list" id="issueQuickTargetList"></ul>
+				</div>
+				<div class="issue-quick-field">
+					<label for="issueQuickAction">변경 항목</label>
+					<select id="issueQuickAction">
+						<option value="">선택하세요</option>
+						<option value="status">상태</option>
+						<option value="priority">우선순위</option>
+						<option value="category">유형</option>
+						<option value="start">시작일 등록</option>
+						<option value="closed">완료일 등록</option>
+					</select>
+				</div>
+				<div class="issue-quick-field" id="issueQuickValueWrap">
+					<label for="issueQuickValue" id="issueQuickValueLabel">새 값</label>
+					<select id="issueQuickValue"></select>
+				</div>
+				<div id="issueQuickDatePanel" class="issue-quick-date-panel" hidden>
+					<p class="issue-quick-date-summary" id="issueQuickDateSummary"></p>
+					<div class="issue-quick-date-section">
+						<div class="issue-quick-date-section-title is-ok" id="issueQuickDateEligibleTitle">등록 대상</div>
+						<ul class="issue-quick-date-detail-list" id="issueQuickDateEligibleList"></ul>
+					</div>
+					<div class="issue-quick-date-section" id="issueQuickDateExcludedBlock" hidden>
+						<div class="issue-quick-date-section-title is-skip">제외</div>
+						<ul class="issue-quick-date-detail-list" id="issueQuickDateExcludedList"></ul>
+					</div>
+				</div>
+			</div>
+			<div class="issue-quick-modal-foot">
+				<button type="button" class="issue-btn issue-btn--secondary issue-bulk-btn issue-bulk-btn-ghost" id="issueQuickCancelBtn">취소</button>
+				<button type="button" class="issue-btn issue-btn--primary issue-bulk-btn issue-bulk-btn-primary" id="issueQuickApplyBtn" disabled>적용</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			function createModalApi(options) {
+				const modalBackdrop = document.getElementById('issueQuickModalBackdrop');
+				const modalAction = document.getElementById('issueQuickAction');
+				const modalValueWrap = document.getElementById('issueQuickValueWrap');
+				const modalValue = document.getElementById('issueQuickValue');
+				const modalValueLabel = document.getElementById('issueQuickValueLabel');
+				const modalTargetCount = document.getElementById('issueQuickTargetCount');
+				const modalTargetList = document.getElementById('issueQuickTargetList');
+				const modalDatePanel = document.getElementById('issueQuickDatePanel');
+				const modalDateSummary = document.getElementById('issueQuickDateSummary');
+				const modalDateEligibleTitle = document.getElementById('issueQuickDateEligibleTitle');
+				const modalDateEligibleList = document.getElementById('issueQuickDateEligibleList');
+				const modalDateExcludedBlock = document.getElementById('issueQuickDateExcludedBlock');
+				const modalDateExcludedList = document.getElementById('issueQuickDateExcludedList');
+				const modalApplyBtn = document.getElementById('issueQuickApplyBtn');
+				const closeBtn = document.getElementById('issueQuickModalClose');
+				const cancelBtn = document.getElementById('issueQuickCancelBtn');
+				let modalTargetIds = [];
+
+				if (!modalBackdrop || !modalAction || !modalValue || !modalApplyBtn) {
+					return null;
+				}
+
+				function getStartDateSkipReason(row) {
+					if (!row) return '이슈를 찾을 수 없음';
+					if (!hasAssignee(row)) return '담당자 없음';
+					if (options.hasIssueDate(row.startDate)) return '이미 시작일 등록됨';
+					return null;
+				}
+				function hasAssignee(row) {
+					if (typeof options.hasIssueAssignee === 'function') {
+						return options.hasIssueAssignee(row);
+					}
+					if (!row) return false;
+					if (row.memId != null && row.memId !== '') return true;
+					var name = row.memName;
+					return name != null && String(name).trim() !== '' && String(name).trim() !== '—';
+				}
+
+				function statusRequiresAssignee(code) {
+					return code === '02ISSUESTAT' || code === '03ISSUESTAT';
+				}
+
+				function getStatusSkipReason(row, targetStatusCd) {
+					if (!row) return '이슈를 찾을 수 없음';
+					if (statusRequiresAssignee(targetStatusCd) && !hasAssignee(row)) return '담당자 없음';
+					return null;
+				}
+
+				function getClosedDateSkipReason(row) {
+					if (!row) return '이슈를 찾을 수 없음';
+					if (options.hasIssueDate(row.closedDate)) return '이미 완료일 등록됨';
+					if (!options.hasIssueDate(row.startDate)) return '시작일 없음';
+					return null;
+				}
+
+				function classifyBySkipReason(ids, getSkipReason) {
+					const eligible = [];
+					const excluded = [];
+					ids.forEach(function (id) {
+						const row = options.getRowByIssueId(id);
+						const label = options.formatIssueLabel(id);
+						const reason = getSkipReason(row);
+						if (reason) excluded.push({ id: id, label: label, reason: reason });
+						else eligible.push({ id: id, label: label });
+					});
+					return { eligible: eligible, excluded: excluded };
+				}
+
+				function classifyDateAction(ids, action) {
+					return classifyBySkipReason(ids, function (row) {
+						return action === 'start'
+							? getStartDateSkipReason(row)
+							: getClosedDateSkipReason(row);
+					});
+				}
+
+				function classifyStatusAction(ids, targetStatusCd) {
+					return classifyBySkipReason(ids, function (row) {
+						return getStatusSkipReason(row, targetStatusCd);
+					});
+				}
+
+				function hideActionPanel() {
+					modalDatePanel.hidden = true;
+				}
+
+				function renderActionPanel(summaryPrefix, eligibleTitlePrefix, result) {
+					modalDateSummary.textContent = summaryPrefix + ' — 적용 '
+						+ result.eligible.length + '건'
+						+ (result.excluded.length > 0 ? ' · 제외 ' + result.excluded.length + '건' : '');
+					modalDateEligibleTitle.textContent = eligibleTitlePrefix + ' (' + result.eligible.length + '건)';
+
+					modalDateEligibleList.innerHTML = '';
+					if (result.eligible.length === 0) {
+						const li = document.createElement('li');
+						li.className = 'issue-quick-date-empty';
+						li.textContent = '적용 가능한 이슈가 없습니다.';
+						modalDateEligibleList.appendChild(li);
+					} else {
+						result.eligible.forEach(function (item) {
+							const li = document.createElement('li');
+							li.textContent = item.label;
+							modalDateEligibleList.appendChild(li);
+						});
+					}
+
+					modalDateExcludedList.innerHTML = '';
+					if (result.excluded.length === 0) {
+						modalDateExcludedBlock.hidden = true;
+					} else {
+						modalDateExcludedBlock.hidden = false;
+						result.excluded.forEach(function (item) {
+							const li = document.createElement('li');
+							li.className = 'issue-quick-date-excluded-item';
+							const issueSpan = document.createElement('span');
+							issueSpan.className = 'issue-quick-date-issue';
+							issueSpan.textContent = item.label;
+							const reasonSpan = document.createElement('span');
+							reasonSpan.className = 'issue-quick-date-reason';
+							reasonSpan.textContent = item.reason;
+							li.appendChild(issueSpan);
+							li.appendChild(reasonSpan);
+							modalDateExcludedList.appendChild(li);
+						});
+					}
+
+					modalDatePanel.hidden = false;
+					modalApplyBtn.disabled = result.eligible.length === 0;
+					return result;
+				}
+
+				function renderDateActionPanel(action) {
+					const result = classifyDateAction(modalTargetIds, action);
+					const dateLabel = action === 'start' ? '시작일' : '완료일';
+					return renderActionPanel(dateLabel + ' 등록', '등록 대상', result);
+				}
+
+				let statusActionResult = null;
+
+				function renderStatusActionPanel() {
+					const targetStatusCd = modalValue.value;
+					if (!targetStatusCd) {
+						hideActionPanel();
+						statusActionResult = null;
+						return null;
+					}
+					statusActionResult = classifyStatusAction(modalTargetIds, targetStatusCd);
+					return renderActionPanel('상태 변경', '변경 대상', statusActionResult);
+				}
+
+				function renderModalTargetList(ids) {
+					modalTargetCount.textContent = String(ids.length);
+					modalTargetList.innerHTML = '';
+					ids.forEach(function (id) {
+						const li = document.createElement('li');
+						li.textContent = options.formatIssueLabel(id);
+						modalTargetList.appendChild(li);
+					});
+				}
+
+				function open(ids) {
+					if (!ids || !ids.length) return;
+					modalTargetIds = ids.slice();
+					renderModalTargetList(modalTargetIds);
+					modalAction.value = '';
+					modalValue.innerHTML = '<option value="">선택하세요</option>';
+					modalValueWrap.hidden = false;
+					hideActionPanel();
+					statusActionResult = null;
+					modalApplyBtn.disabled = true;
+					modalBackdrop.hidden = false;
+					modalBackdrop.classList.add('is-open');
+				}
+
+				function close() {
+					modalBackdrop.classList.remove('is-open');
+					modalBackdrop.hidden = true;
+					modalTargetIds = [];
+				}
+
+				function onQuickActionChange() {
+					const action = modalAction.value;
+					hideActionPanel();
+					statusActionResult = null;
+					modalApplyBtn.disabled = true;
+
+					if (!action) {
+						modalValueWrap.hidden = true;
+						return;
+					}
+					if (action === 'start' || action === 'closed') {
+						modalValueWrap.hidden = true;
+						renderDateActionPanel(action);
+						return;
+					}
+
+					modalValueWrap.hidden = false;
+					const labels = { status: '상태', priority: '우선순위', category: '유형' };
+					modalValueLabel.textContent = labels[action] || '새 값';
+					modalValue.innerHTML = '<option value="">선택하세요</option>';
+					(options.quickValueOptions[action] || []).forEach(function (opt) {
+						const o = document.createElement('option');
+						o.value = opt.code;
+						o.textContent = opt.label;
+						modalValue.appendChild(o);
+					});
+
+					if (action === 'status') {
+						hideActionPanel();
+						statusActionResult = null;
+					}
+				}
+
+				function onQuickValueChange() {
+					const action = modalAction.value;
+					if (action === 'start' || action === 'closed') return;
+					if (action === 'status') {
+						if (modalValue.value) {
+							renderStatusActionPanel();
+						} else {
+							hideActionPanel();
+							statusActionResult = null;
+						}
+						const eligible = statusActionResult && statusActionResult.eligible
+							? statusActionResult.eligible.length
+							: 0;
+						modalApplyBtn.disabled = !modalValue.value || eligible === 0;
+						return;
+					}
+					modalApplyBtn.disabled = !modalValue.value;
+				}
+
+				function buildAuthHeaders(json) {
+					const headers = json ? { 'Content-Type': 'application/json' } : {};
+					const tokenMeta = document.querySelector('meta[name="_csrf"]');
+					const headerMeta = document.querySelector('meta[name="_csrf_header"]');
+					if (tokenMeta && headerMeta) headers[headerMeta.content] = tokenMeta.content;
+					return headers;
+				}
+
+				function applyQuickEdit() {
+					const action = modalAction.value;
+					if (!action || !modalTargetIds.length) return;
+
+					if (action === 'start' || action === 'closed') {
+						const result = classifyDateAction(modalTargetIds, action);
+						const eligible = result.eligible.map(function (item) { return item.id; });
+						if (!eligible.length) {
+							alert(action === 'start'
+								? '담당자가 없는 이슈는 시작일을 등록할 수 없습니다.'
+								: '시작일·완료일 조건을 만족하는 이슈가 없습니다.');
+							return;
+						}
+						const url = action === 'start' ? '/project/issue/api/start-date' : '/project/issue/api/closed-date';
+						const label = action === 'start' ? '시작일' : '완료일';
+						fetch(url, {
+							method: 'PUT',
+							headers: buildAuthHeaders(true),
+							body: JSON.stringify({ ids: eligible })
+						})
+							.then(function (res) { return res.json(); })
+							.then(function (data) {
+								if (!data || !data.ok) throw new Error((data && data.message) || '등록에 실패했습니다.');
+								const ok = data.success != null ? data.success : eligible.length;
+								const skipped = data.skipped != null ? data.skipped : (modalTargetIds.length - ok);
+								alert(label + ' ' + ok + '건 등록' + (skipped > 0 ? ' · 제외 ' + skipped + '건' : ''));
+								location.reload();
+							})
+							.catch(function (err) {
+								alert(err.message || (label + ' 등록 API를 확인해 주세요.'));
+							});
+						return;
+					}
+
+					const code = modalValue.value;
+					if (!code) return;
+
+					let targetIds = modalTargetIds;
+					if (action === 'status') {
+						const result = classifyStatusAction(modalTargetIds, code);
+						targetIds = result.eligible.map(function (item) { return item.id; });
+						if (!targetIds.length) {
+							alert(statusRequiresAssignee(code)
+								? '담당자가 없는 이슈는 진행중·검토 상태로 변경할 수 없습니다.'
+								: '변경 가능한 이슈가 없습니다.');
+							return;
+						}
+					}
+
+					const body = { ids: targetIds };
+					if (action === 'status') body.statusCd = code;
+					else if (action === 'priority') body.priorityCd = code;
+					else if (action === 'category') body.categoryCd = code;
+
+					const label = modalValue.options[modalValue.selectedIndex].text;
+
+					fetch('/project/issue/api/bulk', {
+						method: 'PUT',
+						headers: buildAuthHeaders(true),
+						body: JSON.stringify(body)
+					})
+						.then(function (res) { return res.json(); })
+						.then(function (data) {
+							if (!data || !data.ok) throw new Error((data && data.message) || '변경에 실패했습니다.');
+							var updated = data.updated != null ? data.updated : targetIds.length;
+							var skipped = data.skipped != null ? data.skipped : (modalTargetIds.length - updated);
+							var msg = action === 'status'
+								? '상태 변경 ' + updated + '건 완료'
+								: '변경이 완료되었습니다.';
+							if (action === 'status' && skipped > 0) {
+								msg += statusRequiresAssignee(code)
+									? ' · 제외 ' + skipped + '건(담당자 없음)'
+									: ' · 제외 ' + skipped + '건';
+							}
+							alert(msg);
+							location.reload();
+						})
+						.catch(function (err) {
+							alert(err.message || '일괄 변경 API(/project/issue/api/bulk)를 확인해 주세요.');
+						});
+				}
+
+				modalAction.addEventListener('change', onQuickActionChange);
+				modalValue.addEventListener('change', onQuickValueChange);
+				if (closeBtn) closeBtn.addEventListener('click', close);
+				if (cancelBtn) cancelBtn.addEventListener('click', close);
+				modalBackdrop.addEventListener('click', function (e) {
+					if (e.target === modalBackdrop) close();
+				});
+				modalApplyBtn.addEventListener('click', applyQuickEdit);
+
+				return { open: open, close: close };
+			}
+
+			window.IssueQuickEditModal = {
+				init: function (options) {
+					if (!options || typeof options.getRowByIssueId !== 'function'
+						|| typeof options.formatIssueLabel !== 'function'
+						|| typeof options.hasIssueDate !== 'function'
+						|| typeof options.hasIssueAssignee !== 'function') {
+						return null;
+					}
+					return createModalApi(options);
+				}
+			};
+		})();
+	</script>
+</div>
+</body>
+</html>

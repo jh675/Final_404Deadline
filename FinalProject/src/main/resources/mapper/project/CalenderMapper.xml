@@ -1,73 +1,177 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
- <mapper namespace="com.example.demo.project.calender.mapper.CalenderMapper">
- 
- <select id="selectAll" resultType="calenderVO">
-  select * from calender
-  
-  <!-- 일정 검색조건 (일정유형 기준) -->
-  <where>
-   and mem_id = #{memId}
-    <if test="typeCd != null and typeCd !=''">
-     and type_cd = #{typeCd}
-    </if>
-     <if test="keyword != null and keyword !=''">
+<mapper
+	namespace="com.example.demo.project.calender.mapper.CalenderMapper">
+	<select id="selectAll" resultType="calenderVO">
+		SELECT
+		ID AS id,
+		MEM_ID AS memId,
+		CAL_TEXT AS calText,
+		PLACE AS place,
+		TYPE_CD AS typeCd,
+		SHARING_CD AS sharingCd,
+		STATE_CD AS stateCd,
+		COLOR_TAG_CD AS colorTagCd,
+		CAL_TYPE AS calType,
+		TO_CHAR(CAL_START,
+		'YYYY-MM-DD HH24:MI:SS') AS calStart,
+		TO_CHAR(CAL_END, 'YYYY-MM-DD
+		HH24:MI:SS') AS calEnd,
+		TO_CHAR(CREATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS
+		createdOn,
+		TO_CHAR(UPDATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS updatedOn
+		FROM CALENDER
+		<where>
+			AND (
+			C.MEM_ID = #{memId}
+			OR (
+			C.SHARING_CD = '01CALSHARE'
+			AND U.BIZ_NO = #{bizNo}
+			)
+			)
+			<if test="typeCd != null and typeCd != ''">
+				AND C.TYPE_CD = #{typeCd}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND (
+				C.PLACE LIKE '%' || #{keyword} || '%'
+				OR C.CAL_TEXT LIKE '%' || #{keyword} || '%'
+				)
+			</if>
+		</where>
+	</select>
+
+	<select id="selectOne" resultType="calenderVO">
+		SELECT
+		ID AS id,
+		MEM_ID AS
+		memId,
+		CAL_TEXT AS calText,
+		PLACE AS place,
+		TYPE_CD AS typeCd,
+		SHARING_CD
+		AS sharingCd,
+		STATE_CD AS stateCd,
+		COLOR_TAG_CD AS colorTagCd,
+		CAL_TYPE
+		AS calType,
+		TO_CHAR(CAL_START, 'YYYY-MM-DD HH24:MI:SS') AS calStart,
+		TO_CHAR(CAL_END, 'YYYY-MM-DD HH24:MI:SS') AS calEnd,
+		TO_CHAR(CREATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS createdOn,
+		TO_CHAR(UPDATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS updatedOn
+		FROM CALENDER
+		WHERE ID = #{id}
+	</select>
+
+	<insert id="insert">
+		INSERT INTO CALENDER (
+		ID, MEM_ID, PLACE, CAL_TEXT,
+		TYPE_CD,
+		SHARING_CD, STATE_CD, COLOR_TAG_CD, CAL_TYPE, CAL_START,
+		CAL_END
+		) VALUES (
+		CAL_SEQ.nextval,
+		#{memId}, #{place}, #{calText},
+		#{typeCd},
+		#{sharingCd}, '01STATE', #{colorTagCd}, #{calType},
+		TO_DATE(#{calStart}, 'YYYY-MM-DD HH24:MI:SS'),
+		TO_DATE(#{calEnd},
+		'YYYY-MM-DD HH24:MI:SS')
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE CALENDER
+		SET
+		PLACE = #{place},
+		CAL_TEXT =
+		#{calText},
+		SHARING_CD = #{sharingCd},
+		TYPE_CD = #{typeCd},
+		CAL_TYPE =
+		#{calType},
+		CAL_START = TO_DATE(#{calStart}, 'YYYY-MM-DD HH24:MI:SS'),
+		CAL_END = TO_DATE(#{calEnd}, 'YYYY-MM-DD HH24:MI:SS')
+		WHERE ID = #{id}
+	</update>
+
+	<delete id="delete">
+		DELETE FROM CALENDER
+		WHERE ID = #{id}
+		and mem_id =
+		#{memId}
+	</delete>
+
+	<select id="getList" resultType="calenderVO">
+    SELECT
+        C.ID AS id,
+        C.MEM_ID AS memId,
+        C.CAL_TEXT AS calText,
+        C.PLACE AS place,
+        C.TYPE_CD AS typeCd,
+        C.SHARING_CD AS sharingCd,
+        C.STATE_CD AS stateCd,
+        C.COLOR_TAG_CD AS colorTagCd,
+        C.CAL_TYPE AS calType,
+        U.NAME AS memName,
+        TO_CHAR(C.CAL_START, 'YYYY-MM-DD HH24:MI:SS') AS calStart,
+        TO_CHAR(C.CAL_END, 'YYYY-MM-DD HH24:MI:SS') AS calEnd,
+        TO_CHAR(C.CREATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS createdOn,
+        TO_CHAR(C.UPDATED_ON, 'YYYY-MM-DD HH24:MI:SS') AS updatedOn
+    FROM
+        CALENDER C
+        INNER JOIN USERS U ON C.MEM_ID = U.ID
+    <where>
+        AND U.BIZ_NO = #{bizNo}
+        
         AND (
-                PLACE LIKE '%' || #{keyword} || '%'
-                OR CAL_TEXT LIKE '%' || #{keyword} || '%'
+            C.MEM_ID = #{memId}
+            OR C.SHARING_CD = '01CALSHARE'
+        )
+        <if test="typeCd != null and typeCd != ''">
+            AND C.TYPE_CD = #{typeCd}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (
+                C.PLACE LIKE '%' || #{keyword} || '%'
+                OR C.CAL_TEXT LIKE '%' || #{keyword} || '%'
             )
-     </if>
-  </where>
-  
- </select>
-   <select id="selectOne" resultType="calenderVO">
-     select * from calender
-     where id = #{id}
-   </select>
-   
-   <insert id="insert">
-     insert into calender ( 
-     						id,
-                            MEM_ID, 
-                            PLACE, 
-                            CAL_TEXT, 
-                            TYPE_CD, 
-                            SHARING_CD, 
-                            STATE_CD, 
-                            COLOR_TAG_CD,
-                            CAL_TYPE,
-                            CAL_START, 
-                            CAL_END)
-     values (
-     		CAL_SEQ.nextval,
-     		#{memId},
-            #{place},
-            #{calText},
-            #{typeCd},
-            #{sharingCd},
-            '01STATE',
-            #{colorTagCd},
-            #{calType},
-            #{calStart},
-            #{calEnd})
-   </insert>
-   
-   <update id="update">
-	update calender
-	set  PLACE = #{place},
-         CAL_TEXT = #{calText},
-         SHARING_CD = #{sharingCd},
-         TYPE_CD = #{typeCd},
-         CAL_TYPE = #{calType},
-         CAL_START = #{calStart},
-         CAL_END = #{calEnd}
-	where id = #{id}
-   </update>
-   
-   <delete id="delete">
-    DELETE FROM calender 
-    WHERE id = #{id}
-   </delete>
-   
- </mapper>
+        </if>
+    </where>
+</select>
+
+	<!-- 1시간 전 알림용 -->
+	<select id="findByCalStartBetween" resultType="calenderVO">
+		SELECT
+		ID AS id,
+		CAL_TEXT AS calText,
+		get_sub_code_name(CAL_TYPE) AS calType,
+		get_sub_code_name(TYPE_CD) AS typeCd,
+		CAL_START AS calStart
+		FROM
+		CALENDER
+		WHERE CAL_START BETWEEN SYSDATE + INTERVAL '58' MINUTE
+		AND
+		SYSDATE + INTERVAL '62' MINUTE
+	</select>
+
+
+
+	<select id="findUsernamesByBizNo" parameterType="String"
+		resultType="String">
+		SELECT BIZ_NO || '_' || LOGIN
+		FROM USERS
+		WHERE BIZ_NO =
+		#{bizNo}
+		AND STATUS_CD = '01ACTIVE'
+	</select>
+
+	<select id="findBizNoByMemId" parameterType="Long"
+		resultType="String">
+		SELECT BIZ_NO
+		FROM USERS
+		WHERE ID = #{memId}
+	</select>
+
+</mapper>

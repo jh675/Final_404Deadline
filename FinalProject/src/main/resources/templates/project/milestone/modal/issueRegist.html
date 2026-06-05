@@ -79,7 +79,7 @@
 
 			function loadAvailableIssues(prjId) {
 				selectEl.innerHTML = '<option value="">불러오는 중…</option>';
-				return fetch("/api/milestone/notinissue/" + encodeURIComponent(prjId), {
+				return fetch("/project/milestone/api/notinissue/" + encodeURIComponent(prjId), {
 					headers: { Accept: "application/json" },
 				})
 					.then(function (r) { return r.ok ? r.json() : []; })
@@ -133,7 +133,7 @@
 				};
 				
 				saveBtn.disabled = true;
-				fetch("/api/milestone/issue", {
+				fetch("/project/milestone/api/issue", {
 					method: "POST",
 					headers: getApiJsonHeaders(),
 					body: JSON.stringify(payload),
@@ -144,6 +144,7 @@
 					})
 					.then(function () {
 						if (window.MilestoneTimeline) window.MilestoneTimeline.refreshSelected();
+						alert("이슈가 마일스톤에 등록되었습니다.");
 						bootstrap.Modal.getInstance(modalEl).hide();
 					})
 					.catch(function (err) {

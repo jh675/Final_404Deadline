@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/projectLayout}">
+<head>
+    <meta charset="UTF-8">
+    <title>위키 색인</title>
+    <th:block layout:fragment="head-content">
+        <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+        <link rel="stylesheet" th:href="@{/css/project/wiki.css}" />
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content"
+     th:with="currentType=${type != null and !#strings.isEmpty(type) ? type : 'title'}">
+<div class="wiki-shell">
+<div id="wrapper">
+    <div class="wiki-layout">
+        <div class="wiki-main">
+            <div class="wiki-page-head">
+                <div>
+                    <p class="wiki-page-kicker">위키 색인</p>
+                    <h1 class="wiki-page-head__title"
+                        th:text="${currentType == 'date' ? '날짜별 색인' : '제목별 색인'}">제목별 색인</h1>
+                    <p class="wiki-page-desc"
+                       th:if="${currentType == 'title'}">
+                        작성된 위키를 부모-자식 관계의 트리 구조로 보여줍니다.
+                    </p>
+                    <p class="wiki-page-desc"
+                       th:if="${currentType == 'date'}">
+                        작성일 또는 수정일 기준으로 묶어서 위키 목록을 보여줍니다.
+                    </p>
+                </div>
+                <div class="wiki-page-head__actions">
+                    <a class="btn btn-primary" th:href="@{/project/wiki/register}"
+                       th:if="${@prjAuth.hasRole('ROLE_WIKI_CREATE')}">작성</a>
+                </div>
+            </div>
+
+            <nav class="wiki-tab-row" aria-label="위키 색인 구분">
+                <a class="wiki-tab-btn"
+                   th:classappend="${currentType == 'title'} ? ' is-active' : ''"
+                   th:href="@{/project/wiki/index(type='title')}">제목별</a>
+                <a class="wiki-tab-btn"
+                   th:classappend="${currentType == 'date'} ? ' is-active' : ''"
+                   th:href="@{/project/wiki/index(type='date')}">날짜별</a>
+            </nav>
+
+            <section class="wiki-panel" th:if="${currentType == 'title'}">
+                <th:block th:if="${titleTree != null and !titleTree.isEmpty()}">
+                    <th:block th:replace="~{::wikiTree(nodes=${titleTree}, root=${true})}"></th:block>
+                </th:block>
+                <p class="wiki-empty" th:if="${titleTree == null or titleTree.isEmpty()}">
+                    표시할 위키가 없습니다.
+                </p>
+            </section>
+
+            <section class="wiki-panel" th:if="${currentType == 'date'}">
+                <th:block th:if="${dateGroups != null and !dateGroups.isEmpty()}">
+                    <div class="wiki-date-group" th:each="group : ${dateGroups}">
+                        <h2 class="wiki-date-heading"
+                            th:text="${group.groupDate}">2026/05/07</h2>
+                        <ul class="wiki-date-list">
+                            <li th:each="page : ${group.pages}">
+                                <a class="wiki-date-link"
+                                   th:href="@{/project/wiki/view/{name}(name=${page.title})}"
+                                   th:text="${page.title}">위키 제목</a>
+                                <p class="wiki-date-summary"
+                                   th:if="${page.describe != null and !#strings.isEmpty(page.describe)}"
+                                   th:text="${page.describe}">페이지 설명</p>
+                            </li>
+                        </ul>
+                    </div>
+                </th:block>
+                <p class="wiki-empty" th:if="${dateGroups == null or dateGroups.isEmpty()}">
+                    표시할 위키가 없습니다.
+                </p>
+            </section>
+        </div>
+
+        <aside class="wiki-aside">
+            <h3 class="wiki-aside__title">색인</h3>
+            <ul>
+                <li><a th:href="@{/project/wiki}">첫페이지</a></li>
+                <li>
+                    <a th:href="@{/project/wiki/index(type='title')}"
+                       th:classappend="${currentType == 'title'} ? ' is-active' : ''">제목별</a>
+                </li>
+                <li>
+                    <a th:href="@{/project/wiki/index(type='date')}"
+                       th:classappend="${currentType == 'date'} ? ' is-active' : ''">날짜별</a>
+                </li>
+            </ul>
+        </aside>
+    </div>
+</div>
+</div>
+
+    <th:block th:fragment="wikiTree(nodes, root)">
+        <ul class="wiki-tree-list"
+            th:classappend="${root} ? ' wiki-tree-root' : ''">
+            <li class="wiki-tree-item" th:each="node : ${nodes}">
+                <div class="wiki-tree-row">
+                    <a class="wiki-tree-link"
+                       th:href="@{/project/wiki/view/{name}(name=${node.title})}"
+                       th:text="${node.title}">위키 제목</a>
+                    <span class="wiki-tree-meta"
+                          th:if="${node.updatedOn != null}"
+                          th:text="${#dates.format(node.updatedOn, 'yyyy/MM/dd')}">2026/05/07</span>
+                </div>
+                <th:block th:if="${node.children != null and !node.children.isEmpty()}"
+                          th:replace="~{::wikiTree(nodes=${node.children}, root=${false})}"></th:block>
+            </li>
+        </ul>
+    </th:block>
+</div>
+</body>
+</html>

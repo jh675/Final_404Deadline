@@ -4,14 +4,14 @@
 <mapper namespace="com.example.demo.project.notice.mapper.NoticeMapper">
 
 <select id="selectAll" resultType="com.example.demo.project.notice.service.NoticeVO">
- 
- select *
- FROM notice
- where prj_id = #{prjId}
- ORDER BY is_fixed DESC, id desc
-
+    SELECT 
+        n.*, 
+        u.name || '(' || u.login || ')' AS memName
+    FROM notice n
+    LEFT JOIN users u ON n.mem_id = u.id
+    WHERE n.prj_id = #{prjId}
+    ORDER BY n.is_fixed DESC, n.id DESC
 </select>
-
 <insert id="insert">
 <selectKey keyProperty="id" resultType="long" order="BEFORE">
         SELECT news_seq.nextval FROM DUAL

@@ -1,209 +1,70 @@
 <!doctype html>
-<html
-  lang="ko"
-  xmlns:th="http://www.thymeleaf.org"
-  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/projectLayout}"
->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/projectLayout}">
   <head>
     <meta charset="UTF-8" />
-    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
-    <meta
-      th:if="${_csrf != null}"
-      name="_csrf_header"
-      th:content="${_csrf.headerName}"
-    />
     <title>작업내역</title>
     <th:block layout:fragment="head-content">
-      <link
-        rel="stylesheet"
-        href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css"
-      />
-      <link
-        rel="stylesheet"
-        href="https://uicdn.toast.com/grid/latest/tui-grid.css"
-      />
+      <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+      <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+      <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+      <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+      <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+      <link rel="stylesheet" th:href="@{/css/project/issue.css}" />
+      <link rel="stylesheet" th:href="@{/css/project/projectAdmin.css}" />
       <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
       <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-
-      <style>
-        .history-page {
-          max-width: 100%;
-        }
-        .history-page__title {
-          margin: 0 0 1rem;
-          font-size: 1.05rem;
-          font-weight: 600;
-          color: #222;
-        }
-        .history-search {
-          display: flex;
-          align-items: center;
-          gap: 0;
-          padding: 1rem 1.25rem;
-          margin-bottom: 1.25rem;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          background: #fafafa;
-        }
-        .history-search__bar {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 0.75rem 1.25rem;
-          flex: 1;
-          min-width: 0;
-        }
-        .history-search__inline {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: 0.4rem;
-          flex-shrink: 0;
-        }
-        .history-search__inline label {
-          font-size: 0.8125rem;
-          color: #444;
-          white-space: nowrap;
-        }
-        .history-search__inline input[type="text"],
-        .history-search__inline input[type="date"],
-        .history-search__inline select {
-          min-width: 9.5rem;
-          padding: 0.35rem 0.5rem;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          font-size: 0.875rem;
-          background: #fff;
-        }
-        .history-search__inline input[type="text"]#historyDetail {
-          min-width: 14rem;
-        }
-        .history-search__tilde {
-          color: #444;
-          font-size: 0.875rem;
-          user-select: none;
-        }
-        .history-search__actions {
-          display: flex;
-          gap: 0.5rem;
-          align-items: center;
-          flex-shrink: 0;
-        }
-        .history-search__actions button {
-          padding: 0.4rem 1rem;
-          border-radius: 4px;
-          cursor: pointer;
-          border: 1px solid #1976d2;
-          background: #1976d2;
-          color: #fff;
-          font-size: 0.875rem;
-        }
-        .history-search__actions button[type="button"] {
-          background: #fff;
-          color: #333;
-          border-color: #ccc;
-        }
-        .history-grid-host {
-          min-height: 120px;
-        }
-        .visually-hidden {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border: 0;
-        }
-      </style>
+      <script th:src="@{/js/common/gridTheme.js}"></script>
     </th:block>
   </head>
   <body>
     <div layout:fragment="content">
-      <main class="history-page">
-        <h1 class="history-page__title">작업내역</h1>
+      <div class="issue-shell issue-shell--list">
+        <div id="wrapper" class="issue-list">
+          <header class="issue-list__header">
+            <h1 class="issue-list__title">작업내역</h1>
+          </header>
 
-        <section aria-labelledby="history-search-heading">
-          <h2 id="history-search-heading" class="visually-hidden">작업내역 검색</h2>
-          <form
-            class="history-search"
-            id="historySearchForm"
-            th:action="@{/project/history/list}"
-            method="get"
-          >
-            <div class="history-search__bar">
-              <div class="history-search__inline">
+          <section class="issue-section issue-section--filter" aria-label="작업내역 검색">
+            <form id="historySearchForm" th:action="@{/project/history/list}" method="get" class="issue-filter-form">
+              <div class="issue-field issue-field--range">
                 <label for="updatedFrom">일시</label>
-                <input
-                  type="date"
-                  id="updatedFrom"
-                  name="updatedFrom"
-                  th:value="${updatedFrom}"
-                />
-                <span class="history-search__tilde">~</span>
-                <input
-                  type="date"
-                  id="updatedTo"
-                  name="updatedTo"
-                  th:value="${updatedTo}"
-                  aria-label="일시 종료"
-                />
+                <input type="date" id="updatedFrom" name="updatedFrom" th:value="${updatedFrom}" />
+                <span class="issue-field-sep">~</span>
+                <input type="date" id="updatedTo" name="updatedTo" th:value="${updatedTo}" aria-label="일시 종료"/>
               </div>
-              <div class="history-search__inline">
+              <div class="issue-field">
                 <label for="modifierName">수정자</label>
-                <input
-                  type="text"
-                  id="modifierName"
-                  name="modifierName"
-                  th:value="${modifierName}"
-                  placeholder="이름"
-                  autocomplete="off"
-                />
+                <input type="text" id="modifierName" name="modifierName" th:value="${modifierName}" placeholder="이름" autocomplete="off"/>
               </div>
-              <div class="history-search__inline">
+              <div class="issue-field">
                 <label for="tableName">항목명</label>
                 <select id="tableName" name="tableName">
-                  <option value="" th:selected="${tableName == null or tableName == ''}">
-                    전체
-                  </option>
+                  <option value="" th:selected="${tableName == null or tableName == ''}">전체</option>
                   <option value="ISSUE" th:selected="${tableName == 'ISSUE'}">이슈</option>
-                  <option value="PROJECT" th:selected="${tableName == 'PROJECT'}">
-                    프로젝트
-                  </option>
+                  <option value="PROJECT" th:selected="${tableName == 'PROJECT'}">프로젝트</option>
                 </select>
               </div>
-              <div class="history-search__inline">
+              <div class="issue-field issue-field--wide">
                 <label for="historyDetail">내용</label>
-                <input
-                  type="text"
-                  id="historyDetail"
-                  name="detail"
-                  th:value="${detail}"
-                  placeholder="내용 검색"
-                  autocomplete="off"
-                />
+                <input type="text" id="historyDetail" name="detail" th:value="${detail}" placeholder="내용 검색" autocomplete="off"/>
               </div>
-              <div class="history-search__actions">
-                <button type="submit">검색</button>
-                <button type="button" id="historySearchReset">초기화</button>
+              <div class="issue-filter-buttons">
+                <button type="submit" class="btn btn-primary">검색</button>
+                <a th:href="@{/project/history/list}" class="btn btn-secondary">초기화</a>
               </div>
-            </div>
-          </form>
-        </section>
+            </form>
+          </section>
 
-        <section aria-labelledby="history-grid-heading">
-          <h2 id="history-grid-heading" class="visually-hidden">작업내역 목록</h2>
-          <div
-            id="historyGrid"
-            class="history-grid-host"
-            role="region"
-            aria-label="작업내역 그리드"
-          ></div>
-        </section>
-      </main>
+          <section class="issue-section issue-section--grid" aria-label="작업내역 목록">
+            <div id="historyGrid" role="region" aria-label="작업내역 그리드"></div>
+          </section>
+        </div>
+      </div>
+
+      <th:block th:replace="~{project/history/modal/historyDetail :: historyDetailModal}"></th:block>
+      <th:block th:replace="~{project/history/modal/historyDetail :: historyDetailModalScript}"></th:block>
 
       <script th:inline="javascript">
         /*<![CDATA[*/
@@ -213,22 +74,14 @@
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           (function historySearchDates() {
-            const form = document.getElementById("historySearchForm");
             const start = document.getElementById("updatedFrom");
             const end = document.getElementById("updatedTo");
-            const resetBtn = document.getElementById("historySearchReset");
-            if (!form || !start || !end) return;
+            if (!start || !end) return;
 
             const pad = (n) => String(n).padStart(2, "0");
             const todayStr = () => {
               const d = new Date();
-              return (
-                d.getFullYear() +
-                "-" +
-                pad(d.getMonth() + 1) +
-                "-" +
-                pad(d.getDate())
-              );
+              return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
             };
 
             const compare = (a, b) => {
@@ -242,37 +95,19 @@
               return compare(a, b) <= 0 ? a : b;
             }
 
-            function maxYmd(a, b) {
-              if (!a) return b;
-              if (!b) return a;
-              return compare(a, b) >= 0 ? a : b;
-            }
-
             function syncDateBounds() {
               const max = todayStr();
               start.max = max;
               end.max = max;
-              if (start.value && compare(start.value, max) > 0) {
-                start.value = max;
+              if (start.value && compare(start.value, max) > 0) start.value = max;
+              if (end.value && compare(end.value, max) > 0) end.value = max;
+              if (start.value && end.value && compare(start.value, end.value) > 0) {
+                end.value = start.value;
               }
-              if (end.value && compare(end.value, max) > 0) {
-                end.value = max;
-              }
-              if (start.value && end.value) {
-                if (compare(start.value, end.value) > 0) {
-                  end.value = start.value;
-                }
-              }
-              if (start.value) {
-                end.min = start.value;
-              } else {
-                end.removeAttribute("min");
-              }
-              if (end.value) {
-                start.max = minYmd(max, end.value);
-              } else {
-                start.max = max;
-              }
+              if (start.value) end.min = start.value;
+              else end.removeAttribute("min");
+              if (end.value) start.max = minYmd(max, end.value);
+              else start.max = max;
             }
 
             start.addEventListener("change", function () {
@@ -288,14 +123,6 @@
               syncDateBounds();
             });
             syncDateBounds();
-
-            if (resetBtn) {
-              resetBtn.addEventListener("click", function () {
-                form.reset();
-                syncDateBounds();
-                form.submit();
-              });
-            }
           })();
 
           function formatDate(value) {
@@ -303,17 +130,8 @@
             const d = new Date(value);
             if (isNaN(d.getTime())) return value;
             const pad = (n) => String(n).padStart(2, "0");
-            return (
-              d.getFullYear() +
-              "-" +
-              pad(d.getMonth() + 1) +
-              "-" +
-              pad(d.getDate()) +
-              " " +
-              pad(d.getHours()) +
-              ":" +
-              pad(d.getMinutes())
-            );
+            return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) +
+              " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
           }
 
           function tableNameLabel(code) {
@@ -327,9 +145,19 @@
           const gridEl = document.getElementById("historyGrid");
           if (!gridEl || typeof tui === "undefined" || !tui.Grid) return;
 
-          const gridData = Array.isArray(historyRows) ? historyRows : [];
+          function resolveHistoryId(row) {
+            if (!row) return null;
+            const raw = row.historyId != null ? row.historyId : row.id;
+            if (raw == null || raw === "") return null;
+            const n = Number(raw);
+            return Number.isFinite(n) ? n : null;
+          }
 
-          new tui.Grid({
+          const gridData = (Array.isArray(historyRows) ? historyRows : []).map(function (row) {
+            return Object.assign({}, row, { historyId: resolveHistoryId(row) });
+          });
+
+          const historyGrid = new tui.Grid({
             el: gridEl,
             data: gridData,
             scrollX: true,
@@ -338,40 +166,53 @@
             rowHeight: 36,
             minBodyHeight: 100,
             columns: [
+              { header: "ID", name: "historyId", hidden: true },
               {
-                header: "일시",
-                name: "updatedOn",
-                width: 160,
-                align: "center",
-                sortable: true,
+                header: "일시", name: "updatedOn", width: 160, align: "center", sortable: true,
                 formatter: ({ value }) => formatDate(value),
               },
+              { header: "수정자", name: "modifierName", width: 110, align: "center", sortable: true },
               {
-                header: "수정자",
-                name: "modifierName",
-                width: 110,
-                align: "center",
-                sortable: true,
-              },
-              {
-                header: "항목명",
-                name: "tableName",
-                width: 100,
-                align: "center",
-                sortable: true,
+                header: "항목명", name: "tableName", width: 100, align: "center", sortable: true,
                 formatter: ({ value }) => tableNameLabel(value),
               },
               {
-                header: "내용",
-                name: "detail",
-                minWidth: 280,
-                sortable: true,
+                header: "내용", name: "detail", minWidth: 280, sortable: true,
+                formatter: ({ row, value }) => {
+                  const text = value == null ? "" : String(value);
+                  const historyId = resolveHistoryId(row);
+                  if (!text || historyId == null) return text;
+                  return '<span class="history-detail-link" role="button" tabindex="0" data-history-id="' +
+                    historyId + '">' +
+                    text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</span>";
+                },
               },
             ],
-            pageOptions: {
-              useClient: true,
-              perPage: 15,
-            },
+            pageOptions: { useClient: true, perPage: 15 },
+          });
+
+          function openHistoryDetailModal(historyId, row) {
+            if (historyId == null) return;
+            const itemLabel = tableNameLabel(row && row.tableName);
+            const summaryParts = [];
+            if (row && row.updatedOn) summaryParts.push(formatDate(row.updatedOn));
+            if (row && row.modifierName) summaryParts.push(row.modifierName);
+            if (itemLabel) summaryParts.push(itemLabel);
+            if (row && row.detail) summaryParts.push(row.detail);
+            if (window.HistoryDetailModal && typeof window.HistoryDetailModal.open === "function") {
+              window.HistoryDetailModal.open({ historyId: historyId, summary: summaryParts.join(" · ") });
+            }
+          }
+
+          historyGrid.on("click", function (ev) {
+            if (ev.rowKey == null) return;
+            const row = historyGrid.getRow(ev.rowKey);
+            const nativeTarget = ev.nativeEvent && ev.nativeEvent.target ? ev.nativeEvent.target : null;
+            const linkEl = nativeTarget && nativeTarget.closest ? nativeTarget.closest("[data-history-id]") : null;
+            const fromAttr = linkEl ? Number(linkEl.getAttribute("data-history-id")) : null;
+            if (ev.columnName !== "detail" && !linkEl) return;
+            const historyId = Number.isFinite(fromAttr) && fromAttr > 0 ? fromAttr : resolveHistoryId(row);
+            openHistoryDetailModal(historyId, row);
           });
         });
       </script>

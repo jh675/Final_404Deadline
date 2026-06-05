@@ -1,0 +1,695 @@
+/**
+ * App theme — 색상 통합 (Cerulean primary / navbar 톤)
+ * 배치·간격·크기: tabler-bridge.css, issue.css
+ */
+:root {
+	/* ── Core palette ───────────────────────────────────── */
+	--app-primary: var(--bs-primary, #2fa4e7);
+	--app-primary-rgb: var(--bs-primary-rgb, 47, 164, 231);
+	--app-primary-hover: #1a94d6;
+	--app-primary-soft: rgba(var(--app-primary-rgb), 0.1);
+	--app-primary-muted: rgba(var(--app-primary-rgb), 0.06);
+
+	--app-page-bg: #eef4f9;
+	--app-surface: #ffffff;
+	--app-surface-muted: #f4f8fc;
+	--app-surface-subtle: #f8fafc;
+	--app-hover: #eef4f9;
+
+	--app-text: #334155;
+	--app-text-muted: #64748b;
+	--app-heading: #1e293b;
+	--app-label: #64748b;
+
+	--app-border: rgba(71, 85, 105, 0.22);
+	--app-border-light: rgba(71, 85, 105, 0.2);
+	--app-border-focus: rgba(var(--app-primary-rgb), 0.45);
+
+	--app-link: var(--app-primary);
+	--app-accent: var(--app-primary);
+	--app-accent-hover: var(--app-primary-hover);
+
+	--app-danger: #dc3545;
+	--app-danger-hover: #bb2d3b;
+	--app-danger-border-hover: #b02a37;
+	--app-error: #c62828;
+	--app-error-bg: #fee;
+	--app-error-fg: #c33;
+	--app-success: var(--bs-success, #78c2ad);
+	--app-muted-fg: #6c757d;
+
+	--app-btn-bg: #ffffff;
+	--app-btn-bg-hover: #f4f6f8;
+	--app-btn-border: #e9ecef;
+	--app-btn-text: #495057;
+	--app-btn-primary-text: #1565a8;
+	--app-btn-primary-bg: var(--app-primary-soft);
+	--app-btn-primary-bg-hover: rgba(var(--app-primary-rgb), 0.16);
+	--app-btn-primary-border: rgba(var(--app-primary-rgb), 0.28);
+	--app-btn-disabled-bg: #f1f3f5;
+	--app-btn-disabled-text: #adb5bd;
+
+	--app-track-bg: #e4e6ef;
+	--app-shadow-color: rgba(15, 23, 42, 0.06);
+	--app-shadow-color-lg: rgba(15, 23, 42, 0.14);
+	--app-shadow-color-xl: rgba(15, 23, 42, 0.2);
+	--app-focus-ring: rgba(var(--app-primary-rgb), 0.12);
+	--app-warn-bg: #fff8e6;
+	--app-warn-border: #f0e0b0;
+	--app-warn-text: #7a5c00;
+
+	/* ── 하위 호환 alias (layout-tabler) ─────────────────── */
+	--tblr-page-bg: var(--app-page-bg);
+	--tblr-bridge-primary: var(--app-primary);
+	--tblr-bridge-primary-rgb: var(--app-primary-rgb);
+	--tblr-bridge-primary-hover: var(--app-primary-hover);
+	--tblr-bridge-primary-soft: var(--app-primary-soft);
+	--tblr-bridge-primary-muted: var(--app-primary-muted);
+	--tblr-bridge-border: var(--app-border);
+	--tblr-bridge-surface: var(--app-surface);
+	--tblr-bridge-surface-muted: var(--app-surface-muted);
+	--tblr-bridge-text: var(--app-text);
+	--tblr-bridge-text-muted: var(--app-text-muted);
+	--tblr-bridge-heading: var(--app-heading);
+
+	/* ── 하위 호환 alias (issue 모듈) ────────────────────── */
+	--issue-primary: var(--app-primary);
+	--issue-primary-rgb: var(--app-primary-rgb);
+	--issue-primary-hover: var(--app-primary-hover);
+	--issue-primary-soft: var(--app-primary-soft);
+	--issue-primary-muted: var(--app-primary-muted);
+	--issue-border: var(--app-border-light);
+	--issue-border-focus: var(--app-border-focus);
+	--issue-bg: var(--app-surface);
+	--issue-bg-muted: var(--app-surface-muted);
+	--issue-bg-subtle: var(--app-surface-subtle);
+	--issue-hover: var(--app-hover);
+	--issue-label: var(--app-label);
+	--issue-text: var(--app-text);
+	--issue-heading: var(--app-heading);
+	--issue-link: var(--app-link);
+	--issue-accent: var(--app-accent);
+	--issue-accent-hover: var(--app-accent-hover);
+	--issue-btn-bg: var(--app-btn-bg);
+	--issue-btn-bg-hover: var(--app-btn-bg-hover);
+	--issue-btn-border: var(--app-btn-border);
+	--issue-btn-text: var(--app-btn-text);
+	--issue-btn-primary-bg: var(--app-btn-primary-bg);
+	--issue-btn-primary-bg-hover: var(--app-btn-primary-bg-hover);
+	--issue-btn-primary-border: var(--app-btn-primary-border);
+	--issue-btn-primary-text: var(--app-btn-primary-text);
+	--issue-btn-disabled-bg: var(--app-btn-disabled-bg);
+	--issue-btn-disabled-text: var(--app-btn-disabled-text);
+}
+
+/* ── Base ─────────────────────────────────────────────── */
+body.layout-tabler {
+	background: var(--app-page-bg);
+	color: var(--app-text);
+}
+
+/* ── Project workspace ────────────────────────────────── */
+.layout-tabler .project-workspace {
+	background: var(--app-surface);
+	border: 1px solid var(--app-border);
+	box-shadow: 0 1px 4px var(--app-shadow-color);
+	color: var(--app-text);
+}
+
+/* ── Project header ───────────────────────────────────── */
+.layout-tabler .project-header {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+}
+
+.layout-tabler .project-header h3 {
+	color: var(--app-heading);
+}
+
+.layout-tabler .project-header .border-bottom {
+	border-color: var(--app-border) !important;
+}
+
+.layout-tabler .project-header .text-secondary,
+.layout-tabler .project-header .small.text-secondary {
+	color: var(--app-text-muted) !important;
+}
+
+.layout-tabler .project-header .badge.text-bg-light {
+	background: var(--app-primary-muted) !important;
+	color: var(--app-heading) !important;
+	border-color: rgba(var(--app-primary-rgb), 0.18) !important;
+}
+
+.layout-tabler .project-header .nav-tabs {
+	--bs-nav-tabs-border-color: var(--app-border);
+	--bs-nav-tabs-link-active-color: var(--app-primary);
+	--bs-nav-tabs-link-active-bg: var(--app-surface);
+	border-bottom-color: var(--app-border);
+}
+
+.layout-tabler .project-header .nav-tabs .nav-link {
+	color: var(--app-text-muted);
+}
+
+.layout-tabler .project-header .nav-tabs .nav-link:hover {
+	color: var(--app-heading);
+	border-color: transparent;
+	background: var(--app-primary-muted);
+}
+
+.layout-tabler .project-header .nav-tabs .nav-link.active,
+.layout-tabler .project-header .nav-tabs .nav-link.fw-bold.active {
+	color: var(--app-primary) !important;
+	background: var(--app-surface);
+	border-color: var(--app-border) var(--app-border) var(--app-surface);
+}
+
+/* ── Content card ─────────────────────────────────────── */
+.layout-tabler .card {
+	background: var(--app-surface);
+	border: 1px solid var(--app-border) !important;
+	box-shadow: 0 1px 4px var(--app-shadow-color) !important;
+	color: var(--app-text);
+}
+
+.layout-tabler .project-workspace .project-content {
+	background: transparent;
+	border: none;
+	border-top: 1px solid var(--app-border);
+	box-shadow: none;
+}
+
+.layout-tabler .project-workspace:has(.issue-shell) .issue-shell > #wrapper,
+.layout-tabler .project-workspace:has(.wiki-shell) .wiki-shell > #wrapper {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+}
+
+/* ── Issue / Wiki shell (layout-tabler scope) ─────────── */
+.layout-tabler .issue-shell,
+.layout-tabler .wiki-shell {
+	color: var(--app-text);
+}
+
+.layout-tabler .issue-shell > #wrapper,
+.layout-tabler .wiki-shell > #wrapper {
+	background: var(--app-surface);
+	border: 1px solid var(--app-border);
+	box-shadow: none;
+}
+
+.layout-tabler .issue-shell .issue-section + .issue-section,
+.layout-tabler .issue-shell .issue-page-section,
+.layout-tabler .issue-shell .section-block,
+.layout-tabler .issue-shell .tab-panel-wrap,
+.layout-tabler .issue-shell .issue-page-head,
+.layout-tabler .wiki-shell .wiki-page-section,
+.layout-tabler .wiki-shell .wiki-page-head,
+.layout-tabler .wiki-shell .wiki-panel,
+.layout-tabler .wiki-shell .wiki-aside {
+	border-color: var(--app-border);
+}
+
+.layout-tabler .issue-shell .issue-list__title,
+.layout-tabler .issue-shell .issue-page-head__title,
+.layout-tabler .issue-shell .section-head,
+.layout-tabler .issue-shell .inner-table-title,
+.layout-tabler .wiki-shell .wiki-page-head__title,
+.layout-tabler .wiki-shell .wiki-section-head,
+.layout-tabler .wiki-shell .wiki-aside__title {
+	color: var(--app-heading);
+}
+
+.layout-tabler .issue-shell .issue-field label,
+.layout-tabler .issue-shell .search-item label,
+.layout-tabler .issue-shell .meta-item label,
+.layout-tabler .issue-shell .issue-filter-check__text,
+.layout-tabler .wiki-shell .search-item label {
+	color: var(--app-text-muted);
+}
+
+.layout-tabler .issue-shell .issue-field select,
+.layout-tabler .issue-shell .issue-field input[type="text"],
+.layout-tabler .issue-shell .meta-item input,
+.layout-tabler .issue-shell .meta-item textarea {
+	border-color: var(--app-border);
+	color: var(--app-heading);
+}
+
+.layout-tabler .issue-shell .issue-field select:disabled {
+	background-color: var(--app-surface-muted);
+	color: var(--app-text-muted);
+}
+
+.layout-tabler .issue-shell .issue-meta-grid,
+.layout-tabler .issue-shell .issue-bulk-bar,
+.layout-tabler .issue-shell .comment-thread .comment {
+	background: var(--app-surface-muted);
+	border-color: var(--app-border);
+}
+
+.layout-tabler .issue-shell .meta-item input,
+.layout-tabler .issue-shell .meta-item textarea {
+	background: var(--app-surface);
+}
+
+.layout-tabler .issue-shell table.data-table thead th {
+	background: var(--app-surface-muted);
+	color: var(--app-text-muted);
+}
+
+.layout-tabler .issue-shell table.data-table tbody td {
+	color: var(--app-text);
+}
+
+.layout-tabler .issue-shell .tab-row {
+	background: var(--app-surface-muted);
+}
+
+.layout-tabler .issue-shell .tab-row .tab-btn {
+	color: var(--app-text-muted);
+	background: transparent;
+}
+
+.layout-tabler .issue-shell .tab-row .tab-btn:hover {
+	color: var(--app-heading);
+	background: var(--app-surface);
+}
+
+.layout-tabler .issue-shell .tab-row .tab-btn.is-active {
+	color: var(--app-primary);
+	border-color: rgba(var(--app-primary-rgb), 0.35);
+	background: var(--app-primary-soft);
+}
+
+.layout-tabler .issue-shell .comment-thread .comment .meta {
+	color: var(--app-text-muted);
+}
+
+.layout-tabler .issue-shell .comment-thread .comment .meta strong {
+	color: var(--app-heading);
+}
+
+.layout-tabler .issue-shell .tui-grid-cell-content a {
+	color: var(--app-primary);
+}
+
+.layout-tabler .issue-shell .btn-secondary,
+.layout-tabler .wiki-shell .btn-secondary {
+	background-color: var(--issue-btn-bg-hover);
+	border-color: var(--issue-btn-border);
+	color: var(--issue-heading);
+}
+
+.layout-tabler .issue-shell .btn-secondary:hover,
+.layout-tabler .issue-shell .btn-secondary:focus,
+.layout-tabler .wiki-shell .btn-secondary:hover,
+.layout-tabler .wiki-shell .btn-secondary:focus {
+	background-color: #e2e8f0;
+	border-color: #cbd5e1;
+	color: var(--issue-heading);
+}
+
+.layout-tabler .issue-shell .btn-primary,
+.layout-tabler .wiki-shell .btn-primary {
+	background-color: var(--app-primary);
+	border-color: var(--app-primary);
+}
+
+.layout-tabler .issue-shell .btn-primary:hover,
+.layout-tabler .issue-shell .btn-primary:focus,
+.layout-tabler .wiki-shell .btn-primary:hover,
+.layout-tabler .wiki-shell .btn-primary:focus {
+	background-color: var(--app-primary-hover);
+	border-color: var(--app-primary-hover);
+}
+
+.layout-tabler .wiki-shell .btn-success {
+	background-color: var(--app-success);
+	border-color: var(--app-success);
+	color: #1e3a2f;
+}
+
+.layout-tabler .wiki-shell .btn-success:hover,
+.layout-tabler .wiki-shell .btn-success:focus {
+	filter: brightness(0.92);
+	border-color: var(--app-success);
+	color: #1a3329;
+}
+
+.layout-tabler .issue-shell .btn-info,
+.layout-tabler .wiki-shell .btn-info {
+	background-color: rgba(var(--app-primary-rgb), 0.85);
+	border-color: rgba(var(--app-primary-rgb), 0.85);
+	color: #ffffff;
+}
+
+.layout-tabler .issue-shell .btn-outline-info,
+.layout-tabler .wiki-shell .btn-outline-info {
+	color: var(--app-primary);
+	border-color: rgba(var(--app-primary-rgb), 0.45);
+	background-color: transparent;
+}
+
+.layout-tabler .issue-shell .btn-outline-info:hover,
+.layout-tabler .issue-shell .tab-btn.btn-outline-info.is-active,
+.layout-tabler .wiki-shell .btn-outline-info:hover {
+	background-color: var(--app-primary-soft);
+	border-color: rgba(var(--app-primary-rgb), 0.45);
+	color: var(--app-primary);
+}
+
+.layout-tabler .issue-shell .tab-btn.btn-info.is-active {
+	background-color: var(--app-primary) !important;
+	border-color: var(--app-primary) !important;
+}
+
+/* ── Issue module — 공통 색 ─────────────────────────── */
+.issue-shell {
+	color: var(--issue-text);
+}
+
+.issue-shell input:not([type="checkbox"]):not([type="range"]):focus,
+.issue-shell select:focus,
+.issue-shell textarea:focus {
+	border-color: var(--issue-border-focus);
+	box-shadow: 0 0 0 3px var(--app-focus-ring);
+}
+
+.issue-page-back {
+	color: var(--issue-label);
+}
+
+.issue-page-back:hover {
+	color: var(--issue-link);
+}
+
+.issue-form-row--status-progress {
+	background: var(--issue-bg-subtle);
+	border: 1px solid var(--issue-border);
+}
+
+.req,
+.err-msg {
+	color: var(--app-error);
+}
+
+.issue-shell .field-wrap.is-invalid input,
+.issue-shell .field-wrap.is-invalid select,
+.issue-shell .field-wrap.is-invalid textarea {
+	border-color: var(--app-error);
+}
+
+.attach-section {
+	background: var(--issue-bg-subtle);
+	border: 1px solid var(--issue-border);
+}
+
+.attach-row {
+	border: 1px solid var(--issue-border);
+	background: var(--app-surface);
+}
+
+.form-hint {
+	color: var(--app-muted-fg);
+}
+
+.search-item select:disabled {
+	background: var(--issue-bg-muted);
+	color: var(--app-muted-fg);
+}
+
+.progress-wrap input[type="range"]::-webkit-slider-runnable-track {
+	background: linear-gradient(
+		to right,
+		var(--issue-accent) 0%,
+		var(--issue-accent) var(--pct, 0%),
+		var(--app-track-bg) var(--pct, 0%),
+		var(--app-track-bg) 100%
+	);
+}
+
+.progress-wrap input[type="range"]::-moz-range-track {
+	background: var(--app-track-bg);
+}
+
+.progress-wrap input[type="range"]::-moz-range-progress {
+	background: var(--issue-accent);
+}
+
+.progress-wrap input[type="range"]::-webkit-slider-thumb,
+.progress-wrap input[type="range"]::-moz-range-thumb {
+	background: var(--app-surface);
+	border: 2px solid var(--issue-accent);
+}
+
+.issue-filter-check input[type="checkbox"],
+.issue-row-check {
+	accent-color: var(--issue-link);
+}
+
+.attach-delete-btn {
+	color: var(--app-muted-fg);
+}
+
+.attach-delete-btn:hover {
+	background: var(--app-error-bg);
+	color: var(--app-error-fg);
+}
+
+.issue-quick-hint.is-warn,
+.issue-quick-date-panel {
+	background: var(--app-warn-bg);
+	border-color: var(--app-warn-border);
+}
+
+.issue-quick-date-summary {
+	color: var(--app-warn-text);
+}
+
+.issue-quick-date-section-title.is-ok {
+	color: #2e7d32;
+}
+
+.issue-quick-date-section-title.is-skip,
+.issue-quick-date-reason {
+	color: var(--app-error);
+}
+
+/* ── Issue 버튼 역할 색상 ─────────────────────────────── */
+.search-btn,
+.issue-register-btn,
+.issue-btn--primary,
+.issue-bulk-btn-primary,
+.issue-shell .comment-form button[type="submit"] {
+	background-color: var(--issue-primary);
+	border-color: var(--issue-primary);
+	color: #fff;
+}
+
+.search-btn:hover,
+.issue-register-btn:hover,
+.issue-btn--primary:hover:not(:disabled),
+.issue-bulk-btn-primary:hover:not(:disabled),
+.issue-shell .comment-form button[type="submit"]:hover {
+	background-color: var(--issue-primary-hover);
+	border-color: var(--issue-primary-hover);
+	color: #fff;
+}
+
+.search-cancel-btn,
+#btnCancel,
+#issueQuickCancelBtn,
+#cancelReplyBtn {
+	background-color: var(--app-danger);
+	border-color: var(--app-danger);
+	color: #fff;
+}
+
+.search-cancel-btn:hover,
+#btnCancel:hover,
+#issueQuickCancelBtn:hover,
+#cancelReplyBtn:hover {
+	background-color: var(--app-danger-hover);
+	border-color: var(--app-danger-border-hover);
+	color: #fff;
+}
+
+.issue-btn--secondary,
+.issue-pivot-btn,
+.issue-bulk-btn-ghost,
+.issue-quick-btn,
+.issue-shell .btn-ghost,
+.issue-shell .comment-actions .btn-reply {
+	background-color: var(--issue-primary-soft);
+	border-color: rgba(var(--issue-primary-rgb), 0.28);
+	color: var(--app-btn-primary-text);
+}
+
+.issue-btn--secondary:hover:not(:disabled),
+.issue-pivot-btn:hover,
+.issue-bulk-btn-ghost:hover,
+.issue-quick-btn:hover,
+.issue-shell .btn-ghost:hover,
+.issue-shell .comment-actions .btn-reply:hover {
+	background-color: var(--issue-btn-primary-bg-hover);
+	border-color: rgba(var(--issue-primary-rgb), 0.38);
+	color: #0f4d7a;
+}
+
+#issueBulkClearBtn {
+	background-color: transparent;
+	border-color: var(--issue-btn-border);
+	color: var(--issue-btn-text);
+}
+
+#issueBulkClearBtn:hover {
+	background-color: var(--issue-btn-bg-hover);
+	border-color: #dee2e6;
+	color: var(--issue-heading);
+}
+
+#issueBulkQuickBtn {
+	background-color: var(--app-success);
+	border-color: var(--app-success);
+	color: #fff;
+}
+
+#issueBulkQuickBtn:hover:not(:disabled) {
+	background-color: var(--app-success);
+	border-color: var(--app-success);
+	filter: brightness(0.93);
+	color: #fff;
+}
+
+#issueBulkQuickBtn:disabled {
+	background-color: var(--issue-btn-disabled-bg);
+	border-color: var(--issue-btn-border);
+	color: var(--issue-btn-disabled-text);
+	opacity: 1;
+	cursor: not-allowed;
+}
+
+/* ── 빠른수정 모달 (issue-shell 밖 렌더) ─────────────── */
+.layout-tabler .issue-quick-modal-backdrop .issue-quick-field label {
+	color: var(--app-text-muted);
+}
+
+.layout-tabler .issue-quick-modal-backdrop .issue-quick-field select {
+	border-color: var(--app-border);
+	background-color: var(--app-surface);
+	color: var(--app-heading);
+}
+
+.layout-tabler .issue-quick-modal-backdrop .issue-quick-target-block {
+	background: var(--app-surface-muted);
+	border-color: var(--app-border);
+}
+
+.layout-tabler .issue-quick-modal-backdrop .issue-quick-modal-foot {
+	background: var(--app-surface-subtle);
+	border-color: var(--app-border);
+}
+
+.issue-shell .btn.btn-outline-primary,
+.issue-shell .btn.btn-outline-secondary,
+.issue-shell .btn.btn-outline-success,
+.issue-shell .btn.btn-outline-info,
+.issue-shell .btn.btn-outline-warning,
+.issue-shell .btn.btn-outline-danger,
+.issue-shell .btn.btn-outline-light,
+.issue-shell .btn.btn-outline-dark {
+	background-color: transparent;
+}
+
+#grid .btn.issue-quick-btn.btn-success {
+	background-color: var(--app-success) !important;
+	color: #fff !important;
+	border-color: var(--app-success) !important;
+}
+
+#grid .btn.issue-quick-btn.btn-success:hover {
+	background-color: var(--app-success) !important;
+	filter: brightness(0.93);
+	color: #fff;
+}
+
+/* ── AI modal ─────────────────────────────────────────── */
+#aiResultModal .modal-content {
+	border: 1px solid var(--app-border);
+	box-shadow: 0 20px 36px var(--app-shadow-color-xl);
+}
+
+#aiResultModal .modal-header {
+	background: var(--app-surface-muted) !important;
+	border-bottom: 1px solid var(--app-border);
+}
+
+#aiResultModal .modal-title {
+	color: var(--app-heading);
+}
+
+#aiResultModal .modal-body,
+#aiResultModal .ai-modal-body {
+	background: var(--app-surface);
+	color: var(--app-text);
+}
+
+#aiResultModal .ai-modal-stage {
+	position: relative;
+	min-height: 280px;
+}
+
+#aiResultModal .ai-modal-loading {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	background: var(--app-surface);
+}
+
+#aiResultModal .ai-modal-loading[hidden] {
+	display: none !important;
+}
+
+#aiResultModal .ai-modal-answer {
+	min-height: 280px;
+	line-height: 1.7;
+	font-size: 14px;
+}
+
+#aiResultModal .ai-modal-answer[hidden] {
+	display: none !important;
+}
+
+#aiResultModal #aiAnswerViewer {
+	min-height: 120px;
+}
+
+#aiResultModal #aiAnswerViewer .toastui-editor-spinner {
+	display: none !important;
+}
+
+/* 이슈 · 위키 — 에디터/뷰어 로딩 스피너 */
+.issue-shell .toastui-editor-spinner,
+.wiki-shell .toastui-editor-spinner,
+.issue-shell .toastui-editor-md-preview .toastui-editor-spinner,
+.wiki-shell .toastui-editor-md-preview .toastui-editor-spinner,
+#issue-grid .toastui-editor-spinner,
+#childIssueList .toastui-editor-spinner,
+#wikiViewer .toastui-editor-spinner {
+	display: none !important;
+}
+
+#aiResultModal .ai-modal-empty {
+	margin: 0;
+	color: var(--app-muted-fg);
+	font-size: 13px;
+}

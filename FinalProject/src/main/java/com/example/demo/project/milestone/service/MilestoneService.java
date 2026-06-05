@@ -6,6 +6,7 @@ import com.example.demo.project.issue.service.IssueSummaryVO;
 
 public interface MilestoneService {
 	List<MilestoneVO> selectMilestoneList(Long id);
+	MilestoneVO selectMilestoneById(Long id);
 	List<MilestoneIssueVO> selectMilestoneIssueList(Long id);
 	List<MilestoneTimelineVO> selectTimelineList(Long id);
 	Long insertMilestone(MilestoneVO milestoneVO);
@@ -15,7 +16,9 @@ public interface MilestoneService {
 	Long deleteTimeline(Long id);
 	Long deleteMilestoneIssue(Long id);
 	Long deleteMilestone(Long id);
+	Long moveIssue(MilestoneIssueVO milestoneIssueVO);
 	List<IssueSummaryVO> selectMilestoneNotInIssue(Long id);
 	Long updateMilestone(MilestoneVO milestoneVO);
 	Long getAvg(Long id);
+	Long getExpectedProgress(Long id);
 }

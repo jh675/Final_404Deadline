@@ -1,0 +1,337 @@
+/**
+ * 마일스톤 타임라인 — 디자인 (색·버튼·타이포)
+ * 레이아웃·크기: timeline.html 인라인 style
+ */
+.milestone-timeline-page {
+	box-sizing: border-box;
+	width: 100%;
+	padding: var(--project-body-inset, 16px 20px 20px);
+	background: var(--app-surface);
+	border: 1px solid var(--app-border);
+	border-radius: 8px;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+	color: var(--app-text);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "맑은 고딕", sans-serif;
+	-webkit-font-smoothing: antialiased;
+}
+
+.layout-tabler .milestone-timeline-page {
+	border-radius: 12px;
+	box-shadow: none;
+}
+
+.layout-tabler .project-workspace:has(.milestone-timeline-page) .milestone-timeline-page {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	border-radius: 0;
+}
+
+/* .project-content > div padding:0 은 tabler-bridge.css 에 단일 정의 (중복 제거) */
+
+/* ── 헤더 · 본문 톤 ───────────────────────────────────── */
+.milestone-timeline-page .milestone-page-head {
+	border-bottom-color: var(--app-border);
+}
+
+.milestone-timeline-page .milestone-page-head h1 {
+	color: var(--app-heading);
+	font-size: 1.125rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+
+.milestone-timeline-page .milestone-page-head p,
+.milestone-timeline-page .milestone-page-head .text-muted {
+	color: var(--app-text-muted) !important;
+}
+
+.milestone-timeline-page .milestone-page-body {
+	background: var(--app-surface);
+	border-color: var(--app-border);
+	border-radius: 8px;
+	max-height: 32rem;
+	overflow: hidden;
+}
+
+.milestone-timeline-page .milestone-sidebar {
+	background: var(--app-surface-muted);
+	border-right-color: var(--app-border);
+	min-height: 0;
+	overflow: hidden;
+}
+
+.milestone-timeline-page .milestone-list {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+.milestone-timeline-page .milestone-sidebar h2 {
+	color: var(--app-label);
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: none;
+	letter-spacing: normal;
+	border-bottom-color: var(--app-border);
+}
+
+.milestone-timeline-page .milestone-add-wrap {
+	background: var(--app-surface-muted);
+	border-top-color: var(--app-border);
+}
+
+.milestone-timeline-page .timeline-header {
+	border-bottom-color: var(--app-border);
+}
+
+.milestone-timeline-page .timeline-header h3 {
+	color: var(--app-heading);
+	font-weight: 600;
+}
+
+.milestone-timeline-page .timeline-header p {
+	color: var(--app-text-muted);
+}
+
+.milestone-timeline-page .timeline-status {
+	background: var(--app-surface-muted);
+	border-color: var(--app-border);
+	color: var(--app-text-muted);
+	border-radius: 6px;
+}
+
+.milestone-timeline-page .milestone-list-empty,
+.milestone-timeline-page .empty-hint {
+	color: var(--app-text-muted);
+}
+
+/* ── 사이드바 마일스톤 버튼 ───────────────────────────── */
+.milestone-timeline-page .milestone-btn {
+	border-radius: 6px;
+	transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.milestone-timeline-page .milestone-btn:hover {
+	background: var(--app-hover);
+}
+
+.milestone-timeline-page .milestone-btn.active {
+	background: var(--app-primary-soft);
+	border-color: rgba(var(--app-primary-rgb), 0.28);
+}
+
+.milestone-timeline-page .milestone-btn .name {
+	color: var(--app-heading);
+}
+
+.milestone-timeline-page .milestone-btn .period {
+	color: var(--app-text-muted);
+}
+
+/* ── Bootstrap 버튼 (이슈 페이지 톤) ────────────────────── */
+.milestone-timeline-page .btn {
+	font-weight: 500;
+	border-radius: 6px;
+	transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.milestone-timeline-page .milestone-add-wrap .btn,
+.milestone-timeline-page .timeline-actions .btn {
+	font-size: 0.8125rem;
+}
+
+.milestone-timeline-page .btn-primary {
+	background-color: var(--app-primary);
+	border-color: var(--app-primary);
+	color: #fff;
+}
+
+.milestone-timeline-page .btn-primary:hover,
+.milestone-timeline-page .btn-primary:focus {
+	background-color: var(--app-primary-hover);
+	border-color: var(--app-primary-hover);
+	color: #fff;
+}
+
+.milestone-timeline-page .btn-secondary {
+	background-color: var(--issue-btn-bg-hover, var(--app-surface-muted));
+	border-color: var(--issue-btn-border, var(--app-border));
+	color: var(--app-heading);
+}
+
+.milestone-timeline-page .btn-secondary:hover,
+.milestone-timeline-page .btn-secondary:focus {
+	background-color: #e2e8f0;
+	border-color: #cbd5e1;
+	color: var(--app-heading);
+}
+
+.milestone-timeline-page .btn-danger {
+	background-color: var(--app-danger);
+	border-color: var(--app-danger);
+	color: #fff;
+}
+
+.milestone-timeline-page .btn-danger:hover,
+.milestone-timeline-page .btn-danger:focus {
+	filter: brightness(0.95);
+	border-color: var(--app-danger);
+	color: #fff;
+}
+
+.milestone-timeline-page .btn-outline-primary {
+	color: var(--app-primary);
+	border-color: rgba(var(--app-primary-rgb), 0.45);
+	background-color: transparent;
+}
+
+.milestone-timeline-page .btn-outline-primary:hover,
+.milestone-timeline-page .btn-outline-primary:focus {
+	background-color: var(--app-primary-soft);
+	border-color: rgba(var(--app-primary-rgb), 0.45);
+	color: var(--app-primary);
+}
+
+.milestone-timeline-page .btn-outline-secondary {
+	color: var(--app-text-muted);
+	border-color: var(--app-border);
+	background-color: transparent;
+}
+
+.milestone-timeline-page .btn-outline-secondary:hover,
+.milestone-timeline-page .btn-outline-secondary:focus {
+	background: var(--app-surface-muted);
+	border-color: var(--app-border);
+	color: var(--app-heading);
+}
+
+.milestone-timeline-page .btn-outline-danger {
+	color: var(--app-danger);
+	border-color: rgba(var(--app-danger-rgb, 220, 53, 69), 0.45);
+	background-color: transparent;
+}
+
+.milestone-timeline-page .btn-outline-danger:hover,
+.milestone-timeline-page .btn-outline-danger:focus {
+	background-color: rgba(var(--app-danger-rgb, 220, 53, 69), 0.08);
+	border-color: rgba(var(--app-danger-rgb, 220, 53, 69), 0.45);
+	color: var(--app-danger);
+}
+
+/* ── 진척도 카드 ───────────────────────────────────────── */
+.milestone-timeline-page .milestone-avg-progress {
+	background: var(--app-surface-muted);
+	border-color: var(--app-border);
+	border-radius: 6px;
+}
+
+.milestone-timeline-page .milestone-avg-progress .avg-label {
+	color: var(--app-label);
+	text-transform: none;
+	letter-spacing: normal;
+	font-size: 12px;
+}
+
+.milestone-timeline-page .milestone-avg-progress .avg-value {
+	color: var(--app-text-muted);
+}
+
+.milestone-timeline-page .milestone-avg-progress .avg-hint {
+	color: var(--app-text-muted);
+}
+
+.milestone-timeline-page .milestone-avg-progress .progress {
+	background: var(--app-track-bg, #e9ecef);
+}
+
+.milestone-timeline-page .milestone-avg-progress .progress-bar {
+	background: var(--app-text-muted);
+}
+
+.milestone-timeline-page .milestone-avg-progress.expected .avg-value {
+	color: var(--app-text-muted);
+}
+
+.milestone-timeline-page .milestone-avg-progress.expected .progress-bar {
+	background: var(--app-track-bg, #e9ecef);
+}
+
+.milestone-timeline-page .milestone-avg-progress.compare-below .avg-value {
+	color: var(--app-error);
+}
+
+.milestone-timeline-page .milestone-avg-progress.compare-below .progress-bar {
+	background: var(--app-error);
+}
+
+.milestone-timeline-page .milestone-avg-progress.compare-above .avg-value {
+	color: var(--app-primary);
+}
+
+.milestone-timeline-page .milestone-avg-progress.compare-above .progress-bar {
+	background: linear-gradient(90deg, var(--app-primary), var(--app-primary-hover));
+}
+
+.milestone-timeline-page .milestone-avg-progress.compare-equal .avg-value {
+	color: var(--app-heading);
+}
+
+.milestone-timeline-page .milestone-avg-progress.compare-equal .progress-bar {
+	background: var(--app-heading);
+}
+
+.milestone-timeline-page .milestone-avg-progress.is-loading .avg-value {
+	color: var(--app-text-muted);
+	opacity: 0.65;
+}
+
+/* ── vis-timeline 액센트 ────────────────────────────────── */
+.milestone-timeline-page .vis-labelset .issue-group-link {
+	color: var(--app-primary);
+}
+
+.milestone-timeline-page .vis-labelset .issue-group-link:hover {
+	color: var(--app-primary-hover);
+}
+
+.milestone-timeline-page .vis-custom-time.milestone-start {
+	background-color: var(--app-primary);
+}
+
+.milestone-timeline-page .vis-custom-time.milestone-end {
+	background-color: var(--app-danger);
+}
+
+.milestone-timeline-page .vis-custom-time.milestone-start::after {
+	background-color: var(--app-primary);
+}
+
+.milestone-timeline-page .vis-custom-time.milestone-end::after {
+	background-color: var(--app-danger);
+}
+
+.milestone-timeline-page .vis-item.issue-event-multi .vis-item-content {
+	background: var(--app-danger);
+}
+
+.milestone-timeline-page .vis-item.issue-event-multi:not([class*="type-"]) .vis-dot {
+	background: var(--app-danger);
+	border-color: var(--app-danger-hover, var(--app-danger));
+}
+
+.milestone-timeline-page .vis-item.type-02 .vis-dot {
+	background: var(--app-primary);
+	border-color: var(--app-primary-hover);
+}
+
+/* 세로 스크롤 — 날짜 축(상단) 고정, 이슈 행만 스크롤 */
+.milestone-timeline-page .vis-panel.vis-left.vis-vertical-scroll,
+.milestone-timeline-page .vis-panel.vis-center.vis-vertical-scroll {
+	overflow-x: hidden !important;
+}
+
+.milestone-timeline-page .vis-panel.vis-top {
+	flex-shrink: 0;
+}

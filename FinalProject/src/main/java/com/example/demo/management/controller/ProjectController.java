@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.demo.company.service.CompanyService;
 import com.example.demo.company.service.CompanyVO;
 import com.example.demo.login.service.UserVO;
+import com.example.demo.management.service.ModulesVO;
 import com.example.demo.management.service.ProjectService;
 import com.example.demo.management.service.ProjectVO;
 import com.example.demo.project.calender.service.CalenderService;
@@ -57,7 +58,7 @@ public class ProjectController {
 
 	@GetMapping("management/project")
 	public String listProject(ProjectVO vo, Model model, CompanyVO cvo, GroupDetailVO gvo,
-			Authentication authentication) {
+			Authentication authentication, HttpSession session) {
 
 		List<ProjectVO> list;
 		UserVO loginUser = null;
@@ -82,12 +83,19 @@ public class ProjectController {
 	    model.addAttribute("projectinfo", Map.of("list", list != null ? list : List.of()));
 	    model.addAttribute("companyList", companyList != null ? companyList : List.of());
 	    
+	    // 프로젝트 목록으로 나갈때는 세션 정보 정리
+	    session.removeAttribute("currentProjectId");
+        session.removeAttribute("currentMenu");
+        session.removeAttribute("moduleList");
+        session.removeAttribute("project");
+        session.setAttribute("currentTopMenu", "project");
 	    return "management/projectlist";
 	}
 
 	
 	@GetMapping("/management/projectcreate")
-	public String projectCreate(Model model, HttpSession session,ProjectVO vo) {
+	public String projectCreate(Model model, HttpSession session,ProjectVO vo,
+								@RequestParam(name = "copyFrom", required = false) Long copyFrom) {
 		UserVO user = (UserVO) session.getAttribute("loginUser");
 		if (user != null) {
 	        // userId 필드가 String이라면 user.getUserId()를, 
@@ -97,6 +105,13 @@ public class ProjectController {
 	    }
 		List<ProjectVO> list = projectservice.listProject(null);
 		model.addAttribute("projectList", list != null ? list : List.of());
+		
+		// 복사 기능 추가
+	    if (copyFrom != null) {
+	        ProjectVO copyProject = projectservice.getprojectid(copyFrom);
+	        model.addAttribute("copyProject", copyProject);
+	    }
+	    
 		return "management/projectcreate";
 	}
 
@@ -112,6 +127,8 @@ public class ProjectController {
 	        Map<String, Object> map = new HashMap<>();
 	        map.put("id", user.getId());
 	        map.put("name", user.getName());
+	        map.put("login", user.getLogin());
+	        map.put("email", user.getEmail());
 	        return map;
 	    }).collect(Collectors.toList());
 	}
@@ -119,27 +136,93 @@ public class ProjectController {
 	@PostMapping("/management/projectcreate")
 	public String projectInsert(ProjectVO vo, 
 	                             @RequestParam(value="moduleList", required=false) List<String> moduleList, 
-	                             Authentication authentication,GroupDetailVO gVo, MemberDetailVO mvo,WikiVO wVo,RoleVO rVo) {
+	                             Authentication authentication, GroupDetailVO gVo, MemberDetailVO mvo, 
+	                             WikiVO wVo, RoleVO rVo, Model model) {
 	    
-	    // 1. 인증 객체에서 로그인 유저 정보 가져오기 (가장 확실한 방법)
 	    if (authentication != null && authentication.getPrincipal() instanceof UserVO loginUser) {
-	        // 프로젝트를 생성하는 사람의 정보 세팅
-	        vo.setUserId(loginUser.getId()); 
-	        vo.setBizNo(loginUser.getBizNo());
+	        vo.setBizNo(loginUser.getBizNo()); // userId 세팅 제거
+	    }
+	    
+	    // 폼에서 선택한 매니저 ID를 userId에 세팅
+	    vo.setUserId(vo.getManagerId());
+
+	    try {
+	        projectservice.insertProjectWithModules(vo, moduleList, gVo, mvo, wVo, rVo);
+	        return "redirect:/management/project";
+	        
+	    } catch (IllegalStateException e) {
+	        List<ProjectVO> list = projectservice.listProject(null);
+	        model.addAttribute("projectList", list != null ? list : List.of());
+	        model.addAttribute("errorMessage", e.getMessage());
+	        
+	        if (vo.getCopyPrjId() != null) {
+	            model.addAttribute("copyProject", projectservice.getprojectid(vo.getCopyPrjId()));
+	        }
+	        return "management/projectcreate";
+	    }
+	}
+	
+	@GetMapping("/management/projectupdate")
+	public String projectUpdate(@RequestParam("id") Long id, Model model, Authentication authentication) {
+
+	    ProjectVO editProject = projectservice.getprojectid(id);
+
+	    // 매니저 이름 조회
+	    if (editProject.getUserId() != null) {
+	        List<UserVO> userList = projectservice.searchUsersByBizNo(editProject.getBizNo(), "");
+	        userList.stream()
+	            .filter(u -> u.getId().equals(editProject.getUserId()))
+	            .findFirst()
+	            .ifPresent(u -> editProject.setManagerName(
+	                u.getName() + " / " + u.getLogin() ));
 	    }
 
-	    // 2. 서비스 호출 (프로젝트 정보와 모듈 리스트를 함께 넘김)
-	    // 기존의 projectservice.projectInsert(vo) 대신 새로운 메서드를 호출합니다.
-	    projectservice.insertProjectWithModules(vo, moduleList, gVo, mvo, wVo, rVo);
+	    // 활성화된 모듈 조회 후 enaId에 세팅
+	    List<ModulesVO> moduleList = projectservice.listModules(id);
+	    if (moduleList != null && !moduleList.isEmpty()) {
+	        String enaId = moduleList.stream()
+	            .map(ModulesVO::getModuleCode)
+	            .collect(Collectors.joining(","));
+	        editProject.setEnaId(enaId);
+	    }
+
+	    List<ProjectVO> list = projectservice.listProject(null);
+	    model.addAttribute("editProject", editProject);
+	    model.addAttribute("projectList", list != null ? list : List.of());
+
+	    return "management/projectupdate";
+	}
+
+	@PostMapping("/management/projectupdate")
+	public String projectUpdatePost(ProjectVO vo,
+	                                @RequestParam(value = "moduleList", required = false) List<String> moduleList,
+	                                Authentication authentication) {
+	    
+	    if (authentication != null && authentication.getPrincipal() instanceof UserVO loginUser) {
+	        vo.setBizNo(loginUser.getBizNo());
+	    }
+	    
+	    // 폼에서 선택한 매니저 ID 세팅
+	    vo.setUserId(vo.getManagerId());
+	    
+	    projectservice.updateProject(vo, moduleList);
 	    
 	    return "redirect:/management/project";
 	}
 	
+	
 	@PostMapping("/management/hide")
 	public String projectHide(ProjectVO vo ,RedirectAttributes rttr) {
-		projectservice.projectHide(vo);
-		rttr.addFlashAttribute("msg", "프로젝트가 성공적으로 삭제되었습니다.");
-		return "redirect:/management/project";
+		Long id = vo.getId();
+
+	    if (projectservice.hasChildProject(id)) {
+	        rttr.addFlashAttribute("msg", "하위 프로젝트가 있어 삭제 할 수 없습니다.");
+	        return "redirect:/management/project";
+	    }
+
+	    projectservice.projectHide(vo);
+	    rttr.addFlashAttribute("msg", "프로젝트가 성공적으로 삭제되었습니다.");
+	    return "redirect:/management/project";
 	}
 	
 	@PostMapping("/management/delete")
@@ -156,7 +239,19 @@ public class ProjectController {
 	    return "redirect:/management/project";
 	}
 	
-	//대시보
+	@PostMapping("/management/restoration")
+	public String reproject(ProjectVO vo,RedirectAttributes redirectAttributes) {
+		int result = projectservice.reproject(vo);
+	    if (result == 0) {
+	        // 중복으로 업데이트 차단된 경우
+	        redirectAttributes.addFlashAttribute("errorMsg", "이미 사용중인 식별자입니다.");
+	    } else {
+	        redirectAttributes.addFlashAttribute("successMsg", "복구되었습니다.");
+	    }
+		return "redirect:/management/project";
+	}
+	
+	//대시보드
 	@GetMapping("/project/main")
 	public String goMain( ProjectVO vo , Model model, 
 			             IssueInputVO ivo, 
@@ -172,17 +267,15 @@ public class ProjectController {
 		gmvo.setPrjId(projectid);
 		List<IssueOutputVO> issuelist = issueService.selectIssueList(ivo);
 		IssueCountVO count = mainService.issueCount(icvo);
-		List<CalenderVO> Clist = mainService.selectCalender(vo);
 		List<NoticeVO> Nlist = mainService.selectNotice(nvo);
 		List<GroupDetailVO> Glist = mainService.selectGroupMemberCount(gmvo);
 		if (count == null) {
 	        count = new IssueCountVO();
 	    }
-		model.addAttribute("currentMenu", "dashboard");
+		session.setAttribute("currentMenu", "dashboard");
 		model.addAttribute("project", vo);
 		model.addAttribute("issuelist",issuelist);
 		model.addAttribute("count",count);
-		model.addAttribute("calender",Clist);
 		model.addAttribute("notice",Nlist);
 		model.addAttribute("selectgroup",Glist);
 		model.addAttribute("moduleList",projectservice.listModules(projectid));

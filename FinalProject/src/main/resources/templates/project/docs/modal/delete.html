@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<div th:fragment="deleteModal">
+
+	<div class="modal fade" id="deleteModal" tabindex="-1"
+		aria-hidden="true">
+
+		<div class="modal-dialog">
+			<div class="modal-content">
+
+				<form th:action="@{/project/docs/delete}" method="post">
+					<input type="hidden" name="_method" value="delete" />
+					<input type="hidden" name="id" id="deleteDocId" />
+
+					<div class="modal-header">
+						<h5 class="modal-title">문서 삭제</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">정말로 삭제하시겠습니까?</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+						<button type="submit" class="btn btn-danger">삭제</button>
+					</div>
+				</form>
+
+			</div>
+		</div>
+
+	</div>
+
+</div>
+</html>

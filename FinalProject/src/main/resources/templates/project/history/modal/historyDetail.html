@@ -1,12 +1,210 @@
-<!-- 히스토리 상세 모달 -->
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  
-</body>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <th:block th:fragment="historyDetailModal">
+      <div class="modal fade" id="historyDetailModal" tabindex="-1" aria-labelledby="historyDetailModalTitle" aria-hidden="true" >
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+          <div class="modal-content history-detail-modal">
+            <div class="modal-header">
+              <h5 class="modal-title" id="historyDetailModalTitle">변경 상세</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기" ></button>
+            </div>
+            <div class="modal-body">
+              <p class="history-detail-modal__summary text-muted small mb-3" id="historyDetailSummary" hidden></p>
+              <p class="history-detail-modal__empty text-muted mb-0" id="historyDetailEmpty" hidden>
+                변경 필드 상세가 없습니다.
+              </p>
+              <p class="history-detail-modal__loading text-muted mb-0" id="historyDetailLoading" hidden >
+                불러오는 중…
+              </p>
+              <div id="historyDetailList" class="history-detail-list"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+</th:block>
+
+    <th:block th:fragment="historyDetailModalScript">
+      <script>
+        window.HistoryDetailModal = (function () {
+          var modalEl,
+            titleEl,
+            summaryEl,
+            listEl,
+            emptyEl,
+            loadingEl;
+
+          function cacheElements() {
+            if (!modalEl) {
+              modalEl = document.getElementById("historyDetailModal");
+              if (!modalEl) return false;
+              titleEl = document.getElementById("historyDetailModalTitle");
+              summaryEl = document.getElementById("historyDetailSummary");
+              listEl = document.getElementById("historyDetailList");
+              emptyEl = document.getElementById("historyDetailEmpty");
+              loadingEl = document.getElementById("historyDetailLoading");
+            }
+            return true;
+          }
+
+          function getInstance() {
+            if (!cacheElements() || typeof bootstrap === "undefined" || !bootstrap.Modal) {
+              return null;
+            }
+            return bootstrap.Modal.getOrCreateInstance(modalEl);
+          }
+
+          function escapeHtml(text) {
+            if (text == null) return "";
+            return String(text)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;");
+          }
+
+          function renderItems(items) {
+            if (!listEl) return;
+            if (!items || !items.length) {
+              listEl.innerHTML = "";
+              if (emptyEl) emptyEl.hidden = false;
+              return;
+            }
+            if (emptyEl) emptyEl.hidden = true;
+            listEl.innerHTML = items
+              .map(function (item) {
+                var field = escapeHtml(item.fieldName || "");
+                var oldVal = escapeHtml(item.oldValues || "");
+                var newVal = escapeHtml(item.newValues || "");
+                return (
+                  '<article class="history-detail-item">' +
+                  '<div class="history-detail-item__field">' +
+                  field +
+                  "</div>" +
+                  '<div class="history-detail-item__compare">' +
+                  '<div class="history-detail-item__col history-detail-item__col--old">' +
+                  '<span class="history-detail-item__label">변경 전</span>' +
+                  '<div class="history-detail-item__value">' +
+                  oldVal +
+                  "</div></div>" +
+                  '<div class="history-detail-item__col history-detail-item__col--new">' +
+                  '<span class="history-detail-item__label">변경 후</span>' +
+                  '<div class="history-detail-item__value">' +
+                  newVal +
+                  "</div></div></div></article>"
+                );
+              })
+              .join("");
+          }
+
+          function setLoading(loading) {
+            if (loadingEl) loadingEl.hidden = !loading;
+            if (loading && listEl) listEl.innerHTML = "";
+            if (loading && emptyEl) emptyEl.hidden = true;
+          }
+
+          function open(opts) {
+            if (!cacheElements()) return;
+            opts = opts || {};
+            var historyId = opts.historyId;
+            var summary = opts.summary || "";
+
+            if (titleEl) titleEl.textContent = "변경 상세";
+            if (summaryEl) {
+              if (summary) {
+                summaryEl.textContent = summary;
+                summaryEl.hidden = false;
+              } else {
+                summaryEl.textContent = "";
+                summaryEl.hidden = true;
+              }
+            }
+
+            renderItems([]);
+            setLoading(true);
+
+            var instance = getInstance();
+            if (instance) instance.show();
+
+            if (!historyId) {
+              setLoading(false);
+              if (emptyEl) emptyEl.hidden = false;
+              return;
+            }
+
+            var idNum = Number(historyId);
+            if (!Number.isFinite(idNum) || idNum <= 0) {
+              setLoading(false);
+              if (listEl) {
+                listEl.innerHTML =
+                  '<p class="text-danger mb-0">히스토리 ID가 올바르지 않습니다. (전달값: ' +
+                  escapeHtml(String(historyId)) +
+                  ")</p>";
+              }
+              return;
+            }
+
+            var url =
+              "/project/history/detail?historyId=" + encodeURIComponent(idNum);
+            var csrfMeta = document.querySelector('meta[name="_csrf"]');
+            var fetchPromise =
+              typeof csrfFetch === "function" && csrfMeta && csrfMeta.content
+                ? csrfFetch(url, {
+                    method: "GET",
+                    headers: { Accept: "application/json" },
+                  })
+                : fetch(url, {
+                    method: "GET",
+                    headers: { Accept: "application/json" },
+                  });
+
+            fetchPromise
+              .then(function (res) {
+                return res.json().then(function (data) {
+                  return { res: res, data: data };
+                });
+              })
+              .then(function (payload) {
+                setLoading(false);
+                if (!payload.res.ok) {
+                  var msg =
+                    (payload.data && payload.data.message) ||
+                    "HTTP " + payload.res.status;
+                  if (listEl) {
+                    listEl.innerHTML =
+                      '<p class="text-danger mb-0">상세 내역을 불러오지 못했습니다. (' +
+                      escapeHtml(msg) +
+                      ")</p>";
+                  }
+                  console.error("[history] detail API 실패", idNum, msg);
+                  return;
+                }
+                var items =
+                  payload.data && payload.data.content
+                    ? payload.data.content
+                    : [];
+                renderItems(items);
+              })
+              .catch(function (err) {
+                setLoading(false);
+                if (listEl) {
+                  listEl.innerHTML =
+                    '<p class="text-danger mb-0">상세 내역을 불러오지 못했습니다. (요청 ID: ' +
+                    escapeHtml(String(idNum)) +
+                    ")</p>";
+                }
+                console.error("[history] detail fetch 오류", idNum, err);
+              });
+          }
+
+          return { open: open, getInstance: getInstance };
+        })();
+      </script>
+    </th:block>
+  </body>
 </html>

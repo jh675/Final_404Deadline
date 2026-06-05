@@ -23,6 +23,15 @@ public class Holidaycontroller {
 	public List<HolidayVO> getHolidays(@RequestParam("year")int year) {
 		return holidayService.getHolidays(year);
 	}
-	
+	// 공휴일 초기 데이터 저장 
+	@GetMapping("/holiday/init")
+	@ResponseBody
+	public String initHolidays(
+			@RequestParam(name= "startYear")int startYear,
+			@RequestParam(name="endYear") int endYear) {
+		holidayService.fetchAndRange(startYear, endYear);
+		return startYear + "~" + endYear + "공휴일 저장 완료";
+		
+	}
 
 }

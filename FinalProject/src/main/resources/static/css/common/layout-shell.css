@@ -1,0 +1,128 @@
+/**
+ * 전역 페이지 높이 — layout-app(일반) · layout-tabler(프로젝트) 공통
+ */
+:root {
+	--project-page-gutter: 12px 16px 1px;
+}
+
+html {
+	height: 100%;
+}
+
+body.layout-app,
+body.layout-tabler {
+	min-height: 100%;
+	height: 100%;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	background: var(--app-page-bg);
+	color: var(--app-text);
+}
+
+/* ── 일반 레이아웃 (defaultLayout, errorpgLayout) ─────── */
+body.layout-app > .layout-app__shell {
+	box-sizing: border-box;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--layout-section-gap);
+	padding: var(--project-page-gutter);
+	max-width: 1800px !important; 
+    margin: 0 auto;
+}
+
+body.layout-app .layout-app__shell > .navbar {
+	flex-shrink: 0;
+	margin-bottom: 10px !important;
+}
+
+body.layout-app .layout-app__main {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 2px !important;
+}
+
+body.layout-app .layout-app__main > .card {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	margin-top: 0 !important;
+}
+
+body.layout-app .layout-app__main > .card > .card-body {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+}
+
+body.layout-app .layout-app__shell > footer,
+body.layout-app .layout-app__shell > div:last-child {
+	flex-shrink: 0;
+}
+
+/* ── 프로젝트 레이아웃 (projectLayout) ─────────────────── */
+body.layout-tabler .page {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+body.layout-tabler .page > .page-wrapper {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+body.layout-tabler .page > .page-wrapper > .page-body {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+body.layout-tabler .page > .page-wrapper > .page-body > .container-fluid {
+	flex: 1;
+	min-height: 0;
+	max-width: 1800px !important;
+	margin: 0 auto;
+	width: 100%;
+}
+
+/* 프로젝트 레이아웃 상단 간격: 네비 바 아래 (10px) */
+body.layout-tabler .page > .page-wrapper > .page-body > .container-fluid > .navbar {
+	margin-bottom: 10px !important;
+}
+
+body.layout-tabler .project-workspace {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 2px !important;
+}
+
+body.layout-tabler .project-header {
+	flex-shrink: 0;
+}
+
+body.layout-tabler .project-content {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+}
+
+/* 마일스톤: 워크스페이스 본문(오른쪽 끝) 세로 스크롤만 제거 — 사이드·타임라인 내부 스크롤은 유지 */
+body.layout-tabler .project-workspace:has(.milestone-timeline-page) .project-content {
+	overflow: hidden;
+}
+
+/* 이슈·위키·마일스톤: 본문은 콘텐츠 높이만 사용 (뷰포트 flex 채움 규칙 없음) */

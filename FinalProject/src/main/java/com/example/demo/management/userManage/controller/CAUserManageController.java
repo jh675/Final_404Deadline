@@ -9,7 +9,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.login.service.UserVO;
@@ -18,6 +27,7 @@ import com.example.demo.management.userManage.service.UserManageVO;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +47,8 @@ public class CAUserManageController {
 	}
 	
 	@GetMapping("/userList")
-	public String userList(Model model, @ModelAttribute("filter01") UserManageVO userManage) {
+	public String userList(Model model, @ModelAttribute("filter01") UserManageVO userManage, HttpSession session) {
+		session.setAttribute("currentTopMenu", "user");
 		// 내 기업의 직원만 보도록 bizNo 강제 세팅
 		String myBizNo = getCurrentAdmin().getBizNo();
 		userManage.setBizNo(myBizNo); 
@@ -67,10 +78,15 @@ public class CAUserManageController {
 	@ResponseBody
 	public Map<String, String> userUpdate(@RequestBody UserManageVO vo) {
 		
-
+		vo.setBizNo(getCurrentAdmin().getBizNo());
+		
 	    int updateCnt = caUserManageService.updateUser(vo);
 	    Map<String, String> result = new HashMap<>();
-	    if(updateCnt > 0) {
+
+	    // 성공 체크
+	    if ("DUPLICATE_LOGIN".equals(vo.getResult())) {
+	        result.put("result", "DUPLICATE_LOGIN");
+	    } else if(updateCnt > 0) {
 	        result.put("result", "SUCCESS");
 	    } else {
 	        result.put("result", "ERROR");
@@ -123,5 +139,25 @@ public class CAUserManageController {
 	        }
 	    }
 	    return ResponseEntity.ok().body("SUCCESS");
+	}
+	
+	// 다중 일괄 업데이트
+	@PutMapping("/users/bulk-update")
+	@ResponseBody
+	public Map<String, String> bulkUpdateUsers(@RequestBody Map<String, Object> payload) {
+		
+		// payload에 기업번호를 집어넣기
+		payload.put("bizNo", getCurrentAdmin().getBizNo());
+	    
+		// payload 안에는 ids(리스트), type(문자열), value(문자열) 가 들어있습니다.
+	    int updateCnt = caUserManageService.bulkUpdateUsers(payload);
+	    
+	    Map<String, String> result = new HashMap<>();
+	    if (updateCnt > 0) {
+	        result.put("result", "SUCCESS");
+	    } else {
+	        result.put("result", "ERROR");
+	    }
+	    return result;
 	}
 }

@@ -14,85 +14,121 @@
 <body>
 	<div layout:fragment="content">
 	<div id="wrapper">
-		<h3 class="mb-3">회원 목록</h3>
-		<div>
-			<form id="searchForm"
-			      th:action="@{/admin/userList}"
-			      method="get"
-			      th:object="${filter01}"
-			      class="d-flex align-items-end gap-3 mb-3 flex-wrap">
-
-			    <!-- 권한 -->
-			    <div>
-			        <label for="categoryCd" class="form-label">계정 권한</label>
-			
-			        <select id="categoryCd"
-			                th:field="*{adminCd}"
-			                class="form-select">
-			            <option value="">전체</option>
-			            <option value="01ROLE">시스템관리자</option>
-			            <option value="02ROLE">기업관리자</option>
-			            <option value="03ROLE">사원</option>
-			        </select>
-			    </div>
-			
-			    <!-- 검색 종류 -->
-			    <div>
-			        <label for="searchType" class="form-label">검색 조건</label>
-			        <select id="searchType"
-			                th:field="*{searchType}"
-			                class="form-select">
-			            <option value="">선택</option>
-			            <option value="login">아이디</option>
-			            <option value="compNm">소속기업</option>
-			            <option value="name">이름</option>
-			            <option value="email">이메일</option>
-			        </select>
-			    </div>
-			    <!-- 검색어 -->
-			    <div>
-			        <label for="keyword" class="form-label">검색어</label>
-			        <input type="text"
-			               id="keyword"
-			               th:field="*{keyword}"
-			               class="form-control"
-			               placeholder="검색어 입력">
-			    </div>
-				<div id="searchWarning"
-				     class="text-danger small mt-1 d-none">
-					검색 조건을 선택해주세요.
-				</div>
-			    <!-- 버튼 -->
-			    <div class="d-flex gap-2">
-				    <button type="submit"
-				            class="btn btn-primary">
-				        검색
-				    </button>
-				    <a th:href="@{/admin/userList}"
-				       class="btn btn-outline-secondary">
-				        초기화
-				    </a>
-				
-				</div>
-			</form>
+		<div class="d-flex justify-content-between align-items-center mb-4">
+    
+		    <h2 class="mb-2">회원 목록</h2>
+		
+		    <div class="position-relative">
+		        
+		        <form id="searchForm" 
+		        	  th:action="@{/admin/userList}" 
+		        	  method="get" 
+		        	  th:object="${filter01}" 
+		        	  class="d-flex align-items-end gap-3 mb-3 flex-wrap">
+		            
+		            <div class="d-flex align-items-center gap-2">
+		                <label for="categoryCd" 
+		                	   class="form-label mb-0 text-nowrap text-muted small">계정 권한</label>
+		                <select id="categoryCd" 
+		                		th:field="*{adminCd}" 
+		                		class="form-select form-select-sm" 
+		                		style="width: 130px;">
+		                    <option value="">전체</option>
+		                    <option value="01ROLE">시스템관리자</option>
+		                    <option value="02ROLE">기업관리자</option>
+		                    <option value="03ROLE">사원</option>
+		                </select>
+		            </div>
+		
+		            <div class="vr mx-1 text-secondary"></div> 
+		
+		            <div class="d-flex align-items-center gap-2">
+		                <label  for="searchType" 
+		                		class="form-label mb-0 text-nowrap text-muted small">검색 조건</label>
+		                <select id="searchType" 
+		                		th:field="*{searchType}" 
+		                		class="form-select form-select-sm" 
+		                		style="width: 110px;">
+		                    <option value="">선택</option>
+		                    <option value="login">아이디</option>
+		                    <option value="compNm">소속기업</option>
+		                    <option value="name">이름</option>
+		                    <option value="email">이메일</option>
+		                </select>
+		            </div>
+		
+		            <div>
+		                <input  type="text" 
+		                		id="keyword" 
+		                		th:field="*{keyword}" 
+		                		class="form-control form-control-sm" 
+		                		placeholder="검색어 입력" 
+		                		style="width: 180px;">
+		            </div>
+		
+		            <div class="d-flex gap-1">
+		                <button type="submit" 
+		                		class="btn btn-primary">검색</button>
+		                <a  th:href="@{/admin/userList}" 
+		                	class="btn btn-light border text-secondary">초기화</a>
+		            </div>
+		        </form>
+		
+		        <div id="searchWarning" 
+		        	 class="text-danger mt-1 d-none position-absolute w-100 text-end" 
+		        	 style="font-size: 0.8rem; top: 70%; right: 10px;">
+		            검색 조건을 선택해주세요.
+		        </div>
+		        
+		    </div>
 		</div>
 		
 		<div id="grid"></div>
-		<div class="d-flex justify-content-end mb-3">
-			<button type="button" class="btn btn-primary" onclick="openInsertModal()">회원 등록</button>
-		</div>
-
+		
+		<div id="customBottomBar" class="d-none justify-content-between align-items-center bg-white border-top py-4">
+		    
+		    <div id="leftActionBtns" class="d-flex align-items-center gap-2" style="flex: 1;">
+		        <button type="button" class="btn bg-white border text-secondary fw-semibold shadow-sm" id="toggleBulkModeBtn">일괄작업</button>
+		
+		        <div id="bulkControls" class="d-none d-flex align-items-center gap-2">
+		            <select id="bulkActionType" class="form-select form-select-sm" style="width: auto;">
+		                <option value="">일괄 작업 선택</option>
+		                <option value="status_01ACTIVE">계정 활성화</option>
+		                <option value="status_02ACTIVE">계정 비활성화</option>
+		                <option value="prjManager_01ACTIVE">PM 역할 부여</option>
+		                <option value="prjManager_02ACTIVE">PM 역할 해제</option>
+		            </select>
+		            <button type="button" class="btn btn-success" id="bulkApplyBtn">적용</button>
+		            <button type="button" class="btn bg-white border text-secondary fw-semibold shadow-sm" id="cancelBulkModeBtn">취소</button>
+		            <span id="bulkFeedback" class="small fw-bold text-danger ms-2"></span>
+		        </div>
+		    </div>
+		
+		    <div id="paginationPlaceholder" class="d-flex justify-content-center" style="flex: 2;"></div>
+		    
+		    <div id="rightActionBtns" class="d-flex justify-content-end" style="flex: 1;">
+		        <button type="button" class="btn btn-primary" onclick="openInsertModal()">회원 등록</button>
+		    </div>
+		    
 		</div>
 		<div th:replace="~{management/modal/userInsert :: userInsert}"></div>
-
+	</div>
 		<script th:inline="javascript">
-			const userData = /*[[${userList}]]*/[];
+		    const userData = /*[[${userList}]]*/[];
+		    const activeCodeList = /*[[${activeCodeList}]]*/ [];
+		    
+		    // Map 변환
+		    const activeCodeMap = activeCodeList.reduce((acc, code) => {
+			        const key = code.sCode; 
+			        acc[key] = code.name; 
+			        return acc;
+			    }, {});
 		</script>
 
-		<!-- pagination JS가 grid JS보다 먼저 -->
 		<script
 			src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+		<script th:src="@{/js/common/gridTheme.js}"></script>
 		<script th:src="@{/js/management/userManage.js}"></script>
 	</div>
 </body>

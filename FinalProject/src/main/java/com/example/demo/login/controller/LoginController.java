@@ -1,6 +1,8 @@
 package com.example.demo.login.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -13,18 +15,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.company.service.CompanyVO;
+import com.example.demo.login.mapper.LoginMapper;
 import com.example.demo.login.service.LoginService;
 import com.example.demo.login.service.UserVO;
+import com.example.demo.management.userManage.service.UserManageVO;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
 public class LoginController {
 	private final LoginService loginService;
+	private final LoginMapper loginMapper;
 	
 	@GetMapping("/")
-	public String main(Model model) {
+	public String main(Model model, HttpSession session) {
+		// 프로젝트 밖으로 나왔으므로 프로젝트 관련 세션 정보 삭제
+        session.removeAttribute("currentProjectId");
+        session.removeAttribute("currentMenu");
+        session.removeAttribute("moduleList");
+        session.removeAttribute("project");
 		// 시큐리티 컨텍스트 객체를 얻습니다.
 		SecurityContext context = SecurityContextHolder.getContext();
 
@@ -42,12 +53,12 @@ public class LoginController {
 	        
 	        // 시스템 관리자
 	        if(roles.contains("ROLE_ADMIN")) {
-	            return "redirect:/management/project";
+	            return "redirect:/admin/company/list";
 	        }
 
 	        // 기업 관리자
 	        if(roles.contains("ROLE_CADMIN")) {
-	            return "redirect:/management/project";
+	            return "redirect:/cadmin/userList";
 	        }
 
 	        // 일반 사용자
@@ -60,11 +71,18 @@ public class LoginController {
 
 	    } else {
 	        // 비로그인 사용자
-	        return "login/info";
 	    }
   	
+	    session.setAttribute("currentTopMenu", "home");
+	    return "login/info";
 //	    userVO 꺼내서 쓰는 방법 > 회의록 밑의 개발표준 9번 확인
 	    
+	}
+	
+	@GetMapping("/login")
+	public String goLoginPg(HttpSession session) {
+		session.setAttribute("currentTopMenu", "login");
+		return "login/login";
 	}
 	
 	@GetMapping("/login/companies/search")
@@ -76,10 +94,10 @@ public class LoginController {
 	    return loginService.searchActiveCompanies(keyword);
 	}
 
-		@GetMapping("/login/password-reset")
-		public String showPasswordResetPage() {
-			return "login/pwReset"; 
-		}
+	@GetMapping("/login/password-reset")
+	public String showPasswordResetPage() {
+		return "login/pwReset"; 
+	}
 	
 	// 비밀번호 재설정 처리
 	@PostMapping("/login/password-reset")
@@ -91,6 +109,7 @@ public class LoginController {
 		if (authentication != null && authentication.getPrincipal() instanceof UserVO) {
 			UserVO vo = (UserVO) authentication.getPrincipal();
 			loginService.updatePassword(vo, newPassword);
+			loginService.updateLastLogOn(vo);
 			vo.setMcpCd("02ACTIVE");
 			return "success";
 		}
@@ -101,5 +120,29 @@ public class LoginController {
 	@GetMapping("/errorTest")
 	public String errorpgTest() {
 		return "error/403";
+	}
+	
+	@GetMapping("/login/company/check-bizno")
+	@ResponseBody
+	public Map<String, Object> checkBizNo(@RequestParam("bizNo") String bizNo) {
+	    Map<String, Object> response = new HashMap<>();
+	    
+	    String statusCd = loginMapper.selectCompanyStatus(bizNo);
+	    
+	    if (statusCd != null) {
+	        response.put("exists", true);
+	        response.put("statusCd", statusCd);
+	    } else {
+	        response.put("exists", false);
+	    }
+	    
+	    return response;
+	}
+	
+	@PostMapping("/login/company/request")
+	public String requestCompanyRegistration(CompanyVO company, UserManageVO user) {
+		loginService.requestCompanyRegistration(company, user);
+	    
+	    return "redirect:/login?reqSuccess=true";
 	}
 }

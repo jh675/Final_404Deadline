@@ -9,6 +9,8 @@ public interface AttachService {
     int insertAttach(List<AttachVO> attachVO);
 
     List<AttachVO> selectAttachList(String tableName, Long containerId);
+    
+    List<AttachVO> selectAttachListByContainer(String containerType, Long containerId);
 
     int deleteAttach(Long id);
 

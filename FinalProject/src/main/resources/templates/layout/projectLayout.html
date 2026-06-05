@@ -10,26 +10,46 @@
 	">
 
 <head>
-
 	<th:block
 		th:replace="~{layout/fragments/head :: commonHead(${roleName})}">
 	</th:block>
+
+	<link rel="stylesheet" th:href="@{/css/common/tabler-bridge.css}" />
 
 	<th:block layout:fragment="head-content"></th:block>
 
 </head>
 
-<body>
-    <div class="container-fluid px-4">
+<body class="layout-tabler">
+    <div class="page">
+    <div class="page-wrapper">
+    <div class="page-body">
+    <div class="container-fluid" style="max-width: 1800px; margin: 0 auto;">
 
 		<div
 			th:replace="~{layout/fragments/navbar :: layoutNavbar(${roleName})}">
 		</div>
         
-        <div class="project-header mb-4">
+        <div class="project-workspace">
+        <div class="project-header">
             <!-- 프로젝트 제목 -->
-            <div class="d-flex justify-content-between align-items-end mb-3 border-bottom pb-2">
-                <h4 class="m-0 fw-bold" th:text="${session.project != null ? session.project.prjName : '프로젝트 명'}"></h4>
+            <div class="d-flex justify-content-between align-items-end mb-2 border-bottom pb-2">
+                <h3 class="m-0 fw-bold" th:text="${session.project != null ? session.project.prjName : '프로젝트 명'}"></h3>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="small text-secondary"
+                      th:text="${session.project != null and session.project.prjDesc != null and !#strings.isEmpty(session.project.prjDesc)} ? ${session.project.prjDesc} : '프로젝트 설명이 없습니다.'">
+                    프로젝트 설명이 없습니다.
+                </span>
+                <span class="badge text-bg-light border"
+                      th:text="${session.project != null and session.project.startDate != null} ? ${#dates.format(session.project.startDate, 'yyyy-MM-dd')} : '시작일 미정'">
+                    시작일 미정
+                </span>
+                <span class="text-secondary small">~</span>
+                <span class="badge text-bg-light border"
+                      th:text="${session.project != null and session.project.closedDate != null} ? ${#dates.format(session.project.closedDate, 'yyyy-MM-dd')} : '종료일 미정'">
+                    종료일 미정
+                </span>
             </div>
 
             <!-- 서브 메뉴 탭 -->
@@ -38,14 +58,35 @@
                 <!-- (기본으로 항상 있는 항목) -->
                 <li class="nav-item">
                     <a class="nav-link" 
-                       th:classappend="${currentMenu == 'dashboard' ? 'active fw-bold' : ''}" 
-                       th:href="@{#}">
+                       th:classappend="${session.currentMenu == 'dashboard' ? 'active fw-bold' : ''}" 
+                       th:href="@{/project/main}">
                         개요
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${session.currentMenu == 'group' ? 'active fw-bold' : ''}"
+                       th:href="@{/project/group/list}">
+                        그룹
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${session.currentMenu == 'member' ? 'active fw-bold' : ''}"
+                       th:href="@{/project/member/list}">
+                        구성원
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       th:classappend="${session.currentMenu == 'role' ? 'active fw-bold' : ''}"
+                       th:href="@{/project/role/list}">
+                        권한
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" 
-                       th:classappend="${currentMenu == 'history' ? 'active fw-bold' : ''}" 
+                       th:classappend="${session.currentMenu == 'history' ? 'active fw-bold' : ''}" 
                        th:href="@{/project/history/list}">
                         작업내역
                     </a>
@@ -57,50 +98,52 @@
                     <!-- ENA_NAME_CD가 'NOTICE'면 공지사항 탭 생성 -->
                     <a th:if="${mod1.enaNameCd == '01MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${currentMenu == 'notice' ? 'active fw-bold' : ''}" 
-                       th:href="@{/notice/list}">공지사항</a>
+                       th:classappend="${session.currentMenu == 'notice' ? 'active fw-bold' : ''}" 
+                       th:href="@{/project/notice/list}">공지사항</a>
 
                     <a th:if="${mod1.enaNameCd == '06MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'wiki' ? 'active fw-bold' : ''}" 
-                       th:href="@{#}">위키</a>
+                       th:href="@{/project/wiki}">위키</a>
 
                     <a th:if="${mod1.enaNameCd == '04MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'issue' ? 'active fw-bold' : ''}" 
-                       th:href="@{/issue/list}">이슈</a>
+                       th:href="@{/project/issue/list}">이슈</a>
 
                     <a th:if="${mod1.enaNameCd == '05MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'milestone' ? 'active fw-bold' : ''}" 
-                       th:href="@{/milestone}">마일스톤</a>
+                       th:href="@{/project/milestone}">마일스톤</a>
                     
                     <a th:if="${mod1.enaNameCd == '08MODULE'}" 
                        class="nav-link" 
                        th:classappend="${currentMenu == 'board' ? 'active fw-bold' : ''}" 
-                       th:href="@{/boards/list}">게시판</a>
+                       th:href="@{/project/boards/list}">게시판</a>
                        
                     <a th:if="${mod1.enaNameCd == '02MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
-                       th:href="@{#/ganttchart/list}">간트차트</a>
-
-                    <a th:if="${mod1.enaNameCd == '03MODULE'}" 
-                       class="nav-link" 
-                       th:classappend="${currentMenu == 'calendar' ? 'active fw-bold' : ''}" 
-                       th:href="@{/calender/list}">일정</a>
-                       
+                       th:classappend="${session.currentMenu == 'gantt' ? 'active fw-bold' : ''}" 
+                       th:href="@{/project/gantt/list}">간트차트</a>
+                
                     <a th:if="${mod1.enaNameCd == '07MODULE'}" 
                        class="nav-link" 
-                       th:classappend="${currentMenu == 'docs' ? 'active fw-bold' : ''}" 
-                       th:href="@{#}">문서</a> 
+                       th:classappend="${session.currentMenu == 'docs' ? 'active fw-bold' : ''}" 
+                       th:href="@{/project/docs/list}">문서</a> 
                 </li> 
+               
             </ul> 
         </div>
-        <!-- 실제 본문(이슈, 위키 등)이 들어갈 영역 -->
-        <div layout:fragment="content">
+        <div class="project-content">
+            <div layout:fragment="content">
+            </div>
+        </div>
         </div>
 	<div th:replace="~{layout/fragments/footer :: yedam}"></div>
+		<th:block th:replace="~{layout/fragments/modal/aiModal :: aiModalFragment}"></th:block>
+  </div>
+  </div>
+  </div>
   </div>
 </body>
 </html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/projectLayout}">
+<head>
+    <meta charset="UTF-8">
+    <title>위키 문서 역사</title>
+    <th:block layout:fragment="head-content">
+        <link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+        <link rel="stylesheet" th:href="@{/css/project/wiki.css}" />
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+<div class="wiki-shell">
+<div id="wrapper">
+    <div class="wiki-layout">
+        <div class="wiki-main">
+            <div class="wiki-page-head">
+                <div>
+                    <p class="wiki-page-kicker">위키 문서 역사</p>
+                    <h1 class="wiki-page-head__title">
+                        <span th:text="${page.title}">SCP-6871</span>
+                        <small>(문서 역사)</small>
+                    </h1>
+                    <p class="wiki-page-desc">
+                        이 문서의 수정 이력을 시간순으로 확인할 수 있습니다.
+                    </p>
+                </div>
+                <div class="wiki-page-head__actions">
+                    <a class="btn btn-secondary" th:href="@{/project/wiki/view/{name}(name=${page.title})}">문서 보기</a>
+                    <a class="btn btn-success"
+                       th:if="${@prjAuth.hasRole('ROLE_WIKI_UPDATE')}"
+                       th:href="@{/project/wiki/register(id=${page.pageId != null ? page.pageId : page.id})}">편집</a>
+                </div>
+            </div>
+
+            <div class="wiki-history-summary">
+                <div class="wiki-history-stat">
+                    <span class="wiki-history-stat-label">총 리비전</span>
+                    <strong th:text="${historyList != null ? historyList.size() : 0}">0</strong>
+                </div>
+                <div class="wiki-history-stat">
+                    <span class="wiki-history-stat-label">최신 버전</span>
+                    <strong th:text="${page.version != null ? 'r' + page.version : '-'}">r0</strong>
+                </div>
+                <div class="wiki-history-stat">
+                    <span class="wiki-history-stat-label">최근 수정 시각</span>
+                    <strong th:text="${page.updatedOn != null ? #dates.format(page.updatedOn, 'yyyy-MM-dd HH:mm') : '-'}">2026-05-26 17:00</strong>
+                </div>
+            </div>
+
+            <section class="wiki-panel">
+                <div class="wiki-history-toolbar">
+                    <div class="wiki-history-pager">
+                        <button type="button" class="btn btn-secondary" disabled>이전</button>
+                        <button type="button" class="btn btn-secondary" disabled>다음</button>
+                    </div>
+                </div>
+
+                <th:block th:if="${historyList != null and !historyList.isEmpty()}">
+                    <ul class="wiki-revision-list">
+                        <li class="wiki-revision-item"
+                            th:each="revision, stat : ${historyList}"
+                            th:classappend="${stat.first} ? ' is-latest' : ''">
+                            <label class="wiki-revision-check" th:attr="for=${'revision-' + revision.version}"></label>
+                            <div>
+                                <div class="wiki-revision-meta">
+                                    <span class="wiki-revision-time"
+                                          th:text="${revision.updatedOn != null ? #dates.format(revision.updatedOn, 'yyyy-MM-dd HH:mm:ss') : '날짜 미상'}">2026-05-11 11:28:55</span>
+                                    <span class="wiki-revision-links">
+                                        <a th:href="@{/project/wiki/view/{name}(name=${page.title},version=${revision.version})}">보기</a>
+                                        <a th:href="@{/project/wiki/view/{name}(name=${page.title},version=${revision.version})}" target="_blank" rel="noopener">새 창</a>
+                                    </span>
+                                    <span class="wiki-revision-tag"
+                                          th:text="${revision.version != null ? 'r' + revision.version : 'r?'}">r74</span>
+                                    <span class="wiki-revision-badge" th:if="${stat.first}">최신</span>
+                                    <span class="wiki-revision-author"
+                                          th:if="${revision.modifierName != null and !#strings.isEmpty(revision.modifierName)}"
+                                          th:text="${revision.modifierName}">whk5879</span>
+                                    <span class="wiki-revision-author"
+                                          th:if="${revision.modifierName == null or #strings.isEmpty(revision.modifierName)}"
+                                          th:text="|사용자 #${revision.memId}|">사용자 #1</span>
+                                </div>
+                                <p class="wiki-revision-summary"
+                                   th:text="${revision.describe != null and !#strings.isEmpty(revision.describe) ? revision.describe : '수정 요약이 없습니다.'}">
+                                    원문에서 오래된 표현을 다듬었습니다.
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </th:block>
+
+                <p class="wiki-empty" th:if="${historyList == null or historyList.isEmpty()}">
+                    아직 표시할 수정 이력이 없습니다.
+                </p>
+            </section>
+        </div>
+
+        <aside class="wiki-aside">
+            <h3 class="wiki-aside__title">색인</h3>
+            <ul>
+                <li><a th:href="@{/project/wiki}">첫페이지</a></li>
+                <li><a th:href="@{/project/wiki/index(type='title')}">제목별</a></li>
+                <li><a th:href="@{/project/wiki/index(type='date')}">날짜별</a></li>
+                <li><a class="is-active" th:href="@{/project/wiki/history/{name}(name=${page.title})}">문서 역사</a></li>
+            </ul>
+        </aside>
+    </div>
+</div>
+</div>
+
+    <script>
+        (function () {
+            var checks = Array.prototype.slice.call(document.querySelectorAll('.wiki-history-check'));
+            var compareButton = document.getElementById('compareButton');
+
+            if (!checks.length || !compareButton) {
+                return;
+            }
+
+            function getSelectedVersions() {
+                return checks
+                    .filter(function (checkbox) {
+                        return checkbox.checked;
+                    })
+                    .map(function (checkbox) {
+                        return checkbox.value;
+                    });
+            }
+
+            function syncCompareButton() {
+                compareButton.disabled = getSelectedVersions().length !== 2;
+            }
+
+            checks.forEach(function (checkbox) {
+                checkbox.addEventListener('change', syncCompareButton);
+            });
+
+            compareButton.addEventListener('click', function () {
+                var versions = getSelectedVersions();
+                if (versions.length !== 2) {
+                    return;
+                }
+
+                alert('선택한 리비전: r' + versions[0] + ' / r' + versions[1] + '\n비교 화면은 다음 단계에서 연결할 수 있습니다.');
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>

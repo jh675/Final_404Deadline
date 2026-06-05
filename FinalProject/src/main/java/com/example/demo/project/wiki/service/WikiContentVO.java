@@ -8,9 +8,12 @@ import lombok.Data;
 public class WikiContentVO {
 	private Long id;
 	private Long pageId;
+	private Long parentId;
 	private Long version;
 	private String describe;
 	private String content;
+	private String title;
 	private Date updatedOn;
 	private Long memId;
+	private String modifierName;
 }

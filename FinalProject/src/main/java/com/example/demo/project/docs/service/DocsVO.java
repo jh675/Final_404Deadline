@@ -12,5 +12,6 @@ public class DocsVO {
 	private String title;
 	private String description;
 	private Date createdOn;
-
+	private int fileCount;
+	private String memName;
 }

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+
+    <th:block th:fragment="aiModalFragment">
+        
+        <div class="modal fade" id="aiResultModal" tabindex="-1" aria-labelledby="aiResultModalLabel"
+             aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title fw-bold" id="aiResultModalLabel">✨ AI 프로젝트 비서 답변</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                    </div>
+                    <div class="modal-body ai-modal-body">
+                        <div class="ai-modal-stage">
+                            <div id="aiLoading" class="ai-modal-loading" hidden>
+                                <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+                                <p class="mt-2 text-muted mb-0">프로젝트 데이터를 분석 중입니다. 잠시만 기다려주세요...</p>
+                            </div>
+                            <article id="aiAnswerContent" class="ai-modal-answer" hidden>
+                                <div id="aiAnswerViewer"></div>
+                                <p id="aiAnswerEmpty" class="ai-modal-empty" hidden>내용이 없습니다.</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function () {
+                const modalEl = document.getElementById('aiResultModal');
+                const searchBtn = document.getElementById('aiSearchBtn');
+                const searchInput = document.getElementById('aiSearchInput');
+                if (!modalEl) return;
+
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                const loadingDiv = document.getElementById('aiLoading');
+                const contentDiv = document.getElementById('aiAnswerContent');
+                const viewerEl = document.getElementById('aiAnswerViewer');
+                const emptyEl = document.getElementById('aiAnswerEmpty');
+
+                let aiAnswerViewer = null;
+
+                function renderAiAnswer(markdown) {
+                    if (aiAnswerViewer) {
+                        try { aiAnswerViewer.destroy(); } catch (e) {}
+                        aiAnswerViewer = null;
+                    }
+                    viewerEl.innerHTML = '';
+
+                    const md = (markdown || '').toString().trim();
+                    if (!md) {
+                        viewerEl.hidden = true;
+                        emptyEl.hidden = false;
+                        return;
+                    }
+
+                    emptyEl.hidden = true;
+                    viewerEl.hidden = false;
+
+                    function mountAiViewer() {
+                        if (window.toastui && window.toastui.Editor) {
+                            // viewer: true 대신 Viewer 클래스 직접 사용
+                            // editor-all.min.js 에는 Viewer가 toastui.Editor.factory 로 접근 가능
+                            aiAnswerViewer = toastui.Editor.factory({
+                                el: viewerEl,
+                                viewer: true,
+                                initialValue: md
+                            });
+                        } else {
+                            viewerEl.style.whiteSpace = 'pre-wrap';
+                            viewerEl.textContent = md;
+                        }
+                    }
+
+                    if (window.ToastUiBundle) {
+                        ToastUiBundle.requireViewer(mountAiViewer);
+                    } else {
+                        mountAiViewer();
+                    }
+                }
+
+                function executeAiSearch() {
+                    const query = searchInput.value.trim();
+                    if (!query) {
+                        alert('질문을 입력해주세요!');
+                        return;
+                    }
+
+                    contentDiv.hidden = true;
+                    loadingDiv.hidden = false;
+                    modal.show();
+
+                    csrfFetch('/ai/assistant', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: query })
+                    })
+                        .then(function (res) {
+                            if (!res.ok) throw new Error('AI 응답을 가져오지 못했습니다.');
+                            return res.text();
+                        })
+                        .then(function (data) {
+                            renderAiAnswer(data);
+                            loadingDiv.hidden = true;
+                            contentDiv.hidden = false;
+                        })
+                        .catch(function (err) {
+                            renderAiAnswer('오류가 발생했습니다: ' + err.message);
+                            loadingDiv.hidden = true;
+                            contentDiv.hidden = false;
+                        });
+                }
+
+                if (searchBtn && searchInput) {
+                    searchBtn.addEventListener('click', executeAiSearch);
+                    searchInput.addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter') executeAiSearch();
+                    });
+                }
+            });
+        </script>
+    </th:block>
+
+</body>
+</html>

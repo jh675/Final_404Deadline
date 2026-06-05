@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <th:block th:fragment="memberDetailContent">
+      <th:block th:if="${memberNotFound}">
+        <p class="perm-empty">
+          요청한 구성원을 이 프로젝트에서 찾을 수 없습니다.
+        </p>
+      </th:block>
+
+      <th:block th:if="${!memberNotFound}">
+        <section class="mem-section" aria-labelledby="mem-basic-heading">
+          <h2 class="mem-section__title" id="mem-basic-heading">기본정보</h2>
+          <div class="mem-section__body">
+            <div class="mem-basic-layout">
+              <div class="mem-profile-slot" title="프로필 이미지 영역">
+                <img
+                  th:if="${profileImageAttachId != null}"
+                  th:src="@{/download/{id}(id=${profileImageAttachId})}"
+                  alt="프로필 이미지"
+                  style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px"
+                />
+                <span th:if="${profileImageAttachId == null}" aria-hidden="true">이미지</span>
+              </div>
+              <div class="mem-basic-fields mem-detail-form">
+                <div class="mem-field-row">
+                  <label for="detailUserName">이름</label>
+                  <input type="text" id="detailUserName" readonly th:value="${detail.userName}" autocomplete="off" />
+                </div>
+                <div class="mem-field-row">
+                  <label for="detailHireDate">입사일</label>
+                  <input type="text" id="detailHireDate" readonly th:value="${detail.hireDate}" />
+                </div>
+                <div class="mem-field-row">
+                  <label>성별</label>
+                  <div class="mem-gender-group">
+                    <label>
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="01GENDER"
+                        disabled
+                        th:checked="${#strings.equalsIgnoreCase(detail.genderCd, '01GENDER')}"
+                      />
+                      남
+                    </label>
+                    <label>
+                      <input type="radio" name="gender" value="02GENDER" disabled th:checked="${#strings.equalsIgnoreCase(detail.genderCd, '02GENDER')}" />
+                      여
+                    </label>
+                  </div>
+                </div>
+                <div class="mem-field-row">
+                  <label for="detailEmail">이메일</label>
+                  <input type="text" id="detailEmail" readonly placeholder="aaa@aaa.com" th:value="${detail.email}" />
+                </div>
+                <div class="mem-field-row">
+                  <label for="detailTel">연락처</label>
+                  <input type="text" id="detailTel" readonly placeholder="010-xxxx-xxxx" th:value="${detail.tel}" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mem-section" aria-labelledby="mem-account-heading">
+          <h2 class="mem-section__title" id="mem-account-heading">계정 정보</h2>
+          <div class="mem-section__body">
+            <div class="mem-account-inline mem-detail-form">
+              <div class="mem-field-row">
+                <label for="detailLogin">아이디</label>
+                <input type="text" id="detailLogin" readonly th:value="${detail.login != null and !#strings.isEmpty(detail.login) ? detail.login : '-'}" />
+              </div>
+              <div class="mem-field-row">
+                <label for="detailLastLogin">마지막 접속일자</label>
+                <input
+                  type="text"
+                  id="detailLastLogin"
+                  readonly
+                  placeholder="-"
+                  th:value="${lastLoginOnYmd != null and !#strings.isEmpty(lastLoginOnYmd) ? lastLoginOnYmd : '-'}"
+                />
+              </div>
+              <div class="mem-field-row mem-field-row--pw-expiry">
+                <label for="detailPwExpiry">패스워드 유효만료일</label>
+                <input
+                  type="text"
+                  id="detailPwExpiry"
+                  readonly
+                  placeholder="-"
+                  th:value="${pwUpdatedOnYmd != null and !#strings.isEmpty(pwUpdatedOnYmd) ? pwUpdatedOnYmd : '-'}"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mem-section" aria-labelledby="mem-project-heading">
+          <h2 class="mem-section__title" id="mem-project-heading">소속 정보</h2>
+          <div class="mem-section__body">
+            <div class="mem-basic-fields mem-detail-form">
+              <div class="mem-field-row">
+                <label for="detailGrpName">소속 그룹 <span class="req">*</span></label>
+                <input type="text" id="detailGrpName" readonly th:value="${detail.grpName}" autocomplete="off" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mem-section" aria-labelledby="mem-issues-heading">
+          <h2 class="mem-section__title" id="mem-issues-heading">담당 이슈 정보</h2>
+          <div class="mem-section__body">
+            <div id="memberIssueGrid" class="mem-issue-grid" aria-label="담당 이슈 목록"></div>
+            <script th:inline="javascript">
+              window.memberIssueGridRows = /*[[${issues}]]*/ [];
+            </script>
+          </div>
+        </section>
+
+        <div class="issue-register-actions mem-actions">
+          <a
+            th:if="${panelMode}"
+              class="btn btn-success"
+            th:href="@{/project/member/panel(userId=${userId}, grpId=${grpId}, edit=true)}"
+          >수정</a>
+          <a
+            th:unless="${panelMode}"
+              class="btn btn-success"
+            th:href="@{/project/member/info(userId=${userId}, grpId=${grpId}, edit=true)}"
+          >수정</a>
+        </div>
+      </th:block>
+    </th:block>
+  </body>
+</html>

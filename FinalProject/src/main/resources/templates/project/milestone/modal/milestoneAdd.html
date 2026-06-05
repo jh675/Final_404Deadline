@@ -25,19 +25,19 @@
 						</div>
 						<div class="mb-3">
 							<label class="form-label">시작일</label>
-							<input type="datetime-local" class="form-control" name="startDate" step="3600" required />
+							<input type="date" class="form-control" name="startDate" required />
 						</div>
 						<div class="mb-3">
 							<label class="form-label">마감일</label>
-							<input type="datetime-local" class="form-control" name="endDate" step="60" required />
-							
-							
+							<input type="date" class="form-control" name="endDate" required />
 						</div>
+						<small class="form-text text-muted d-block mb-2" data-ms-date-hint></small>
 						<small class="text-danger d-none" data-ms-err></small>
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-outline-danger" data-ms-delete hidden>삭제</button>
+					<button type="button" class="btn btn-danger" data-ms-delete hidden
+					        th:if="${@prjAuth.hasRole('ROLE_MILESTONE_DELETE')}">삭제</button>
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
 					<button type="button" class="btn btn-primary" data-ms-save>추가/수정</button>
 				</div>
@@ -58,38 +58,62 @@
 			var saveBtn = modalEl.querySelector("[data-ms-save]");
 			var startDateEl = form.querySelector('[name="startDate"]');
 			var endDateEl = form.querySelector('[name="endDate"]');
+			var dateHintEl = modalEl.querySelector("[data-ms-date-hint]");
 
-			function toDatetimeLocalValue(d) {
+			function toDateInputValue(d) {
 				d = d || new Date();
 				var pad = function (n) { return String(n).padStart(2, "0"); };
-				return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate())
-					+ "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+				return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
 			}
 
-			function toDatetimeLocalFromApi(value, roundToHour) {
+			function toDateInputFromApi(value) {
 				if (value == null || value === "") return "";
-				var d = value instanceof Date ? value : new Date(value);
-				if (!isNaN(d.getTime())) {
-					if (roundToHour) d.setMinutes(0, 0, 0);
-					return toDatetimeLocalValue(d);
-				}
+				var d = (window.MilestoneTimeline && window.MilestoneTimeline.parseWallClockDate)
+					? window.MilestoneTimeline.parseWallClockDate(value)
+					: (value instanceof Date ? value : new Date(value));
+				if (d && !isNaN(d.getTime())) return toDateInputValue(d);
 				var s = String(value);
-				if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) {
-					return roundToHour ? s.slice(0, 13) + ":00" : s.slice(0, 16);
-				}
-				if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-					return s.slice(0, 10) + "T00:00";
-				}
+				if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
 				return "";
 			}
 
+			function applyProjectDateBounds() {
+				var mt = window.MilestoneTimeline;
+				if (!mt) return { min: "", max: "" };
+				if (typeof mt.applyMilestoneDateBounds === "function") {
+					mt.applyMilestoneDateBounds(startDateEl, endDateEl);
+				}
+				if (dateHintEl && typeof mt.formatProjectMilestoneBoundsHint === "function") {
+					dateHintEl.textContent = mt.formatProjectMilestoneBoundsHint();
+				}
+				return typeof mt.getProjectMilestoneBounds === "function"
+					? mt.getProjectMilestoneBounds() : { min: "", max: "" };
+			}
+
+			function clampToProjectBounds(el) {
+				if (!el || !el.value) return;
+				if (window.MilestoneTimeline && window.MilestoneTimeline.clampMilestoneDateValue) {
+					window.MilestoneTimeline.clampMilestoneDateValue(el);
+				}
+			}
+
 			function setDefaultMilestoneDates() {
+				applyProjectDateBounds();
 				var start = new Date();
-				start.setMinutes(0, 0, 0);
 				var end = new Date(start);
 				end.setMonth(end.getMonth() + 1);
-				if (startDateEl) startDateEl.value = toDatetimeLocalValue(start);
-				if (endDateEl) endDateEl.value = toDatetimeLocalValue(end);
+				if (startDateEl) {
+					startDateEl.value = toDateInputValue(start);
+					clampToProjectBounds(startDateEl);
+				}
+				if (endDateEl) {
+					endDateEl.value = toDateInputValue(end);
+					clampToProjectBounds(endDateEl);
+				}
+				if (startDateEl && endDateEl && startDateEl.value && endDateEl.value
+						&& startDateEl.value > endDateEl.value) {
+					endDateEl.value = startDateEl.value;
+				}
 			}
 
 			function getCsrfHeaders() {
@@ -115,6 +139,13 @@
 				);
 			}
 
+			/** date input → 서버 JsonFormat(yyyy-MM-dd) */
+			function normalizeMilestoneDate(raw) {
+				var s = (raw || "").toString().trim();
+				var m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+				return m ? m[1] + "-" + m[2] + "-" + m[3] : "";
+			}
+
 			function setErr(msg) {
 				if (!errEl) return;
 				if (msg) {
@@ -124,6 +155,23 @@
 					errEl.textContent = "";
 					errEl.classList.add("d-none");
 				}
+			}
+
+			function isEditMode() {
+				return modalEl.dataset.msMode === "edit";
+			}
+
+			function resolveMilestoneId(fd) {
+				var raw = fd.get("id") || fd.get("selectId");
+				if (raw == null || String(raw).trim() === "") {
+					if (isEditMode() && window.MilestoneTimeline
+							&& typeof window.MilestoneTimeline.getSelectedMilestoneId === "function") {
+						raw = window.MilestoneTimeline.getSelectedMilestoneId();
+					}
+				}
+				if (raw == null || String(raw).trim() === "") return null;
+				var n = Number(raw);
+				return Number.isFinite(n) ? n : null;
 			}
 
 			function syncPrjId(msOpt) {
@@ -152,8 +200,15 @@
 				}
 				form.querySelector('[name="id"]').value = ms.id  != null ? ms.id : "";
 				form.querySelector('[name="name"]').value = ms.name || "";
-				if (startDateEl) startDateEl.value = toDatetimeLocalFromApi(ms.startDate, true);
-				if (endDateEl) endDateEl.value = toDatetimeLocalFromApi(ms.endDate, false);
+				applyProjectDateBounds();
+				if (startDateEl) {
+					startDateEl.value = toDateInputFromApi(ms.startDate);
+					clampToProjectBounds(startDateEl);
+				}
+				if (endDateEl) {
+					endDateEl.value = toDateInputFromApi(ms.endDate);
+					clampToProjectBounds(endDateEl);
+				}
 				syncPrjId(ms);
 			}
 
@@ -161,8 +216,9 @@
 				if (!selectEl) return;
 				selectEl.innerHTML = '<option value="">선택하세요</option>';
 				milestones.forEach(function (m) {
+					if (m.id == null) return;
 					var opt = document.createElement("option");
-					opt.value = m.id;
+					opt.value = String(m.id);
 					opt.textContent = m.name || ("마일스톤 #" + m.id);
 					if (currentId != null && String(currentId) === String(m.id)) opt.selected = true;
 					selectEl.appendChild(opt);
@@ -174,21 +230,33 @@
 				syncPrjId(null);
 				var trigger = event.relatedTarget;
 				var mode = trigger && trigger.getAttribute("data-mode") === "edit" ? "edit" : "add";
-				var ms = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestone)
-					? window.MilestoneTimeline.getSelectedMilestone()
-					: null;
+				modalEl.dataset.msMode = mode;
 				var list = (window.MilestoneTimeline && window.MilestoneTimeline.getMilestones)
 					? window.MilestoneTimeline.getMilestones()
 					: [];
+				var ms = null;
+				if (mode === "edit") {
+					ms = (window.MilestoneTimeline && window.MilestoneTimeline.getSelectedMilestone)
+						? window.MilestoneTimeline.getSelectedMilestone()
+						: null;
+					if (!ms && list.length) ms = list[0];
+				}
 
 				if (mode === "edit") {
 					titleEl.textContent = "마일스톤 관리";
 					selectWrap.hidden = false;
 					if (deleteBtn) deleteBtn.hidden = false;
+					if (!list.length) {
+						setErr("마일스톤 목록을 불러온 뒤 다시 시도해 주세요.");
+						saveBtn.disabled = true;
+					} else {
+						saveBtn.disabled = false;
+					}
 					populateSelect(list, ms ? ms.id : null);
 					fillForm(ms);
 					saveBtn.textContent = "수정";
 				} else {
+					saveBtn.disabled = false;
 					titleEl.textContent = "마일스톤 추가";
 					selectWrap.hidden = true;
 					if (deleteBtn) deleteBtn.hidden = true;
@@ -207,26 +275,63 @@
 				});
 			}
 
+			function parseApiError(res) {
+				return res.text().then(function (text) {
+					if (!text) return "HTTP " + res.status;
+					try {
+						var data = JSON.parse(text);
+						return data.message || text;
+					} catch (e) {
+						return text;
+					}
+				});
+			}
+
+			function buildSavedMilestone(saved, payload, isEdit) {
+				if (saved && typeof saved === "object" && saved.id != null) {
+					return saved;
+				}
+				if (typeof saved === "number" && Number.isFinite(saved)) {
+					return Object.assign({}, payload, { id: saved });
+				}
+				return Object.assign({}, payload, { id: isEdit ? payload.id : null });
+			}
+
 			saveBtn.addEventListener("click", function () {
 				setErr("");
 				var fd = new FormData(form);
+				var isEdit = isEditMode();
 				var payload = {
-					id: fd.get("id") ? Number(fd.get("id")) : null,
+					id: resolveMilestoneId(fd),
 					prjId: fd.get("prjId") ? Number(fd.get("prjId")) : null,
 					name: (fd.get("name") || "").toString().trim(),
-					startDate: (fd.get("startDate") || "").toString(),
-					endDate: (fd.get("endDate") || "").toString(),
+					startDate: normalizeMilestoneDate(fd.get("startDate")),
+					endDate: normalizeMilestoneDate(fd.get("endDate")),
 				};
+				if (isEdit && payload.id == null) {
+					setErr("수정할 마일스톤을 선택하세요.");
+					return;
+				}
+				if (!isEdit) {
+					payload.id = null;
+				}
 				if (!payload.name || !payload.startDate || !payload.endDate) {
 					setErr("모든 항목을 입력하세요."); return;
 				}
 				if (payload.startDate > payload.endDate) {
 					setErr("마감일은 시작일 이후여야 합니다."); return;
 				}
-				var isEdit = payload.id != null;
-				var url = "/api/milestone/milestone";
+				if (window.MilestoneTimeline && window.MilestoneTimeline.isMilestoneDateInProjectBounds) {
+					if (!window.MilestoneTimeline.isMilestoneDateInProjectBounds(payload.startDate)
+							|| !window.MilestoneTimeline.isMilestoneDateInProjectBounds(payload.endDate)) {
+						var hint = window.MilestoneTimeline.formatProjectMilestoneBoundsHint
+							? window.MilestoneTimeline.formatProjectMilestoneBoundsHint() : "";
+						setErr("시작·마감일은 프로젝트 기간 안이어야 합니다." + (hint ? " " + hint : ""));
+						return;
+					}
+				}
+				var url = "/project/milestone/api/milestone";
 				var method = isEdit ? "PUT" : "POST";
-				console.log(payload);
 				saveBtn.disabled = true;
 				fetch(url, {
 					method: method,
@@ -234,16 +339,27 @@
 					body: JSON.stringify(payload),
 				})
 					.then(function (res) {
-						if (!res.ok) throw new Error("HTTP " + res.status);
+						if (!res.ok) {
+							return parseApiError(res).then(function (msg) {
+								throw new Error(msg);
+							});
+						}
 						return res.json().catch(function () { return null; });
 					})
 					.then(function (saved) {
-						var ms = saved && saved.id != null ? saved : Object.assign(
-							{ id: isEdit ? payload.id : Date.now() }, payload
-						);
+						var ms = buildSavedMilestone(saved, payload, isEdit);
 						if (isEdit) {
+							if (ms.id == null) {
+								throw new Error("수정 결과를 확인할 수 없습니다.");
+							}
 							window.MilestoneTimeline.updateMilestoneLocal(ms);
+							if (typeof window.MilestoneTimeline.refreshMilestones === "function") {
+								return window.MilestoneTimeline.refreshMilestones();
+							}
 						} else {
+							if (ms.id == null) {
+								throw new Error("등록 결과를 확인할 수 없습니다.");
+							}
 							window.MilestoneTimeline.addMilestoneLocal(ms);
 						}
 						bootstrap.Modal.getInstance(modalEl).hide();
@@ -259,15 +375,15 @@
 					setErr("");
 					var idVal = form.querySelector('[name="id"]').value;
 					if (!idVal) { setErr("삭제할 마일스톤을 선택하세요."); return; }
-					if (!window.confirm("이 마일스톤을 삭제할까요?")) return;
 					deleteBtn.disabled = true;
-					fetch("/api/milestone/milestone/" + encodeURIComponent(idVal), {
+					fetch("/project/milestone/api/milestone/" + encodeURIComponent(idVal), {
 						method: "DELETE",
 						headers: getCsrfHeaders()
 					})
 						.then(function (res) {
 							if (!res.ok) throw new Error("HTTP " + res.status);
 							window.MilestoneTimeline.removeMilestoneLocal(idVal);
+							alert("마일스톤이 삭제되었습니다.");
 							bootstrap.Modal.getInstance(modalEl).hide();
 						})
 						.catch(function (err) {

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+</head>
+<body>
+  <div id="editor"></div>
+  <hr/>
+  <div id="viewer"></div>
+
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+  <script>
+    const { Editor, Viewer } = toastui;
+
+    // Editor 초기화
+    const editor = new Editor({
+      el: document.querySelector('#editor'),
+      height: '400px',
+      initialEditType: 'markdown',
+      previewStyle: 'vertical',
+      initialValue: '# 안녕하세요\n내용을 입력하세요.',
+    });
+
+    // Viewer 초기화
+    const viewer = new Viewer({
+      el: document.querySelector('#viewer'),
+      initialValue: editor.getMarkdown(),
+    });
+
+    // Editor 변경 시 Viewer 실시간 업데이트
+    editor.on('change', () => {
+      viewer.setMarkdown(editor.getMarkdown());
+    });
+  </script>
+</body>
+</html>

@@ -12,8 +12,6 @@ public interface MemberMapper {
     /** 프로젝트 구성원 목록 */
     List<ProjectMemberRowVO> selectProjectMemberList(MemberListCriteria criteria);
 
-    String selectProjectNameByPrjId(@Param("prjId") Long prjId);
-
     /** 프로젝트 수행 기업(biz_no) 소속 사용자 목록 */
     List<CompanyMemberRowVO> selectCompanyMembersByPrjId(
             @Param("prjId") Long prjId,
@@ -41,9 +39,10 @@ public interface MemberMapper {
 
     int countActiveMember(@Param("userId") Long userId, @Param("grpId") Long grpId);
 
-    String selectUserHireDateYmd(@Param("userId") Long userId);
-
-    int insertMember(MemberRegisterParam param);
+    /** 동일 그룹으로 N건 INSERT */
+    int insertMembers(@Param("userIds") List<Long> userIds, @Param("grpId") Long grpId);
 
     int updateMember(MemberUpdateParam param);
+    
+    String findLoginById(Long userId);
 }

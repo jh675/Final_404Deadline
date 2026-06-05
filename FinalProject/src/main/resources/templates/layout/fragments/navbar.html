@@ -4,153 +4,295 @@
 
 <body>
 
-<nav th:fragment="layoutNavbar(title)"
-     class="navbar navbar-expand-lg bg-body-tertiary border-top border-5"
-     th:classappend="${
-        title == '시스템관리자' ? 'border-danger' : 
-        (title == '기업관리자' ? 'border-primary' : 'border-secondary')
-     }">
+	<nav th:fragment="layoutNavbar(title)"
+		class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
 
-	<div class="container-fluid">
+		<div class="container-fluid">
 
-		<a class="navbar-brand" th:text="${title}"></a>
+			<a class="navbar-brand" th:text="${title}"></a>
 
-		<div class="collapse navbar-collapse">
+			<div class="collapse navbar-collapse">
 
-			<ul class="navbar-nav me-auto">
+				<ul class="navbar-nav me-auto">
 
-				<!-- 공통 메뉴 -->
-				<li class="nav-item small">
-					편의를 위한 임시 메뉴입니다
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" th:href="@{/}">
-						홈화면
-					</a>
-				</li>
-
-				<!-- 비로그인 -->
 				<th:block sec:authorize="isAnonymous()">
-
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/login}">
+						<a class="nav-link px-3" 
+						   th:classappend="${session.currentTopMenu == 'home'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+						   th:href="@{/}">
+							홈화면
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link px-3" 
+						   th:classappend="${session.currentTopMenu == 'login'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+						   th:href="@{/login}">
 							로그인
 						</a>
 					</li>
-
 				</th:block>
 
-				<!-- 관리자 -->
-				<th:block sec:authorize="hasRole('ADMIN')">
+					<th:block sec:authorize="hasRole('ADMIN')">
+						<li class="nav-item"><a class="nav-link px-3"
+							th:classappend="${session.currentTopMenu == 'company'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+							th:href="@{/admin/company/list}"> 기업관리 </a></li>
+						<li class="nav-item"><a class="nav-link px-3"
+							th:classappend="${session.currentTopMenu == 'user'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+							th:href="@{/admin/userList}"> 회원관리 </a></li>
+						<li class="nav-item"><a class="nav-link px-3"
+							th:classappend="${session.currentTopMenu == 'project'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+							th:href="@{/management/project}"> 프로젝트 관리 </a></li>
+					</th:block>
 
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/company/list}">
-							기업관리
-						</a>
-					</li>
-					
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/admin/userList}">
-							회원관리
-						</a>
-					</li>
-					
+					<th:block sec:authorize="hasRole('USER')">
+						<li class="nav-item"><a class="nav-link px-3"
+							th:classappend="${session.currentTopMenu == 'project'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+							th:href="@{/management/project}"> 프로젝트 목록 </a></li>
+					</th:block>
 
-				</th:block>
-
-				<!-- 일반회원 -->
-				<th:block sec:authorize="hasRole('USER')">
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/issue/list}">
-							이슈
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/milestone}">
-							마일스톤
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/calender/list}">
-							일정
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/notice/list}">
-							공지사항
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/boards/list}">
-							게시판
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{#}">
-							문서(미연결)
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{#}">
-							간트차트(미연결)
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{#}">
-							위키(미연결)
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{#}">
-							작업내역(미연결)
-						</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" th:href="@{/management/project}">
-							프로젝트개요(미연결)
-						</a>
-					</li>
-
-				</th:block>
-
-				<!-- 기업관리자 -->
 				<th:block sec:authorize="hasRole('CADMIN')">
-
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/cadmin/userList}">
+						<a class="nav-link px-3" 
+						   th:classappend="${session.currentTopMenu == 'user'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+						   th:href="@{/cadmin/userList}">
 							회원 관리
 						</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" th:href="@{/management/project}">
+						<a class="nav-link px-3" 
+						   th:classappend="${session.currentTopMenu == 'project'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+						   th:href="@{/management/project}">
 							프로젝트관리
 						</a>
 					</li>
-
 				</th:block>
 
+				<li class="nav-item" sec:authorize="isAuthenticated()">
+					<a class="nav-link px-3" 
+					   th:classappend="${session.currentTopMenu == 'calendar'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+					   th:href="@{/calendar/list}">
+						일정
+					</a>
+				</li>
+				<li class="nav-item" sec:authorize="isAuthenticated()">
+					<a class="nav-link px-3" 
+					   th:classappend="${session.currentTopMenu == 'mypage'} ? 'active bg-primary bg-opacity-10 text-primary fw-bold rounded-pill mx-1' : ''"
+					   th:href="@{/mypage}">
+						마이페이지
+					</a>
+				</li>
 			</ul>
 
-			<!-- 로그인 영역 -->
-			<div class="d-flex align-items-center gap-2"
-				sec:authorize="isAuthenticated()">
+				<!-- 공통 영역 -->
 
-				<span>
-					<strong sec:authentication="principal.name"></strong>님
-				</span>
+				<div class="d-flex align-items-center gap-2"
+					sec:authorize="isAuthenticated()">
+					<div class="position-relative me-2" style="width: 300px;">
+						<div class="input-group input-group-sm">
+							<span class="input-group-text bg-gradient text-white"
+								style="background-color: #5b6cff;">✨ AI</span> <input
+								type="text" id="aiSearchInput" class="form-control"
+								placeholder="지금 내가 해야할 일은?">
+							<button class="btn btn-primary" type="button"
+								id="aiSearchBtn">묻기</button>
+						</div>
+					</div>
 
-				<form th:action="@{/logout}" method="post">
-					<button type="submit"
-						class="btn btn-outline-danger btn-sm">
-						로그아웃
-					</button>
-				</form>
+					<input type="hidden" id="loginUserId"
+						th:value="${#authentication != null and #authentication.principal != 'anonymousUser' ? #authentication.principal.username : 0}" />
 
+					<!-- 🔔 알림 버튼 드롭다운 -->
+					<div class="dropdown me-2">
+						<button class="btn btn-secondary position-relative"
+							type="button" id="notificationBtn" data-bs-toggle="dropdown"
+							data-bs-auto-close="outside" aria-expanded="false">
+							🔔 <span id="notificationBadge"
+								class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+								style="display: none; font-size: 10px;"> 0 </span>
+						</button>
+
+						<ul class="dropdown-menu dropdown-menu-end p-0"
+							data-bs-theme="light"
+							style="width: 350px; max-height: 400px; overflow-y: auto; background: #fff; color: #212529;">
+
+							<!-- 헤더 -->
+							<li
+								class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom"
+								style="background: #f8f9fa; color: #212529;"><strong>🔔
+									알림</strong>
+								<button class="btn btn-link text-muted p-0"
+									id="clearAllBtn">전체 삭제</button></li>
+
+							<!-- 알림 목록 -->
+							<div id="notificationList">
+								<li class="text-center text-muted py-4" id="emptyNoti">새로운
+									알림이 없습니다</li>
+							</div>
+
+						</ul>
+					</div>
+
+					<!-- ✅ 알림 아이템 스타일 오버라이드 -->
+					<style>
+/* 기본 상태에서도 글자가 잘 보이도록 */
+#notificationList .dropdown-item {
+	background-color: #fff !important;
+	color: #212529 !important;
+}
+
+#notificationList .dropdown-item small {
+	color: #212529 !important;
+}
+/* 호버 시 살짝 강조만 */
+#notificationList .dropdown-item:hover {
+	background-color: #f0f6ff !important;
+	color: #212529 !important;
+}
+/* 삭제 버튼 */
+#notificationList .delete-btn {
+	color: #aaa !important;
+}
+
+#notificationList .delete-btn:hover {
+	color: #e74c3c !important;
+}
+/* 시간 텍스트 */
+#notificationList .text-muted {
+	color: #888 !important;
+}
+</style>
+
+					<span> <strong sec:authentication="principal.name"></strong>님
+					</span>
+
+					<form th:action="@{/logout}" method="post">
+						<button type="submit" class="btn btn-danger">로그아웃
+						</button>
+					</form>
+				</div>
+
+				<!-- SSE 연결 스크립트 -->
+				<script th:inline="javascript">
+			document.addEventListener('DOMContentLoaded', function () {
+			
+				const userId = String(document.getElementById('loginUserId').value);
+				if (!userId || userId === "0") return;
+			
+			    if (!userId) return;
+			
+			    const badge       = document.getElementById('notificationBadge');
+			    const list        = document.getElementById('notificationList');
+			    const emptyNoti   = document.getElementById('emptyNoti');
+			    const clearAllBtn = document.getElementById('clearAllBtn');
+			
+			    let unreadCount = 0;
+			
+			    function getIcon(message) {
+			        if (message.includes('이슈가 등록'))        return '🐛';
+			        if (message.includes('이슈 상태가 변경'))   return '🔄';
+			        if (message.includes('프로젝트 그룹'))      return '👥';
+			        if (message.includes('공지사항'))           return '📢';
+			        if (message.includes('프로젝트 진행상태')) return '📊';
+			        if (message.includes('회사 일정이 등록'))   return '📅';
+			        if (message.includes('1시간 후 일정'))      return '⏰';
+			        return '🔔';
+			    }
+			
+			    function addNotification(message) {
+			        emptyNoti.style.display = 'none';
+			
+			        const icon = getIcon(message);
+			        const time = new Date().toLocaleTimeString();
+			
+			        const item = document.createElement('li');
+			        item.className = 'dropdown-item border-bottom py-2 px-3';
+			        item.style.whiteSpace = 'normal';
+			        item.style.cursor = 'default';
+			        // ✅ 인라인 스타일로 기본 배경/글자색 강제 지정
+			        item.style.backgroundColor = '#fff';
+			        item.style.color = '#212529';
+			        item.innerHTML = `
+			            <div class="d-flex justify-content-between align-items-start">
+			                <div>
+			                    <span>${icon}</span>
+			                    <small class="ms-1" style="color:#212529;">${message}</small>
+			                </div>
+			                <button class="btn btn-link p-0 ms-2 delete-btn" 
+			                        style="font-size:12px; flex-shrink:0; color:#aaa;">✕</button>
+			            </div>
+			            <div style="font-size:11px; color:#888; margin-top:4px;">${time}</div>
+			        `;
+			
+			        item.querySelector('.delete-btn').addEventListener('click', function () {
+			            item.remove();
+			            unreadCount = Math.max(0, unreadCount - 1);
+			            updateBadge();
+			            checkEmpty();
+			        });
+
+			        // 호버 효과 JS로 처리
+			        item.addEventListener('mouseenter', function() {
+			            item.style.backgroundColor = '#f0f6ff';
+			        });
+			        item.addEventListener('mouseleave', function() {
+			            item.style.backgroundColor = '#fff';
+			        });
+
+			        list.prepend(item);
+			        unreadCount++;
+			        updateBadge();
+			
+			        if (Notification.permission === 'granted') {
+			            new Notification(`${icon} 회사 알림`, { body: message });
+			        }
+			    }
+			
+			    function updateBadge() {
+			        if (unreadCount > 0) {
+			            badge.style.display = 'block';
+			            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+			        } else {
+			            badge.style.display = 'none';
+			        }
+			    }
+			
+			    function checkEmpty() {
+			        const items = list.querySelectorAll('.dropdown-item');
+			        if (items.length === 0) {
+			            emptyNoti.style.display = 'block';
+			        }
+			    }
+			
+			    clearAllBtn.addEventListener('click', function () {
+			        list.querySelectorAll('.dropdown-item').forEach(item => item.remove());
+			        unreadCount = 0;
+			        updateBadge();
+			        checkEmpty();
+			    });
+			
+			    document.getElementById('notificationBtn').addEventListener('click', function () {
+			        unreadCount = 0;
+			        updateBadge();
+			    });
+			
+			    if (Notification.permission === 'default') {
+			        Notification.requestPermission();
+			    }
+			
+			    const eventSource = new EventSource(`/api/notifications/subscribe?userId=${userId}`);
+			
+			    eventSource.addEventListener('notification', function (event) {
+			        addNotification(event.data);
+			    });
+			
+			    eventSource.onerror = function () {
+			        console.warn('SSE 연결이 끊겼습니다. 재연결 시도 중...');
+			    };
+			});
+			</script>
 			</div>
-
 		</div>
-	</div>
-</nav>
+	</nav>
 
 </body>
 </html>

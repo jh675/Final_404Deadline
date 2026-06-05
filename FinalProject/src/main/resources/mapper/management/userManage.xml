@@ -47,7 +47,7 @@
 		        </if>
 		    </if>
 		</where>
-		ORDER BY ID
+		ORDER BY ADMIN_CD, COMP_NM, ID
 	</select>
 	
 	<insert id="insertUser"
@@ -63,8 +63,8 @@
 	        #{email},
 	        #{adminCd},
 	        #{statusCd},
-	        #{mcpCd},
 	        #{prjManagerCd},
+	        #{mcpCd},
 			#{hireDate, jdbcType=DATE},
         	#{genderCd},
 	
@@ -75,15 +75,26 @@
 
 	</insert>
 
+	<select id="checkUpdateIdDuplicate" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM USERS 
+	    WHERE BIZ_NO = #{bizNo} 
+	      AND LOGIN = #{login} 
+	      AND ID != #{id} 
+	</select>
+	      
 	<update id="updateUser">
 	    UPDATE USERS
 	    SET
+	    	LOGIN = #{login},
 	        BIZ_NO = #{bizNo},
 	        NAME = #{name},
 	        TEL = #{tel},
 	        EMAIL = #{email},
 	        ADMIN_CD = #{adminCd},
+	        GENDER_CD = #{genderCd},
 	        STATUS_CD = #{statusCd},
+	        HIRE_DATE = #{hireDate},
 	        PRJ_MANAGER_CD = #{prjManagerCd},
 	        MCP_CD = #{mcpCd}
 	    WHERE ID = #{id}
@@ -94,7 +105,67 @@
                ,COMPANY_NAME
         FROM 	COMPANY
         WHERE 	IS_ACTIVE_CD = '01ACTIVE'
+          AND   BIZ_NO != '124-87-03358' 
         ORDER BY COMPANY_NAME
-
     </select>
+    
+    <select id="selectByLoginAndBizNo">
+	    SELECT 	 ID
+				,BIZ_NO
+				,LOGIN
+				,NAME
+				,TEL
+				,EMAIL
+				,ADMIN_CD
+				,STATUS_CD
+				,PRJ_MANAGER_CD
+				,MCP_CD
+	    FROM 	 users
+	    WHERE 	 BIZ_NO = #{bizNo} 
+	    AND 	 LOGIN = #{login}
+	</select>
+	
+	<update id="bulkUpdateUsers" parameterType="map">
+	    UPDATE USERS
+	    <set>
+	        <choose>
+	            <when test="type == 'status'">
+	                STATUS_CD = #{value}
+	                <if test="value == '02ACTIVE'">
+	                    , MCP_CD = '01ACTIVE'
+	                </if>
+	            </when>
+	            
+	            <when test="type == 'prjManager'">
+	                PRJ_MANAGER_CD = #{value}
+	            </when>
+	        </choose>
+	    </set>
+	    WHERE ID IN
+	    <foreach item="id" collection="ids" open="(" separator="," close=")">
+	        #{id}
+	    </foreach>
+	</update>
+	
+	<select id="checkCompanyExists" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM COMPANY 
+	    WHERE BIZ_NO = #{bizNo} 
+	</select>	
+	
+	<update id="updateMyInfo">
+	    UPDATE USERS
+	    <set>
+	        LOGIN = #{login},
+	        NAME = #{name},
+	        TEL = #{tel},
+	        EMAIL = #{email}
+	        
+	        <if test="password != null and password != ''">
+	            , PASSWORD = #{password}
+	            , PW_UPDATED_ON = SYSDATE
+	        </if>
+	    </set>
+	    WHERE ID = #{id}
+	</update>
 </mapper>

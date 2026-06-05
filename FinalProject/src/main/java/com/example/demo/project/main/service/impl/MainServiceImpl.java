@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.management.service.ProjectVO;
-import com.example.demo.project.calender.service.CalenderVO;
 import com.example.demo.project.group.service.GroupDetailVO;
 import com.example.demo.project.main.mapper.MainMapper;
 import com.example.demo.project.main.service.IssueCountVO;
@@ -27,10 +25,7 @@ public class MainServiceImpl implements MainService {
 		return mainMapper.issueCount(vo);
 	}
 	
-	@Override
-	public List<CalenderVO> selectCalender(ProjectVO vo){
-		return mainMapper.selectCalender(vo);
-	}
+
 	
 	@Override
 	public List<NoticeVO> selectNotice(NoticeVO nvo) {

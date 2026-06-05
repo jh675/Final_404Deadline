@@ -1,15 +1,40 @@
 package com.example.demo.project.wiki.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.util.UriUtils;
 
+import java.nio.charset.StandardCharsets;
+
+import com.example.demo.login.service.UserVO;
+import com.example.demo.project.issue.service.IssueOutputVO;
+import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.wiki.service.WikiContentVO;
+import com.example.demo.project.wiki.service.WikiLinkSuggestVO;
+import com.example.demo.project.wiki.service.WikiPageVO;
 import com.example.demo.project.wiki.service.WikiService;
+import com.example.demo.util.attach.service.AttachService;
+import com.example.demo.util.attach.service.AttachVO;
 
+import jakarta.servlet.http.HttpSession;
 @Controller
 public class WikiController {
 
@@ -17,19 +42,285 @@ public class WikiController {
 	@Autowired
 	WikiService service;
 	
-	@GetMapping("/wiki/write")
-	public String wikiWrite(Model model) {
+	@Autowired
+	AttachService attachService;
+
+	@Autowired
+	IssueService issueService;
+
+	private Long getCurrentProjectId(HttpSession session) {
+		return (Long) session.getAttribute("currentProjectId");
+	}
+
+	private UserVO getLoginUser() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null && auth.getPrincipal() instanceof UserVO u) {
+			return u;
+		}
+		return null;
+	}
+
+	/** 본문 저장 형식: [[#123 이슈 제목]] */
+	private static String buildIssueLinkInsert(Long id, String subject) {
+		if (id == null) {
+			return "";
+		}
+		String safeSubject = sanitizeLinkText(subject);
+		if (safeSubject.isEmpty()) {
+			return "[[#" + id + "]]";
+		}
+		return "[[#" + id + " " + safeSubject + "]]";
+	}
+
+	private static String formatIssueLinkLabel(Long id, String subject) {
+		String safeSubject = sanitizeLinkText(subject);
+		if (safeSubject.isEmpty()) {
+			return "#" + id;
+		}
+		return safeSubject + " (#" + id + ")";
+	}
+
+	private static String sanitizeLinkText(String text) {
+		if (text == null) {
+			return "";
+		}
+		return text.trim()
+				.replace("]]", "」")
+				.replace("\r", " ")
+				.replace("\n", " ");
+	}
+
+	@GetMapping("/project/wiki/register")
+	public String wikiWrite(Model model, @RequestParam(value = "id", required = false) Long id, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+		List<WikiPageVO> pageList = service.selectWikiPageForTree(projectId, id);
+		model.addAttribute("currentMenu", "wiki");
+		model.addAttribute("pageList", pageList != null ? pageList : Collections.emptyList());
+		if (id != null) {
+			WikiContentVO page = service.selectWikiContentLastVerById(id);
+			if (page == null) {
+				return "redirect:/project/wiki/register";
+			}
+			page.setId(id);
+			model.addAttribute("page", page);
+			model.addAttribute("selectedParentId", page.getParentId());
+			List<AttachVO> existingFiles = attachService.selectAttachList("06MODULE", id);
+			model.addAttribute("existingFiles",
+					existingFiles != null ? existingFiles : Collections.emptyList());
+		}
 		return "project/wiki/wikiWrite";
 	}
 	
-//	@PostMapping("/wiki/write")
-//	public String wikiWrite(@RequestBody WikiContentVO wikiContentVO) {
-//		service.insertWikiContent(wikiContentVO);
-//		return "redirect:/wiki/view?id=" + wikiVO.getId();
-//	}
-	@GetMapping("/wiki/view")
-	public String wikiView() {
+	@PostMapping(path = "/project/wiki/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public String wikiWrite(@ModelAttribute WikiContentVO wikiContentVO,
+			@RequestParam(value = "files", required = false) MultipartFile[] files,
+			HttpSession session,
+			RedirectAttributes redirectAttributes) {
+		Long projectId = getCurrentProjectId(session);
+		UserVO loginUser = getLoginUser();
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+		if (loginUser == null) {
+			return "redirect:/";
+		}
+
+		Long id = service.saveNewWiki(
+				wikiContentVO.getTitle(), projectId, wikiContentVO.getParentId(),
+				wikiContentVO, loginUser.getId());
+		if (attachService.hasAttachmentFiles(files)) {
+			attachService.saveAndInsertAttachments(id, files, "06MODULE", "Wiki");
+		}
+		String encodedTitle = UriUtils.encodePathSegment(
+				wikiContentVO.getTitle(), StandardCharsets.UTF_8);
+		redirectAttributes.addFlashAttribute("wikiNotice", "위키가 작성되었습니다.");
+		return "redirect:/project/wiki/view/" + encodedTitle;
+	}
+	
+	@PostMapping(path = "/project/wiki/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public String wikiUpdate(@ModelAttribute WikiContentVO wikiContentVO,
+			@RequestParam(value = "files", required = false) MultipartFile[] files,
+			HttpSession session,
+			RedirectAttributes redirectAttributes) {
+		UserVO loginUser = getLoginUser();
+		if (getCurrentProjectId(session) == null) {
+			return "redirect:/management/project";
+		}
+		if (loginUser == null) {
+			return "redirect:/";
+		}
+		service.updateWikiPageParent(wikiContentVO.getPageId(), wikiContentVO.getParentId());
+		service.reviseWiki(wikiContentVO, loginUser.getId());
+		if (attachService.hasAttachmentFiles(files)) {
+			attachService.saveAndInsertAttachments(wikiContentVO.getPageId(), files, "06MODULE", "Wiki");
+		}
+		String encodedTitle = UriUtils.encodePathSegment(
+				wikiContentVO.getTitle(), StandardCharsets.UTF_8);
+		redirectAttributes.addFlashAttribute("wikiNotice", "위키가 수정되었습니다.");
+		return "redirect:/project/wiki/view/" + encodedTitle;
+	}
+	
+	@GetMapping("/project/wiki/link-suggest")
+	@ResponseBody
+	public List<WikiLinkSuggestVO> linkSuggest(
+			@RequestParam(name = "q", required = false) String q,
+			@RequestParam(name = "type", defaultValue = "wiki") String type,
+			HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return Collections.emptyList();
+		}
+		String term = q != null ? q.trim() : "";
+		String linkType = type != null ? type.trim().toLowerCase() : "wiki";
+		List<WikiLinkSuggestVO> result = new ArrayList<>();
+
+		if ("wiki".equals(linkType) || "all".equals(linkType)) {
+			result.addAll(service.suggestWikiLinks(projectId, term));
+		}
+		if ("issue".equals(linkType) || "all".equals(linkType)) {
+			for (IssueOutputVO issue : issueService.searchIssuesForLink(projectId, term)) {
+				if (issue == null || issue.getId() == null) {
+					continue;
+				}
+				String subject = issue.getSubject() != null ? issue.getSubject() : "";
+				String label = formatIssueLinkLabel(issue.getId(), subject);
+				result.add(new WikiLinkSuggestVO("issue", label, buildIssueLinkInsert(issue.getId(), subject)));
+			}
+		}
+		return result;
+	}
+
+	@GetMapping("/project/wiki/check")
+	public ResponseEntity<Void> nameCheck(@RequestParam(name = "name") String name, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return ResponseEntity.badRequest().build();
+		}
+		if (service.nameCheck(projectId, name) == 0) {
+			return ResponseEntity.ok().build();
+		} else {
+			return ResponseEntity.badRequest().build();
+		}
+
+	}
+	
+	@GetMapping("/project/wiki/index/tree")
+	public String wikiTree(Model model, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+		model.addAttribute("currentMenu", "wiki");
+		model.addAttribute("type", "title");
+		model.addAttribute("titleTree", service.getTitleTree(projectId));
+		return "project/wiki/wikiIndex";
+	}
+
+	@GetMapping("/project/wiki/index")
+	public String wikiIndex(@RequestParam(value = "type", defaultValue = "title") String type,
+			Model model, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+
+		String currentType = "date".equalsIgnoreCase(type) ? "date" : "title";
+		model.addAttribute("currentMenu", "wiki");
+		model.addAttribute("type", currentType);
+		if ("date".equals(currentType)) {
+			model.addAttribute("dateGroups", service.getDateGroups(projectId));
+		} else {
+			model.addAttribute("titleTree", service.getTitleTree(projectId));
+		}
+		return "project/wiki/wikiIndex";
+	}
+	
+	
+	@GetMapping({"/project/wiki", "/project/wiki/view/{name}"})
+	public String wikiView(@PathVariable(required = false,name = "name") String name,
+			@RequestParam(value = "version", required = false) Long version,
+			Model model, HttpSession session) {
+		session.setAttribute("currentMenu", "wiki");
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+		WikiContentVO latestPage = service.selectWikiContentLastVerByTitle(projectId,name);
+		if (latestPage == null) {
+			// 첫 페이지가 아직 없는 프로젝트에서 자기 자신(/project/wiki)으로 재리다이렉트 되는 루프를 방지한다.
+			if (name == null || name.isBlank()) {
+				return "redirect:/project/wiki/index?type=title";
+			}
+			return "redirect:/project/wiki";
+		}
+		WikiContentVO pageToShow = latestPage;
+		if (version != null && latestPage.getPageId() != null) {
+			WikiContentVO revisionPage = service.selectWikiContentByPageIdAndVersion(latestPage.getPageId(), version);
+			if (revisionPage != null) {
+				pageToShow = revisionPage;
+			}
+		}
+		List<AttachVO> existingFiles = attachService.selectAttachList("06MODULE", latestPage.getPageId());
+		Long pageId = latestPage.getId() != null ? latestPage.getId() : latestPage.getPageId();
+		model.addAttribute("currentMenu", "wiki");
+		model.addAttribute("attachments", existingFiles);
+		model.addAttribute("page", pageToShow);
+		model.addAttribute("breadcrumb", service.getBreadcrumb(pageId));
+		model.addAttribute("hasChildren", service.hasWikiChildren(pageId));
+		model.addAttribute("isStartPage", service.isStartPage(projectId, pageToShow.getTitle()));
+		model.addAttribute("latestVersion", latestPage.getVersion());
+		model.addAttribute("isHistoricalVersion",
+				pageToShow.getVersion() != null && latestPage.getVersion() != null
+				&& !pageToShow.getVersion().equals(latestPage.getVersion()));
 		return "project/wiki/wikiView";
+	}
+
+	@GetMapping("/project/wiki/history/{name}")
+	public String wikiHistory(@PathVariable("name") String name, Model model, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return "redirect:/management/project";
+		}
+
+		WikiContentVO page = service.selectWikiContentLastVerByTitle(projectId, name);
+		if (page == null || page.getPageId() == null) {
+			return "redirect:/project/wiki";
+		}
+
+		model.addAttribute("currentMenu", "wiki");
+		model.addAttribute("page", page);
+		model.addAttribute("historyList", service.selectWikiHistoryByPageId(page.getPageId()));
+		return "project/wiki/wikiHistory";
+	}
+
+	@PostMapping("/project/wiki/start-page")
+	@ResponseBody
+	public ResponseEntity<Void> setWikiStartPage(@RequestParam("name") String name, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null || name == null || name.isBlank()) {
+			return ResponseEntity.badRequest().build();
+		}
+		if (!service.setStartPage(projectId, name)) {
+			return ResponseEntity.badRequest().build();
+		}
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping("/project/wiki/{name}")
+	@ResponseBody
+	public ResponseEntity<Void> wikiDelete(@PathVariable("name") String name, HttpSession session) {
+		Long projectId = getCurrentProjectId(session);
+		if (projectId == null) {
+			return ResponseEntity.badRequest().build();
+		}
+		if (service.isStartPage(projectId, name)) {
+			return ResponseEntity.status(409).build();
+		}
+		service.deleteWikiPage(projectId, name);
+		return ResponseEntity.noContent().build();
 	}
 	
 	

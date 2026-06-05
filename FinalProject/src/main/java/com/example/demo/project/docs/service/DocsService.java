@@ -7,6 +7,7 @@ public interface DocsService {
 	List<DocsVO> selectAll(DocsVO docs);
 	DocsVO selectOne(Long id);
 	int delete(Long id);
-	int update(DocsVO vo);
+	void update(DocsVO vo);
 	int insert(DocsVO vo);
+	
 }
