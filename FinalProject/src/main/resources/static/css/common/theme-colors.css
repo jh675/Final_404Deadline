@@ -226,6 +226,7 @@ body.layout-tabler {
 .layout-tabler .issue-shell .issue-field label,
 .layout-tabler .issue-shell .search-item label,
 .layout-tabler .issue-shell .meta-item label,
+.layout-tabler .issue-shell .issue-filter-check__text,
 .layout-tabler .wiki-shell .search-item label {
 	color: var(--app-text-muted);
 }
@@ -236,6 +237,11 @@ body.layout-tabler {
 .layout-tabler .issue-shell .meta-item textarea {
 	border-color: var(--app-border);
 	color: var(--app-heading);
+}
+
+.layout-tabler .issue-shell .issue-field select:disabled {
+	background-color: var(--app-surface-muted);
+	color: var(--app-text-muted);
 }
 
 .layout-tabler .issue-shell .issue-meta-grid,

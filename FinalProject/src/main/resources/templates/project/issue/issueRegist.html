@@ -152,14 +152,19 @@
 				<div class="search-item search-item--status">
 					<label for="statusCd">상태</label>
 					<div class="field-wrap">
-						<select id="statusCd" name="statusCd" class="form-select">
+						<select id="statusCd" name="statusCd" class="form-select"
+							th:disabled="${issue == null or issue.id == null}">
 							<option value="01ISSUESTAT"
 								th:selected="${issue == null or issue.statusCd == null or issue.statusCd == '' or issue.statusCd == '01ISSUESTAT'}">신규</option>
 							<option value="02ISSUESTAT"
-								th:selected="${issue != null and issue.statusCd == '02ISSUESTAT'}">진행중</option>
+								th:if="${issue != null and issue.id != null}"
+								th:selected="${issue.statusCd == '02ISSUESTAT'}">진행중</option>
 							<option value="03ISSUESTAT"
-								th:selected="${issue != null and issue.statusCd == '03ISSUESTAT'}">검토</option>
+								th:if="${issue != null and issue.id != null}"
+								th:selected="${issue.statusCd == '03ISSUESTAT'}">검토</option>
 						</select>
+						<p class="form-hint" id="statusRegisterHint"
+							th:if="${issue == null or issue.id == null}">등록 시 상태는 신규로 고정됩니다.</p>
 					</div>
 				</div>
 				<div class="search-item search-item--progress">
@@ -228,6 +233,7 @@
 	var STATUS_REVIEW = '03ISSUESTAT';
 	var STATUS_DONE = '04ISSUESTAT';
 	var lockedStatusCd = null;
+	var isNewIssue = /*[[${issue == null or issue.id == null}]]*/ true;
 	var selectedFiles = [];
 	var projectDateMin = /*[[${project != null and project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : ''}]]*/ '';
 	var projectDateMax = /*[[${project != null and project.closedDate != null ? #dates.format(project.closedDate, 'yyyy-MM-dd') : ''}]]*/ '';
@@ -267,6 +273,26 @@
 		setDateInputBounds(dueEl, minVal, maxVal);
 		clampDateInputValue(estEl);
 		clampDateInputValue(dueEl);
+	}
+
+	function hasAssigneeSelected() {
+		var memEl = document.getElementById('memId');
+		return memEl && memEl.value !== '';
+	}
+
+	function applyStatusOptionsByAssignee() {
+		if (isNewIssue) return;
+		var statusEl = document.getElementById('statusCd');
+		if (!statusEl || lockedStatusCd) return;
+		var progressOpt = statusEl.querySelector('option[value="' + STATUS_PROGRESS + '"]');
+		var reviewOpt = statusEl.querySelector('option[value="' + STATUS_REVIEW + '"]');
+		var hasMem = hasAssigneeSelected();
+		if (progressOpt) progressOpt.disabled = !hasMem;
+		if (reviewOpt) reviewOpt.disabled = !hasMem;
+		if (!hasMem && (statusEl.value === STATUS_PROGRESS || statusEl.value === STATUS_REVIEW)) {
+			statusEl.value = STATUS_NEW;
+			applyProgressByStatus();
+		}
 	}
 
 	function getEffectiveStatus() {
@@ -379,7 +405,22 @@
 	}
 	applyIssueSelects();
 	applyIssueDateBounds();
+	if (isNewIssue) {
+		lockedStatusCd = STATUS_NEW;
+		var statusElNew = document.getElementById('statusCd');
+		if (statusElNew) {
+			statusElNew.value = STATUS_NEW;
+			statusElNew.disabled = true;
+		}
+	} else {
+		applyStatusOptionsByAssignee();
+	}
 	applyProgressByStatus();
+
+	var memIdEl = document.getElementById('memId');
+	if (memIdEl && !isNewIssue) {
+		memIdEl.addEventListener('change', applyStatusOptionsByAssignee);
+	}
 
 	var milestoneIdEl = document.getElementById('milestoneId');
 	if (milestoneIdEl) {
@@ -492,6 +533,13 @@
 		var subject = document.getElementById('subject').value.trim();
 		setFieldError('wrap-subject', 'err-subject', !subject);
 		if (!subject) ok = false;
+		if (!isNewIssue) {
+			var status = getEffectiveStatus();
+			if ((status === STATUS_PROGRESS || status === STATUS_REVIEW) && !hasAssigneeSelected()) {
+				alert('진행중·검토 상태는 담당자가 있을 때만 선택할 수 있습니다.');
+				ok = false;
+			}
+		}
 		errAttach.classList.remove('is-visible');
 		if (totalSelectedBytes() > MAX_TOTAL_BYTES) {
 			errAttach.classList.add('is-visible');

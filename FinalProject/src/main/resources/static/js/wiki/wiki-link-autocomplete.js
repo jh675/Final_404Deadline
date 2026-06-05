@@ -3,7 +3,7 @@
  *
  * [작성 흐름]
  *   1. 사용자가 [[ 또는 [[# 입력
- *   2. detectTrigger → 커서 앞 문자열에서 트리거·검색어 추출
+ *   2. detectTrigger → 현재 줄(커서 앞)에서 트리거·검색어 추출
  *   3. fetchSuggestions → GET /project/wiki/link-suggest (WikiController)
  *   4. 드롭다운 표시 → 클릭/Enter 시 applyItem으로 본문에 insert 문자열 삽입
  *   5. DB에는 [[제목]], [[#번호 제목]] 형태로 저장 (URL 없음)
@@ -18,60 +18,92 @@
  */
 var WikiLinkAutocomplete = (function () {
     var hideHandlers = [];
-    /** [[# ...]] — 이슈 링크 (마크다운 Heading # 과 충돌하지 않도록 [[# 사용) */
-    var ISSUE_TRIGGER = /\[\[#([^\]]*)$/;
+    /** [[# ...]] — 이슈 링크 (현재 줄·커서 앞만 검사) */
+    var ISSUE_TRIGGER = /\[\[#([^\]\n]*)$/;
     /** [[ ...]] — 위키 링크 ([[# 로 시작하는 경우는 제외) */
-    var WIKI_TRIGGER = /\[\[(?!#)([^\]]*)$/;
+    var WIKI_TRIGGER = /\[\[(?!#)([^\]\n]*)$/;
 
     /**
-     * TOAST UI Editor 마크다운 + 커서 위치 → 전체 텍스트와 커서 기준 before/after 분리
-     * @returns {{ md: string, before: string, after: string, pos: number }}
+     * TOAST UI Editor 마크다운 + 커서 위치 → 전체 텍스트와 현재 줄(커서 앞) 분리
+     * @returns {{ md: string, before: string, after: string, pos: number, lineBefore: string, lineIdx: number }}
      */
-    function getMarkdownContext(editor) {
-        var md = editor.getMarkdown();
+    function normalizeMarkdown(md) {
+        return (md || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    }
+
+    /**
+     * Toast UI Editor 3.x markdown selection → 0-based line/ch
+     * (getSelection()은 [[line, ch], ...] 형태, line/ch 모두 1-based)
+     */
+    function parseEditorCursor(editor, lines) {
         var sel = editor.getSelection();
-        if (!sel || !sel[0]) {
-            return { md: md, before: md, after: '', pos: md.length };
+        if (!sel || sel[0] == null) {
+            var lastIdx = Math.max(0, lines.length - 1);
+            var lastLine = lines[lastIdx] || '';
+            return { lineIdx: lastIdx, ch: lastLine.length };
         }
+        var rawLine;
+        var rawCh;
+        if (Array.isArray(sel[0])) {
+            rawLine = sel[0][0];
+            rawCh = sel[0][1];
+        } else {
+            rawLine = sel[0];
+            rawCh = sel[1];
+        }
+        /* TUI 3.x markdown: 1-based. rawLine=0 이면 이미 0-based로 간주 */
+        var lineIdx = rawLine > 0 ? rawLine - 1 : rawLine;
+        var ch = rawCh > 0 ? rawCh - 1 : rawCh;
+        lineIdx = Math.max(0, Math.min(lineIdx, Math.max(0, lines.length - 1)));
+        var lineText = lines[lineIdx] || '';
+        ch = Math.max(0, Math.min(ch, lineText.length));
+        return { lineIdx: lineIdx, ch: ch };
+    }
+
+    function getMarkdownContext(editor) {
+        var md = normalizeMarkdown(editor.getMarkdown());
         var lines = md.split('\n');
-        var lineIdx = sel[0][0];
-        var ch = sel[0][1];
+        var cursor = parseEditorCursor(editor, lines);
+        var lineIdx = cursor.lineIdx;
+        var ch = cursor.ch;
+        var lineBefore = (lines[lineIdx] || '').substring(0, ch);
         var pos = 0;
-        for (var i = 0; i < lineIdx && i < lines.length; i++) {
+        for (var i = 0; i < lineIdx; i++) {
             pos += lines[i].length + 1;
         }
-        if (lineIdx < lines.length) {
-            pos += Math.min(ch, lines[lineIdx].length);
-        }
+        pos += ch;
         return {
             md: md,
             before: md.substring(0, pos),
             after: md.substring(pos),
-            pos: pos
+            pos: pos,
+            lineBefore: lineBefore,
+            lineIdx: lineIdx
         };
     }
 
     /**
-     * 커서 앞 텍스트에 [[ / [[# 트리거가 있는지 판별
-     * @returns {{ type: 'wiki'|'issue', query: string, replaceStart: number, replaceEnd: number }|null}
+     * 현재 줄(커서 앞)에서 [[ / [[# 트리거 판별 — 다른 줄의 [[ 와 섞이지 않음
+     * @param {string} lineBefore - 현재 줄에서 커서 앞까지
+     * @param {number} globalPos - 전체 마크다운 기준 커서 위치
      */
-    function detectTrigger(before) {
-        var issueMatch = before.match(ISSUE_TRIGGER);
+    function detectTrigger(lineBefore, globalPos) {
+        var issueMatch = lineBefore.match(ISSUE_TRIGGER);
         if (issueMatch) {
             return {
                 type: 'issue',
                 query: (issueMatch[1] || '').trim(),
-                replaceStart: before.lastIndexOf('[[#'),
-                replaceEnd: before.length
+                replaceStart: globalPos - issueMatch[0].length,
+                replaceEnd: globalPos
             };
         }
-        var wikiMatch = before.match(WIKI_TRIGGER);
+        var wikiMatch = lineBefore.match(WIKI_TRIGGER);
         if (wikiMatch) {
             return {
                 type: 'wiki',
                 query: (wikiMatch[1] || '').trim(),
-                replaceStart: before.lastIndexOf('[['),
-                replaceEnd: before.length
+                replaceStart: globalPos - wikiMatch[0].length,
+                replaceEnd: globalPos
             };
         }
         return null;
@@ -232,6 +264,45 @@ var WikiLinkAutocomplete = (function () {
             });
         }
 
+        /** 커서만 이동할 때(클릭·화살표) 트리거/드롭다운 위치 재계산 */
+        function bindCursorRefresh() {
+            var root = getEditorRoot();
+            if (!root) return;
+
+            if (!root.__wikiAcMouseBound) {
+                root.__wikiAcMouseBound = true;
+                root.addEventListener('mouseup', function (e) {
+                    if (!root.contains(e.target)) return;
+                    setTimeout(onEditorInput, 0);
+                });
+            }
+
+            /* TUI 3.x는 CodeMirror 대신 ProseMirror 사용 */
+            var cmWrap = root.querySelector('.CodeMirror');
+            if (cmWrap && cmWrap.CodeMirror && !cmWrap.__wikiAcCursorBound) {
+                cmWrap.__wikiAcCursorBound = true;
+                cmWrap.CodeMirror.on('cursorActivity', onEditorInput);
+            }
+
+            root.querySelectorAll('.ProseMirror, .toastui-editor-contents [contenteditable="true"]').forEach(function (el) {
+                if (el.__wikiAcCursorBound) return;
+                el.__wikiAcCursorBound = true;
+                el.addEventListener('keyup', function (e) {
+                    if (state.open && isNavigationKey(e.key)) return;
+                    onEditorInput();
+                });
+            });
+
+            if (!root.__wikiAcSelectionBound && typeof document !== 'undefined') {
+                root.__wikiAcSelectionBound = true;
+                document.addEventListener('selectionchange', function () {
+                    var active = document.activeElement;
+                    if (!active || !root.contains(active)) return;
+                    onEditorInput();
+                });
+            }
+        }
+
         function setHeader(trigger) {
             if (!trigger) {
                 header.textContent = '';
@@ -371,7 +442,7 @@ var WikiLinkAutocomplete = (function () {
             if (state.pointerInside) return;
 
             var ctx = getMarkdownContext(editor);
-            var trigger = detectTrigger(ctx.before);
+            var trigger = detectTrigger(ctx.lineBefore, ctx.pos);
             if (!trigger) {
                 if (state.open) hideDropdown();
                 return;
@@ -418,7 +489,8 @@ var WikiLinkAutocomplete = (function () {
         var editorRoot = anchorSelector ? document.querySelector(anchorSelector) : null;
         if (editorRoot) {
             editorRoot.addEventListener('keyup', function (e) {
-                if (isNavigationKey(e.key)) return;
+                /* 드롭다운 열림 + ↑↓Enter 등만 제외 — 화살표로 커서 이동 시에는 갱신 */
+                if (state.open && isNavigationKey(e.key)) return;
                 onEditorInput();
             });
         }
@@ -449,7 +521,10 @@ var WikiLinkAutocomplete = (function () {
             bindEditorInputs();
             setTimeout(bindEditorInputs, 300);
             if (typeof MutationObserver !== 'undefined') {
-                var mo = new MutationObserver(function () { bindEditorInputs(); });
+                var mo = new MutationObserver(function () {
+                    bindEditorInputs();
+                    bindCursorRefresh();
+                });
                 mo.observe(editorRoot, { childList: true, subtree: true });
             }
         }
@@ -467,7 +542,9 @@ var WikiLinkAutocomplete = (function () {
         });
 
         bindScrollReposition();
+        bindCursorRefresh();
         setTimeout(bindScrollReposition, 300);
+        setTimeout(bindCursorRefresh, 300);
 
         hideHandlers.push(function (force) {
             state.pointerInside = false;

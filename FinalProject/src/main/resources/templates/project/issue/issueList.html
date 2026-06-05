@@ -78,11 +78,13 @@
 				<input type="text" id="subject" th:field="*{subject}"
 					placeholder="텍스트를 입력해 주세요." />
 			</div>
-			<label class="issue-filter-check">
-				<input type="checkbox" id="myIssue" name="myIssue" value="Y"
-					th:checked="*{myIssue == 'Y'}" />
-				<span>내가 맡은 이슈</span>
-			</label>
+			<div class="issue-field issue-field--my-issue">
+				<label class="issue-filter-check" for="myIssue">
+					<input type="checkbox" id="myIssue" name="myIssue" value="Y"
+						th:checked="*{myIssue == 'Y'}" />
+					<span class="issue-filter-check__text">내가 맡은 이슈</span>
+				</label>
+			</div>
 			<div class="issue-filter-buttons">
 				<button type="submit" class="btn btn-primary">검색</button>
 				<a th:href="@{/project/issue/list}" class="btn btn-secondary">초기화</a>
@@ -148,7 +150,9 @@
 			const searchForm = document.getElementById('searchForm');
 
 			function applyMyIssueState() {
-				if (myIssueCheckbox.checked) {
+				const on = myIssueCheckbox.checked;
+				searchForm.classList.toggle('is-my-issue-active', on);
+				if (on) {
 					memIdSelect.value = LOGIN_MEM_ID;
 					memIdSelect.disabled = true;
 				} else {

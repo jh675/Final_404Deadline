@@ -163,9 +163,12 @@ public class IssueRestController {
 		long updated = count;
 		long skipped = Math.max(0, requested - updated);
 		if (vulkVO.getStatusCd() != null && !vulkVO.getStatusCd().isBlank() && updated == 0) {
+			String statusMsg = ("02ISSUESTAT".equals(vulkVO.getStatusCd()) || "03ISSUESTAT".equals(vulkVO.getStatusCd()))
+					? "담당자가 없는 이슈는 진행중·검토 상태로 변경할 수 없습니다."
+					: "상태를 변경할 수 있는 이슈가 없습니다.";
 			return ResponseEntity.badRequest().body(Map.of(
 					"ok", false,
-					"message", "담당자가 없는 이슈는 상태를 변경할 수 없습니다.",
+					"message", statusMsg,
 					"updated", 0,
 					"skipped", skipped));
 		}

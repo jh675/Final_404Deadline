@@ -30,6 +30,7 @@ import com.example.demo.project.issue.service.IssueService;
 import com.example.demo.project.member.service.MemberListCriteria;
 import com.example.demo.project.member.service.MemberService;
 import com.example.demo.project.milestone.service.MilestoneService;
+import com.example.demo.project.issue.service.IssueStatusException;
 import com.example.demo.project.milestone.service.MilestoneSyncException;
 import com.example.demo.util.attach.service.AttachService;
 import com.example.demo.util.attach.service.AttachVO;
@@ -155,6 +156,8 @@ public class IssueController {
 			//id값이 없는경우 빈vo를 만든다
 			issue = IssueInputVO.builder().build();
 			issue.setPrjId(projectId);
+			issue.setStatusCd("01ISSUESTAT");
+			issue.setDoneRatio(0L);
 		}
 		//모델에 담아서 보낸다
 		
@@ -181,6 +184,13 @@ public class IssueController {
 				.body(Map.of("ok", false, "message", ex.getMessage()));
 	}
 
+	@ExceptionHandler(IssueStatusException.class)
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> handleIssueStatus(IssueStatusException ex) {
+		return ResponseEntity.badRequest()
+				.body(Map.of("ok", false, "message", ex.getMessage()));
+	}
+
 	@PostMapping(value = "/project/issue/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String issueInsert(@RequestPart("issue") IssueInputVO issueVO,
 			@RequestPart(value = "attachments", required = false) MultipartFile[] attachments,
@@ -195,6 +205,8 @@ public class IssueController {
 		}
 		issueVO.setPrjId(projectId);
 		issueVO.setWriter(loginUser.getId());
+		issueVO.setStatusCd("01ISSUESTAT");
+		issueVO.setDoneRatio(0L);
 		boolean hasFiles = attachService.hasAttachmentFiles(attachments);
 		if (hasFiles) {
 			issueVO.setIsAttachCd("01ISATTACH");
