@@ -346,7 +346,14 @@
 					name: 'memName',
 					width: 100,
 					align: 'center',
-					sortable: true
+					sortable: true,
+					formatter: function (props) {
+						const name = props.value;
+						if (name == null || String(name).trim() === '' || String(name).trim() === '미정') {
+							return '-';
+						}
+						return name;
+					}
 				},
 				{
 					header: '상태',
