@@ -1,0 +1,60 @@
+/**
+ * project/docs/docList.html
+ */
+.tui-grid-cell-content .doc-title, .doc-title {
+	cursor: pointer !important;
+	text-decoration: none;
+	color: var(--app-heading);
+	font-weight: 500;
+}
+
+.tui-grid-cell-content .doc-title:hover, .doc-title:hover {
+	color: var(--app-primary);
+	text-decoration: underline;
+}
+
+.grid-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+
+.tui-grid-container {
+    border-color: rgba(71, 85, 105, 0.2) !important;
+}
+
+/* 그리드 셀 안 버튼 크기 고정 */
+.tui-grid-cell-content .btn {
+    padding: 2px 10px;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+.tui-grid-header-area,
+.tui-grid-lside-area .tui-grid-header-area,
+.tui-grid-rside-area .tui-grid-header-area {
+	background: var(--app-surface-muted) !important;
+}
+
+.tui-grid-cell-header {
+	background-color: var(--app-surface-muted) !important;
+	color: var(--app-text-muted) !important;
+}
+
+.tui-grid-body-area .tui-grid-cell {
+	background-color: var(--app-surface) !important;
+}
+
+.docs-flash-notify {
+	position: fixed;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 9999;
+	padding: 12px 25px;
+	border-radius: var(--app-radius);
+	font-weight: 600;
+}

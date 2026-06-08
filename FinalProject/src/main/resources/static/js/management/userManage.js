@@ -101,29 +101,44 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-	const gridContainer = document.querySelector('#grid .tui-grid-container');
-    const tuiPaginationWrap = document.querySelector('#grid .tui-grid-pagination');
-    const customBottomBar = document.getElementById('customBottomBar');
-    const paginationPlaceholder = document.getElementById('paginationPlaceholder');
+    function syncPaginationToBottomBar() {
+        const gridEl = document.getElementById('grid');
+        const customBottomBar = document.getElementById('customBottomBar');
+        const paginationPlaceholder = document.getElementById('paginationPlaceholder');
+        if (!gridEl || !customBottomBar || !paginationPlaceholder) return false;
 
-    if (gridContainer && tuiPaginationWrap && customBottomBar && paginationPlaceholder) {
-        // TUI 기본 페이징 박스의 불필요한 고정 스타일(테두리, 배경) 제거
+        const tuiPaginationWrap = gridEl.querySelector('.tui-grid-pagination')
+            || gridEl.querySelector('.tui-pagination');
+        if (!tuiPaginationWrap || paginationPlaceholder.contains(tuiPaginationWrap)) {
+            customBottomBar.classList.remove('d-none');
+            customBottomBar.classList.add('d-flex');
+            return !!tuiPaginationWrap;
+        }
+
         tuiPaginationWrap.style.border = 'none';
         tuiPaginationWrap.style.background = 'transparent';
         tuiPaginationWrap.style.margin = '0';
         tuiPaginationWrap.style.padding = '0';
-        tuiPaginationWrap.style.height = 'auto'; // 높이 제한 해제
-        
-        // 기존 페이징 요소를 우리가 만든 하단 바의 중앙으로 위치
-        paginationPlaceholder.appendChild(tuiPaginationWrap);
+        tuiPaginationWrap.style.height = 'auto';
 
-        // 완성된 한 줄짜리 하단 바를 그리드 영역 안쪽 맨 밑으로 이동
-        gridContainer.appendChild(customBottomBar);
-        
-        // 숨김 해제 및 가로 정렬(Flex) 활성화
+        paginationPlaceholder.appendChild(tuiPaginationWrap);
         customBottomBar.classList.remove('d-none');
         customBottomBar.classList.add('d-flex');
+        return true;
     }
+
+    function schedulePaginationToBottomBar(tries) {
+        if (syncPaginationToBottomBar()) return;
+        if (tries >= 15) return;
+        setTimeout(function() { schedulePaginationToBottomBar(tries + 1); }, 30);
+    }
+
+    requestAnimationFrame(function() {
+        schedulePaginationToBottomBar(0);
+        if (grid && typeof grid.refreshLayout === 'function') {
+            grid.refreshLayout();
+        }
+    });
 	
     // 수정 함수 호출을 위한 연결
     document.addEventListener('click', function(e) {
@@ -150,23 +165,49 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
+    function setCheckboxColumnVisible(visible) {
+        try {
+            if (visible) {
+                grid.showColumn('_checked');
+            } else {
+                grid.hideColumn('_checked');
+            }
+        } catch (e) {
+            console.warn('checkbox column toggle skipped:', e);
+        }
+    }
+
+    function showBulkControls() {
+        const bulkControls = document.getElementById('bulkControls');
+        if (!bulkControls) return;
+        bulkControls.classList.remove('d-none');
+        bulkControls.classList.add('d-flex');
+    }
+
+    function hideBulkControls() {
+        const bulkControls = document.getElementById('bulkControls');
+        if (!bulkControls) return;
+        bulkControls.classList.add('d-none');
+        bulkControls.classList.remove('d-flex');
+    }
+
     // 로딩 직후 체크박스 컬럼 숨기기.
-    grid.hideColumn('_checked');
+    setCheckboxColumnVisible(false);
 
     // 일괄작업 버튼 누르면
     document.getElementById('toggleBulkModeBtn').addEventListener('click', function() {
-        this.classList.add('d-none'); // 일괄작업 버튼 숨기기
-        document.getElementById('bulkControls').classList.remove('d-none'); // 적용 컨트롤 보이기
-        grid.showColumn('_checked');
+        this.classList.add('d-none');
+        showBulkControls();
+        setCheckboxColumnVisible(true);
     });
 
     // 일괄작업 취소 버튼
     document.getElementById('cancelBulkModeBtn').addEventListener('click', function() {
-        document.getElementById('bulkControls').classList.add('d-none');
+        hideBulkControls();
         document.getElementById('toggleBulkModeBtn').classList.remove('d-none');
-		document.getElementById('bulkFeedback').textContent = ''; // 에러 문구 초기화
-        grid.uncheckAll(); // 체크된 것 모두 해제
-        grid.hideColumn('_checked'); 
+		document.getElementById('bulkFeedback').textContent = '';
+        grid.uncheckAll();
+        setCheckboxColumnVisible(false);
     });
 
 	// 일괄 처리 적용 버튼 이벤트
@@ -500,9 +541,12 @@ async function loadProfileImage(userId) {
 }
 
 // 파일 선택 버튼 클릭 (유효성 검사)
-document.getElementById('uploadBtn').addEventListener('click', function() {
-    document.getElementById('profileImage').click();
-});
+const uploadBtn = document.getElementById('uploadBtn');
+if (uploadBtn) {
+    uploadBtn.addEventListener('click', function() {
+        document.getElementById('profileImage').click();
+    });
+}
 
 
 let cropper = null;
@@ -790,7 +834,8 @@ function changeRoleArea(adminCd) {
 // 검색 조건 없이 검색하려고 할 때
 const searchForm = document.getElementById('searchForm');
 
-searchForm.addEventListener('submit', function(e) {
+if (searchForm) {
+    searchForm.addEventListener('submit', function(e) {
     const searchType = document.getElementById('searchType').value;
     const keyword = document.getElementById('keyword').value.trim();
     const warning = document.getElementById('searchWarning');
@@ -806,4 +851,5 @@ searchForm.addEventListener('submit', function(e) {
     // 정상일 경우 경고 숨김
     document.getElementById('searchType').classList.remove('is-invalid');
     warning.classList.add('d-none');
-});
+    });
+}

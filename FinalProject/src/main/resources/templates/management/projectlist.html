@@ -11,191 +11,10 @@
 <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
 <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 
-<style>
-  .numbered-table tbody { counter-reset: myIndex 0; }
-  .numbered-table tbody tr:not([style*="display: none"]) { counter-increment: myIndex; }
-  .row-index::before { content: counter(myIndex); }
-  .table td.text-center { vertical-align: middle; }
-  .btn-group { display: inline-flex; justify-content: center; }
+<link rel="stylesheet" th:href="@{/css/common/containerSize.css}" />
+<link rel="stylesheet" th:href="@{/css/management/management.css}" />
+<link rel="stylesheet" th:href="@{/css/management/modal.css}" />
 
-  .search-autocomplete {
-    position: relative;
-    overflow: visible;
-  }
-  .search-input-group { display: flex; gap: 0.35rem; flex-wrap: nowrap; align-items: center; }
-  .search-input-group .form-control { flex: 1; }
-  .search-autocomplete label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #555;
-  }
-  .search-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: white;
-    border: 1px solid #ccc;
-    z-index: 9999;
-    max-height: 200px;
-    overflow-y: auto;
-    color: black;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  }
-  .search-dropdown-item {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-  }
-  .search-dropdown-item:hover { background-color: #f8f9fa; }
-
-  /* ── 툴바 ── */
-  .prj-toolbar {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-  }
-  .prj-toolbar-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-  .prj-toolbar-right {
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
-    flex: 1;
-    justify-content: flex-end;
-    overflow: visible;
-    position: relative;
-    z-index: 100;
-  }
-  .prj-toolbar-right .search-autocomplete { }
-
-  /* ── 테이블 래퍼 ── */
-  .tui-grid-table-wrap {
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    width: 100%;
-    max-height: 600px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: relative;
-  }
-
-  .tui-style-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    table-layout: auto;
-  }
-  .tui-style-table thead tr {
-    background-color: #f7f7f7;
-    border-bottom: 2px solid #e0e0e0;
-  }
-  .tui-style-table thead th {
-    padding: 10px 12px;
-    font-weight: 600;
-    font-size: 13px;
-    color: #333;
-    text-align: center;
-    border-right: 1px solid #e0e0e0;
-    white-space: nowrap;
-    user-select: none;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: #f7f7f7;
-  }
-  .tui-style-table thead th:last-child { border-right: none; }
-  .tui-style-table tbody tr {
-    border-bottom: 1px solid #ebebeb;
-    transition: background-color 0.1s;
-  }
-  .tui-style-table tbody tr:last-child { border-bottom: none; }
-  .tui-style-table tbody tr:hover { background-color: #f0f6ff; }
-  .tui-style-table tbody td,
-  .tui-style-table tbody th {
-    padding: 9px 12px;
-    font-size: 13px;
-    color: #333;
-    border-right: 1px solid #ebebeb;
-    vertical-align: middle;
-    font-weight: normal;
-  }
-  .tui-style-table tbody td:last-child,
-  .tui-style-table tbody th:last-child { border-right: none; }
-  .tui-style-table .row-index { text-align: center; color: #888; width: 48px; }
-  .tui-style-table tbody td a { color: #1a73e8; text-decoration: none; font-weight: 500; }
-  .tui-style-table tbody td a:hover { text-decoration: underline; }
-  .prj-indent { color: #aaa; margin-right: 2px; }
-  .tui-style-table td.text-center { text-align: center; }
-
-  /* 컨텍스트 메뉴 */
-  #ctxMenu { position: fixed; z-index: 9999; display: none; min-width: 100px; }
-
-  /* ── 상태 필터 커스텀 드롭다운 ── */
-  .status-filter-wrap { display: inline-block; position: relative; vertical-align: middle; }
-  .status-filter-trigger {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 12px;
-    background: #fff;
-    border: 1px solid #c9e0ef;
-    border-radius: 5px;
-    font-size: 13px;
-    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    color: #1a2f3f;
-    cursor: pointer;
-    user-select: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    white-space: nowrap;
-  }
-  .status-filter-trigger:hover { border-color: #1b87c9; color: #1b87c9; }
-  .status-filter-trigger.open {
-    border-color: #1b87c9;
-    box-shadow: 0 0 0 3px rgba(27,135,201,0.13);
-    color: #1b87c9;
-  }
-  .status-filter-trigger svg { transition: transform 0.2s; flex-shrink: 0; }
-  .status-filter-trigger.open svg { transform: rotate(180deg); }
-  .status-filter-dropdown {
-    display: none;
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    min-width: 100%;
-    background: #fff;
-    border: 1px solid #1b87c9;
-    border-radius: 5px;
-    z-index: 9999;
-    box-shadow: 0 6px 16px rgba(27,135,201,0.13);
-    overflow: hidden;
-  }
-  .status-filter-dropdown.open { display: block; }
-  .status-filter-item {
-    padding: 9px 14px;
-    font-size: 13px;
-    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    color: #1a2f3f;
-    cursor: pointer;
-    border-bottom: 1px solid #e8f4fb;
-    white-space: nowrap;
-    transition: background 0.1s;
-  }
-  .status-filter-item:last-child { border-bottom: none; }
-  .status-filter-item:hover { background: #e8f4fb; color: #1b87c9; }
-  .status-filter-item.selected { background: #e8f4fb; color: #1b87c9; font-weight: 600; }
-</style>
 </head>
 <body>
 <div layout:fragment="content">
@@ -323,11 +142,11 @@
             <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
             <td style="text-align:center;">
               <span th:switch="${pro.prjStatusCd}">
-                <span th:case="'01PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#e8f4fb;color:#1b87c9;font-weight:600;">기획</span>
-                <span th:case="'02PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#dbeafe;color:#1d4ed8;font-weight:600;">진행중</span>
-                <span th:case="'03PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#fef9c3;color:#a16207;font-weight:600;">검수</span>
-                <span th:case="'04PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#dcfce7;color:#15803d;font-weight:600;">완료</span>
-                <span th:case="'05PROSTAT'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#fee2e2;color:#b91c1c;font-weight:600;">중단</span>
+                <span th:case="'01PROSTAT'" class="prj-status-badge prj-status-badge--plan">기획</span>
+                <span th:case="'02PROSTAT'" class="prj-status-badge prj-status-badge--progress">진행중</span>
+                <span th:case="'03PROSTAT'" class="prj-status-badge prj-status-badge--review">검수</span>
+                <span th:case="'04PROSTAT'" class="prj-status-badge prj-status-badge--done">완료</span>
+                <span th:case="'05PROSTAT'" class="prj-status-badge prj-status-badge--stop">중단</span>
                 <span th:case="*" th:text="${pro.prjStatusCd}"></span>
               </span>
             </td>

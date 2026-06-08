@@ -1,0 +1,16 @@
+/**
+ * login/info.html
+ */
+.info-section {
+		padding: 60px 0;
+	}
+	.carousel-item img {
+		width: 100%;
+		height: 400px;
+		object-fit: cover; /* 이미지 비율 유지하며 꽉 채우기 */
+	}
+	.section-img {
+		width: 100%;
+		height: 400px;
+		object-fit: cover;
+	}

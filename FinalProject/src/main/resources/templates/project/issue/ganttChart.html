@@ -9,73 +9,32 @@
 <link rel="stylesheet"
 	href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
 <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
-<style>
-#gantt_here {
-	width: 100%;
-	height: calc(100vh - 200px);
-	overflow: hidden;
-}
+<link rel="stylesheet" th:href="@{/css/common/gantt-status.css}">
 
-.gantt_cell {
-	text-align: center !important;
-}
-
-.gantt_grid_head_cell {
-	text-align: center !important;
-}
-/* 신규 - 파랑 */
-.status-new .gantt_task_progress, .status-new.gantt_task_line {
-	background-color: #3498db;
-	border-color: #2980b9;
-}
-
-/* 진행중 - 주황 */
-.status-progress .gantt_task_progress, .status-progress.gantt_task_line
-	{
-	background-color: #e67e22;
-	border-color: #d35400;
-}
-
-/* 검토 - 보라 */
-.status-review .gantt_task_progress, .status-review.gantt_task_line {
-	background-color: #9b59b6;
-	border-color: #8e44ad;
-}
-
-body, html {
-	overflow-y: hidden;
-}
-</style>
 
 </head>
 <body>
 	<div layout:fragment="content">
 
-		<div
-			style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 1px solid #dee2e6;">
+		<div class="gantt-toolbar">
 
 			<!-- 색깔 표시 테그부분 -->
-			<div
-				style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
-				<span style="font-weight: bold;">상태 :</span> <span><span
-					style="display: inline-block; width: 12px; height: 12px; background: #3498db; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>신규</span>
-				<span><span
-					style="display: inline-block; width: 12px; height: 12px; background: #e67e22; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>진행중</span>
-				<span><span
-					style="display: inline-block; width: 12px; height: 12px; background: #9b59b6; margin-right: 4px; vertical-align: middle; border-radius: 2px;"></span>검토</span>
-
+			<div class="gantt-toolbar__legend">
+				<span class="gantt-toolbar__legend-label">상태 :</span>
+				<span><span class="gantt-status-dot gantt-status-dot--new"></span>신규</span>
+				<span><span class="gantt-status-dot gantt-status-dot--progress"></span>진행중</span>
+				<span><span class="gantt-status-dot gantt-status-dot--review"></span>검토</span>
 			</div>
 
 			<!-- 검색창 + 전체/개인 버튼 -->
 			<div class="d-flex align-items-center gap-2">
-				<select class="form-select form-select-sm" id="typeCd"
-					style="width: 100px;">
+				<select class="form-select form-select-sm gantt-search-type" id="typeCd">
 					<option value="">전체</option>
 					<option value="text">이슈명</option>
 					<option value="status_cd">상태</option>
 					<option value="assignee">담당자</option>
-				</select> <input type="text" class="form-control form-control-sm"
-					id="searchInput" placeholder="검색어를 입력해주세요." style="width: 180px;"
+				</select> <input type="text" class="form-control form-control-sm gantt-search-input"
+					id="searchInput" placeholder="검색어를 입력해주세요."
 					onkeydown="if(event.key==='Enter') searchEvents()">
 				<button type="button" class="btn btn-primary"
 					onclick="searchEvents()">검색</button>
@@ -121,8 +80,7 @@ body, html {
 								</tbody>
 							</table>
 						</div>
-						<div id="noResultMsg"
-							style="display: none; text-align: center; padding: 20px; color: #888;">
+						<div id="noResultMsg" class="gantt-empty-row" style="display: none;">
 							검색 결과가 없습니다.</div>
 					</div>
 					<div class="modal-footer">
