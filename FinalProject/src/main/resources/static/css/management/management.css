@@ -1,0 +1,260 @@
+﻿/**
+ * Management pages — project list, shared toolbar
+ */
+  .numbered-table tbody { counter-reset: myIndex 0; }
+  .numbered-table tbody tr:not([style*="display: none"]) { counter-increment: myIndex; }
+  .row-index::before { content: counter(myIndex); }
+  .table td.text-center { vertical-align: middle; }
+  .btn-group { display: inline-flex; justify-content: center; }
+
+  .search-autocomplete {
+    position: relative;
+    overflow: visible;
+  }
+  .search-input-group { display: flex; gap: 0.35rem; flex-wrap: nowrap; align-items: center; }
+  .search-input-group .form-control { flex: 1; }
+  .search-autocomplete label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--app-text-muted);
+  }
+  .search-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid var(--app-border);
+    z-index: 9999;
+    max-height: 200px;
+    overflow-y: auto;
+    color: black;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .search-dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--app-border);
+  }
+  .search-dropdown-item:hover { background-color: var(--app-surface-muted); }
+
+  /* ?? ?대컮 ?? */
+  .prj-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .prj-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .prj-toolbar-right {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex: 1;
+    justify-content: flex-end;
+    overflow: visible;
+    position: relative;
+    z-index: 100;
+  }
+  #grid {
+	width: 100%;
+	min-height: 200px;
+}
+
+/* 회원관리 그리드 + 하단 툴바 (그리드 컨테이너 밖에 배치해 select 클릭 가능) */
+.user-grid-shell {
+	width: 100%;
+	border: 1px solid var(--app-border-light, #cbd5e1);
+	border-radius: 4px;
+	overflow: visible;
+}
+
+.user-grid-shell #grid .tui-grid-container {
+	border: none;
+	border-radius: 0;
+}
+
+.user-grid-shell #customBottomBar {
+	position: relative;
+	z-index: 5;
+	overflow: visible;
+}
+
+.user-grid-shell #bulkControls .form-select {
+	min-width: 160px;
+}
+
+.tui-grid-cell.company-biz-no-cell {
+	cursor: pointer;
+	color: var(--app-primary);
+	font-weight: 500;
+}
+
+.tui-grid-cell.company-biz-no-cell:hover {
+	text-decoration: underline;
+}
+
+  /* ?? ?뚯씠釉??섑띁 ?? */
+  .tui-grid-table-wrap {
+    border: 1px solid var(--app-border);
+    border-radius: 4px;
+    width: 100%;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .tui-style-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-family: var(--app-font-family);
+    table-layout: auto;
+  }
+  .tui-style-table thead tr {
+    background-color: var(--app-surface-muted);
+    border-bottom: 2px solid var(--app-border);
+  }
+  .tui-style-table thead th {
+    padding: 10px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--app-heading);
+    text-align: center;
+    border-right: 1px solid var(--app-border);
+    white-space: nowrap;
+    user-select: none;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--app-surface-muted);
+  }
+  .tui-style-table thead th:last-child { border-right: none; }
+  .tui-style-table tbody tr {
+    border-bottom: 1px solid var(--app-border);
+    transition: background-color 0.1s;
+  }
+  .tui-style-table tbody tr:last-child { border-bottom: none; }
+  .tui-style-table tbody tr:hover { background-color: var(--app-primary-soft); }
+  .tui-style-table tbody td,
+  .tui-style-table tbody th {
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--app-heading);
+    border-right: 1px solid var(--app-border);
+    vertical-align: middle;
+    font-weight: normal;
+  }
+  .tui-style-table tbody td:last-child,
+  .tui-style-table tbody th:last-child { border-right: none; }
+  .tui-style-table .row-index { text-align: center; color: #888; width: 48px; }
+  .tui-style-table .col-prj-name {
+    white-space: nowrap;
+  }
+  .tui-style-table tbody td a { color: var(--app-primary); text-decoration: none; font-weight: 500; }
+  .tui-style-table tbody td a:hover { text-decoration: underline; }
+  .prj-indent { color: #aaa; margin-right: 2px; }
+  .tui-style-table td.text-center { text-align: center; }
+
+  /* 而⑦뀓?ㅽ듃 硫붾돱 */
+  #ctxMenu { position: fixed; z-index: 9999; display: none; min-width: 100px; }
+
+  /* ?? ?곹깭 ?꾪꽣 而ㅼ뒪? ?쒕∼?ㅼ슫 ?? */
+  .status-filter-wrap { display: inline-block; position: relative; vertical-align: middle; }
+  .status-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: #fff;
+    border: 1px solid var(--app-border);
+    border-radius: 5px;
+    font-size: 13px;
+    font-family: var(--app-font-family);
+    color: var(--app-heading);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .status-filter-trigger:hover { border-color: var(--app-primary); color: var(--app-primary); }
+  .status-filter-trigger.open {
+    border-color: var(--app-primary);
+    box-shadow: 0 0 0 3px rgba(27,135,201,0.13);
+    color: var(--app-primary);
+  }
+  .status-filter-trigger svg { transition: transform 0.2s; flex-shrink: 0; }
+  .status-filter-trigger.open svg { transform: rotate(180deg); }
+  .status-filter-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 100%;
+    background: #fff;
+    border: 1px solid var(--app-primary);
+    border-radius: 5px;
+    z-index: 9999;
+    box-shadow: 0 6px 16px rgba(var(--app-primary-rgb), 0.13);
+    overflow: hidden;
+  }
+  .status-filter-dropdown.open { display: block; }
+  .status-filter-item {
+    padding: 9px 14px;
+    font-size: 13px;
+    font-family: var(--app-font-family);
+    color: var(--app-heading);
+    cursor: pointer;
+    border-bottom: 1px solid var(--app-primary-soft);
+    white-space: nowrap;
+    transition: background 0.1s;
+  }
+  .status-filter-item:last-child { border-bottom: none; }
+  .status-filter-item:hover { background: var(--app-primary-soft); color: var(--app-primary); }
+  .status-filter-item.selected { background: var(--app-primary-soft); color: var(--app-primary); font-weight: 600; }
+
+/* ── 프로젝트 상태 뱃지 ─────────────────────────────────── */
+.prj-status-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.prj-status-badge--plan {
+	background: var(--app-primary-soft);
+	color: var(--app-primary);
+}
+
+.prj-status-badge--progress {
+	background: rgba(var(--app-primary-rgb), 0.18);
+	color: var(--app-primary-hover);
+}
+
+.prj-status-badge--review {
+	background: var(--app-warn-bg);
+	color: var(--app-warn-text);
+}
+
+.prj-status-badge--done {
+	background: rgba(var(--bs-success-rgb, 120, 194, 173), 0.2);
+	color: var(--app-success);
+}
+
+.prj-status-badge--stop {
+	background: rgba(var(--app-danger-rgb, 220, 53, 69), 0.12);
+	color: var(--app-danger);
+}

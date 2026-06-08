@@ -1,0 +1,125 @@
+﻿/**
+ * Project overview (main.html)
+ */
+/* ?? ?꾩껜 ?덉씠?꾩썐 ??????????????????????????? */
+#overview-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 24px;
+	font-family: var(--app-font-family);
+}
+
+/* ?곷떒: 怨듭??ы빆 (?꾩껜 ?덈퉬) */
+#overview-top {
+	width: 100%;
+}
+
+/* ?섎떒: ?댁뒋 ?꾪솴 + 洹몃９ ?꾪솴 醫뚯슦 遺꾪븷 */
+#overview-bottom {
+	display: flex;
+	gap: 20px;
+	align-items: flex-start;
+}
+
+#overview-bottom .bottom-left {
+	flex: 1;
+	min-width: 0;
+}
+
+#overview-bottom .bottom-right {
+	flex: 1;
+	min-width: 0;
+}
+
+/* ?? ?뱀뀡 怨듯넻 ?????????????????????????????? */
+.section-title {
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--app-heading);
+	margin: 0 0 12px;
+	padding-left: 10px;
+	border-left: 4px solid var(--app-primary);
+	line-height: 1.4;
+}
+
+/* ?? ?댁뒋 移댁슫???뚯씠釉?????????????????????? */
+#issuetable table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+#issuetable th, #issuetable td {
+	border: 1px solid var(--app-border);
+	padding: 10px 14px;
+	text-align: center;
+}
+
+#issuetable thead th {
+	background: var(--app-surface-muted);
+	font-weight: 700;
+	color: var(--app-text-muted);
+}
+
+#issuetable tbody th {
+	background: var(--app-surface-subtle);
+	font-weight: 600;
+	color: #334155;
+}
+
+#issuetable tbody td a {
+	display: inline-block;
+	min-width: 28px;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-weight: 700;
+	font-size: 13px;
+	text-decoration: none;
+}
+/* 吏꾪뻾以?- ?뚮? 諭껋? */
+#issuetable tbody tr td:nth-child(2) a {
+	background: #dbeafe;
+	color: #1d4ed8;
+}
+/* ?꾨즺 - 珥덈줉 諭껋? */
+#issuetable tbody tr td:nth-child(3) a {
+	background: #dcfce7;
+	color: #15803d;
+}
+
+/* ?? ?댁뒋 諛붾줈媛湲?留곹겕 ????????????????????? */
+.issue-links {
+	margin-top: 10px;
+	display: flex;
+	gap: 12px;
+}
+
+.issue-links a {
+	font-size: 13px;
+	color: var(--app-primary);
+	text-decoration: none;
+	padding: 5px 12px;
+	border: 1px solid #c7d7ff;
+	border-radius: 6px;
+	transition: background 0.15s;
+}
+
+.issue-links a:hover {
+	background: #eef2ff;
+}
+
+/* ?? Toast UI Grid ?섑띁 ????????????????????? */
+#noticeGrid, #groupGrid {
+	width: 100%;
+}
+
+/* Grid ?대? 留곹겕 ?ㅽ???*/
+.tui-grid-cell a {
+	color: #1d4ed8;
+	text-decoration: none;
+}
+
+.tui-grid-cell a:hover {
+	text-decoration: underline;
+}

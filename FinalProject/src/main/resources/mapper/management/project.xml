@@ -25,27 +25,31 @@
 </select>
  
  <select id="userProjectList" resultType="ProjectVO">
- 	SELECT 
+ 	SELECT DISTINCT
 	    p.id,
 	    p.prj_name,
-        p.PRJ_IDENTIFIER,
+        p.prj_identifier,
         p.prj_desc,
         p.created_on,
+        p.start_date,
         p.closed_date,
         p.prj_hide,
+        p.prj_status_cd,
+        p.prj_par_id,
+        p.prj_root_id,
+        p.prj_lft,
+	    p.biz_no,
 	    g.id 		AS group_id,
 	    g.name 		AS group_name,
 	    m.id 		AS member_id,
 	    u.id 		AS user_id,
-	    u.name 		AS user_name,
-    	p.biz_no
-	FROM project p, grp g, member m, users u
- 	WHERE p.id = g.prj_id       
-  		AND g.id = m.grp_id       
-  		AND u.id = m.user_id      
-  		AND p.biz_no = u.biz_no
-  		AND u.id = #{userId}
- 
+	    u.name 		AS user_name
+	FROM project p
+	INNER JOIN grp g ON p.id = g.prj_id
+	INNER JOIN member m ON g.id = m.grp_id
+	INNER JOIN users u ON u.id = m.user_id AND p.biz_no = u.biz_no
+	WHERE u.id = #{userId}
+	ORDER BY p.start_date desc
  </select>
  
  

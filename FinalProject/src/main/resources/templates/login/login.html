@@ -13,10 +13,10 @@
 <body>
 
 <div layout:fragment="content">
-	<div class="d-flex justify-content-center align-items-center py-2 rounded-4 my-1" style="min-height: 75vh;">
+	<div class="d-flex justify-content-center align-items-center py-2 rounded-4 my-1 login-page">
 		
-		<div class="card border-0 shadow-lg" style="width: 100%; max-width: 450px; border-radius: 1.25rem;">
-			<div class="card-body p-2 p-md-3 bg-white" style="border-radius: 1.25rem;">
+		<div class="card border-0 shadow-lg login-card">
+			<div class="card-body p-2 p-md-3 bg-white">
 				
 				<h3 class="fw-bold text-center mb-4">로그인</h3>
 
@@ -44,8 +44,7 @@
 				        <label for="companyNameInput" class="form-label fw-semibold text-muted small">소속 기업명</label>
 				        <input type="text" id="companyNameInput" class="form-control" placeholder="기업명을 입력하세요" autocomplete="off">
 				        <input type="hidden" id="bizNo" name="bizNo">
-				        <ul id="companyDropdown" class="list-group position-absolute w-100 shadow-sm" 
-				            style="display: none; z-index: 1000; max-height: 200px; overflow-y: auto;">
+				        <ul id="companyDropdown" class="list-group position-absolute w-100 shadow-sm">
 				        </ul>
 				        <div class="invalid-feedback">기업을 검색하여 선택해주세요.</div>
 			    	</div>

@@ -1,0 +1,296 @@
+/**
+ * Management modals
+ */
+/* ── 삭제 모달 스타일 ── */
+    #deleteproject .modal-content {
+      border: none;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(var(--app-primary-rgb),0.15);
+      font-family: var(--app-font-family);
+    }
+
+    /* 상단 파란 헤더 */
+    #deleteproject .modal-header-bar {
+      background: var(--app-primary);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #deleteproject .modal-header-bar h5 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+    #deleteproject .modal-header-bar .btn-close-white {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+    #deleteproject .modal-header-bar .btn-close-white:hover {
+      opacity: 1;
+    }
+    #deleteproject .modal-header-bar .btn-close-white svg {
+      width: 16px;
+      height: 16px;
+      fill: #fff;
+    }
+
+    /* 본문 */
+    #deleteproject .modal-body-area {
+      padding: 28px 24px 8px;
+      background: #fff;
+    }
+
+    /* 경고 아이콘 영역 */
+    #deleteproject .delete-icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      background: var(--app-error-bg);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+    }
+    #deleteproject .delete-icon-wrap svg {
+      width: 26px;
+      height: 26px;
+      color: var(--app-danger);
+    }
+
+    #deleteproject .delete-title {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--app-heading);
+      margin-bottom: 8px;
+    }
+    #deleteproject .delete-desc {
+      text-align: center;
+      font-size: 13px;
+      color: var(--app-text-muted);
+      margin-bottom: 0;
+      line-height: 1.6;
+    }
+
+    /* 구분선 */
+    #deleteproject .modal-divider {
+      border: none;
+      border-top: 1px solid rgba(var(--app-primary-rgb), 0.2);
+      margin: 20px 0 0;
+    }
+
+    /* 푸터 버튼 영역 */
+    #deleteproject .modal-footer-area {
+      padding: 16px 24px 20px;
+      background: #fff;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    /* 취소 버튼 */
+    #deleteproject .btn-modal-cancel {
+      padding: 9px 22px;
+      background: #fff;
+      color: var(--app-text-muted);
+      border: 1px solid var(--app-border);
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: var(--app-font-family);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #deleteproject .btn-modal-cancel:hover {
+      background: var(--app-primary-soft);
+    }
+
+    /* 삭제(숨김) 버튼 */
+    #deleteproject .btn-modal-hide {
+      padding: 9px 22px;
+      background: #fff;
+      color: var(--app-danger);
+      border: 1px solid rgba(var(--app-danger-rgb, 220, 53, 69), 0.35);
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: var(--app-font-family);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    #deleteproject .btn-modal-hide:hover {
+      background: var(--app-error-bg);
+    }
+
+    /* 완전삭제 버튼 (시스템관리자 전용) */
+    #deleteproject .btn-modal-delete {
+      padding: 9px 22px;
+      background: var(--app-danger);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: var(--app-font-family);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #deleteproject .btn-modal-delete:hover {
+      background: var(--app-danger-hover);
+    }
+
+/* ── 복구 모달 스타일 ── */
+    #reproject .modal-content {
+      border: none;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(var(--app-primary-rgb),0.15);
+      font-family: var(--app-font-family);
+    }
+
+    /* 상단 파란 헤더 */
+    #reproject .modal-header-bar {
+      background: var(--app-primary);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #reproject .modal-header-bar h5 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+    #reproject .modal-header-bar .btn-close-white {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+    #reproject .modal-header-bar .btn-close-white:hover {
+      opacity: 1;
+    }
+
+    /* 본문 */
+    #reproject .modal-body-area {
+      padding: 28px 24px 8px;
+      background: #fff;
+    }
+
+    /* 복구 아이콘 영역 */
+    #reproject .restore-icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      background: var(--app-primary-soft);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+    }
+
+    #reproject .restore-title {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--app-heading);
+      margin-bottom: 8px;
+    }
+    #reproject .restore-desc {
+      text-align: center;
+      font-size: 13px;
+      color: var(--app-text-muted);
+      margin-bottom: 0;
+      line-height: 1.6;
+    }
+
+    /* 입력 영역 */
+    #reproject .restore-input-wrap {
+      margin-top: 20px;
+    }
+    #reproject .restore-input-wrap label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--app-text-muted);
+      margin-bottom: 5px;
+    }
+    #reproject .restore-input-wrap input {
+      width: 100%;
+      padding: 8px 11px;
+      border: 1px solid var(--app-border);
+      border-radius: 5px;
+      font-size: 13px;
+      color: var(--app-heading);
+      background: #f5fafd;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    #reproject .restore-input-wrap input:focus {
+      border-color: var(--app-primary);
+      box-shadow: 0 0 0 3px rgba(var(--app-primary-rgb),0.13);
+      background: #fff;
+    }
+
+    /* 구분선 */
+    #reproject .modal-divider {
+      border: none;
+      border-top: 1px solid rgba(var(--app-primary-rgb), 0.2);
+      margin: 20px 0 0;
+    }
+
+    /* 푸터 버튼 영역 */
+    #reproject .modal-footer-area {
+      padding: 16px 24px 20px;
+      background: #fff;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    /* 취소 버튼 */
+    #reproject .btn-modal-cancel {
+      padding: 9px 22px;
+      background: #fff;
+      color: var(--app-text-muted);
+      border: 1px solid var(--app-border);
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: var(--app-font-family);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #reproject .btn-modal-cancel:hover {
+      background: var(--app-primary-soft);
+    }
+
+    /* 복구 버튼 */
+    #reproject .btn-modal-restore {
+      padding: 9px 26px;
+      background: var(--app-primary);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: var(--app-font-family);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #reproject .btn-modal-restore:hover {
+      background: var(--app-primary-hover);
+    }
