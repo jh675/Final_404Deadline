@@ -88,7 +88,7 @@
 			<span class="badge-count" th:text="${attachments != null ? #lists.size(attachments) : 0}">0</span>
 		</div>
 		<div class="attach-list" th:if="${attachments == null or attachments.isEmpty()}">
-			<p style="font-size:13px;color:#666;padding:8px 0;">첨부된 파일이 없습니다.</p>
+			<p class="issue-empty-hint">첨부된 파일이 없습니다.</p>
 		</div>
 		<div id="attachListScroll" class="attach-list-scroll-wrap is-collapsed"
 			th:if="${attachments != null and !attachments.isEmpty()}">
@@ -128,7 +128,7 @@
 		<div class="tab-panel is-visible" id="panel-comments" role="tabpanel" data-panel="comments">
 			<div class="comment-thread">
 				<div class="comment-thread-scroll" id="commentThreadScroll">
-					<p style="font-size:13px;color:#666;padding:8px 0;">댓글을 불러오는 중입니다.</p>
+					<p class="issue-empty-hint">댓글을 불러오는 중입니다.</p>
 				</div>
 			</div>
 			<div class="comment-form-wrap">
@@ -160,7 +160,7 @@
 				</thead>
 				<tbody id="relatedIssueTbody">
 					<tr>
-						<td colspan="3" style="color:#666;">연관 이슈를 불러오는 중입니다.</td>
+						<td colspan="3" class="issue-empty-hint--cell">연관 이슈를 불러오는 중입니다.</td>
 					</tr>
 				</tbody>
 			</table>
@@ -181,7 +181,7 @@
 				</thead>
 				<tbody id="historyTbody">
 					<tr>
-						<td colspan="3" style="color:#666;">히스토리를 불러오는 중입니다.</td>
+						<td colspan="3" class="issue-empty-hint--cell">히스토리를 불러오는 중입니다.</td>
 					</tr>
 				</tbody>
 			</table>
@@ -283,7 +283,7 @@
 	}
 
 	function renderEmpty(message) {
-		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">' + escapeHtml(message) + '</td></tr>';
+		tbody.innerHTML = '<tr><td colspan="3" class="issue-empty-hint--cell">' + escapeHtml(message) + '</td></tr>';
 		if (countBadge) {
 			countBadge.textContent = '0';
 		}
@@ -340,7 +340,7 @@
 		}
 		loaded = true;
 
-		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">연관 이슈를 불러오는 중입니다.</td></tr>';
+		tbody.innerHTML = '<tr><td colspan="3" class="issue-empty-hint--cell">연관 이슈를 불러오는 중입니다.</td></tr>';
 
 		fetch('/project/issue/api/' + encodeURIComponent(issueId) + '/relIssue', {
 			method: 'GET',
@@ -441,7 +441,7 @@
 	}
 
 	function renderEmpty(message) {
-		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">' + escapeHtml(message) + '</td></tr>';
+		tbody.innerHTML = '<tr><td colspan="3" class="issue-empty-hint--cell">' + escapeHtml(message) + '</td></tr>';
 		if (countBadge) {
 			countBadge.textContent = '0';
 		}
@@ -517,7 +517,7 @@
 		}
 		loaded = true;
 
-		tbody.innerHTML = '<tr><td colspan="3" style="color:#666;">히스토리를 불러오는 중입니다.</td></tr>';
+		tbody.innerHTML = '<tr><td colspan="3" class="issue-empty-hint--cell">히스토리를 불러오는 중입니다.</td></tr>';
 
 		fetch('/project/issue/api/' + encodeURIComponent(issueId) + '/history', {
 			method: 'GET',
@@ -630,7 +630,7 @@
 	}
 
 	function renderEmpty(message) {
-		threadScroll.innerHTML = '<p style="font-size:13px;color:#666;padding:8px 0;">'
+		threadScroll.innerHTML = '<p class="issue-empty-hint">'
 			+ escapeHtml(message) + '</p>';
 		if (countBadge) {
 			countBadge.textContent = '0';
@@ -698,7 +698,7 @@
 			return Promise.resolve();
 		}
 
-		threadScroll.innerHTML = '<p style="font-size:13px;color:#666;padding:8px 0;">댓글을 불러오는 중입니다.</p>';
+		threadScroll.innerHTML = '<p class="issue-empty-hint">댓글을 불러오는 중입니다.</p>';
 
 		return fetch('/project/issue/api/' + encodeURIComponent(issueId) + '/comments', {
 			method: 'GET',

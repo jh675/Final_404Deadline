@@ -1,0 +1,24 @@
+/**
+ * project/Boards/boardsRegister.html
+ */
+.register-container { max-width: 650px; margin: 0 auto; }
+    
+    .text-success-dark { color: #106699 !important; }
+    
+    .btn-green-sm { 
+        background-color: #20a0e0; 
+        color: white; 
+        border: none; 
+        border-radius: 4px; 
+        font-size: 0.85rem; 
+        padding: 6px 20px; 
+    }
+    .btn-green-sm:hover { background-color: #1a8cc8; color: white; }
+    
+    .form-card-mini { border-radius: 6px; border: 1px solid var(--app-border); background-color: white; }
+    .form-label-sm { font-weight: 600; color: #495057; font-size: 0.85rem; margin-bottom: 0.4rem; }
+
+    .form-control:focus { 
+        border-color: #20a0e0; 
+        box-shadow: 0 0 0 0.2rem rgba(32, 160, 224, 0.25); 
+    }

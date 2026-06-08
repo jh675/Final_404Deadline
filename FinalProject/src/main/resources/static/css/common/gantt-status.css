@@ -1,0 +1,79 @@
+/**
+ * DHTMLX Gantt — 상태별 색상 (theme-colors 토큰)
+ */
+.status-new .gantt_task_progress,
+.status-new.gantt_task_line {
+	background-color: var(--status-new);
+	border-color: var(--status-new-border);
+}
+
+.status-progress .gantt_task_progress,
+.status-progress.gantt_task_line {
+	background-color: var(--status-progress);
+	border-color: var(--status-progress-border);
+}
+
+.status-review .gantt_task_progress,
+.status-review.gantt_task_line {
+	background-color: var(--status-review);
+	border-color: var(--status-review-border);
+}
+
+.gantt-status-dot {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	margin-right: 4px;
+	vertical-align: middle;
+	border-radius: 2px;
+}
+
+.gantt-status-dot--new { background: var(--status-new); }
+.gantt-status-dot--progress { background: var(--status-progress); }
+.gantt-status-dot--review { background: var(--status-review); }
+
+.gantt-toolbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 12px;
+	background: var(--app-surface);
+	border-bottom: 1px solid var(--app-border);
+}
+
+.gantt-toolbar__legend {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 0.8125rem;
+	color: var(--app-text);
+}
+
+.gantt-toolbar__legend-label {
+	font-weight: 700;
+}
+
+#gantt_here {
+	width: 100%;
+	height: calc(100vh - 200px);
+	overflow: hidden;
+}
+
+.gantt_cell,
+.gantt_grid_head_cell {
+	text-align: center !important;
+}
+
+.gantt-search-type { width: 100px; }
+.gantt-search-input { width: 180px; }
+
+.gantt-empty-row {
+	text-align: center;
+	padding: 20px;
+	color: var(--app-muted-fg);
+}
+
+.gantt-modal-table {
+	font-size: 0.8125rem;
+	white-space: nowrap;
+}
