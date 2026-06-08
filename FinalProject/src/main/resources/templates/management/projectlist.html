@@ -110,12 +110,12 @@
           <tr>
             <th>No</th>
             <th class="col-prj-name">프로젝트명</th>
-            <th>식별자</th>
+            <th th:if="${#authentication.principal.prjManagerCd == '01ACTIVE'}">식별자</th>
             <th th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">회사명</th>
             <th>설명</th>
-            <th>생성일</th>
-            <th>시작일</th>
-            <th>종료일</th>
+            <th class="text-center">생성일</th>
+            <th class="text-center">시작일</th>
+            <th class="text-center">종료일</th>
             <th>상태</th>
             <th class="text-center"
                 th:if="${#authentication.principal.adminNm == '시스템관리자' or #authentication.principal.adminNm == '기업관리자' || #authentication.principal.prjManagerCd == '01ACTIVE'}">설정</th>
@@ -133,16 +133,16 @@
               <span th:if="${pro.prjParId != null}" class="prj-indent"></span>
               <a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a>
             </td>
-            <td th:text="${pro.prjIdentifier}"></td>
+            <td th:if="${#authentication.principal.prjManagerCd == '01ACTIVE'}" th:text="${pro.prjIdentifier}"></td>
             <td th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">
               <th:block th:each="c : ${companyList}">
                 <span th:if="${pro.bizNo == c.bizNo}" th:text="${c.companyName}"></span>
               </th:block>
             </td>
             <td th:text="${pro.prjDesc}"></td>
-            <td th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"></td>
-            <td th:text="${pro.startDate != null ? #dates.format(pro.startDate,'yyyy-MM-dd') : '-'}"></td>
-            <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
+            <td class="text-center" th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"></td>
+            <td class="text-center" th:text="${pro.startDate != null ? #dates.format(pro.startDate,'yyyy-MM-dd') : '-'}"></td>
+            <td class="text-center" th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
             <td style="text-align:center;">
               <span th:switch="${pro.prjStatusCd}">
                 <span th:case="'01PROSTAT'" class="prj-status-badge prj-status-badge--plan">기획</span>
