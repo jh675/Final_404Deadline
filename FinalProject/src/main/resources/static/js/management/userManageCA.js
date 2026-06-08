@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         scrollX: false,
         scrollY: false,
         bodyHeight: 'auto',
-        rowHeight: 40,
+        rowHeight: 44,
         minBodyHeight: 200,
         columns: [
 			{ 
@@ -64,11 +64,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             {
                 header: '수정',
                 name: 'edit',
-                width: 100,
+                width: 90,
                 align: 'center',
 				formatter: ({ row }) => {
 								    return `<button type="button" 
-													class="btn btn-success edit-btn shadow-sm" 
+													class="btn btn-success edit-btn" 
 													data-id="${row.id}">
 													수정</button>`;
 								}

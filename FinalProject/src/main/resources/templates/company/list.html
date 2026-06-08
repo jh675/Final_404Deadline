@@ -147,7 +147,7 @@
 				return dayjs(value).format('YYYY.MM.DD');
 			}
 		},
-		{ header: '수정', name: 'edit', align: 'center', sortable: false,
+		{ header: '수정', name: 'edit', align: 'center', width: 90, sortable: false,
 			formatter: () => '<button type="button" class="btn btn-success">수정</button>'
 		}
 	];
@@ -225,9 +225,9 @@
 				scrollX: false,
 				scrollY: false,
 				bodyHeight: 'auto',
-				rowHeight: 40,
+				rowHeight: 44,
 				columnOptions: { resizable: true },
-				minBodyHeight: 100,
+				minBodyHeight: 200,
 				data: Array.isArray(companyData) ? companyData : [],
 				columns: gridColumns,
 				rowHeaders: ['rowNum'],
