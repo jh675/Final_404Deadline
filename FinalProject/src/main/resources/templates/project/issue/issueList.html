@@ -328,11 +328,12 @@
 					header: '이슈명',
 					name: 'subject',
 					sortable: true,
-					formatter: ({ row, value }) => {
-						const id = row.id;                              // 같은 행의 id 값 참조
-						const text = value == null ? '' : value + "#" + id;
-						return '<a href="/project/issue/detail?id=' + id + '">' + text + '</a>';
-					}
+				formatter: ({ row, value }) => {
+					const id = row.id;
+					const subject = value == null ? '' : value;
+					const text = subject + "#" + id;
+					return '<a href="/project/issue/detail?id=' + id + '" title="' + subject.replace(/"/g, '&quot;') + '">' + text + '</a>';
+				}
 				},
 				{
 					header: '유형',
@@ -341,12 +342,12 @@
 					align: 'center',
 					sortable: true
 				},
-				{
-					header: '담당자',
-					name: 'memName',
-					width: 100,
-					align: 'center',
-					sortable: true,
+			{
+				header: '담당자',
+				name: 'memName',
+				width: 80,
+				align: 'center',
+				sortable: true,
 					formatter: function (props) {
 						const name = props.value;
 						if (name == null || String(name).trim() === '' || String(name).trim() === '미정') {
@@ -355,17 +356,17 @@
 						return name;
 					}
 				},
-				{
-					header: '상태',
-					name: 'statusCd',
-					width: 100,
-					align: 'center',
-					sortable: true
-				},
-				{
-					header: '우선순위',
-					name: 'priorityCd',
-					width: 100,
+			{
+				header: '상태',
+				name: 'statusCd',
+				width: 80,
+				align: 'center',
+				sortable: true
+			},
+			{
+				header: '우선순위',
+				name: 'priorityCd',
+				width: 80,
 					align: 'center',
 					sortable: true,
 					comparator: priorityComparator
@@ -386,31 +387,30 @@
 					sortable: true,
 					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
 				},
-				{
-					header: '시작일',
-					name: 'startDate',
-					width: 120,
-					align: 'center',
-					sortable: true,
-					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
-				},
-				{
-					header: '완료일',
-					name: 'closedDate',
-					width: 120,
-					align: 'center',
-					sortable: true,
-					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
-				},
-				{
-					// 수정일: 공통 dateUtils.format 으로 yyyy-MM-dd HH:mm 포맷 출력
-					header: '수정일',
-					name: 'updatedOn',
-					width: 160,
-					align: 'center',
-					sortable: true,
-					formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD HH:mm')
-				},
+			{
+				header: '시작일',
+				name: 'startDate',
+				width: 90,
+				align: 'center',
+				sortable: true,
+				formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
+			},
+			{
+				header: '완료일',
+				name: 'closedDate',
+				width: 90,
+				align: 'center',
+				sortable: true,
+				formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
+			},
+			{
+				header: '수정일',
+				name: 'updatedOn',
+				width: 90,
+				align: 'center',
+				sortable: true,
+				formatter: ({ value }) => dateUtils.format(value, 'YYYY-MM-DD')
+			},
 				{
 					// 진척율(%): 숫자 뒤에 % 자동 추가
 					header: '진척율(%)',
