@@ -62,10 +62,13 @@
         formatter: function (cell) {
           var issueId = cell.row.issueId;
           var text = cell.value == null || cell.value === "" ? "-" : String(cell.value);
+          var escaped = text.replace(/"/g, "&quot;");
           if (!issueId) return text;
           if (isPanel) {
             return (
-              '<button type="button" class="role-name-link mem-issue-subject-link">' +
+              '<button type="button" class="role-name-link mem-issue-subject-link" title="' +
+              escaped +
+              '">' +
               text +
               "</button>"
             );
@@ -73,6 +76,8 @@
           return (
             '<a href="/project/issue/detail?id=' +
             encodeURIComponent(String(issueId)) +
+            '" title="' +
+            escaped +
             '">' +
             text +
             "</a>"

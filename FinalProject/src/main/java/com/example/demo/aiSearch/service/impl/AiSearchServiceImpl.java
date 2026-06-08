@@ -30,7 +30,7 @@ public class AiSearchServiceImpl {
 	private final GptApiClient gptApiClient;
 //	private final OllamaApiClient ollamaApiClient;
 
-	public String processIntelligentSearch(String userMessage, Long userId, Long prjId) {
+	public String processIntelligentSearch(String userMessage, Long userId, Long prjId, String bizNo) {
 
 		// 의미 없는 질문 필터링 (정규식 사용)
 	    // 1. 길이가 2자 이하인 경우 (예: "안녕", "11", "ㅇㅇ")
@@ -159,14 +159,15 @@ public class AiSearchServiceImpl {
 		if (routingIntent.equals("SCHEDULE") || routingIntent.equals("ALL")) {
 			CalenderVO cVo = new CalenderVO();
 			cVo.setMemId(userId.intValue());
+			cVo.setBizNo(bizNo);
 
 			contextData.append("[나의 캘린더 일정 목록]\n");
-			List<CalenderVO> mySchedules = calenderMapper.selectAll(cVo);
+			List<CalenderVO> mySchedules = calenderMapper.getList(cVo);
 			if (mySchedules != null && !mySchedules.isEmpty()) {
 				int count = 0;
 				for (CalenderVO cal : mySchedules) {
-					String start = cal.getCalStart() != null ? sdf.format(cal.getCalStart()) : "미정";
-					String end = cal.getCalEnd() != null ? sdf.format(cal.getCalEnd()) : "미정";
+					String start = cal.getCalStart() != null ? cal.getCalStart() : "미정";
+					String end = cal.getCalEnd() != null ? cal.getCalEnd() : "미정";
 					contextData.append(String.format("- %s (시작:%s, 종료:%s)\n", cal.getCalText(), start, end));
 					// 데이터 개수 제한
 					if (++count >= maxLimit) {
