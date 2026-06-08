@@ -175,7 +175,7 @@
 	min-width: 0;
 }
 
-.issue-form-row--schedule .search-item--date input[type="date"],
+.issue-form-row--schedule .search-item--date .date-input-wrap,
 .issue-form-row--schedule .search-item--ref select {
 	width: 100%;
 	min-width: 0;
@@ -244,7 +244,6 @@
 }
 
 .search-item input[type="text"],
-.search-item input[type="date"],
 .search-item input[type="datetime-local"],
 .search-item select,
 .search-item textarea {
@@ -1751,8 +1750,7 @@ table.data-table tbody tr:last-child td {
 }
 
 .issue-quick-modal-search select,
-.issue-quick-modal-search input[type="text"],
-.issue-quick-modal-search input[type="date"] {
+.issue-quick-modal-search input[type="text"] {
 	height: 36px;
 	padding: 0 10px;
 	border: 1px solid var(--issue-border);
@@ -1880,10 +1878,21 @@ table.data-table tbody tr:last-child td {
 	background: var(--issue-bg-muted);
 }
 
+.issue-empty-hint {
+	font-size: 13px;
+	color: var(--issue-text-muted, var(--app-text-muted));
+	padding: 8px 0;
+	margin: 0;
+}
+
+.issue-empty-hint--cell {
+	color: var(--issue-text-muted, var(--app-text-muted));
+}
+
 .issue-pivot-empty {
 	padding: 1.5rem;
 	text-align: center;
-	color: #6c757d;
+	color: var(--app-text-muted);
 	font-size: 0.875rem;
 }
 

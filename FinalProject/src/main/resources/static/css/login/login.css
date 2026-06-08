@@ -1,3 +1,27 @@
-#test {
-	color : red;
+/**
+ * 로그인 페이지
+ */
+.login-page {
+	min-height: 75vh;
+}
+
+.login-card {
+	width: 100%;
+	max-width: 450px;
+	border-radius: var(--app-radius-lg);
+}
+
+.login-card .card-body {
+	border-radius: var(--app-radius-lg);
+}
+
+.login-card #companyDropdown {
+	display: none;
+	z-index: 1000;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.login-card .form-check-label {
+	cursor: pointer;
 }
