@@ -163,9 +163,6 @@
             var el = document.querySelector('#wikiEditor');
             if (!el) return false;
 
-            el.style.height = '420px';
-            el.style.minHeight = '420px';
-
             var initialContent = /*[[${page != null ? page.content : ''}]]*/ '';
 
             /* placeholder + previewStyle:'vertical' 조합은 미리보기에 로딩 스피너가 무한 표시되는 버그 (#2669) */
