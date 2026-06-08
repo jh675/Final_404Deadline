@@ -30,13 +30,14 @@ public class AiController {
     ) {
         String userMessage = request.get("message");
         Long userId = loginUser.getId(); 
+        String bizNo = loginUser.getBizNo();
         
         // 세션에서 현재 활성화된 프로젝트 정보를 꺼내봄 (있을 수도 있고 없을 수도 있음)
         // 기존 템플릿의 `session.project` 구조 반영
         Long currentPrj = (Long) session.getAttribute("currentProjectId"); 
 
         // 비즈니스 로직 서비스를 호출하여 최종 조립된 답변을 받아옵니다.
-        String aiAnswer = aiSearchService.processIntelligentSearch(userMessage, userId, currentPrj);
+        String aiAnswer = aiSearchService.processIntelligentSearch(userMessage, userId, currentPrj, bizNo);
         
         return ResponseEntity.ok(aiAnswer);
     }
