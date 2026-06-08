@@ -108,11 +108,12 @@
         <thead>
           <tr>
             <th>No</th>
-            <th>프로젝트명</th>
+            <th class="col-prj-name">프로젝트명</th>
             <th>식별자</th>
             <th th:if="${#authentication.principal.adminCd != null and #authentication.principal.adminNm == '시스템관리자'}">회사명</th>
             <th>설명</th>
             <th>생성일</th>
+            <th>시작일</th>
             <th>종료일</th>
             <th>상태</th>
             <th class="text-center"
@@ -127,7 +128,7 @@
               th:data-status="${pro.prjStatusCd == '04PROSTAT' || pro.prjStatusCd == '05PROSTAT' ? 'complete' : 'progress'}"
               th:attr="data-prj-name=${pro.prjName}, data-biz-no=${pro.bizNo}, data-par-id=${pro.prjParId}, data-prj-id=${pro.id}">
             <td class="row-index"></td>
-            <td>
+            <td class="col-prj-name">
               <span th:if="${pro.prjParId != null}" class="prj-indent"></span>
               <a th:text="${pro.prjName}" th:href="@{/project/{id}(id=${pro.id})}"></a>
             </td>
@@ -139,6 +140,7 @@
             </td>
             <td th:text="${pro.prjDesc}"></td>
             <td th:text="${pro.createdOn != null ? #dates.format(pro.createdOn,'yyyy-MM-dd') : '-'}"></td>
+            <td th:text="${pro.startDate != null ? #dates.format(pro.startDate,'yyyy-MM-dd') : '-'}"></td>
             <td th:text="${pro.closedDate != null ? #dates.format(pro.closedDate,'yyyy-MM-dd') : '진행중'}"></td>
             <td style="text-align:center;">
               <span th:switch="${pro.prjStatusCd}">

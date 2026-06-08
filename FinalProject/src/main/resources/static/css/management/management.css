@@ -159,6 +159,13 @@
   .tui-style-table tbody td:last-child,
   .tui-style-table tbody th:last-child { border-right: none; }
   .tui-style-table .row-index { text-align: center; color: #888; width: 48px; }
+  .tui-style-table .col-prj-name {
+    width: 12%;
+    max-width: 144px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .tui-style-table tbody td a { color: var(--app-primary); text-decoration: none; font-weight: 500; }
   .tui-style-table tbody td a:hover { text-decoration: underline; }
   .prj-indent { color: #aaa; margin-right: 2px; }

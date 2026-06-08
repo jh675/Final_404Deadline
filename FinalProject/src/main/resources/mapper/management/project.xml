@@ -31,6 +31,7 @@
         p.prj_identifier,
         p.prj_desc,
         p.created_on,
+        p.start_date,
         p.closed_date,
         p.prj_hide,
         p.prj_status_cd,
@@ -48,7 +49,7 @@
 	INNER JOIN member m ON g.id = m.grp_id
 	INNER JOIN users u ON u.id = m.user_id AND p.biz_no = u.biz_no
 	WHERE u.id = #{userId}
-	ORDER BY p.prj_root_id, p.prj_lft
+	ORDER BY p.start_date desc
  </select>
  
  
