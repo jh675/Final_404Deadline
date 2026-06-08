@@ -106,3 +106,59 @@
 	font-size: 0.9375rem;
 	color: rgba(255, 255, 255, 0.92);
 }
+
+/* 알림 드롭다운 */
+#notificationList .dropdown-item {
+	background-color: var(--app-surface) !important;
+	color: var(--app-heading) !important;
+}
+
+#notificationList .dropdown-item small {
+	color: var(--app-heading) !important;
+}
+
+#notificationList .dropdown-item:hover {
+	background-color: var(--app-primary-soft) !important;
+	color: var(--app-heading) !important;
+}
+
+#notificationList .delete-btn {
+	color: var(--app-muted-fg) !important;
+}
+
+#notificationList .delete-btn:hover {
+	color: var(--app-danger) !important;
+}
+
+#notificationList .text-muted {
+	color: var(--app-muted-fg) !important;
+}
+
+.notification-item {
+	white-space: normal;
+	cursor: default;
+}
+
+.notification-item__time {
+	font-size: 11px;
+	color: var(--app-muted-fg);
+	margin-top: 4px;
+}
+
+.notification-item__delete {
+	font-size: 12px;
+	flex-shrink: 0;
+}
+
+.navbar .notification-dropdown {
+	width: 350px;
+	max-height: 400px;
+	overflow-y: auto;
+	background: var(--app-surface);
+	color: var(--app-heading);
+}
+
+.navbar .notification-dropdown-header {
+	background: var(--app-surface-muted);
+	color: var(--app-heading);
+}
