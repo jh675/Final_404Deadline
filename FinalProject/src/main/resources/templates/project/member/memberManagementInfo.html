@@ -46,9 +46,7 @@
         <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModal}"></th:block>
         <th:block th:replace="~{project/member/modal/questionModal :: memberQuestionModalScript}"></th:block>
 
-        <div
-          id="memPageConfig"
-          style="display: none"
+        <div id="memPageConfig" style="display: none"
           th:attr="data-prj-id=${prjId},data-user-id=${userId},data-old-grp-id=${grpId},data-initial-grp-id=${detail != null ? detail.grpId : ''},data-panel-mode=false"
         ></div>
 
