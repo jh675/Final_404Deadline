@@ -284,12 +284,12 @@ body.role-panel-embed.layout-tabler {
 .mem-basic-layout {
 	display: flex;
 	gap: 0.45rem;
-	align-items: flex-start;
+	align-items: stretch;
 }
 .mem-profile-slot {
-	flex: 0 0 9.5rem;
-	width: 9.5rem;
-	height: 12rem;
+	flex: 0 0 12rem;
+	width: 12rem;
+	min-height: 15rem;
 	margin-left: 0.6rem;
 	border: 1px solid var(--issue-border);
 	border-radius: 4px;
@@ -400,8 +400,9 @@ body.role-panel-embed.layout-tabler {
 	text-align: right;
 }
 .mem-account-inline .mem-field-row--pw-expiry {
-flex: 0 0 100%;
-width: 100%;
+	flex: 0 0 100%;
+	width: 100%;
+	grid-template-columns: auto var(--mem-input-w);
 }
 .mem-section[aria-labelledby="mem-account-heading"] .mem-section__body,
 .mem-section[aria-labelledby="mem-project-heading"] .mem-section__body {
@@ -419,16 +420,19 @@ max-width: 100%;
 --mem-input-w: 11.5rem;
 }
 .role-panel-embed .mem-profile-slot {
-flex: 0 0 7rem;
-width: 7rem;
-height: 8.5rem;
+flex: 0 0 9rem;
+width: 9rem;
+min-height: 11rem;
 margin-left: 0;
 }
 .role-panel-embed .mem-basic-layout {
 gap: 0.5rem;
 }
 .role-panel-embed .mem-account-inline .mem-field-row {
-grid-template-columns: 5.75rem 11.5rem;
+	grid-template-columns: 5.75rem 11.5rem;
+}
+.role-panel-embed .mem-account-inline .mem-field-row--pw-expiry {
+	grid-template-columns: auto 11.5rem;
 }
 .role-panel-embed .mem-issue-grid {
 font-size: 0.8125rem;
