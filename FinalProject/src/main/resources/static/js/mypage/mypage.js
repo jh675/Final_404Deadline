@@ -215,13 +215,19 @@ document.addEventListener('DOMContentLoaded', function() {
 	                document.getElementById('verifyCodeInput').value = '';
 	                document.getElementById('verifyCodeInput').classList.remove('is-invalid');
 					startMypageTimer(180);
-                } else {
-	                this.disabled = false;
-	                this.textContent = '재인증';
-	                this.className = 'btn btn-primary';
-                    document.getElementById('emailFeedback').className = 'small mt-1 text-danger';
-                    document.getElementById('emailFeedback').textContent = '인증번호 발송에 실패했습니다.';
-                }
+				} else {
+		            // 타이머 정지 및 숨김
+		            clearInterval(mypageTimer);
+		            document.getElementById('mypageTimerDisplay').classList.add('d-none');
+		            
+		            this.disabled = true; 
+		            btnEmailAction.disabled = false;
+		            btnEmailAction.textContent = '재인증';
+		            btnEmailAction.className = 'btn btn-outline-primary';
+		            
+		            document.getElementById('emailFeedback').className = 'small mt-1 text-danger fw-bold';
+		            document.getElementById('emailFeedback').textContent = '인증에 실패했습니다. 재인증을 진행해주세요.';
+		        }
             } catch (e) {
 				this.disabled = false;
 	            this.textContent = '재인증';

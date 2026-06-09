@@ -2,6 +2,7 @@ package com.example.demo.login.service.impl;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.login.mapper.EmailVerifyMapper;
 import com.example.demo.login.mapper.LoginMapper;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class EmailVerifyServiceImpl implements EmailVerifyService {
 
 	private final EmailVerifyMapper verifyMapper;

@@ -226,6 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 verifyBtn.disabled = true;
             } else {
                 showMessage('인증번호가 올바르지 않거나 만료되었습니다.', 'danger');
+				clearInterval(pwVerifyTimer);
+                resetPwTimerDisplay.classList.add('d-none');
                 verifyBtn.disabled = true;
                 sendBtn.disabled = false;
                 sendBtn.textContent = '재인증 요청';
