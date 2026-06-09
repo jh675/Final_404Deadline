@@ -378,28 +378,88 @@
 	color: var(--issue-heading);
 }
 
-/* TOAST UI Editor 형태 — 마운트 전후 높이 고정(로드 시 오버슈트 방지) */
+/* TOAST UI Editor — 고정 높이 + flex 체인(대량 붙여넣기 시 툴바·모드탭 겹침 방지) */
 .wiki-shell #wikiEditor {
 	height: 420px;
 	min-height: 420px;
 	max-height: 420px;
 	overflow: hidden;
 	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
 }
 
 #wikiEditor .toastui-editor-defaultUI {
-	height: 420px !important;
-	min-height: 420px !important;
-	max-height: 420px !important;
+	height: 100% !important;
+	min-height: 0 !important;
+	max-height: 100% !important;
+	display: flex !important;
+	flex-direction: column !important;
+	overflow: hidden;
 	border: 1px solid var(--issue-border);
 	border-radius: var(--wiki-radius-sm);
 	box-sizing: border-box;
 }
 
-.wiki-shell #wikiEditor .toastui-editor-main,
+.wiki-shell #wikiEditor .toastui-editor-defaultUI-toolbar {
+	flex-shrink: 0;
+}
+
+.wiki-shell #wikiEditor .toastui-editor-main {
+	flex: 1 1 0;
+	min-height: 0 !important;
+	height: auto !important;
+	overflow: hidden;
+	position: relative;
+}
+
+.wiki-shell #wikiEditor .toastui-editor-main-container {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: auto !important;
+}
+
 .wiki-shell #wikiEditor .toastui-editor-md-container,
 .wiki-shell #wikiEditor .toastui-editor-ww-container {
 	min-height: 0;
+	height: 100% !important;
+	overflow: hidden;
+}
+
+.wiki-shell #wikiEditor .toastui-editor-md-vertical-style {
+	height: 100%;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.wiki-shell #wikiEditor .toastui-editor-md-vertical-style .toastui-editor,
+.wiki-shell #wikiEditor .toastui-editor-md-vertical-style .toastui-editor-md-preview {
+	height: 100% !important;
+	max-height: 100%;
+	overflow: auto !important;
+}
+
+.wiki-shell #wikiEditor .toastui-editor-md-container .toastui-editor .ProseMirror,
+.wiki-shell #wikiEditor .toastui-editor-ww-container .toastui-editor-contents {
+	max-height: 100%;
+	overflow: auto;
+}
+
+.wiki-shell #wikiEditor .CodeMirror {
+	height: 100% !important;
+}
+
+.wiki-shell #wikiEditor .CodeMirror-scroll {
+	max-height: 100%;
+	overflow: auto !important;
+}
+
+.wiki-shell #wikiEditor .toastui-editor-mode-switch {
+	flex-shrink: 0;
+	position: relative;
+	z-index: 5;
+	background-color: var(--issue-bg);
 }
 
 .wiki-form-actions {

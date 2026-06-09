@@ -115,12 +115,12 @@
             th:if="${panelMode}"
             class="btn btn-secondary"
             th:href="@{/project/member/panel(userId=${userId}, grpId=${grpId})}"
-          >초기화</a>
+          >수정 취소</a>
           <a
             th:unless="${panelMode}"
             class="btn btn-secondary"
             th:href="@{/project/member/info(userId=${userId}, grpId=${grpId})}"
-          >초기화</a>
+          >수정 취소</a>
         </div>
       </th:block>
     </th:block>

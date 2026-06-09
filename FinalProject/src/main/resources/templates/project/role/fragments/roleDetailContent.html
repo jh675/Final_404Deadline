@@ -22,7 +22,7 @@
                 <input type="text" id="detailRoleCd" readonly th:value="${currentRole.roleCd}" />
               </div>
               <div class="role-info-fields__row">
-                <label for="detailRoleName">권한명</label>
+                <label for="detailRoleName">권한명 <span class="req" th:if="${registerMode}">*</span></label>
                 <input th:if="${registerMode}" type="text" id="detailRoleName" class="role-input--editable" placeholder="권한명을 입력해 주세요." autocomplete="off" />
                 <input th:unless="${registerMode}" type="text" id="detailRoleName" readonly th:value="${currentRole.roleName}" />
               </div>
@@ -138,13 +138,13 @@
         </section>
 
         <div class="issue-register-actions role-actions" th:if="${registerMode}">
-          <button type="button" class="btn btn-primary" id="btnRoleSave">등록</button>
+          <button type="button" class="btn btn-primary" id="btnRoleSave">생성</button>
           <button type="button" class="btn btn-secondary" id="btnRoleCancel">초기화</button>
         </div>
 
         <div class="issue-register-actions role-actions" th:if="${!registerMode and currentRole != null}">
           <button type="button" class="btn btn-success" id="btnRoleEdit" data-label-edit="수정" data-label-save="저장">수정</button>
-          <button type="button" class="btn btn-secondary is-hidden" id="btnRoleCancelEdit">초기화</button>
+          <button type="button" class="btn btn-secondary is-hidden" id="btnRoleCancelEdit">수정 취소</button>
         </div>
       </th:block>
     </th:block>

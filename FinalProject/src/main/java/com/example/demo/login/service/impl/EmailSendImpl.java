@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import com.example.demo.login.service.EmailSendService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailSendImpl implements EmailSendService {
@@ -33,7 +35,7 @@ public class EmailSendImpl implements EmailSendService {
 		try {
 			mailSender.send(message);
 		} catch (Exception e) {
-			// 발송 실패 시 호출부에서 재시도·안내 처리
+			log.error("이메일 발송 실패 (대상: {}): {}", to, e.getMessage(), e);
 		}
 	}
 }
