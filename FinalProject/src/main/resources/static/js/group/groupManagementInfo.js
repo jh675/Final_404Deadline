@@ -1231,12 +1231,17 @@
                     memberDirty && roleDirty ? "그룹 구성원과 권한이 수정되었습니다." : memberDirty ? "그룹 구성원이 수정되었습니다." : "그룹 권한이 수정되었습니다.";
                   await alertMsg(okMsg, "알림");
                   if (panelMode) {
-                    window.location.reload();
+                    const topWin = window.top || window;
+                    const parentLoc = topWin.location;
+                    const params = new URLSearchParams(parentLoc.search);
+                    params.set("grpId", String(gid));
+                    const query = params.toString();
+                    topWin.location.href =
+                      parentLoc.pathname + (query ? "?" + query : "");
                   } else {
-                    window.location.href =
-                      "/project/group/info?grpId=" +
-                      encodeURIComponent(String(gid));
+                    window.location.reload();
                   }
+                  return;
                 } catch (e) {
                   await alertMsg("그룹 수정 중 오류가 발생했습니다.", "오류");
                 } finally {

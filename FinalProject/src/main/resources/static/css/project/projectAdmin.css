@@ -702,10 +702,12 @@ margin-bottom: 1.25rem;
 }
 .mem-join-actions {
 	display: flex;
-	justify-content: center;
+	justify-content: flex-end;
 	align-items: center;
-	gap: 0.5rem;
-	padding: 1.5rem 0 0.5rem;
+	gap: 8px;
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid var(--issue-border);
 	flex-wrap: wrap;
 }
 .mem-join-picker-overlay {
@@ -926,6 +928,7 @@ margin-bottom: 1.25rem;
 .grp-member-toolbar {
 	display: flex;
 	justify-content: flex-end;
+	gap: 0.5rem;
 	margin-top: 0.65rem;
 }
 .grp-member-toolbar.is-hidden {
@@ -1128,6 +1131,9 @@ margin-bottom: 1.25rem;
 	text-align: right;
 	white-space: nowrap;
 	line-height: 1.35;
+}
+.role-detail-form .role-info-fields__row label .req {
+	color: #c62828;
 }
 .role-detail-form .role-info-fields__row input {
 	width: 100%;
@@ -1824,11 +1830,11 @@ table.data-table.boards-table thead th {
 }
 
 .boards-table__col-title {
-	width: 150px;
+	width: 280px;
 }
 
 .boards-table__col-desc {
-	width: calc(100% - 500px);
+	width: calc(100% - 630px);
 }
 
 .boards-table__col-topics {
@@ -1850,8 +1856,17 @@ table.data-table.boards-table thead th {
 	text-align: left;
 }
 
+.boards-table__cell-title {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 .boards-table__cell-desc {
 	color: var(--issue-label);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .boards-title-link {
