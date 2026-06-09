@@ -224,9 +224,10 @@ document.addEventListener("DOMContentLoaded", function () {
           function renderToolbar() {
             const mount = getToolbarMount();
             if (!mount) return;
-            let html =
-              '<button type="button" class="btn btn-primary" id="memberBtnRegister">등록</button>';
+            let html = "";
             if (!deleteMode) {
+              html +=
+                '<button type="button" class="btn btn-primary" id="memberBtnRegister">등록</button>';
               html +=
                 '<button type="button" class="btn btn-danger" id="memberBtnDelete">삭제</button>';
             } else {

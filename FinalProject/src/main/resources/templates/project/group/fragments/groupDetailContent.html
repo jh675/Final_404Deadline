@@ -14,13 +14,13 @@
           <div class="grp-section__body">
             <div class="grp-basic-form grp-detail-form">
               <div class="grp-basic-form__row">
-                <label for="detailPrjName"> 프로젝트명 <span class="req">*</span></label>
+                <label for="detailPrjName">프로젝트명</label>
                 <div class="grp-basic-form__field">
                   <input type="text" id="detailPrjName" readonly th:value="${session.project != null ? session.project.prjName : detail.prjName}" />
                 </div>
               </div>
               <div class="grp-basic-form__row">
-                <label for="detailGrpName">그룹명 <span class="req">*</span></label>
+                <label for="detailGrpName">그룹명 <span class="req" th:if="${registerMode}">*</span></label>
                 <div class="grp-basic-form__field">
                   <input th:if="${registerMode}" type="text" id="detailGrpName" placeholder="그룹명을 입력해 주세요." class="grp-input--editable" th:value="${detail.grpName}" autocomplete="off" />
                   <input th:unless="${registerMode}" type="text" id="detailGrpName" placeholder="텍스트를 입력해 주세요." readonly th:value="${detail.grpName}" />
@@ -28,7 +28,7 @@
                 </div>
               </div>
               <div class="grp-basic-form__row" th:if="${!registerMode}">
-                <label for="detailGrpCreatedOn">그룹생성일 <span class="req">*</span></label>
+                <label for="detailGrpCreatedOn">그룹생성일</label>
                 <div class="grp-basic-form__field">
                   <input type="text" id="detailGrpCreatedOn" readonly th:value="${detail.createdOn != null ? #dates.format(detail.createdOn, 'yyyy-MM-dd') : ''}" />
                 </div>
@@ -62,13 +62,13 @@
         </section>
 
         <div class="issue-register-actions grp-actions" th:if="${registerMode}">
-          <button type="button" class="btn btn-primary" id="btnGroupSave">등록</button>
+          <button type="button" class="btn btn-primary" id="btnGroupSave">생성</button>
           <a class="btn btn-secondary" th:href="@{/project/group/list}">초기화</a>
         </div>
         <div class="issue-register-actions grp-actions" th:unless="${registerMode}">
           <button type="button" class="btn btn-success" id="btnGroupEdit">수정</button>
           <button type="button" id="btnGroupSave" class="btn btn-primary is-hidden">저장</button>
-          <button type="button" id="btnGroupCancel" class="btn btn-secondary is-hidden">초기화</button>
+          <button type="button" id="btnGroupCancel" class="btn btn-secondary is-hidden">수정 취소</button>
         </div>
       </th:block>
     </th:block>

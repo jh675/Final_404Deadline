@@ -1078,6 +1078,17 @@ table.data-table tbody tr:last-child td {
 	text-decoration: none;
 }
 
+.issue-btn--danger {
+	background-color: var(--app-danger, #dc3545);
+	color: #fff;
+	border-color: var(--app-danger, #dc3545);
+}
+.issue-btn--danger:hover:not(:disabled) {
+	background-color: var(--app-danger-hover, #bb2d3b);
+	border-color: var(--app-danger-hover, #bb2d3b);
+	color: #fff;
+}
+
 .issue-btn--primary:disabled,
 .issue-bulk-btn-primary:disabled,
 .issue-btn--secondary:disabled {

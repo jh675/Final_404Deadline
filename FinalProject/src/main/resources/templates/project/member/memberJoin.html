@@ -53,7 +53,7 @@
         <div class="mem-join-section__body">
           <div class="mem-join-form">
             <div class="mem-field-row">
-              <label for="memJoinGrpName">소속 그룹 <span class="req">*</span></label>
+              <label for="memJoinGrpName">소속 그룹</label>
               <input
                 type="text"
                 id="memJoinGrpName"
@@ -69,8 +69,8 @@
       </section>
 
       <div class="mem-join-actions">
-        <button type="button" class="issue-btn issue-btn--primary" id="btnMemberJoinRegister">등록</button>
-        <a class="issue-btn issue-btn--secondary" th:href="@{/project/member/list}">초기화</a>
+        <button type="button" class="btn btn-primary" id="btnMemberJoinRegister">등록</button>
+        <a class="btn btn-secondary" th:href="@{/project/member/list}">초기화</a>
       </div>
 
       <div class="mem-join-picker-overlay" id="memJoinGroupOverlay" aria-hidden="true">

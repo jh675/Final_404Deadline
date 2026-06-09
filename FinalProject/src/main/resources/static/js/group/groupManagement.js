@@ -312,9 +312,10 @@ document.addEventListener("DOMContentLoaded", function () {
           function renderToolbar() {
             const mount = getToolbarMount();
             if (!mount) return;
-            let html =
-              '<button type="button" class="btn btn-primary" id="groupBtnRegister">등록</button>';
+            let html = "";
             if (!deleteMode) {
+              html +=
+                '<button type="button" class="btn btn-primary" id="groupBtnRegister">생성</button>';
               html +=
                 '<button type="button" class="btn btn-danger" id="groupBtnDelete">삭제</button>';
             } else {
@@ -489,7 +490,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   },
                 },
                 {
-                  header: "멤버 수",
+                  header: "구성원 수",
                   name: "cntMem",
                   width: 110,
                   align: "center",
