@@ -1,4 +1,4 @@
-# 교육기관 내 최종프로젝트, 'Final_404Deadline'
+# 교육기관 내 최종프로젝트, 'Final_yedamine'
 <!-- 박상원 -->
 <!-- 안형주 -->
 <!-- 정찬우 -->
@@ -9,7 +9,7 @@
 ### 교육기관에서 팀 단위로 실시한 최종프로젝트 결과물입니다.
 ### 저희 팀은 **PMS(프로젝트 관리 시스템)** 주제로 회사·프로젝트·이슈·일정을 통합 관리하는 웹 애플리케이션을 개발했습니다.
 
-## <a href="https://github.com/jh675/Final_404Deadline" target="_blank">전체 프로젝트 바로 보기 ▶️</a>
+## <a href="https://github.com/jh675/Final_yedamine" target="_blank">전체 프로젝트 바로 보기 ▶️</a>
 
 ## 개요
 
